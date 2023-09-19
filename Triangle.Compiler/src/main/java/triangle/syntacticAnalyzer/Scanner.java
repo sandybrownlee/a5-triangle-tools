@@ -78,7 +78,8 @@ public final class Scanner {
 			takeIt();
 			while(currentChar != SourceFile.EOT && (currentChar != '$'))
 				takeIt();
-			if(currentChar == '$') takeIt();
+			if(currentChar == '$')
+				takeIt();
 			break;
 		}
 
