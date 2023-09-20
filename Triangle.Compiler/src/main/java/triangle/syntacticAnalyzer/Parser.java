@@ -37,6 +37,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -274,8 +275,10 @@ public class Parser {
 
 		case Token.IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
+			
 			if (currentToken.kind == Token.LPAREN) {
 				acceptIt();
+
 				ActualParameterSequence apsAST = parseActualParameterSequence();
 				accept(Token.RPAREN);
 				finish(commandPos);
@@ -293,7 +296,9 @@ public class Parser {
 			break;
 
 		case Token.BEGIN:
+			//System.out.println(currentToken);
 			acceptIt();
+			//System.out.println(currentToken);
 			commandAST = parseCommand();
 			accept(Token.END);
 			break;
@@ -324,9 +329,29 @@ public class Parser {
 			acceptIt();
 			Expression eAST = parseExpression();
 			accept(Token.DO);
+			// Parse the begin
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
+		}
+			break;
+
+		case Token.REPEAT: {
+			// Cotinue to the begin token
+			acceptIt();
+
+			// Parse the begin block
+			Command cAST = parseSingleCommand();
+
+			// Accept the until token
+			accept(Token.until);
+
+			// Parse the expression
+			Expression eAST = parseExpression();
+			finish(commandPos);
+			commandAST = new RepeatCommand(eAST, cAST, commandPos);
+
+
 		}
 			break;
 

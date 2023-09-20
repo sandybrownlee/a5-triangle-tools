@@ -34,6 +34,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -103,6 +104,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.codeGenerator.Frame;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 public final class Checker implements ActualParameterVisitor<FormalParameter, Void>,
@@ -183,6 +185,10 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		ast.C.visit(this);
 
 		return null;
+	}
+	@Override
+	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
+	return null;
 	}
 
 	// Expressions

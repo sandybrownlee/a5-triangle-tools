@@ -93,6 +93,9 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
+import triangle.codeGenerator.Frame;
+
 public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		ActualParameterSequenceVisitor<Void, DrawingTree>, ArrayAggregateVisitor<Void, DrawingTree>,
 		CommandVisitor<Void, DrawingTree>, DeclarationVisitor<Void, DrawingTree>, ExpressionVisitor<Void, DrawingTree>,
@@ -110,6 +113,7 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		this.fontMetrics = fontMetrics;
 	}
 
+	
 	// Commands
 	@Override
 	public DrawingTree visitAssignCommand(AssignCommand ast, Void obj) {
@@ -143,6 +147,11 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		var d1 = ast.D.visit(this);
 		var d2 = ast.C.visit(this);
 		return layoutBinary("LetCom.", d1, d2);
+	}
+
+	@Override
+	public DrawingTree visitRepeatCommand(RepeatCommand ast, Frame frame) {
+	return null;
 	}
 
 	@Override
