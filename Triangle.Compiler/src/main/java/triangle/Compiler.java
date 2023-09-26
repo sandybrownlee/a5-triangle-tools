@@ -1,5 +1,9 @@
 /*
- * @(#)Compiler.java                        2.1 2003/10/07
+ * @(#)Compiler.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -24,6 +28,9 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+
 /**
  * The main driver class for the Triangle compiler.
  *
@@ -33,10 +40,17 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "o", description = "Outputs the file name in command line")
 	static String objectName = "obj.tam";
-	
+
+	@Argument(alias = "t", description = "Replaces tree command line command with alias t")
 	static boolean showTree = false;
+
+	@Argument(alias = "f", description = "Allows for folding")
 	static boolean folding = false;
+
+	@Argument(alias = "ft", description = "Allows for folding")
+	static boolean treeFold = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -96,6 +110,12 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
+
+			if(treeFold){
+				showTree=true;
+				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
+			}
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -121,16 +141,20 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		Compiler compiler = new Compiler();
+
+		//This call will cause the list of arguments to be parsed and passed into the program.
+		// This will cause instance variables to populate the appropriately
+		Args.parse(compiler, args);
+
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-o=output filename]  [-t]  [-f]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
 
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		var compiledOK = compileProgram(sourceName, objectName, showTree, folding);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);

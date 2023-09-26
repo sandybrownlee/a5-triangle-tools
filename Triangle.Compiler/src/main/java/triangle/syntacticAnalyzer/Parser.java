@@ -1,5 +1,9 @@
 /*
- * @(#)Parser.java                        2.1 2003/10/07
+ * @(#)Parser.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -298,6 +302,12 @@ public class Parser {
 			accept(Token.END);
 			break;
 
+		case Token.LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
+			break;
+
 		case Token.LET: {
 			acceptIt();
 			Declaration dAST = parseDeclaration();
@@ -332,6 +342,7 @@ public class Parser {
 
 		case Token.SEMICOLON:
 		case Token.END:
+		case Token.RCURLY:
 		case Token.ELSE:
 		case Token.IN:
 		case Token.EOT:
