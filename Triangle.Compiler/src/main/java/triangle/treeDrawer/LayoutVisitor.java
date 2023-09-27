@@ -113,6 +113,13 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	}
 
 	@Override
+	public DrawingTree visitIncrementDecrementCommand(IncrementDecrementCommand ast, Void unused) {
+		var d1 = ast.V.visit(this);
+		var d2 = ast.E.visit(this);
+		return layoutBinary("IncDecrCom.", d1, d2);
+	}
+
+	@Override
 	public DrawingTree visitCallCommand(CallCommand ast, Void obj) {
 		var d1 = ast.I.visit(this);
 		var d2 = ast.APS.visit(this);

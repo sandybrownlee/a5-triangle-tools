@@ -8,7 +8,7 @@ begin
     a++;
     putint(a);
     puteol();
-    a++;
+    a--;
     putint(a);
     puteol();
 end

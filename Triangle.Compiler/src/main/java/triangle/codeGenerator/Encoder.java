@@ -124,6 +124,13 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 	}
 
 	@Override
+	public Void visitIncrementDecrementCommand(IncrementDecrementCommand ast, Frame frame) {
+		var valSize = ast.E.visit(this, frame);
+		encodeStore(ast.V, frame.expand(valSize), valSize);
+		return null;
+	}
+
+	@Override
 	public Void visitCallCommand(CallCommand ast, Frame frame) {
 		var argsSize = ast.APS.visit(this, frame);
 		ast.I.visit(this, frame.replace(argsSize));

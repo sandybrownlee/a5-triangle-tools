@@ -5,6 +5,7 @@ import triangle.abstractSyntaxTrees.commands.*;
 public interface CommandVisitor<TArg, TResult> {
 
 	TResult visitAssignCommand(AssignCommand ast, TArg arg);
+	TResult visitIncrementDecrementCommand(IncrementDecrementCommand ast, TArg arg);
 
 	TResult visitCallCommand(CallCommand ast, TArg arg);
 

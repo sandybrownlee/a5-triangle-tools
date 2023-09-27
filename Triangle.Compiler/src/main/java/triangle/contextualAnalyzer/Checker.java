@@ -123,6 +123,16 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	}
 
 	@Override
+	public Void visitIncrementDecrementCommand(IncrementDecrementCommand ast, Void unused) {
+		var vType = ast.V.visit(this);
+		var eType = ast.E.visit(this);
+
+		checkAndReportError(ast.V.variable, "LHS of assignment is not a variable", ast.V);
+		checkAndReportError(eType.equals(vType), "assignment incompatibility", ast);
+		return null;
+	}
+
+	@Override
 	public Void visitCallCommand(CallCommand ast, Void arg) {
 		var binding = ast.I.visit(this);
 
@@ -936,6 +946,9 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 				StdEnvironment.integerType);
 		StdEnvironment.divideDecl = declareStdBinaryOp("/", StdEnvironment.integerType, StdEnvironment.integerType,
 				StdEnvironment.integerType);
+		StdEnvironment.barDecl = declareStdUnaryOp("|",  StdEnvironment.integerType, StdEnvironment.integerType);
+		StdEnvironment.incrementDecl = declareStdUnaryOp("++",  StdEnvironment.integerType, StdEnvironment.integerType);
+		StdEnvironment.decrementDecl = declareStdUnaryOp("--",  StdEnvironment.integerType, StdEnvironment.integerType);
 		StdEnvironment.moduloDecl = declareStdBinaryOp("//", StdEnvironment.integerType, StdEnvironment.integerType,
 				StdEnvironment.integerType);
 		StdEnvironment.lessDecl = declareStdBinaryOp("<", StdEnvironment.integerType, StdEnvironment.integerType,

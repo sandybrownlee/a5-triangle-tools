@@ -31,14 +31,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -274,6 +267,7 @@ public class Parser {
 
 		case Token.IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
+			Vname vnameAST = parseRestOfVname(iAST);
 			if (currentToken.kind == Token.LPAREN) {
 				acceptIt();
 				ActualParameterSequence apsAST = parseActualParameterSequence();
@@ -281,8 +275,28 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			} else if(currentToken.kind == Token.OPERATOR) {
+				var op = parseOperator();
 
+				// this new operator is created because ++ and -- are unary operators
+				// so we need a representation of its binary counterpart (a +/- b) to pass into an
+				// IncrementDecrementCommand(...) ctor invocation. Otherwise, you end up with the compiler
+				// trying to parse ++ and -- as binary operators.
+				Operator binaryOperator = null;
+
+				// Do the conversion here. Throw an error if the operator does not support urany functionality.
+				if(op.spelling.equals("++")) {
+					binaryOperator = new Operator("+", commandPos);
+				} else if (op.spelling.equals("--")) {
+					binaryOperator = new Operator("-", commandPos);
+				} else syntacticError("\"%\" is not a urany operator.", op.spelling);
+
+
+				finish(commandPos);
+				assert binaryOperator != null;
+                commandAST = new IncrementDecrementCommand(vnameAST, binaryOperator, commandPos);
+				
+			} else {
 				Vname vAST = parseRestOfVname(iAST);
 				accept(Token.BECOMES);
 				Expression eAST = parseExpression();
@@ -336,7 +350,7 @@ public class Parser {
 			accept(Token.UNTIL);
 			Expression eAST = parseExpression();
 			finish(commandPos);
-			commandAST = new WhileCommand(eAST, cAST, commandPos);
+			commandAST = new RepeatCommand(eAST, cAST, commandPos);
 		}
 		break;
 
