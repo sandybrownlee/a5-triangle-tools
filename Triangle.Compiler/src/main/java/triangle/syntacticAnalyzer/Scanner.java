@@ -256,7 +256,7 @@ public final class Scanner {
 		currentlyScanningToken = false;
 		// skip any whitespace or comments
 		while (currentChar == '!' || currentChar == ' ' || currentChar == '\n' || currentChar == '\r'
-				|| currentChar == '\t')
+				|| currentChar == '\t' || currentChar == '#')
 			scanSeparator();
 
 		currentlyScanningToken = true;
