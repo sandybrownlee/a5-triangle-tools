@@ -68,23 +68,34 @@ public final class Scanner {
 	private void scanSeparator() {
 		switch (currentChar) {
 		
-		// comment
-		case '!': {
-			takeIt();
-			while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT))
+			// comment
+			case '!': {
 				takeIt();
-			if (currentChar == SourceFile.EOL)
-				takeIt();
-		}
-			break;
+				while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT))
+					takeIt();
+				if (currentChar == SourceFile.EOL)
+					takeIt();
+				
+				break;
+			}
 
-		// whitespace
-		case ' ':
-		case '\n':
-		case '\r':
-		case '\t':
-			takeIt();
-			break;
+			case '#': {
+				takeIt();
+				while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT))
+					takeIt();
+				if (currentChar == SourceFile.EOL)
+					takeIt();
+
+				break;
+			}
+
+			// whitespace
+			case ' ':
+			case '\n':
+			case '\r':
+			case '\t':
+				takeIt();
+				break;
 		}
 	}
 
