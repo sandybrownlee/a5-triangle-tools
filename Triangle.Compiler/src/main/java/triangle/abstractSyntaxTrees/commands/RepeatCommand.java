@@ -24,16 +24,16 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class RepeatCommand extends Command {
 
-	public WhileCommand(Expression eAST, Command cAST, SourcePosition position) {
-		super(position);
-		E = eAST;
-		C = cAST;
-	}
+    public RepeatCommand(Expression eAST, Command cAST, SourcePosition position) {
+        super(position);
+        E = eAST;
+        C = cAST;
+    }
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitRepeatCommand(this, arg);
-	}
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitRepeatCommand(this, arg);
+    }
 
-	public Expression E;
-	public final Command C;
+    public final Expression E;
+    public final Command C;
 }
