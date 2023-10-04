@@ -181,6 +181,7 @@ public final class Scanner {
 		case '@':
 		case '%':
 		case '^':
+		case '|':
 		case '?':
 			takeIt();
 			while (isOperator(currentChar))

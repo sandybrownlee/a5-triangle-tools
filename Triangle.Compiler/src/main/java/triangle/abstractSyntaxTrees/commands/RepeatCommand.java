@@ -28,7 +28,7 @@ public class RepeatCommand extends Command {
 	}
 
 	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitRepeatCommand(this, null);
+		return v.visitRepeatCommand(this, arg);
 	}
 
 

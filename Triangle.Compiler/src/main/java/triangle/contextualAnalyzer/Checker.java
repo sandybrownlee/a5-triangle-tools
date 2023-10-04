@@ -187,7 +187,13 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		return null;
 	}
 	@Override
-	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
+	//public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
+	public Void visitRepeatCommand(RepeatCommand ast, Void arg) {
+		var eType = ast.E.visit(this);
+
+		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+		ast.C.visit(this);
+
 	return null;
 	}
 
@@ -935,6 +941,10 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 		StdEnvironment.integerDecl = declareStdType("Integer", StdEnvironment.integerType);
 		StdEnvironment.maxintDecl = declareStdConst("maxint", StdEnvironment.integerType);
+
+		// Add "|" operator
+		StdEnvironment.barDecl = declareStdUnaryOp("|", StdEnvironment.integerType, StdEnvironment.integerType);
+
 		StdEnvironment.addDecl = declareStdBinaryOp("+", StdEnvironment.integerType, StdEnvironment.integerType,
 				StdEnvironment.integerType);
 		StdEnvironment.subtractDecl = declareStdBinaryOp("-", StdEnvironment.integerType, StdEnvironment.integerType,

@@ -74,6 +74,7 @@ import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.types.AnyTypeDenoter;
 import triangle.abstractSyntaxTrees.types.ArrayTypeDenoter;
 import triangle.abstractSyntaxTrees.types.BoolTypeDenoter;
+import triangle.codeGenerator.entities.BarPrimitiveRoutine;
 import triangle.abstractSyntaxTrees.types.CharTypeDenoter;
 import triangle.abstractSyntaxTrees.types.ErrorTypeDenoter;
 import triangle.abstractSyntaxTrees.types.IntTypeDenoter;
@@ -131,10 +132,6 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 	}
 
 	
-	@Override
-	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
-	return null;
-	}
 
 	@Override
 	public Void visitCallCommand(CallCommand ast, Frame frame) {
@@ -187,6 +184,16 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		return null;
 	}
+
+	@Override
+	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
+		var loopAddr = emitter.getNextInstrAddr();
+		ast.C.visit(this, frame);
+		ast.E.visit(this, frame);
+		emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, loopAddr);
+		return null;
+	}
+
 
 	// Expressions
 	@Override
@@ -741,6 +748,8 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		elaborateStdPrimRoutine(StdEnvironment.puteolDecl, Primitive.PUTEOL);
 		elaborateStdEqRoutine(StdEnvironment.equalDecl, Primitive.EQ);
 		elaborateStdEqRoutine(StdEnvironment.unequalDecl, Primitive.NE);
+		StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
+
 	}
 
 	boolean tableDetailsReqd;
