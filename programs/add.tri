@@ -1,0 +1,15 @@
+let
+	var a : Integer;
+	var b : Integer;
+	var c : Integer
+in
+begin
+	getint (var a);
+	getint (var b);
+	c:=a+b;
+	putint(c);
+	if a = b then begin
+		put('S'); put('a'); put('m'); put('e')
+	end
+		else put('n');
+end
