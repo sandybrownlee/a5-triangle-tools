@@ -7,7 +7,7 @@ let
 
   var me: Name;
   var silly : maxint;
-  var silly: Rec;
+  var silly2: Rec;
 
   proc putstr (s: String) ~
     let var i: Integer

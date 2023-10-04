@@ -44,6 +44,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -182,6 +183,10 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.patch(jumpAddr);
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
+
+	public Void visitRepeatCommand(RepeatCommand ast, Frame arg){
 		return null;
 	}
 
