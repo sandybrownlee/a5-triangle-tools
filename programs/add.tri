@@ -1,0 +1,11 @@
+let
+    var n1 : Integer;
+    var n2 : Integer;
+    var result : Integer
+in
+begin
+    getint (var n1);
+    getint (var n2);
+    result := n1 + n2;
+    putint (result)
+end
