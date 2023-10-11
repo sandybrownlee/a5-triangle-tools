@@ -1,11 +1,23 @@
 let
-    var n1 : Integer;
-    var n2 : Integer;
-    var result : Integer
+    var a: Integer;
+    var b: Integer
 in
 begin
-    getint (var n1);
-    getint (var n2);
-    result := n1 + n2;
-    putint (result)
+    getint(var a);
+    getint(var b);
+    putint(a + b);
+    puteol();
+    putint(a * b);
+    puteol();
+    if (a = b)
+    then
+    begin
+        put('S');
+        put('a');
+        put('m');
+        put('e');
+        put('!');
+        puteol()
+    end
+    else
 end
