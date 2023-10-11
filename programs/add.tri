@@ -1,0 +1,24 @@
+let
+    var x: Integer;
+    var y: Integer;
+    var xy: Integer
+in
+begin
+    getint(var x);
+    getint(var y);
+
+    xy := x + y;
+
+    putint(xy);
+    puteol();
+
+    if x = y then
+    begin
+        put('S');
+        put('a');
+        put('m');
+        put('e');
+        puteol();
+    end
+    else
+end;
