@@ -43,6 +43,10 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+	public void testDouble() {
+		compileExpectSuccess("/double.tri");
+	}
+	
 	
 	
 	private void compileExpectSuccess(String filename) {
