@@ -11,6 +11,7 @@ repositories {
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+	implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
 }
 
 application {
@@ -19,3 +20,11 @@ application {
 
 // allow access to programs for unit tests
 sourceSets.test.resources.srcDir file("$rootDir/programs")
+
+jar {
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
