@@ -43,8 +43,14 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+	@Test
 	public void testDouble() {
 		compileExpectSuccess("/double.tri");
+	}
+	
+	@Test
+	public void testCurly() {
+		compileExpectSuccess("/while-curly.tri");
 	}
 	
 	
