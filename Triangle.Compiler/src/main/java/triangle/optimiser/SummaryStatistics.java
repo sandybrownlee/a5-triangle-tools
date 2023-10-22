@@ -80,7 +80,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+public class SummaryStatistics implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -88,6 +88,15 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
 		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
 		VnameVisitor<Void, AbstractSyntaxTree> {
+	
+	private int characterExpressionCount = 0;
+	private int integerExpressionCount = 0;
+	
+	public void countExpressions(Program ast) {
+        ast.visit(this);
+        System.out.println("Character Expressions: " + characterExpressionCount);
+        System.out.println("Integer Expressions: " + integerExpressionCount);
+    }
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -305,6 +314,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitCharacterExpression(CharacterExpression ast, Void arg) {
+		characterExpressionCount++;
 		ast.CL.visit(this);
 		return null;
 	}
@@ -334,6 +344,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIntegerExpression(IntegerExpression ast, Void arg) {
+		integerExpressionCount++;
 		return ast;
 	}
 

@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryStatistics;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -48,6 +49,7 @@ public class Compiler {
 	private static Emitter emitter;
 	private static ErrorReporter reporter;
 	private static Drawer drawer;
+	private static SummaryStatistics summary;
 	
 	@Argument(value = "-o", description = "Output file name", required = false)
 	static String outputFileName;
@@ -60,6 +62,9 @@ public class Compiler {
 	
 	@Argument(value = "-af", description = "Show AST after folding", required = false)
 	static boolean showASTAfterFolding;
+	
+	@Argument(value = "-s", description = "Show general summary statistics", required = false)
+	static boolean showSummaryStatistics;
 
 	/** The AST representing the source program. */
 	private static Program theAST;
@@ -77,7 +82,8 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean folding, boolean showASTAfterFolding) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean folding,
+			boolean showASTAfterFolding, boolean showSummaryStatistics) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -96,12 +102,13 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		summary = new SummaryStatistics();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
 			if (showingAST) {
-			drawer.draw(theAST);
+				drawer.draw(theAST);
 			}
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
@@ -111,17 +118,24 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
-				System.out.println("Folding Enabled");
+				System.out.println("Folding Enabled ...");
 				checker.check(theAST);
-				if(showASTAfterFolding) {
+				if (showASTAfterFolding) {
 					System.out.println("AST after Folding:");
 					drawer.draw(theAST);
 				}
+			} else {
+				System.out.println("Folding not enabled ...");
 			}
-			
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
+			}
+
+			if (showSummaryStatistics) {
+				System.out.println("Summary Statistics:");
+				summary.countExpressions(theAST);
 			}
 		}
 
@@ -148,7 +162,7 @@ public class Compiler {
 		
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, outputFileName, showTree, false, folding, showASTAfterFolding);
+		var compiledOK = compileProgram(sourceName, outputFileName, showTree, false, folding, showASTAfterFolding, showSummaryStatistics);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
