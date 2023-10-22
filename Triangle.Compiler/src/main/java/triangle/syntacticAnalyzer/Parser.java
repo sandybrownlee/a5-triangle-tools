@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -311,12 +312,11 @@ public class Parser {
 			accept(Token.END);
 			break;
 			
-		case Token.LCURLY: {
+		case Token.LCURLY:
             acceptIt();
             commandAST = parseCommand();
             accept(Token.RCURLY);
             break;
-        }
 
 		case Token.LET: {
 			acceptIt();
@@ -347,6 +347,18 @@ public class Parser {
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
+		}
+			break;
+			
+		case Token.LOOP: {
+			acceptIt();
+			Command c1AST = parseCommand();
+			accept(Token.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.DO);
+			Command c2AST = parseSingleCommand();
+			finish(commandPos);
+			commandAST = new LoopCommand(c1AST, eAST, c2AST, commandPos);
 		}
 			break;
 
