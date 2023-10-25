@@ -23,6 +23,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -48,6 +50,18 @@ public class Compiler {
 
 	/** The AST representing the source program. */
 	private static Program theAST;
+
+	@Argument(alias = "filename", description = "Filename of file to compile", required = true)
+	static String argFilename;
+
+	@Argument(alias = "-o=outputfilename", description = "Output filename of compiled .tam file", required = false)
+	static String argOutputFilename;
+
+	@Argument(alias = "tree", description = "Show tree", required = false)
+	static String argTree;
+
+	@Argument(alias = "folding", description = "Show folding", required = false)
+	static String argFolding;
 
 	/**
 	 * Compile the source program to TAM machine code.
@@ -121,6 +135,8 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		Args.parseOrExit(Compiler.class, args);
+
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
@@ -138,7 +154,17 @@ public class Compiler {
 	}
 	
 	private static void parseArgs(String[] args) {
-		for (String s : args) {
+		if(argTree.equals("tree")) {
+			showTree = true;
+		}
+		if(argOutputFilename.startsWith("-o=")) {
+			objectName = argOutputFilename.substring(3);
+		}
+		if(argFolding.equals("folding")) {
+			folding = true;
+		}
+
+		/* for (String s : args) {
 			var sl = s.toLowerCase();
 			if (sl.equals("tree")) {
 				showTree = true;
@@ -147,6 +173,6 @@ public class Compiler {
 			} else if (sl.equals("folding")) {
 				folding = true;
 			}
-		}
+		} */
 	}
 }
