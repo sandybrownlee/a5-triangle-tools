@@ -9,7 +9,7 @@ in
         b := 2;
         
         putint(a);
-	puteol();
+	    puteol();
         putint(b);
         puteol();
         putint(|a);
