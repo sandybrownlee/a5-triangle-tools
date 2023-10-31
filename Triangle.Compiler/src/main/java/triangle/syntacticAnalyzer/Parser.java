@@ -277,14 +277,42 @@ public class Parser {
 				accept(Token.RPAREN);
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
-
 			} else {
-
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+
+					//e.g. a** translates to an assignment a=a*2
+					//vAST is the variable we'll be updating
+					//"commandPos" is the line number in source of the current command.
+					//We can just reuse that for each new AST node we make
+
+					//first, we need to make the integerliteral for the 2
+					IntegerLiteral il = new IntegerLiteral("2", commandPos);
+
+					//this gets wrapped in an IntegerExpression
+					IntegerExpression ie = new IntegerExpression(il, commandPos);
+
+					//the variable name gets wrapped in a VnameExpression
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+
+					//the operstor will be a * (each operator is just defined by its spelling)
+					Operator op = new Operator("*", commandPos);
+
+					//now we assemble the expression into a BinaryExpression for the a * 2
+					Expression eAST = new BinaryExpression(vne, op, ie, commandPos);
+
+					//this sets the last line of the command for debugging purposes
+					finish(commandPos);
+
+					//we need to make an assignment, with a binary expression on the right
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				} else {
+					accept(Token.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -293,6 +321,12 @@ public class Parser {
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.END);
+			break;
+
+		case Token.LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
 			break;
 
 		case Token.LET: {
@@ -339,6 +373,7 @@ public class Parser {
 
 		case Token.SEMICOLON:
 		case Token.END:
+		case Token.RCURLY:
 		case Token.ELSE:
 		case Token.IN:
 		case Token.EOT:
