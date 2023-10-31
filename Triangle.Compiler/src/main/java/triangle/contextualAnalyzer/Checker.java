@@ -189,6 +189,18 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 		return null;
 	}
+	
+	@Override
+	public Void visitLoopCommand(LoopCommand ast, Void arg) {
+		ast.C1.visit(this);
+		
+		var eType = ast.E.visit(this);
+		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+		
+		ast.C2.visit(this);
+
+		return null;
+	}
 
 	// Expressions
 
@@ -983,9 +995,4 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 	}
 
-	@Override
-	public Void visitLoopCommand(LoopCommand specialWhile, Void arg) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 }
