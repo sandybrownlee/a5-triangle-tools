@@ -42,6 +42,11 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
+
+	@Test
+	public void testDouble() {
+		compileExpectSuccess("/double.tri");
+	}
 	
 	
 	
