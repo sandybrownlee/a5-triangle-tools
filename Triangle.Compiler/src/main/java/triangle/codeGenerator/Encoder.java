@@ -37,13 +37,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -103,20 +97,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
-import triangle.codeGenerator.entities.AddressableEntity;
-import triangle.codeGenerator.entities.EqualityRoutine;
-import triangle.codeGenerator.entities.FetchableEntity;
-import triangle.codeGenerator.entities.Field;
-import triangle.codeGenerator.entities.KnownAddress;
-import triangle.codeGenerator.entities.KnownRoutine;
-import triangle.codeGenerator.entities.KnownValue;
-import triangle.codeGenerator.entities.PrimitiveRoutine;
-import triangle.codeGenerator.entities.RoutineEntity;
-import triangle.codeGenerator.entities.RuntimeEntity;
-import triangle.codeGenerator.entities.TypeRepresentation;
-import triangle.codeGenerator.entities.UnknownAddress;
-import triangle.codeGenerator.entities.UnknownRoutine;
-import triangle.codeGenerator.entities.UnknownValue;
+import triangle.codeGenerator.entities.*;
 
 public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		ActualParameterSequenceVisitor<Frame, Integer>, ArrayAggregateVisitor<Frame, Integer>,
@@ -185,6 +166,14 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		return null;
 	}
 
+	@Override
+	public Void visitRepeatCommand(RepeatCommand ast, Frame arg){
+		var loopAddr = emitter.getNextInstrAddr();
+		ast.C.visit(this, arg);
+		ast.E.visit(this, arg);
+		emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, loopAddr);
+		return null;
+	}
 	// Expressions
 	@Override
 	public Integer visitArrayExpression(ArrayExpression ast, Frame frame) {
@@ -738,6 +727,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		elaborateStdPrimRoutine(StdEnvironment.puteolDecl, Primitive.PUTEOL);
 		elaborateStdEqRoutine(StdEnvironment.equalDecl, Primitive.EQ);
 		elaborateStdEqRoutine(StdEnvironment.unequalDecl, Primitive.NE);
+		StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
 	}
 
 	boolean tableDetailsReqd;
