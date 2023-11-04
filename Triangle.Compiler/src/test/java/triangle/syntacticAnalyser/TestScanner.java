@@ -57,6 +57,12 @@ public class TestScanner {
 	public void testCurly() {
 		compileExpectSuccess("/while-curly.tri");
 	}//testing for task 4
+
+	//test for task 6 not yet implemented
+	/*@Test
+	public void testLoopWhile() { compileExpectSuccess("/loopwhile.tri");} */
+
+
 	
 	
 	
