@@ -47,6 +47,16 @@ public class TestScanner {
 	public void testAdd() {
 		compileExpectSuccess("/add.tri");
 	}
+
+	@Test
+	public void testDouble() {
+		compileExpectSuccess("/double.tri");
+	}//testing for task 3
+
+	@Test
+	public void testCurly() {
+		compileExpectSuccess("/while-curly.tri");
+	}//testing for task 4
 	
 	
 	
