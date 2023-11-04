@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.ExpressionCounter;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -41,6 +42,7 @@ public class Compiler {
 	
 	static boolean showTree = false;
 	static boolean folding = false;
+	static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -97,13 +99,21 @@ public class Compiler {
 			if (showingAST) {
 				drawer.draw(theAST);
 			}
+
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
+
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
+			}
+			//If Stats option is used, provide char and integer expression count
+			if (showStats) {
+				ExpressionCounter expressionCounter = new ExpressionCounter();
+				theAST.visit(expressionCounter);
+				expressionCounter.printExpressionCounts();
 			}
 		}
 
@@ -150,6 +160,8 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			} else if (sl.equals("stats")) {
+				showStats = true;
 			}
 		}
 	}
