@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.ExpressionCounter;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -41,6 +42,7 @@ public class Compiler {
 	
 	static boolean showTree = false;
 	static boolean folding = false;
+	static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -136,6 +138,12 @@ public class Compiler {
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
+		if (showStats) {
+			ExpressionCounter expressionCounter = new ExpressionCounter();
+			theAST.visit(expressionCounter, null);
+			expressionCounter.printSummaryStatistics();
+		}
+
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
 		}
@@ -150,6 +158,8 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			} else if (sl.equals("stats")) {
+				showStats = true;
 			}
 		}
 	}
