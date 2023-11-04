@@ -309,13 +309,26 @@ public class Parser {
             break;
 
             case Token.BEGIN:
+                acceptIt();
+                commandAST = parseCommand();
+                accept(Token.END);
+                break;
+
+            case Token.LCURLY: {
+                acceptIt();
+                commandAST = parseCommand();
+                accept(Token.RCURLY);
+                break;
+            }
+            //the following code is an alternate method that allows for a mix such as "begin ... } " or "{ ... end"
+           /* case Token.BEGIN:
             case Token.LCURLY:
                 acceptIt();
                 commandAST = parseCommand();
                 if (currentToken.kind == Token.END || currentToken.kind == Token.RCURLY) {
                     acceptIt();
                 }
-                break;
+                break; */
 
 
             case Token.LET: {
