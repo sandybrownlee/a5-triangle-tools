@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -288,10 +281,40 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+				//Implement ++ increment operation
+				if(currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("++")){
+					acceptIt();
+
+					//a++ is the same as a=a+1
+					//vAST variable will be updated
+					//"commandPos" is line number of current command in source code
+					//We reuse that for each new AST node we make
+
+					//create IntegerLiteral for 1 (incrementing by 1)
+					IntegerLiteral intLit = new IntegerLiteral("1", commandPos);
+					//wrap IntegerLiteral in IntegerExpression
+					IntegerExpression intExp = new IntegerExpression(intLit, commandPos);
+					//wrap variable name in VnameExpression
+					VnameExpression vnExp = new VnameExpression(vAST, commandPos);
+					//operator is a +
+					Operator op = new Operator("+", commandPos);
+
+					//assemble expressions into a BinaryExpression (a+1)
+					Expression eAST = new BinaryExpression(vnExp, op, intExp, commandPos);
+					//set last line of command for debugging purposes
+					finish(commandPos);
+
+					//make assignment (a=a+1)
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				else {
+
+					accept(Token.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -331,6 +354,16 @@ public class Parser {
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
+		}
+			break;
+
+		case Token.REPEAT: {
+			acceptIt();
+			Command cAST = parseSingleCommand();
+			accept(Token.UNTIL);
+			Expression eAST = parseExpression();
+			finish(commandPos);
+			commandAST = new RepeatCommand(eAST, cAST, commandPos);
 		}
 			break;
 
