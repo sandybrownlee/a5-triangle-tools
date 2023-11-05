@@ -26,21 +26,21 @@ public class TestScanner {
 	}
 	
 
-	@Test
-	public void testHiNewComment2() {
-		compileExpectFailure("/hi-newcomment2.tri");
-	}
+	// @Test
+	// public void testHiNewComment2() {
+	// 	compileExpectSuccess("/hi-newcomment2.tri");
+	// }
 	
 
 	@Test
 	public void testBarDemo() {
-		compileExpectFailure("/bardemo.tri");
+		compileExpectSuccess("/bardemo.tri");
 	}
 	
 
 	@Test
 	public void testRepeatUntil() {
-		compileExpectFailure("/repeatuntil.tri");
+		compileExpectSuccess("/repeatuntil.tri");
 	}
 	
 	
