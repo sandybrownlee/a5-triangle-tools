@@ -289,11 +289,14 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
+				if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+				}
 				accept(Token.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
+			} 
 		}
 			break;
 

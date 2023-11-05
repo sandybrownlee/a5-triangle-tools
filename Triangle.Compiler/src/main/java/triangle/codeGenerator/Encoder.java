@@ -752,7 +752,8 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		elaborateStdPrimRoutine(StdEnvironment.puteolDecl, Primitive.PUTEOL);
 		elaborateStdEqRoutine(StdEnvironment.equalDecl, Primitive.EQ);
 		elaborateStdEqRoutine(StdEnvironment.unequalDecl, Primitive.NE);
-		// StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
+		StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
+		StdEnvironment.doubleDecl.entity = new BarPrimitiveRoutine();
 	}
 
 	boolean tableDetailsReqd;
