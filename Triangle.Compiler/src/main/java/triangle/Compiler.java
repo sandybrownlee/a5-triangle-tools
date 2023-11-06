@@ -18,6 +18,8 @@
 
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -38,10 +40,16 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "output", description = "Output filename")
 	static String objectName = "obj.tam";
-	
+
+	@Argument(alias = "tree", description = "Show ast")
 	static boolean showTree = false;
+
+	@Argument(alias = "folding", description = "Folding")
 	static boolean folding = false;
+
+	@Argument(alias = "stats", description = "Show stats")
 	static boolean showStats = false;
 
 	private static Scanner scanner;
@@ -127,12 +135,14 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		Compiler compiler = new Compiler();
+
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
 		
-		parseArgs(args);
+		Args.parse(compiler, args);
 
 		String sourceName = args[0];
 		
@@ -146,21 +156,6 @@ public class Compiler {
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			} else if (sl.equals("stats")) {
-				showStats = true;
-			}
 		}
 	}
 }

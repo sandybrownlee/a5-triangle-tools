@@ -232,9 +232,7 @@ public class ExpressionCounter implements ActualParameterVisitor<Void, AbstractS
     }
 
     @Override
-    public AbstractSyntaxTree visitCharacterLiteral(CharacterLiteral ast, Void arg) {
-        return null;
-    }
+    public AbstractSyntaxTree visitCharacterLiteral(CharacterLiteral ast, Void arg) { return null; }
 
     @Override
     public AbstractSyntaxTree visitIntegerLiteral(IntegerLiteral ast, Void arg) {
