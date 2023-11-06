@@ -508,6 +508,17 @@ public class ExpressionCounter implements ActualParameterVisitor<Void, AbstractS
 	}
 
 	@Override
+	public AbstractSyntaxTree visitLoopCommand(LoopCommand ast, Void arg) {
+		ast.C1.visit(this);
+		ast.C2.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		return null;
+	}
+
+	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
 		ast.AA.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);

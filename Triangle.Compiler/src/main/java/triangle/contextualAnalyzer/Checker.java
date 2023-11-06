@@ -193,6 +193,17 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		return null;
 	}
 
+
+	@Override
+	public Void visitLoopCommand(LoopCommand ast, Void arg){
+		var eType = ast.E.visit(this);
+
+		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+		ast.C1.visit(this);
+		ast.C2.visit(this);
+
+		return null;
+	}
 	// Expressions
 
 	// Returns the TypeDenoter denoting the type of the expression. Does

@@ -174,6 +174,29 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, loopAddr);
 		return null;
 	}
+
+	@Override
+	public Void visitLoopCommand(LoopCommand ast, Frame arg){
+		//Emitts a jump instruction to a placeholder address
+		var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+		var loopAddr = emitter.getNextInstrAddr();
+
+		//Visit the inner command (Do)
+		ast.C2.visit(this, arg);
+
+		//Assigns jump to the end of the loop if the condition is false
+		emitter.patch(jumpAddr);
+
+		//Visit the outer command (Loop)
+		ast.C1.visit(this, arg);
+
+		//Visit the condition (While)
+		ast.E.visit(this, arg);
+
+		//Jump back to the loop start if the condition is true
+		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
 	// Expressions
 	@Override
 	public Integer visitArrayExpression(ArrayExpression ast, Frame frame) {

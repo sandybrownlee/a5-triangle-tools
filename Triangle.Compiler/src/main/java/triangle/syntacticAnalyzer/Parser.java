@@ -350,6 +350,18 @@ public class Parser {
 		}
 			break;
 
+		case Token.LOOP: {
+			acceptIt();
+			Command c1AST = parseSingleCommand();
+			accept(Token.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.DO);
+			Command c2AST = parseSingleCommand();
+			finish(commandPos);
+			commandAST = new LoopCommand(eAST, c1AST, c2AST, commandPos);
+			}
+			break;
+
 		case Token.REPEAT: {
 			acceptIt();
 			Command cAST = parseSingleCommand();
