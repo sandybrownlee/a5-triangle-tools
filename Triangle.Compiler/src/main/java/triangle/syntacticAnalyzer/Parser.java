@@ -830,7 +830,7 @@ public class Parser {
 		case Token.LET:
 		case Token.IF:
 		case Token.LPAREN:
-		case Token.LBRACKET:
+		case Token.LBRACKET: 
 		case Token.LCURLY: {
 			Expression eAST = parseExpression();
 			finish(actualPos);
