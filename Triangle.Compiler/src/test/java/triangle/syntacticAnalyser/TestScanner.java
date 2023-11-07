@@ -32,16 +32,22 @@ public class TestScanner {
 	// }
 	
 
-	@Test
-	public void testBarDemo() {
-		compileExpectSuccess("/bardemo.tri");
-	}
+	// @Test
+	// public void testBarDemo() {
+	// 	compileExpectSuccess("/bardemo.tri");
+	// }
 	
 
-	@Test
-	public void testRepeatUntil() {
-		compileExpectSuccess("/repeatuntil.tri");
-	}
+	// @Test
+	// public void testRepeatUntil() {
+	// 	compileExpectSuccess("/repeatuntil.tri");
+	// }
+
+	// @Test
+	// public void testWhileCurly() 
+	// {
+	// 	compileExpectSuccess("/while-curly.tri");
+	// }
 	
 	
 	

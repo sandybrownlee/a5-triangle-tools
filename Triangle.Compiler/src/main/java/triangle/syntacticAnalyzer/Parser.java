@@ -306,6 +306,12 @@ public class Parser {
 			accept(Token.END);
 			break;
 
+		case Token.LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			acceptIt(Token.RCURLY);
+			break;
+
 		case Token.LET: {
 			acceptIt();
 			Declaration dAST = parseDeclaration();
