@@ -83,9 +83,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
 		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
 		VnameVisitor<Void, AbstractSyntaxTree> {
-	{
-
-	}
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
