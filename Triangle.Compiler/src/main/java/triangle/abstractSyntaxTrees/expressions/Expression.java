@@ -40,6 +40,10 @@ public abstract class Expression extends AbstractSyntaxTree {
 		throw new UnsupportedOperationException();
 	}
 
+	public boolean getBooleanValue() {
+		throw new UnsupportedOperationException();
+	}
+
 	public abstract <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor, TArg arg);
 
 	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor) {

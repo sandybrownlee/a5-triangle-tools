@@ -40,7 +40,7 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	@Argument(alias = "output", description = "Output filename")
+	@Argument(alias = "o", description = "Output filename")
 	static String objectName = "obj.tam";
 
 	@Argument(alias = "tree", description = "Show ast")
@@ -76,7 +76,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -109,11 +109,19 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
+				showTree = true;
 			}
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
+			}
+
+			if (showStats) {
+				ExpressionCounter expressionCounter = new ExpressionCounter();
+				theAST.visit(expressionCounter, null);
+				expressionCounter.printSummaryStatistics();
 			}
 		}
 
@@ -137,22 +145,16 @@ public class Compiler {
 
 		Compiler compiler = new Compiler();
 
+		Args.parse(compiler, args);
+
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
-		
-		Args.parse(compiler, args);
 
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (showStats) {
-			ExpressionCounter expressionCounter = new ExpressionCounter();
-			theAST.visit(expressionCounter, null);
-			expressionCounter.printSummaryStatistics();
-		}
+		var compiledOK = compileProgram(sourceName, objectName, showTree, folding, showStats);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
