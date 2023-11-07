@@ -607,7 +607,20 @@ public class ExpressionCounter implements ActualParameterVisitor<Void, AbstractS
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				Identifier ide = new Identifier(foldedValue.toString(), node1.getPosition());
+
+				if(foldedValue.toString() == "true"){
+					ide.decl = StdEnvironment.trueDecl;
+				}else{
+					ide.decl = StdEnvironment.falseDecl;
+				}
+
+				SimpleVname sv = new SimpleVname(ide, node1.getPosition());
+				VnameExpression ve = new VnameExpression(sv, node1.getPosition());
+
+				ve.type = StdEnvironment.booleanType;
+
+				return ve;
 			}
 		}
 

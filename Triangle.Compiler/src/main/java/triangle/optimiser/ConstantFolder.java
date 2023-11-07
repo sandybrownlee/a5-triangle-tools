@@ -73,6 +73,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.abstractSyntaxTrees.vnames.Vname;
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -582,26 +583,53 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
-			}else if (o.decl == StdEnvironment.divideDecl) {
+			} else if (o.decl == StdEnvironment.divideDecl) {
 				foldedValue = int1 / int2;
-			}else if (o.decl == StdEnvironment.moduloDecl) {
+			} else if (o.decl == StdEnvironment.moduloDecl) {
 				foldedValue = int1 % int2;
-			}else if (o.decl == StdEnvironment.multiplyDecl) {
+			} else if (o.decl == StdEnvironment.multiplyDecl) {
 				foldedValue = int1 * int2;
-			}else if (o.decl == StdEnvironment.subtractDecl) {
+			} else if (o.decl == StdEnvironment.subtractDecl) {
 				foldedValue = int1 - int2;
+			} else if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 == int2;
+			} else if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			} else if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			} else if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			} else if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			} else if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
 			}
+
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
+
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				Identifier ide = new Identifier(foldedValue.toString(), node1.getPosition());
+
+				if(foldedValue.toString() == "true"){
+					ide.decl = StdEnvironment.trueDecl;
+				}else{
+					ide.decl = StdEnvironment.falseDecl;
+				}
+
+				SimpleVname sv = new SimpleVname(ide, node1.getPosition());
+				VnameExpression ve = new VnameExpression(sv, node1.getPosition());
+
+				ve.type = StdEnvironment.booleanType;
+
+				return ve;
 			}
 		}
 

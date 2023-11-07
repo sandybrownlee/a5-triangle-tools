@@ -280,6 +280,7 @@ public class Parser {
 
 			} else {
 
+				//Adding support for a**
 				Vname vAST = parseRestOfVname(iAST);
 				if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
 					acceptIt();
@@ -312,6 +313,7 @@ public class Parser {
 			commandAST = parseCommand();
 			accept(Token.END);
 			break;
+
 		case Token.LCURLY:
 			acceptIt();
 			commandAST = parseCommand();
