@@ -25,8 +25,8 @@ public abstract class Terminal extends AbstractSyntaxTree {
 
 	public Terminal(String spelling, SourcePosition position) {
 		super(position);
-		this.spelling = spelling;
+		this.operatorSymbol = spelling;
 	}
 
-	public final String spelling;
+	public final String operatorSymbol;
 }

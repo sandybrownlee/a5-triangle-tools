@@ -14,14 +14,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
-import triangle.abstractSyntaxTrees.commands.RepeatCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -80,6 +73,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -497,6 +491,16 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void unused) {
+		ast.C1.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		return null;
+	}
+
 	// TODO uncomment if you've implemented the repeat command
 	@Override
 	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
@@ -573,28 +577,71 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
-		// the only case we know how to deal with for now is two IntegerExpressions
-		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
-			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
-			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
-			Object foldedValue = null;
-			
-			if (o.decl == StdEnvironment.addDecl) {
-				foldedValue = int1 + int2;
-			}
-
-			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-				ie.type = StdEnvironment.integerType;
-				return ie;
-			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
-			}
+		if (!(node1 instanceof IntegerExpression) || !(node2 instanceof IntegerExpression)) {
+			return null;
 		}
 
-		// any unhandled situation (i.e., not foldable) is ignored
+		int int1 = Integer.parseInt(((IntegerExpression) node1).IL.operatorSymbol);
+		int int2 = Integer.parseInt(((IntegerExpression) node2).IL.operatorSymbol);
+
+		if (o.decl == StdEnvironment.addDecl) {
+			int result = int1 + int2;
+			return createIntegerExpression(result, node1.getPosition());
+		}
+
+		if (isComparisonOperator(o.operatorSymbol)) {
+			// Handle comparison operators
+			boolean result = performComparison(o.operatorSymbol, int1, int2);
+			return createBooleanExpression(result, node1.getPosition());
+		}
+
+		// Returns null if the case hasnt been handled
 		return null;
 	}
+
+	private boolean isComparisonOperator(String operator) {
+		return operator.equals("=") || operator.equals("<") || operator.equals("<=") ||
+				operator.equals(">") || operator.equals(">=") || operator.equals("\\=");
+	}
+
+	private boolean performComparison(String operator, int int1, int int2) {
+		switch (operator) {
+			case "=":
+				return int1 == int2;
+			case "<":
+				return int1 < int2;
+			case "<=":
+				return int1 <= int2;
+			case ">":
+				return int1 > int2;
+			case ">=":
+				return int1 >= int2;
+			case "\\=":
+				return int1 != int2;
+			default:
+				return false; // Return false in the case of an unrecognized operator
+		}
+	}
+
+	// Helper method to create an IntegerExpression
+	private IntegerExpression createIntegerExpression(int value, SourcePosition position) {
+		IntegerLiteral il = new IntegerLiteral(Integer.toString(value), position);
+		IntegerExpression ie = new IntegerExpression(il, position);
+		ie.type = StdEnvironment.integerType;
+		return ie;
+	}
+
+	// Helper method to create a BooleanExpression
+	private VnameExpression createBooleanExpression(boolean value, SourcePosition position) {
+		String resultOperator = value ? "true" : "false";
+		Identifier id = new Identifier(resultOperator, position);
+		id.decl = value ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+		SimpleVname simpleVname = new SimpleVname(id, position);
+		VnameExpression vnameExpression = new VnameExpression(simpleVname, position);
+		vnameExpression.type = StdEnvironment.booleanType;
+		return vnameExpression;
+	}
+
+
 
 }

@@ -36,6 +36,6 @@ public class IntegerLiteral extends Terminal {
 	}
 
 	public int getValue() {
-		return Integer.parseInt(spelling);
+		return Integer.parseInt(operatorSymbol);
 	}
 }

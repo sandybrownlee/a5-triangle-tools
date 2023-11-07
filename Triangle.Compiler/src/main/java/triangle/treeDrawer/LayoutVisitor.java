@@ -32,14 +32,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.RepeatCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -161,6 +154,13 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	public DrawingTree visitWhileCommand(WhileCommand ast, Void obj) {
 		var d1 = ast.E.visit(this);
 		var d2 = ast.C.visit(this);
+		return layoutBinary("WhileCom.", d1, d2);
+	}
+
+	@Override
+	public DrawingTree visitLoopWhileCommand(LoopWhileCommand ast, Void obj) {
+		var d1 = ast.E.visit(this);
+		var d2 = ast.C1.visit(this);
 		return layoutBinary("WhileCom.", d1, d2);
 	}
 
@@ -488,22 +488,22 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	// Literals, Identifiers and Operators
 	@Override
 	public DrawingTree visitCharacterLiteral(CharacterLiteral ast, Void obj) {
-		return layoutNullary(ast.spelling);
+		return layoutNullary(ast.operatorSymbol);
 	}
 
 	@Override
 	public DrawingTree visitIdentifier(Identifier ast, Void obj) {
-		return layoutNullary(ast.spelling);
+		return layoutNullary(ast.operatorSymbol);
 	}
 
 	@Override
 	public DrawingTree visitIntegerLiteral(IntegerLiteral ast, Void obj) {
-		return layoutNullary(ast.spelling);
+		return layoutNullary(ast.operatorSymbol);
 	}
 
 	@Override
 	public DrawingTree visitOperator(Operator ast, Void obj) {
-		return layoutNullary(ast.spelling);
+		return layoutNullary(ast.operatorSymbol);
 	}
 
 	// Value-or-variable names
