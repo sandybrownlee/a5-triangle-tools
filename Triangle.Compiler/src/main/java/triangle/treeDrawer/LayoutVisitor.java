@@ -166,7 +166,7 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		return layoutBinary("WhileCom.", d1, d2);
 	}
 
-	// TO IMPLEMENT
+
 	@Override
 	public DrawingTree visitLoopCommand(LoopCommand ast, Void obj) {
 		var d1 = ast.E.visit(this);

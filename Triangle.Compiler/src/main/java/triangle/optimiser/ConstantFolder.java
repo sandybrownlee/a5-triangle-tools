@@ -503,7 +503,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 
-	// TO IMPLEMENT
 	@Override
 	public AbstractSyntaxTree visitLoopCommand(LoopCommand ast, Void arg) {
 		ast.C1.visit(this);

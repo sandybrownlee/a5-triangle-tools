@@ -191,7 +191,6 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	}
 
 
-	// TO IMPLEMENT
 	@Override
 	public Void visitLoopCommand(LoopCommand ast, Void arg) {
 		var c1Type = ast.C1.visit(this);

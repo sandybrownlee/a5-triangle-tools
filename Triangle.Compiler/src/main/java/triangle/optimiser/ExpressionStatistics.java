@@ -470,7 +470,7 @@ public class ExpressionStatistics implements ActualParameterVisitor<Void, Abstra
 		return null;
 	}
 
-	// TO IMPLEMENT
+
 	@Override
 	public AbstractSyntaxTree visitLoopCommand(LoopCommand ast, Void arg) {
 		//ast.C.visit(this);
