@@ -7,7 +7,7 @@
 let
   var a : Integer;
   var b : Integer;
-  var c : Integer 
+  var c : Integer
 in
 begin
   a := 0;
