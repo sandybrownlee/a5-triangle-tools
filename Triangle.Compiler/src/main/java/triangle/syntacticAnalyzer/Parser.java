@@ -35,20 +35,8 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
-import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
-import triangle.abstractSyntaxTrees.declarations.Declaration;
-import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
-import triangle.abstractSyntaxTrees.declarations.ProcDeclaration;
-import triangle.abstractSyntaxTrees.declarations.SequentialDeclaration;
-import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
+import triangle.abstractSyntaxTrees.commands.*;
+import triangle.abstractSyntaxTrees.declarations.*;
 import triangle.abstractSyntaxTrees.expressions.ArrayExpression;
 import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
 import triangle.abstractSyntaxTrees.expressions.CallExpression;
@@ -278,6 +266,7 @@ public class Parser {
 
 		case Token.IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
+			Vname vAST = parseRestOfVname(iAST);
 			if (currentToken.kind == Token.LPAREN) {
 				acceptIt();
 				ActualParameterSequence apsAST = parseActualParameterSequence();
@@ -285,15 +274,36 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			}
+			else if(currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")){
+					acceptIt();
 
-				Vname vAST = parseRestOfVname(iAST);
+					IntegerLiteral il = new IntegerLiteral("2",commandPos);
+
+					IntegerExpression ie = new IntegerExpression(il,commandPos);
+
+					VnameExpression ex = new VnameExpression(vAST,commandPos);
+
+					Operator op = new Operator("*",commandPos);
+
+					BinaryExpression eAST = new BinaryExpression(ie,op,ex,commandPos);
+
+					finish(commandPos);
+
+					commandAST = new AssignCommand(vAST,eAST,commandPos);
+				}
+				else {
 				accept(Token.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
+				}
 		}
+			break;
+		case Token.LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
 			break;
 
 		case Token.BEGIN:
@@ -333,7 +343,18 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
-
+		case Token.LOOP: {
+				acceptIt();
+				Command cAST1 = parseSingleCommand();
+				accept(Token.WHILE);
+				Expression eAST = parseExpression();
+				accept(Token.DO);
+				Command cAST2 = parseSingleCommand();
+				finish(commandPos);
+				commandAST = new LoopWhileCommand(eAST,cAST1,cAST2,commandPos);
+			}
+			break;
+		case Token.RCURLY:
 		case Token.SEMICOLON:
 		case Token.END:
 		case Token.ELSE:

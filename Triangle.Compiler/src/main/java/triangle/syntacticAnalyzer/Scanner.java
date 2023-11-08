@@ -163,10 +163,9 @@ public final class Scanner {
 			while (isDigit(currentChar))
 				takeIt();
 			return Token.INTLITERAL;
-
+		case '*':
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':

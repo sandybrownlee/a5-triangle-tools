@@ -36,14 +36,20 @@ public class TestScanner {
 	public void testBarDemo() {
 		compileExpectFailure("/bardemo.tri");
 	}
+	@Test
+	public void testDoubleDemo(){compileExpectSuccess("/double.tri");}
 	
 
 	@Test
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
+
+	@Test
+	public void testWhileCurly(){compileExpectSuccess("/while-curly.tri");}
 	
-	
+	@Test
+	public void testLoopWhile(){compileExpectSuccess("/loopwhile.tri");}
 	
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")

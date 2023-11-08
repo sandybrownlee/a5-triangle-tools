@@ -24,6 +24,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryStatistics;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -51,6 +52,10 @@ public class Compiler {
 	/** The AST representing the source program. */
 	public static Program theAST;
 	public static Drawer foldedDrawer;
+	public static SummaryStatistics summarizer;
+
+
+	//for the compiler default is false
 
 	/**
 	 * Compile the source program to TAM machine code.
@@ -65,7 +70,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST,boolean isFolding,boolean showingASTAfterFolding, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -85,23 +90,29 @@ public class Compiler {
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
 		foldedDrawer = new Drawer();
+		summarizer = new SummaryStatistics();
 		//scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
 
 			System.out.println("Contextual Analysis ...");
 			 // 2nd pass
+			if(showSummaryStats){
+				theAST.visit(summarizer);
+			}
 			checker.check(theAST);
 			if (showingAST) {
 				drawer.draw(theAST);
 			}
-			if (isFolding) {
+			if (folding) {
 				theAST.visit(new ConstantFolder());
+				checker.check(theAST);
+				if (showTreeAfterFolding) {
+					foldedDrawer.draw(theAST);
+				}
 			}
-			checker.check(theAST);
-			if (showingASTAfterFolding) {
-				foldedDrawer.draw(theAST);
-			}
+
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -114,6 +125,12 @@ public class Compiler {
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
 			System.out.println("Compilation was successful.");
+			if(showSummaryStats){
+				System.out.println("number of character expressions");
+				System.out.println(summarizer.numberOfCharacterExpressions);
+				System.out.println("number of Integer expressions");
+				System.out.println(summarizer.numberOfIntegerExpressions);
+			}
 		} else {
 			System.out.println("Compilation was unsuccessful.");
 		}
@@ -128,20 +145,51 @@ public class Compiler {
 	 *             source filename.
 	 */
 @Argument(alias="s", description = "Source Name Path")
-protected String SourceNamePath = "programs/adddeep.tri";
+public static String sourceNamePath = "programs/loopwhile.tri";
 @Argument(alias="o",description = "Object Name")
-protected String objectSourceName = "adddeep.tam";
-@Argument(alias="t",description = "Show Tree")
-protected boolean showTree = true;
-@Argument(alias="f",description = "folding")
-protected boolean folding = true;
-@Argument(alias="tf",description = "show tree after folding")
-protected boolean showTreeAfterFolding = true;
+public static String objectSourceName = "loopwhile.tam";
+
+//the declared booleans below were kept here for dev purposes allowing for one big block of code that can be manipulated
+	// it was also decided to keep them like this in order to have a default value instead of requiring input
+	// this means that they do not have to be parameters of the methods which follows Clean Code Principles
+public static boolean showTree = true;
+
+public static boolean folding = false;
+public static boolean showTreeAfterFolding = false;
+public static boolean showSummaryStats = true;
 	public static void main(String[] args) {
+		//these lines have been commented out to allow for the cliparser to manipulate the args
+		/**
+		 if (args.length < 1) {
+			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.exit(1);
+		}
+		parseArgs(args);
+		sourceNamePath = args[0];
+		 */
 		Compiler compiler = new Compiler();
 		Args.parseOrExit(compiler,args);
-		compileProgram(compiler.SourceNamePath, compiler.objectSourceName, compiler.showTree, compiler.folding, compiler.showTreeAfterFolding,false);
-
+		var compiledOK = compileProgram(sourceNamePath, objectSourceName,showTree,false);
+		if (!showTree) {
+			System.exit(compiledOK ? 0 : 1);
+		}
 	}
 
+//parseArgs has cases added for when cliparser is no longer used
+	private static void parseArgs(String[] args) {
+	for (String s : args) {
+		var sl = s.toLowerCase();
+		if (sl.equals("tree")) {
+			showTree = true;
+		} else if (sl.startsWith("-o=")) {
+			objectSourceName = s.substring(3);
+		} else if (sl.equals("folding")) {
+			folding = true;
+		}else if (sl.equals("stats")) {
+			showSummaryStats = true;
+		}else if (sl.equals("treeafterfolding")) {
+			showTreeAfterFolding = true;
+		}
+	}
+}
 }

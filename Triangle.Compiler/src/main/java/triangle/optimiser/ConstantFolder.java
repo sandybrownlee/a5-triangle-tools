@@ -14,13 +14,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -79,6 +73,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.abstractSyntaxTrees.vnames.Vname;
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -496,6 +491,19 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void unused) {
+		ast.C1.visit(this);
+		ast.C2.visit(this);
+		ast.E.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+
+		return null;
+	}
+
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
@@ -581,17 +589,52 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}
+			//now to add cases for all the operators in order (equal, less, notgreater, greater, notless, unequal
+			if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 = int2;
+			}if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			}if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			}if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			}if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			}if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			}
 
+			//since either a boolean or an integer will be returned the checks will need to be for both
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
-			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+			}
+			else if (foldedValue instanceof Boolean) {
+				if(foldedValue.toString() == "true"){
+					//create identifier with spelling true
+					Identifier trueId = new Identifier("true", node1.getPosition());
+					//declare the identifier as a trueDecl
+					trueId.decl = StdEnvironment.trueDecl;
+					//wrapping in simpleVname and then VnameExpression
+					SimpleVname trueVName = new SimpleVname(trueId,node1.getPosition());
+					VnameExpression trueExpression = new VnameExpression(trueVName,node1.getPosition());
+					//since we are not returning an integer like above we need to declare it as a type boolean
+					trueExpression.type = StdEnvironment.booleanType;
+					return trueExpression;
+				}
+				//same thing for false
+				else if (foldedValue.toString() == "false"){
+					Identifier falseId = new Identifier("false", node1.getPosition());
+					falseId.decl = StdEnvironment.falseDecl;
+					SimpleVname falseVName = new SimpleVname(falseId,node1.getPosition());
+					VnameExpression falseExpression = new VnameExpression(falseVName,node1.getPosition());
+					falseExpression.type = StdEnvironment.booleanType;
+					return falseExpression;
+				}
 			}
 		}
-
 		// any unhandled situation (i.e., not foldable) is ignored
 		return null;
 	}
