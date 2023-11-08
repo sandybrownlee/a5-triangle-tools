@@ -14,13 +14,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -496,16 +490,32 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-	// TODO uncomment if you've implemented the repeat command
 //	@Override
-//	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
-//		ast.C.visit(this);
-//		AbstractSyntaxTree replacement = ast.E.visit(this);
-//		if (replacement != null) {
-//			ast.E = (Expression) replacement;
-//		}
+//	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void unused) {
 //		return null;
 //	}
+
+	// TODO uncomment if you've implemented the repeat command
+	@Override
+	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
+		ast.C.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		return null;
+	}
+	
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+		ast.C1.visit(this);
+		ast.C2.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		return null;
+	}
 
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
@@ -581,6 +591,37 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}
+			else if (o.decl == StdEnvironment.divideDecl) {
+				foldedValue = int1 / int2;
+			}
+			else if (o.decl == StdEnvironment.moduloDecl) {
+				foldedValue = int1 % int2;
+			}
+			else if (o.decl == StdEnvironment.multiplyDecl) {
+				foldedValue = int1 * int2;
+			}
+			else if (o.decl == StdEnvironment.subtractDecl) {
+				foldedValue = int1 - int2;
+			}
+			else if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 = int2;
+			}
+			else if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			}
+			else if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			}
+			else if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			}
+			else if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			}
+			else if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			}
+			
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
@@ -588,8 +629,19 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				Identifier id = new Identifier(foldedValue.toString(), node1.getPosition());
+				if (id.spelling == "true") {
+					id.decl = StdEnvironment.trueDecl;
+				}
+				else {
+					id.decl = StdEnvironment.falseDecl;
+				}
+				SimpleVname vname = new SimpleVname(id, node1.getPosition());
+				VnameExpression vne = new VnameExpression(vname, node1.getPosition());
+				vne.type = StdEnvironment.booleanType;
+				return vne;
 			}
+			
 		}
 
 		// any unhandled situation (i.e., not foldable) is ignored

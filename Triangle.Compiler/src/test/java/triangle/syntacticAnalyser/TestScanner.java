@@ -22,26 +22,47 @@ public class TestScanner {
 
 	@Test
 	public void testHiNewComment() {
-		compileExpectFailure("/hi-newcomment.tri");
+		compileExpectSuccess("/hi-newcomment.tri");
 	}
 	
 
 	@Test
 	public void testHiNewComment2() {
-		compileExpectFailure("/hi-newcomment2.tri");
+		compileExpectSuccess("/hi-newcomment2.tri");
 	}
-	
+
 
 	@Test
-	public void testBarDemo() {
-		compileExpectFailure("/bardemo.tri");
+ 	public void testBarDemo() {
+		 compileExpectSuccess("/bardemo.tri");
 	}
-	
+
 
 	@Test
-	public void testRepeatUntil() {
-		compileExpectFailure("/repeatuntil.tri");
+ 	public void testRepeatUntil() {
+		compileExpectSuccess("/repeatuntil.tri");
+
 	}
+	
+	@Test
+	public void testCurly() {
+		compileExpectSuccess("/while-curly.tri");
+	}
+	
+	@Test
+	public void testDouble() {
+		compileExpectSuccess("/double.tri");
+	}
+	
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopWhile.tri");
+	}
+
+
+	
+
+
 	
 	
 	

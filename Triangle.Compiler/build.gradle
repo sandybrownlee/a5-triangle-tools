@@ -9,6 +9,7 @@ repositories {
 
 
 dependencies {
+	implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
 	implementation project(':Triangle.AbstractMachine')
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
