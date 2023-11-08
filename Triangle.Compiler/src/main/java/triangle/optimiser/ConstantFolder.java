@@ -578,17 +578,17 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			return null;
 		}
 
-		int int1 = Integer.parseInt(((IntegerExpression) node1).IL.operatorSymbol);
-		int int2 = Integer.parseInt(((IntegerExpression) node2).IL.operatorSymbol);
+		int int1 = Integer.parseInt(((IntegerExpression) node1).IL.spelling);
+		int int2 = Integer.parseInt(((IntegerExpression) node2).IL.spelling);
 
 		if (o.decl == StdEnvironment.addDecl) {
 			int result = int1 + int2;
 			return createIntegerExpression(result, node1.getPosition());
 		}
 
-		if (isComparisonOperator(o.operatorSymbol)) {
+		if (isComparisonOperator(o.spelling)) {
 			// Handle comparison operators
-			boolean result = performComparison(o.operatorSymbol, int1, int2);
+			boolean result = performComparison(o.spelling, int1, int2);
 			return createBooleanExpression(result, node1.getPosition());
 		}
 
@@ -620,23 +620,18 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 	}
 
-	// Helper method to create an IntegerExpression
+	// Helper method to create an IntegerExpression, useful if code needs to be reused as its a standalone method
 	private IntegerExpression createIntegerExpression(int value, SourcePosition position) {
-		IntegerLiteral il = new IntegerLiteral(Integer.toString(value), position);
-		IntegerExpression ie = new IntegerExpression(il, position);
-		ie.type = StdEnvironment.integerType;
-		return ie;
+		return new IntegerExpression(new IntegerLiteral(Integer.toString(value), position), position);
 	}
 
-	// Helper method to create a BooleanExpression
+	// Helper method to create a BooleanExpression, useful if code needs to be reused as its a standalone method
 	private VnameExpression createBooleanExpression(boolean value, SourcePosition position) {
 		String resultOperator = value ? "true" : "false";
 		Identifier id = new Identifier(resultOperator, position);
 		id.decl = value ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
 		SimpleVname simpleVname = new SimpleVname(id, position);
-		VnameExpression vnameExpression = new VnameExpression(simpleVname, position);
-		vnameExpression.type = StdEnvironment.booleanType;
-		return vnameExpression;
+		return new VnameExpression(simpleVname, position);
 	}
 
 

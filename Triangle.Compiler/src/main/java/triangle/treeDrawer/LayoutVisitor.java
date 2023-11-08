@@ -488,22 +488,22 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	// Literals, Identifiers and Operators
 	@Override
 	public DrawingTree visitCharacterLiteral(CharacterLiteral ast, Void obj) {
-		return layoutNullary(ast.operatorSymbol);
+		return layoutNullary(ast.spelling);
 	}
 
 	@Override
 	public DrawingTree visitIdentifier(Identifier ast, Void obj) {
-		return layoutNullary(ast.operatorSymbol);
+		return layoutNullary(ast.spelling);
 	}
 
 	@Override
 	public DrawingTree visitIntegerLiteral(IntegerLiteral ast, Void obj) {
-		return layoutNullary(ast.operatorSymbol);
+		return layoutNullary(ast.spelling);
 	}
 
 	@Override
 	public DrawingTree visitOperator(Operator ast, Void obj) {
-		return layoutNullary(ast.operatorSymbol);
+		return layoutNullary(ast.spelling);
 	}
 
 	// Value-or-variable names

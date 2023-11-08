@@ -589,8 +589,8 @@ public class ExpressionCounter implements ActualParameterVisitor<Void, AbstractS
     public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
         // the only case we know how to deal with for now is two IntegerExpressions
         if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
-            int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.operatorSymbol));
-            int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.operatorSymbol));
+            int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
+            int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
             Object foldedValue = null;
 
             if (o.decl == StdEnvironment.addDecl) {

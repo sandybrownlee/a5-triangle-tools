@@ -20,9 +20,6 @@ package triangle.contextualAnalyzer;
 
 import triangle.ErrorReporter;
 import triangle.StdEnvironment;
-import triangle.abstractMachine.Machine;
-import triangle.abstractMachine.OpCode;
-import triangle.abstractMachine.Register;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.abstractSyntaxTrees.actuals.ConstActualParameter;
@@ -332,7 +329,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	@Override
 	public Void visitConstDeclaration(ConstDeclaration ast, Void arg) {
 		ast.E.visit(this);
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "identifier \"%\" already declared", ast.I, ast);
 		return null;
 	}
@@ -341,7 +338,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	public Void visitFuncDeclaration(FuncDeclaration ast, Void arg) {
 		ast.T = ast.T.visit(this);
 		// permits recursion
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "identifier \"%\" already declared", ast.I, ast);
 
 		idTable.openScope();
@@ -356,7 +353,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	@Override
 	public Void visitProcDeclaration(ProcDeclaration ast, Void arg) {
 		// permits recursion
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "identifier \"%\" already declared", ast.I, ast);
 
 		idTable.openScope();
@@ -377,7 +374,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	@Override
 	public Void visitTypeDeclaration(TypeDeclaration ast, Void arg) {
 		ast.T = ast.T.visit(this);
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "identifier \"%\" already declared", ast.I, ast);
 		return null;
 	}
@@ -390,7 +387,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	@Override
 	public Void visitVarDeclaration(VarDeclaration ast, Void arg) {
 		ast.T = ast.T.visit(this);
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "identifier \"%\" already declared", ast.I, ast);
 		return null;
 	}
@@ -443,7 +440,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	@Override
 	public Void visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
 		ast.T = ast.T.visit(this);
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "duplicated formal parameter \"%\"", ast.I, ast);
 		return null;
 	}
@@ -454,7 +451,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		ast.FPS.visit(this);
 		idTable.closeScope();
 		ast.T = ast.T.visit(this);
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "duplicated formal parameter \"%\"", ast.I, ast);
 		return null;
 	}
@@ -464,7 +461,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		idTable.openScope();
 		ast.FPS.visit(this);
 		idTable.closeScope();
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "duplicated formal parameter \"%\"", ast.I, ast);
 		return null;
 	}
@@ -472,7 +469,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	@Override
 	public Void visitVarFormalParameter(VarFormalParameter ast, Void arg) {
 		ast.T = ast.T.visit(this);
-		idTable.enter(ast.I.operatorSymbol, ast);
+		idTable.enter(ast.I.spelling, ast);
 		checkAndReportError(!ast.duplicated, "duplicated formal parameter \"%\"", ast.I, ast);
 		return null;
 	}
@@ -671,7 +668,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 	@Override
 	public Declaration visitIdentifier(Identifier I, Void arg) {
-		var binding = idTable.retrieve(I.operatorSymbol);
+		var binding = idTable.retrieve(I.spelling);
 		if (binding != null) {
 			I.decl = binding;
 		}
@@ -685,7 +682,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 	@Override
 	public Declaration visitOperator(Operator O, Void arg) {
-		var binding = idTable.retrieve(O.operatorSymbol);
+		var binding = idTable.retrieve(O.spelling);
 		if (binding != null) {
 			O.decl = binding;
 		}
@@ -815,7 +812,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	}
 
 	private void reportError(String message, Terminal spellingNode, AbstractSyntaxTree positionNode) {
-		reporter.reportError(message, spellingNode.operatorSymbol, positionNode.getPosition());
+		reporter.reportError(message, spellingNode.spelling, positionNode.getPosition());
 	}
 
 	private void reportError(String message, AbstractSyntaxTree positionNode) {
@@ -834,7 +831,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 	private void checkAndReportError(boolean condition, String message, Terminal spellingNode,
 			AbstractSyntaxTree positionNode) {
-		checkAndReportError(condition, message, spellingNode.operatorSymbol, positionNode.getPosition());
+		checkAndReportError(condition, message, spellingNode.spelling, positionNode.getPosition());
 	}
 
 	private void checkAndReportError(boolean condition, String message, AbstractSyntaxTree positionNode) {
@@ -844,7 +841,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	private static TypeDenoter checkFieldIdentifier(FieldTypeDenoter ast, Identifier I) {
 		if (ast instanceof MultipleFieldTypeDenoter) {
 			MultipleFieldTypeDenoter ft = (MultipleFieldTypeDenoter)ast;
-			if (ft.I.operatorSymbol.compareTo(I.operatorSymbol) == 0) {
+			if (ft.I.spelling.compareTo(I.spelling) == 0) {
 				I.decl = ast;
 				return ft.T;
 			} else {
@@ -852,7 +849,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 			}
 		} else if (ast instanceof SingleFieldTypeDenoter) {
 			SingleFieldTypeDenoter ft = (SingleFieldTypeDenoter)ast;
-			if (ft.I.operatorSymbol.compareTo(I.operatorSymbol) == 0) {
+			if (ft.I.spelling.compareTo(I.spelling) == 0) {
 				I.decl = ast;
 				return ft.T;
 			}

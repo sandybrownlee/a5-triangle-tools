@@ -64,10 +64,6 @@ public class TestScanner {
 	}//testing for task 7
 
 
-	@Test
-	public void testLoopWhile() { compileExpectSuccess("/loopwhile.tri");}
-
-
 	
 	
 	

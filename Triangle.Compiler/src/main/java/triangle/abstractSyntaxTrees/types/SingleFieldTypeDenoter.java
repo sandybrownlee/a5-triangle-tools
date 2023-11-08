@@ -43,7 +43,7 @@ public class SingleFieldTypeDenoter extends FieldTypeDenoter {
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof SingleFieldTypeDenoter) {
 			SingleFieldTypeDenoter ft = (SingleFieldTypeDenoter) obj;
-			return (this.I.operatorSymbol.compareTo(ft.I.operatorSymbol) == 0) && this.T.equals(ft.T);
+			return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T);
 		} else {
 			return false;
 		}

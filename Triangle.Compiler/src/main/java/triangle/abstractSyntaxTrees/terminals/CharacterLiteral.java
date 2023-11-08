@@ -36,6 +36,6 @@ public class CharacterLiteral extends Terminal {
 	}
 
 	public int getValue() {
-		return operatorSymbol.charAt(1);
+		return spelling.charAt(1);
 	}
 }

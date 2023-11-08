@@ -45,7 +45,7 @@ public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
 	public boolean equals(Object obj) {
 		if (obj != null && obj instanceof MultipleFieldTypeDenoter) {
 			MultipleFieldTypeDenoter ft = (MultipleFieldTypeDenoter) obj;
-			return (this.I.operatorSymbol.compareTo(ft.I.operatorSymbol) == 0) && this.T.equals(ft.T) && this.FT.equals(ft.FT);
+			return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T) && this.FT.equals(ft.FT);
 		} else {
 			return false;
 		}
