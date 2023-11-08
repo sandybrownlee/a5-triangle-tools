@@ -7,9 +7,9 @@ let
  var i: Integer
 
 in
- begin
+ {
  getint (var i);
  putint (i); put ('!');
  put (' '); put ('='); put (' ');
  putint (factorial (i))
- end
+ }
