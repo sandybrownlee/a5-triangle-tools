@@ -165,6 +165,7 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		return layoutBinary("RepCom.", d1, d2);
 	}
 
+<<<<<<< HEAD
 	//Task 6.a implement visitTestWhileCommand
 	@Override
 	public DrawingTree visitTestWhileCommand(TestWhileCommand ast, Void obj){
@@ -174,6 +175,8 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		return layoutTernary("TestWhileCom.", d1, d2, d3);
 	}
 
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 	// Expressions
 	@Override
 	public DrawingTree visitArrayExpression(ArrayExpression ast, Void obj) {

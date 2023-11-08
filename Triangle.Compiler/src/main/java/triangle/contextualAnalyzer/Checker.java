@@ -194,6 +194,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		return null;
 	}
 
+<<<<<<< HEAD
 	//Task 6.a implement visitTestWhileCommand
 	@Override
 	public Void visitTestWhileCommand(TestWhileCommand ast, Void arg){
@@ -206,6 +207,8 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		return null;
 	}
 
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 	// Expressions
 
 	// Returns the TypeDenoter denoting the type of the expression. Does

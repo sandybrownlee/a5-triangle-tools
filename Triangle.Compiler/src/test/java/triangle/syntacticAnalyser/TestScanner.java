@@ -44,6 +44,7 @@ public class TestScanner {
 	@Test
 	public void testIncrement() { compileExpectSuccess("/increment.tri"); }
 
+<<<<<<< HEAD
 	//Task 3.b implement unit test for doubling (a**)
 	@Test
 	public void testDoubling() {compileExpectSuccess("/double.tri");}
@@ -58,6 +59,8 @@ public class TestScanner {
 	    do C2 */
 	@Test
 	public void testTestWhileLoop(){compileExpectSuccess("/loopwhile.tri");}
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 
 
 	private void compileExpectSuccess(String filename) {

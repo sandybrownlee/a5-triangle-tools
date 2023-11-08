@@ -311,6 +311,7 @@ public class Parser {
 					//make assignment (a=a+1)
 					commandAST = new AssignCommand(vAST, eAST, commandPos);
 				}
+<<<<<<< HEAD
 				//Task 3.a implement ** doubling operation
 				else if(currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")){
 					acceptIt();
@@ -336,6 +337,8 @@ public class Parser {
 					//make assignment (a=a*2)
 					commandAST = new AssignCommand(vAST, eAST, commandPos);
 				}
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 				else {
 
 					accept(Token.BECOMES);
@@ -402,6 +405,7 @@ public class Parser {
 		}
 			break;
 
+<<<<<<< HEAD
 		//Task 6.a implement test while loop
 		case Token.LOOP: {
 			//get LOOP token
@@ -424,6 +428,8 @@ public class Parser {
 		}
 			break;
 
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 		case Token.SEMICOLON:
 		case Token.END:
 		case Token.ELSE:

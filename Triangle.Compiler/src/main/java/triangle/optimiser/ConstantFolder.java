@@ -14,7 +14,18 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
+<<<<<<< HEAD
 import triangle.abstractSyntaxTrees.commands.*;
+=======
+import triangle.abstractSyntaxTrees.commands.AssignCommand;
+import triangle.abstractSyntaxTrees.commands.CallCommand;
+import triangle.abstractSyntaxTrees.commands.EmptyCommand;
+import triangle.abstractSyntaxTrees.commands.IfCommand;
+import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.SequentialCommand;
+import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -499,6 +510,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 		return null;
 	}
+<<<<<<< HEAD
 
 	//Task 6.a implement visitTestWhileCommand
 	public AbstractSyntaxTree visitTestWhileCommand(TestWhileCommand ast, Void arg) {
@@ -510,6 +522,8 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 		return null;
 	}
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
@@ -598,6 +612,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			else if (o.decl == StdEnvironment.subtractDecl){
 				foldedValue = int1 - int2;
 			}
+<<<<<<< HEAD
 			//Task 7.a operator support
 			else if(o.decl == StdEnvironment.equalDecl)
 				foldedValue = int1 == int2;
@@ -611,6 +626,8 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				foldedValue = int1 >= int2;
 			else if(o.decl == StdEnvironment.unequalDecl)
 				foldedValue = int1 != int2;
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 
 
 			if (foldedValue instanceof Integer) {

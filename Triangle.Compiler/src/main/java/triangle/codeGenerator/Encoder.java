@@ -175,6 +175,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		return null;
 	}
 
+<<<<<<< HEAD
 	//Task 6.a implement visitTestWhileCommand
 	@Override
 	public Void visitTestWhileCommand(TestWhileCommand ast, Frame frame){
@@ -195,6 +196,8 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		return null;
 	}
 
+=======
+>>>>>>> a15935a019d310364b660e764b41eec26759f780
 	// Expressions
 	@Override
 	public Integer visitArrayExpression(ArrayExpression ast, Frame frame) {
