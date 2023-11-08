@@ -63,6 +63,11 @@ public class TestScanner {
 		compileExpectSuccess("/booleans-to-fold.tri");
 	}//testing for task 7
 
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}//testing for task 6
+
 
 	
 	

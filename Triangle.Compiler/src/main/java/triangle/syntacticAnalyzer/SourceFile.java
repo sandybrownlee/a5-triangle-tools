@@ -20,7 +20,7 @@ package triangle.syntacticAnalyzer;
 
 import java.net.URL;
 
-public class SourceFile {
+public class 	SourceFile {
 
 	public static final char EOL = '\n';
 	public static final char EOT = '\u0000';

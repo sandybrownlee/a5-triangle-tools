@@ -489,8 +489,9 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 	@Override
-	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void unused) {
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
 		ast.C1.visit(this);
+		ast.C2.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
 			ast.E = (Expression) replacement;

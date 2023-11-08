@@ -503,11 +503,11 @@ public class ExpressionCounter implements ActualParameterVisitor<Void, AbstractS
     @Override
     public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
         ast.C1.visit(this);
+        ast.C2.visit(this);
         AbstractSyntaxTree replacement = ast.E.visit(this);
         if (replacement != null) {
             ast.E = (Expression) replacement;
         }
-        ast.C2.visit(this);
         return null;
     }
 
