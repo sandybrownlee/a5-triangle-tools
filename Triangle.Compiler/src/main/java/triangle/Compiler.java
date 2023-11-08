@@ -1,5 +1,9 @@
 /*
- * @(#)Compiler.java                        2.1 2003/10/07
+ * @(#)Compiler.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -14,11 +18,15 @@
 
 package triangle;
 
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.GenerateSummaryStats;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -33,10 +41,19 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "o", description = "the name of the file containing the object program.")
 	static String objectName = "obj.tam";
-	
+
+	@Argument(alias = "tree", description = "the AST is to be displayed after contextual analysis")
 	static boolean showTree = false;
+
+	@Argument(alias = "folding", description = "AST after folding")
 	static boolean folding = false;
+
+	//Task 5.b flag for showing CharacterExpression and IntegerExpression counts
+	@Argument(alias = "stats", description = "shows CharacterExpression and IntegerExpression counts")
+	static boolean stats = false;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -95,6 +112,16 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				//Task 2.c show tree after folding is complete
+				System.out.println("AST after folding...");
+				drawer.draw(theAST);
+				showTree = true;
+			}
+			//Task 5.b add stats option
+			if (stats){
+				GenerateSummaryStats summaryStats = new GenerateSummaryStats();
+				theAST.visit(summaryStats);
+				summaryStats.printSumStats();
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -120,12 +147,17 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		//Create new Compiler instance
+		Compiler compiler = new Compiler();
+
+		//using cli parser to parse arguments into program
+		Args.parseOrExit(compiler, args);
 
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
-		
+
 		parseArgs(args);
 
 		String sourceName = args[0];
@@ -146,6 +178,10 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			}
+			//Task 5.b handle new flag option
+			else if (sl.equals("stats")){
+				stats = true;
 			}
 		}
 	}

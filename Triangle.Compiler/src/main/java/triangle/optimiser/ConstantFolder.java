@@ -14,13 +14,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -496,16 +490,26 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-	// TODO uncomment if you've implemented the repeat command
-//	@Override
-//	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
-//		ast.C.visit(this);
-//		AbstractSyntaxTree replacement = ast.E.visit(this);
-//		if (replacement != null) {
-//			ast.E = (Expression) replacement;
-//		}
-//		return null;
-//	}
+	@Override
+	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
+		ast.C.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		return null;
+	}
+
+	//Task 6.a implement visitTestWhileCommand
+	public AbstractSyntaxTree visitTestWhileCommand(TestWhileCommand ast, Void arg) {
+		ast.C1.visit(this);
+		ast.C2.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		return null;
+	}
 
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
@@ -577,18 +581,63 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+
+			//operators support
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}
+			else if (o.decl == StdEnvironment.divideDecl){
+				foldedValue = int1 / int2;
+			}
+			else if (o.decl == StdEnvironment.moduloDecl){
+				foldedValue = int1 % int2;
+			}
+			else if (o.decl == StdEnvironment.multiplyDecl){
+				foldedValue = int1 * int2;
+			}
+			else if (o.decl == StdEnvironment.subtractDecl){
+				foldedValue = int1 - int2;
+			}
+			//Task 7.a operator support
+			else if(o.decl == StdEnvironment.equalDecl)
+				foldedValue = int1 == int2;
+			else if(o.decl == StdEnvironment.lessDecl)
+				foldedValue = int1 < int2;
+			else if(o.decl == StdEnvironment.notgreaterDecl)
+				foldedValue = int1 <= int2;
+			else if(o.decl == StdEnvironment.greaterDecl)
+				foldedValue = int1 > int2;
+			else if(o.decl == StdEnvironment.notlessDecl)
+				foldedValue = int1 >= int2;
+			else if(o.decl == StdEnvironment.unequalDecl)
+				foldedValue = int1 != int2;
+
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
-			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+			}
+			//Task 7.a including booleans in constant folding
+			else if (foldedValue instanceof Boolean) {
+				//Create new Identifier object
+				Identifier id = new Identifier(foldedValue.toString(), node1.getPosition());
+
+				//if true set id to true, else set id to false
+				if(foldedValue.toString().equalsIgnoreCase("true"))
+					id.decl = StdEnvironment.trueDecl;
+				else
+					id.decl = StdEnvironment.falseDecl;
+
+				//Create SimpleVname wrapper for Identifier
+				SimpleVname svn = new SimpleVname(id, node1.getPosition());
+				//Create VnameExpression wrapper for SimpleVname
+				VnameExpression vne = new VnameExpression(svn, node1.getPosition());
+
+				//set VnameExpression to be of type boolean and return it
+				vne.type = StdEnvironment.booleanType;
+				return vne;
 			}
 		}
 

@@ -1,5 +1,9 @@
 /*
- * @(#)Parser.java                        2.1 2003/10/07
+ * @(#)Parser.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -31,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -81,6 +78,8 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
+
+import java.util.ArrayList;
 
 public class Parser {
 
@@ -281,15 +280,78 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			}
+			else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+				//Implement ++ increment operation
+				if(currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("++")){
+					acceptIt();
+
+					//a++ is the same as a=a+1
+					//vAST variable will be updated
+					//"commandPos" is line number of current command in source code
+					//We reuse that for each new AST node we make
+
+					//create IntegerLiteral for 1 (incrementing by 1)
+					IntegerLiteral intLit = new IntegerLiteral("1", commandPos);
+					//wrap IntegerLiteral in IntegerExpression
+					IntegerExpression intExp = new IntegerExpression(intLit, commandPos);
+					//wrap variable name in VnameExpression
+					VnameExpression vnExp = new VnameExpression(vAST, commandPos);
+					//operator is a +
+					Operator op = new Operator("+", commandPos);
+
+					//assemble expressions into a BinaryExpression (a+1)
+					Expression eAST = new BinaryExpression(vnExp, op, intExp, commandPos);
+					//set last line of command for debugging purposes
+					finish(commandPos);
+
+					//make assignment (a=a+1)
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				//Task 3.a implement ** doubling operation
+				else if(currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")){
+					acceptIt();
+
+					//a** is the same as a=a*2
+					//vAST variable will be updated
+					//"commandPos" is line number of current command in source code, this will be reused for each new AST node made
+
+					//create IntegerLiteral for 2 (doubling)
+					IntegerLiteral il = new IntegerLiteral("2", commandPos);
+					//wrap IntegerLiteral in IntegerExpression
+					IntegerExpression ie = new IntegerExpression(il, commandPos);
+					//wrap variable name in VnameExpression
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					//operator is a *
+					Operator op = new Operator("*", commandPos);
+
+					//assemble expressions into a BinaryExpression (a*2)
+					Expression eAST = new BinaryExpression(vne, op, ie, commandPos);
+					//set last line of command for debugging purposes
+					finish(commandPos);
+
+					//make assignment (a=a*2)
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				else {
+
+					accept(Token.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
+			break;
+
+		//Task 4.a Support for { parse commands }
+		case Token.LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
 			break;
 
 		case Token.BEGIN:
@@ -330,12 +392,45 @@ public class Parser {
 		}
 			break;
 
+		case Token.REPEAT: {
+			acceptIt();
+			Command cAST = parseSingleCommand();
+			accept(Token.UNTIL);
+			Expression eAST = parseExpression();
+			finish(commandPos);
+			commandAST = new RepeatCommand(eAST, cAST, commandPos);
+		}
+			break;
+
+		//Task 6.a implement test while loop
+		case Token.LOOP: {
+			//get LOOP token
+			acceptIt();
+
+			//parse command(s) C1
+			Command c1AST = parseCommand();
+
+			//accept WHILE token and parse expression E
+			accept(Token.WHILE);
+			Expression eAST = parseExpression();
+
+			//accept DO token and parse command C2
+			accept(Token.DO);
+			Command c2AST = parseSingleCommand();
+
+			//set last line of command for debugging purposes and create new TestWhileCommand
+			finish(commandPos);
+			commandAST = new TestWhileCommand(c1AST, eAST, c2AST, commandPos);
+		}
+			break;
+
 		case Token.SEMICOLON:
 		case Token.END:
 		case Token.ELSE:
 		case Token.IN:
 		case Token.EOT:
-
+		//Task 4.a Support for end of {...} block
+		case Token.RCURLY:
 			finish(commandPos);
 			commandAST = new EmptyCommand(commandPos);
 			break;

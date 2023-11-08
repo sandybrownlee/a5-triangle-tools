@@ -2,6 +2,11 @@ apply plugin: 'java'
 
 sourceCompatibility = 11
 
+//Task 2.a tells Gradle where to find dependencies, in this case mavenCentral
+repositories {
+    mavenCentral();
+}
+
 subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
@@ -15,4 +20,9 @@ jar {
 
 
   from subprojects.sourceSets.main.output
+}
+
+//Task 2.a. Add cli parser dependency
+dependencies {
+    implementation 'com.github.spullara.cli-parser:cli-parser:1.1.6'
 }

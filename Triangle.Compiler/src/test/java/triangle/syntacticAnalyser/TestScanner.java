@@ -22,29 +22,44 @@ public class TestScanner {
 
 	@Test
 	public void testHiNewComment() {
-		compileExpectFailure("/hi-newcomment.tri");
+		compileExpectSuccess("/hi-newcomment.tri");
 	}
 	
 
 	@Test
 	public void testHiNewComment2() {
-		compileExpectFailure("/hi-newcomment2.tri");
+		compileExpectSuccess("/hi-newcomment2.tri");
 	}
 	
 
 	@Test
 	public void testBarDemo() {
-		compileExpectFailure("/bardemo.tri");
+		compileExpectSuccess("/bardemo.tri");
 	}
 	
 
 	@Test
-	public void testRepeatUntil() {
-		compileExpectFailure("/repeatuntil.tri");
-	}
-	
-	
-	
+	public void testRepeatUntil() { compileExpectSuccess("/repeatuntil.tri"); }
+
+	@Test
+	public void testIncrement() { compileExpectSuccess("/increment.tri"); }
+
+	//Task 3.b implement unit test for doubling (a**)
+	@Test
+	public void testDoubling() {compileExpectSuccess("/double.tri");}
+
+	//Task 4.b implement unit test for {...}
+	@Test
+	public void testCurly(){compileExpectSuccess("/while-curly.tri");}
+
+	/*Task 6.b implement unit test for new loop:
+	    loop C1
+	    while E
+	    do C2 */
+	@Test
+	public void testTestWhileLoop(){compileExpectSuccess("/loopwhile.tri");}
+
+
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
 		// which adds the programs directory to the list of places Java can easily find files

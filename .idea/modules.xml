@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle-Tools.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle-Tools.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine/Triangle-Tools.Triangle.AbstractMachine.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine/Triangle-Tools.Triangle.AbstractMachine.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Disassembler/Triangle-Tools.Triangle.AbstractMachine.Disassembler.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Disassembler/Triangle-Tools.Triangle.AbstractMachine.Disassembler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Disassembler/Triangle-Tools.Triangle.AbstractMachine.Disassembler.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Disassembler/Triangle-Tools.Triangle.AbstractMachine.Disassembler.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Disassembler/Triangle-Tools.Triangle.AbstractMachine.Disassembler.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Disassembler/Triangle-Tools.Triangle.AbstractMachine.Disassembler.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Interpreter/Triangle-Tools.Triangle.AbstractMachine.Interpreter.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Interpreter/Triangle-Tools.Triangle.AbstractMachine.Interpreter.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Interpreter/Triangle-Tools.Triangle.AbstractMachine.Interpreter.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Interpreter/Triangle-Tools.Triangle.AbstractMachine.Interpreter.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Interpreter/Triangle-Tools.Triangle.AbstractMachine.Interpreter.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine.Interpreter/Triangle-Tools.Triangle.AbstractMachine.Interpreter.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine/Triangle-Tools.Triangle.AbstractMachine.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine/Triangle-Tools.Triangle.AbstractMachine.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine/Triangle-Tools.Triangle.AbstractMachine.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.AbstractMachine/Triangle-Tools.Triangle.AbstractMachine.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle-Tools.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle-Tools.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle-Tools.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle-Tools.test.iml" />
+    </modules>
+  </component>
+</project>

@@ -1,5 +1,9 @@
 /*
- * @(#)Encoder.java                        2.1 2003/10/07
+ * @(#)Encoder.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -33,13 +37,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -99,20 +97,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
-import triangle.codeGenerator.entities.AddressableEntity;
-import triangle.codeGenerator.entities.EqualityRoutine;
-import triangle.codeGenerator.entities.FetchableEntity;
-import triangle.codeGenerator.entities.Field;
-import triangle.codeGenerator.entities.KnownAddress;
-import triangle.codeGenerator.entities.KnownRoutine;
-import triangle.codeGenerator.entities.KnownValue;
-import triangle.codeGenerator.entities.PrimitiveRoutine;
-import triangle.codeGenerator.entities.RoutineEntity;
-import triangle.codeGenerator.entities.RuntimeEntity;
-import triangle.codeGenerator.entities.TypeRepresentation;
-import triangle.codeGenerator.entities.UnknownAddress;
-import triangle.codeGenerator.entities.UnknownRoutine;
-import triangle.codeGenerator.entities.UnknownValue;
+import triangle.codeGenerator.entities.*;
 
 public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		ActualParameterSequenceVisitor<Frame, Integer>, ArrayAggregateVisitor<Frame, Integer>,
@@ -178,6 +163,35 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.patch(jumpAddr);
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
+
+	@Override
+	public Void visitRepeatCommand(RepeatCommand ast, Frame frame){
+		var loopAddr = emitter.getNextInstrAddr();
+		ast.C.visit(this, frame);
+		ast.E.visit(this, frame);
+		emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, loopAddr);
+		return null;
+	}
+
+	//Task 6.a implement visitTestWhileCommand
+	@Override
+	public Void visitTestWhileCommand(TestWhileCommand ast, Frame frame){
+		var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+		var loopAddr = emitter.getNextInstrAddr();
+
+		//jump to Command C2
+		ast.C2.visit(this, frame);
+		emitter.patch(jumpAddr);
+
+		//visits Command C1 and evaluates Expression E
+		ast.C1.visit(this, frame);
+		ast.E.visit(this, frame);
+
+		//jump to start of loop
+		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+
 		return null;
 	}
 
@@ -734,6 +748,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		elaborateStdPrimRoutine(StdEnvironment.puteolDecl, Primitive.PUTEOL);
 		elaborateStdEqRoutine(StdEnvironment.equalDecl, Primitive.EQ);
 		elaborateStdEqRoutine(StdEnvironment.unequalDecl, Primitive.NE);
+		StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
 	}
 
 	boolean tableDetailsReqd;

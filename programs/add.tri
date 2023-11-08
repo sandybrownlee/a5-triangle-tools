@@ -1,0 +1,25 @@
+let
+    var num1 : Integer;
+    var num2 : Integer;
+    var sum : Integer;
+    var product : Integer
+in
+  begin
+    getint(var num1);
+    getint(var num2);
+
+    sum := num1 + num2;
+    putint(sum);
+    puteol();
+
+    product := num1 * num2;
+    putint(product);
+    puteol();
+
+    if num1 = num2
+    then
+     begin 
+      put('S'); put('a'); put('m'); put('e'); put('!')
+     end
+    else
+  end

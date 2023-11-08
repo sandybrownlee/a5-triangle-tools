@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.id=":Triangle.Compiler:main" external.linked.project.path="$MODULE_DIR$/../../../Triangle.Compiler" external.root.project.path="$MODULE_DIR$/../../.." external.system.id="GRADLE" external.system.module.group="Triangle-Tools" external.system.module.type="sourceSet" external.system.module.version="unspecified" type="JAVA_MODULE" version="4">
+  <component name="NewModuleRootManager">
+    <output url="file://$MODULE_DIR$/../../../Triangle.Compiler/build/classes/java/main" />
+    <exclude-output />
+    <content url="file://$MODULE_DIR$/../../../Triangle.Compiler/src/main">
+      <sourceFolder url="file://$MODULE_DIR$/../../../Triangle.Compiler/src/main/java" isTestSource="false" />
+    </content>
+    <orderEntry type="inheritedJdk" />
+    <orderEntry type="sourceFolder" forTests="false" />
+    <orderEntry type="module" module-name="Triangle-Tools.Triangle.AbstractMachine.main" />
+    <orderEntry type="library" name="Gradle: com.github.spullara.cli-parser:cli-parser:1.1.6" level="project" />
+  </component>
+</module>
