@@ -1,5 +1,9 @@
 /*
- * @(#)Encoder.java                        2.1 2003/10/07
+ * @(#)Encoder.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -38,7 +42,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.RepeatCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -74,7 +78,6 @@ import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.types.AnyTypeDenoter;
 import triangle.abstractSyntaxTrees.types.ArrayTypeDenoter;
 import triangle.abstractSyntaxTrees.types.BoolTypeDenoter;
-import triangle.codeGenerator.entities.BarPrimitiveRoutine;
 import triangle.abstractSyntaxTrees.types.CharTypeDenoter;
 import triangle.abstractSyntaxTrees.types.ErrorTypeDenoter;
 import triangle.abstractSyntaxTrees.types.IntTypeDenoter;
@@ -131,8 +134,6 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		return null;
 	}
 
-	
-
 	@Override
 	public Void visitCallCommand(CallCommand ast, Frame frame) {
 		var argsSize = ast.APS.visit(this, frame);
@@ -185,15 +186,21 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		return null;
 	}
 
+	
+
 	@Override
-	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
+	public Void visitLoopCommand(LoopCommand ast, Frame frame) {
+        
 		var loopAddr = emitter.getNextInstrAddr();
-		ast.C.visit(this, frame);
+		ast.C1.visit(this, frame);
 		ast.E.visit(this, frame);
-		emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, loopAddr);
+		var jumpifAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
+		ast.C2.visit(this, frame);
+		emitter.emit(OpCode.JUMP, 0, Register.CB, loopAddr);
+		emitter.patch(jumpifAddr);
+		
 		return null;
 	}
-
 
 	// Expressions
 	@Override
@@ -748,8 +755,6 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		elaborateStdPrimRoutine(StdEnvironment.puteolDecl, Primitive.PUTEOL);
 		elaborateStdEqRoutine(StdEnvironment.equalDecl, Primitive.EQ);
 		elaborateStdEqRoutine(StdEnvironment.unequalDecl, Primitive.NE);
-		StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
-
 	}
 
 	boolean tableDetailsReqd;

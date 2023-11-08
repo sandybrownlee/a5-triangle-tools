@@ -1,19 +1,11 @@
 let
-  var a : Integer;
-  var b : Integer;
-  var sum : Integer;
-  var product : Integer
+    var n : Integer;
+    var c : Char
 in
-begin
-  a := 0;
-  b := 2;
-  getint(var b);
-  getint(var a);
-  
-  sum := a + b;
-  product := a * b;
 
-  if sum = product
-  then put('Y')
-  else put('N')
-end
+	begin
+		c := '&';
+		c := '2';
+		n := n + 2;
+		n := n + 1
+	end

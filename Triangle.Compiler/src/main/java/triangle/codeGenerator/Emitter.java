@@ -11,7 +11,7 @@ import triangle.abstractMachine.Machine;
 import triangle.abstractMachine.OpCode;
 import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
-// up
+
 public class Emitter {
 
 	// OBJECT CODE

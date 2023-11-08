@@ -1,0 +1,14 @@
+let
+    var b: Boolean
+
+in
+begin
+
+    b := ((0<1)=(0<1)) \= ((0<1)=(0<1));
+    
+    if b
+    then put('t')    else put('f');
+   
+   	
+    
+end

@@ -1,5 +1,9 @@
 /*
- * @(#)Compiler.java                        2.1 2003/10/07
+ * @(#)Compiler.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -19,10 +23,15 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.WhileHoister;
+import triangle.optimiser.ExpressionStatistics;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -32,11 +41,31 @@ import triangle.treeDrawer.Drawer;
  */
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
+	/** Command line arguments */
+	@Argument(alias = "s", description = "The source file to compile", required = true)
+	protected static String sourceName = "programs/file.tri";
+
+	@Argument(alias = "o", description = "Outputs the compiled TAM file in the CWD to this name [i.e. x.tam]", required = false)
+	protected static String outputName;
+
+	@Argument(alias = "fold", description = "Enable constant folding", required = false)
+	protected static Boolean folding = false;
+
+	@Argument(alias = "sAst", description = "Show AST before optimisation", required = false)
+	protected static Boolean showUnoptimisedTree = false;
+
+	@Argument(alias ="sfAst", description = "Show AST after folding", required = false)
+	protected static Boolean showFoldedTree = false;
+
+	@Argument(alias = "stats", description = "Print number of integer and character expressions after any applied optimisation", required = false)
+	protected static Boolean showExpressionStatistics = false;
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	@Argument(description = "Enable hoisting", required = false)
+	protected static Boolean hoist = false;
+	
+	@Argument(alias = "shAst", description = "Show AST after folding and or hoisting", required = false)
+	protected static Boolean showHoistedTree = false;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -51,9 +80,10 @@ public class Compiler {
 
 	/**
 	 * Compile the source program to TAM machine code.
+	 * 
 	 *
-	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
+	 * //@param sourceName   the name of the file containing the source program.
+	 * //@param objectName   the name of the file containing the object program.
 	 * @param showingAST   true iff the AST is to be displayed after contextual
 	 *                     analysis
 	 * @param showingTable true iff the object description details are to be
@@ -62,7 +92,11 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+
+
+
+
+	static boolean compileProgram(String sourceName, String objectName, boolean fold, boolean hoist, boolean showingStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -81,6 +115,7 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		ExpressionStatistics expressionStats = new ExpressionStatistics();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -88,18 +123,52 @@ public class Compiler {
 			// if (showingAST) {
 			// drawer.draw(theAST);
 			// }
+			
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
-			if (showingAST) {
+
+			
+
+			if (showUnoptimisedTree) {
 				drawer.draw(theAST);
 			}
-			if (folding) {
+			
+			if (fold) {
 				theAST.visit(new ConstantFolder());
 			}
 			
+			
+			if (showFoldedTree) {
+				if (!fold) {
+					System.out.println("Folding NOT enabled, so tree cannot be ");
+				} else {
+					drawer.draw(theAST);
+				}
+				
+			}
+			
+			if (hoist) {				
+				theAST.visit(new WhileHoister());
+			}
+			
+			if (showHoistedTree) {
+				if (!hoist) {
+					System.out.println("Hoisting NOT enabled, so tree cannot be shown");
+					
+				} else {
+					if (fold) { System.out.println("Warning: Hoisted AST has also been folded"); }
+					drawer.draw(theAST);
+				}
+				
+			}
+			
+			if (showingStats) {
+				expressionStats.visitProgram(theAST, null);
+			 }
+			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
+				encoder.encodeRun(theAST, false); // 3rd pass
 			}
 		}
 
@@ -120,33 +189,16 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
+		// NEW
+		Compiler compiler = new Compiler();
+		Args.parseOrExit(compiler, args);
 		
-		parseArgs(args);
-
-		String sourceName = args[0];
+		var compiledOK = compileProgram(sourceName, outputName, folding, hoist, showExpressionStatistics);
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!showTree) {
+		if (!showUnoptimisedTree && !showFoldedTree && !showHoistedTree) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+
+
 }

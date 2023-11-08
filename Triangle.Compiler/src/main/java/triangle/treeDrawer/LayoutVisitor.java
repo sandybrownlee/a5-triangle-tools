@@ -1,5 +1,9 @@
 /*
- * @(#)LayoutVisitor.java                        2.1 2003/10/07
+ * @(#)LayoutVisitor.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -33,6 +37,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -93,9 +98,6 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-import triangle.abstractSyntaxTrees.commands.RepeatCommand;
-import triangle.codeGenerator.Frame;
-
 public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		ActualParameterSequenceVisitor<Void, DrawingTree>, ArrayAggregateVisitor<Void, DrawingTree>,
 		CommandVisitor<Void, DrawingTree>, DeclarationVisitor<Void, DrawingTree>, ExpressionVisitor<Void, DrawingTree>,
@@ -113,7 +115,6 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		this.fontMetrics = fontMetrics;
 	}
 
-	
 	// Commands
 	@Override
 	public DrawingTree visitAssignCommand(AssignCommand ast, Void obj) {
@@ -136,6 +137,8 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 
 	@Override
 	public DrawingTree visitIfCommand(IfCommand ast, Void obj) {
+
+		
 		var d1 = ast.E.visit(this);
 		var d2 = ast.C1.visit(this);
 		var d3 = ast.C2.visit(this);
@@ -147,13 +150,6 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		var d1 = ast.D.visit(this);
 		var d2 = ast.C.visit(this);
 		return layoutBinary("LetCom.", d1, d2);
-	}
-
-	@Override
-	public DrawingTree visitRepeatCommand(RepeatCommand ast, Void obj) {
-		var d1 = ast.E.visit(this);
-		var d2 = ast.C.visit(this);
-		return layoutBinary("RepeatCom.", d2, d1);
 	}
 
 	@Override
@@ -170,6 +166,16 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		return layoutBinary("WhileCom.", d1, d2);
 	}
 
+	// TO IMPLEMENT
+	@Override
+	public DrawingTree visitLoopCommand(LoopCommand ast, Void obj) {
+		var d1 = ast.E.visit(this);
+		///var d2 = ast.C.visit(this);
+		return null;
+		//return layoutBinary("WhileCom.", d1, d2);
+	}
+
+
 	// Expressions
 	@Override
 	public DrawingTree visitArrayExpression(ArrayExpression ast, Void obj) {
@@ -179,6 +185,7 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 
 	@Override
 	public DrawingTree visitBinaryExpression(BinaryExpression ast, Void obj) {
+		
 		var d1 = ast.E1.visit(this);
 		var d2 = ast.O.visit(this);
 		var d3 = ast.E2.visit(this);

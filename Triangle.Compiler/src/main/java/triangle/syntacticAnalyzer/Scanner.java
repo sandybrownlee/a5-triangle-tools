@@ -1,5 +1,9 @@
 /*
- * @(#)Scanner.java                        2.1 2003/10/07
+ * @(#)Scanner.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -65,7 +69,6 @@ public final class Scanner {
 		switch (currentChar) {
 		
 		// comment
-		case '#':
 		case '!': {
 			takeIt();
 			while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT))
@@ -74,15 +77,7 @@ public final class Scanner {
 				takeIt();
 		}
 			break;
-		
-		case '$': {
-			takeIt();
-			while ((currentChar != '$') && (currentChar != SourceFile.EOT))
-				takeIt();
-			if (currentChar == '$')
-				takeIt(); 
-		}
-			break;
+
 		// whitespace
 		case ' ':
 		case '\n':
@@ -181,7 +176,6 @@ public final class Scanner {
 		case '@':
 		case '%':
 		case '^':
-		case '|':
 		case '?':
 			takeIt();
 			while (isOperator(currentChar))
@@ -262,7 +256,7 @@ public final class Scanner {
 		currentlyScanningToken = false;
 		// skip any whitespace or comments
 		while (currentChar == '!' || currentChar == ' ' || currentChar == '\n' || currentChar == '\r'
-				|| currentChar == '\t' || currentChar == '#' || currentChar == '$')
+				|| currentChar == '\t')
 			scanSeparator();
 
 		currentlyScanningToken = true;

@@ -3,9 +3,13 @@ let
 in
 begin
   a := 0;
+  let
+  var b : Integer
+  in
   while a < 5 do
   begin
     put('a');
     a := a + 1;
+  end
   end
 end

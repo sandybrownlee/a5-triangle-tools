@@ -1,5 +1,9 @@
 /*
- * @(#)WhileCommand.java                        2.1 2003/10/07
+ * @(#)IfCommand.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -16,23 +20,21 @@ package triangle.abstractSyntaxTrees.commands;
 
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.codeGenerator.Frame;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class RepeatCommand extends Command {
+public class LoopCommand extends Command {
 
-	public RepeatCommand(Expression eAST, Command cAST, SourcePosition position) {
+	public LoopCommand(Expression eAST, Command c1AST, Command c2AST, SourcePosition position) {
 		super(position);
 		E = eAST;
-		C = cAST;
+		C1 = c1AST;
+		C2 = c2AST;
 	}
 
 	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitRepeatCommand(this, arg);
+		return v.visitLoopCommand(this, arg);
 	}
 
-
-
 	public Expression E;
-	public final Command C;
+	public final Command C1, C2;
 }

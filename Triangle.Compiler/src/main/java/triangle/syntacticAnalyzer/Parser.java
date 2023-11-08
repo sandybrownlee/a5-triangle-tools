@@ -1,5 +1,9 @@
 /*
- * @(#)Parser.java                        2.1 2003/10/07
+ * @(#)Parser.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -37,7 +41,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.RepeatCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -251,9 +255,9 @@ public class Parser {
 
 	Command parseCommand() throws SyntaxError {
 		Command commandAST = null; // in case there's a syntactic error
-
+		
 		SourcePosition commandPos = new SourcePosition();
-
+	
 		start(commandPos);
 		commandAST = parseSingleCommand();
 		while (currentToken.kind == Token.SEMICOLON) {
@@ -275,10 +279,8 @@ public class Parser {
 
 		case Token.IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
-			
 			if (currentToken.kind == Token.LPAREN) {
 				acceptIt();
-
 				ActualParameterSequence apsAST = parseActualParameterSequence();
 				accept(Token.RPAREN);
 				finish(commandPos);
@@ -287,21 +289,60 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				
+				// If an identifier is followed by '**', it should be replaced by an assign command
+				// that doubles it,  e.g. a** is parsed into a=a*2
+				if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					
+					Operator op = new Operator("*", commandPos);
+					
+					IntegerLiteral il = new IntegerLiteral("2", commandPos);
+					IntegerExpression ie = new IntegerExpression(il, commandPos);
+					
+					Expression eAST = new BinaryExpression(vne, op, ie, commandPos);
+					
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos); 
+				} 
+				// perform default behaviour on other identifiers
+				else  {
+						accept(Token.BECOMES);
+						Expression eAST = parseExpression();
+						finish(commandPos);
+						commandAST = new AssignCommand(vAST, eAST, commandPos);
+					}
 			}
 		}
 			break;
 
 		case Token.BEGIN:
-			//System.out.println(currentToken);
 			acceptIt();
-			//System.out.println(currentToken);
 			commandAST = parseCommand();
 			accept(Token.END);
 			break;
+		
+		case Token.LCURLY: {
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
+
+		} break;
+
+		case Token.LOOP: {
+			acceptIt();
+			Command c1AST = parseSingleCommand();
+			accept(Token.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.DO);
+			Command c2AST = parseSingleCommand();
+			finish(commandPos);
+			commandAST = new LoopCommand(eAST, c1AST, c2AST, commandPos);
+
+		} break;
+
+
 
 		case Token.LET: {
 			acceptIt();
@@ -329,29 +370,9 @@ public class Parser {
 			acceptIt();
 			Expression eAST = parseExpression();
 			accept(Token.DO);
-			// Parse the begin
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
-		}
-			break;
-
-		case Token.REPEAT: {
-			// Cotinue to the begin token
-			acceptIt();
-
-			// Parse the begin block
-			Command cAST = parseSingleCommand();
-
-			// Accept the until token
-			accept(Token.until);
-
-			// Parse the expression
-			Expression eAST = parseExpression();
-			finish(commandPos);
-			commandAST = new RepeatCommand(eAST, cAST, commandPos);
-
-
 		}
 			break;
 
@@ -360,6 +381,7 @@ public class Parser {
 		case Token.ELSE:
 		case Token.IN:
 		case Token.EOT:
+		case Token.RCURLY:
 
 			finish(commandPos);
 			commandAST = new EmptyCommand(commandPos);

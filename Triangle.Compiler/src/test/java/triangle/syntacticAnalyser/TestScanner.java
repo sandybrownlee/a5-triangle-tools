@@ -18,35 +18,48 @@ public class TestScanner {
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-
-	public void testNew() {
-		compileExpectSuccess("/hi.tri");
-	}
 	
 
 	@Test
 	public void testHiNewComment() {
-		compileExpectSuccess("/hi-newcomment.tri");
+		compileExpectFailure("/hi-newcomment.tri");
 	}
 	
 
 	@Test
 	public void testHiNewComment2() {
-		compileExpectSuccess("/hi-newcomment2.tri");
+		compileExpectFailure("/hi-newcomment2.tri");
 	}
 	
 
 	@Test
 	public void testBarDemo() {
-		compileExpectSuccess("/bardemo.tri");
+		compileExpectFailure("/bardemo.tri");
 	}
 	
 
 	@Test
 	public void testRepeatUntil() {
-		compileExpectSuccess("/repeatuntil.tri");
+		compileExpectFailure("/repeatuntil.tri");
+	}
+
+	@Test
+	public void testDoubleOperator() {
+		compileExpectSuccess("/double.tri");
+	}
+
+	
+	@Test
+	public void testCurlyBracketBlock() {
+		compileExpectSuccess("/while-curly.tri");
 	}
 	
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
+	
+
 	
 	
 	private void compileExpectSuccess(String filename) {

@@ -1,5 +1,9 @@
 /*
- * @(#)Token.java                        2.1 2003/10/07
+ * @(#)Token.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+ * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
  * Dept. of Computing Science, University of Glasgow, Glasgow G12 8QQ Scotland
@@ -63,24 +67,20 @@ final class Token extends Object {
 	INTLITERAL = 0, CHARLITERAL = 1, IDENTIFIER = 2, OPERATOR = 3,
 
 			// reserved words - must be in alphabetical order...
-			ARRAY = 4, BEGIN = 5, CONST = 6, DO = 7, ELSE = 8, END = 9, FUNC = 10, IF = 11, IN = 12, LET = 13, OF = 14,
-			PROC = 15, RECORD = 16, REPEAT = 17, THEN = 18, TYPE = 19, until = 20, VAR = 21, WHILE = 22,
+			ARRAY = 4, BEGIN = 5, CONST = 6, DO = 7, ELSE = 8, END = 9, FUNC = 10, IF = 11, IN = 12, LET = 13,LOOP = 14, OF = 15,
+			PROC = 16, RECORD = 17, THEN = 18, TYPE = 19, VAR = 20,  WHILE = 21,
 
 			// punctuation...
-			DOT = 23, COLON = 24, SEMICOLON = 25, COMMA = 26, BECOMES = 27, IS = 28,
+			DOT = 22, COLON = 23, SEMICOLON = 24, COMMA = 25, BECOMES = 26, IS = 27,
 
 			// brackets...
-			LPAREN = 29, RPAREN = 30, LBRACKET = 31, RBRACKET = 32, LCURLY = 33, RCURLY = 34,
+			LPAREN = 28, RPAREN = 29, LBRACKET = 30, RBRACKET = 31, LCURLY = 32, RCURLY = 33,
 
 			// special tokens...
-			EOT = 35, ERROR = 36;
-			
-
-			// additional reserved words
-	
+			EOT = 34, ERROR = 35;
 
 	private static String[] tokenTable = new String[] { "<int>", "<char>", "<identifier>", "<operator>", "array",
-			"begin", "const", "do", "else", "end", "func", "if", "in", "let", "of", "proc", "record", "repeat", "then", "type", "until",
+			"begin", "const", "do", "else", "end", "func", "if", "in", "let","loop", "of", "proc", "record", "then", "type",
 			"var", "while", ".", ":", ";", ",", ":=", "~", "(", ")", "[", "]", "{", "}", "", "<error>" };
 
 	private final static int firstReservedWord = Token.ARRAY, lastReservedWord = Token.WHILE;

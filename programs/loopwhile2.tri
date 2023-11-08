@@ -1,0 +1,18 @@
+! print out ababababa
+
+let
+  var a : Integer
+in
+begin
+  a := 0;
+  put('Z');
+  loop
+  begin
+    put('a');
+    
+    a := a + 1;
+  end
+  while a < 5 do
+  	put('b');
+  
+end

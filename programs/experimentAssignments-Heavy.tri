@@ -1,0 +1,15 @@
+let
+    var n : Integer;
+    var c : Char
+in
+
+	begin
+		c := '&';
+		c := 'F';
+		c := c;
+		put('X');
+		n := n + 1;
+		putint(1);
+		n := (2+300)+(400+200)
+		
+	end

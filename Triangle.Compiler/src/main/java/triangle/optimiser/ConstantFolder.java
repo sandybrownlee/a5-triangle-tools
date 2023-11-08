@@ -19,7 +19,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.RepeatCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -80,7 +80,11 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
-import triangle.codeGenerator.Frame;
+import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.abstractSyntaxTrees.terminals.Identifier;
+import triangle.abstractSyntaxTrees.vnames.SimpleVname;
+import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -147,7 +151,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	@Override
 	public AbstractSyntaxTree visitSimpleVname(SimpleVname ast, Void arg) {
 		ast.I.visit(this);
-		return null;
+		return ast;
 	}
 
 	@Override
@@ -248,7 +252,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIdentifier(Identifier ast, Void arg) {
-		return null;
+		return ast;
 	}
 
 	@Override
@@ -372,7 +376,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	@Override
 	public AbstractSyntaxTree visitVnameExpression(VnameExpression ast, Void arg) {
 		ast.V.visit(this);
-		return null;
+		return ast;
 	}
 
 	@Override
@@ -499,17 +503,28 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 
-
-// TODO uncomment if you've implemented the repeat command
+	// TO IMPLEMENT
 	@Override
-	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
-		ast.C.visit(this);
+	public AbstractSyntaxTree visitLoopCommand(LoopCommand ast, Void arg) {
+		ast.C1.visit(this);
+		ast.C2.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
 		return null;
 	}
+
+	// TODO uncomment if you've implemented the repeat command
+//	@Override
+//	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
+//		ast.C.visit(this);
+//		AbstractSyntaxTree replacement = ast.E.visit(this);
+//		if (replacement != null) {
+//			ast.E = (Expression) replacement;
+//		}
+//		return null;
+//	}
 
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
@@ -574,30 +589,146 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		ast.V.visit(this);
 		return null;
 	}
+	
+	public Boolean getVnameBoolValue(VnameExpression b) {
+		SimpleVname a = (SimpleVname) b.V;
+		return Boolean.valueOf(a.I.spelling);
+	
+	}
+	
+	public VnameExpression createBooleanVname(Boolean value, SourcePosition position) {
+		ConstDeclaration foldedDeclType = null;
+		if ((boolean) value == true) {
+			 foldedDeclType = StdEnvironment.trueDecl;
+		} else {
+			foldedDeclType = StdEnvironment.falseDecl;
+		}
+		
+		Identifier foldedValueIdentifier = new Identifier(value.toString(), position);
+		foldedValueIdentifier.decl = foldedDeclType;
+	
+		SimpleVname foldedValueWrapper = new SimpleVname(foldedValueIdentifier, position);
+
+		VnameExpression foldedValueNode = new VnameExpression(foldedValueWrapper, position);
+		foldedValueNode.type=StdEnvironment.booleanType;
+		
+		return foldedValueNode;
+		
+	}
+	
+	public Object getFoldedValue(int int1, int int2, Operator o) {
+		Object foldedValue = null;
+		if (o.decl == StdEnvironment.addDecl) {
+			foldedValue = int1 + int2;
+		}
+		
+		
+		if (o.decl == StdEnvironment.lessDecl || o.decl == StdEnvironment.notgreaterDecl) {
+			foldedValue = int1 < int2;
+		}
+		if (o.decl == StdEnvironment.greaterDecl || o.decl == StdEnvironment.notlessDecl) {
+			foldedValue = int1 > int2;
+		}
+		
+		if (o.decl == StdEnvironment.equalDecl) {
+			foldedValue = int1 == int2;
+		}
+		
+		if (o.decl == StdEnvironment.notDecl) {
+			foldedValue = int1 != int2;
+		}
+		return foldedValue;
+	}
+	
+	public AbstractSyntaxTree foldBooleanOnlyBinExp(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
+		Boolean e1 = null;
+		Boolean e2 = null;
+		Boolean operator = null;
+		
+		e1 = getVnameBoolValue((VnameExpression) node1);
+		e2 = getVnameBoolValue((VnameExpression) node2);
+
+		if (o.decl == StdEnvironment.equalDecl) {
+			operator = true;
+		} else {
+			operator = false;
+		}
+	
+		
+
+			
+			String foldedValue = null;
+			ConstDeclaration foldedDeclType = null;
+			
+			switch (operator.toString()) {
+			case "true": {
+				foldedValue = ((Boolean) (e1 == e2)).toString();
+				
+			} break;
+			
+			case "false": {
+				foldedValue = ((Boolean) (e1 != e2)).toString();
+			} break;
+			
+			// Ignore malformed boolean variables
+			default: { return null; }
+			
+			}
+			
+			
+			switch (foldedValue) {
+			case "true": {
+				foldedDeclType = StdEnvironment.trueDecl;
+				
+			} break;
+			
+			case "false": {
+				foldedDeclType = StdEnvironment.falseDecl;
+			} break;
+			
+			
+			}
+			
+	
+			
+			return createBooleanVname(Boolean.valueOf(foldedValue), node1.getPosition());
+	}
 
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
-		// the only case we know how to deal with for now is two IntegerExpressions
+		// Fold constant binary expressions
+		if ((node1 instanceof VnameExpression) && (node2 instanceof VnameExpression)) {
+			
+			if ((((VnameExpression) node1).type instanceof BoolTypeDenoter) && (((VnameExpression) node2).type instanceof BoolTypeDenoter)) {
+				return foldBooleanOnlyBinExp(node1, node2, o);
+			}
+			
+		
+		}
+		
+		// Fold constant integers and boolean operations
 		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
+			
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
-			Object foldedValue = null;
+			Object foldedValue = getFoldedValue(int1, int2, o);
 			
-			if (o.decl == StdEnvironment.addDecl) {
-				foldedValue = int1 + int2;
-			}
-
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
+				
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				return createBooleanVname((boolean) foldedValue, node1.getPosition());
 			}
+
 		}
+		
+	
 
 		// any unhandled situation (i.e., not foldable) is ignored
 		return null;
 	}
 
 }
+
