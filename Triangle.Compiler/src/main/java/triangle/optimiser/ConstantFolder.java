@@ -592,9 +592,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				foldedValue = int1 * int2;
 			} else if (o.decl == StdEnvironment.subtractDecl) {
 				foldedValue = int1 - int2;
-			}
-
-			if (o.decl == StdEnvironment.equalDecl) {
+			}else if(o.decl == StdEnvironment.equalDecl) {
 				foldedValue = int1 == int2;
 			} else if (o.decl == StdEnvironment.lessDecl) {
 				foldedValue = int1 < int2;
@@ -606,7 +604,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				foldedValue = int1 >= int2;
 			} else if (o.decl == StdEnvironment.unequalDecl) {
 				foldedValue = int1 != int2;
-		}
+			}
 
 
 			if (foldedValue instanceof Integer) {
@@ -619,7 +617,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				Identifier idnt = new Identifier(foldedValue.toString(), node1.getPosition());
 
 				// set the identifier object to std.truedecl if spelling is true or std.falsedec if false
-				if (foldedValue.toString().equals("true")) {
+				if (foldedValue.toString() == "true") {
 					idnt.decl = StdEnvironment.trueDecl;
 				} else {
 					idnt.decl = StdEnvironment.falseDecl;

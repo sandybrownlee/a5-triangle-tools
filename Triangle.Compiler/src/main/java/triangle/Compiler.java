@@ -47,7 +47,8 @@ public class Compiler {
 	static boolean showTree = false;
 	@Argument(alias = "f", description = "Enable folding")
 	static boolean folding = false;
-
+	@Argument(alias = "ft", description = "Enable folding and show tree")
+	static boolean foldAndTree = false;
 	@Argument(alias = "stats", description = "count the number of CharacterExpressions and IntegerExpressions ")
 	static boolean stats = false;
 
@@ -107,6 +108,11 @@ public class Compiler {
 				drawer.draw(theAST);
 			}
 			if (folding) {
+				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
+			}
+
+			if (foldAndTree) {
 				showTree = true;
 				theAST.visit(new ConstantFolder());
 				drawer.draw(theAST);
