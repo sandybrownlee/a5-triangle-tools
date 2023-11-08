@@ -6,6 +6,7 @@ subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     
@@ -16,3 +17,4 @@ jar {
 
   from subprojects.sourceSets.main.output
 }
+

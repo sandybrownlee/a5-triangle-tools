@@ -81,7 +81,7 @@ final class Token extends Object {
 
 	private static String[] tokenTable = new String[] { "<int>", "<char>", "<identifier>", "<operator>", "array",
 			"begin", "const", "do", "else", "end", "func", "if", "in", "let", "of", "proc", "record", "then", "type",
-			"var", "while", ".", ":", ";", ",", ":=", "~", "(", ")", "[", "]", "{", "}", "", "<error>" };
+			"var", "while",  ".", ":", ";", ",", ":=", "~", "(", ")", "[", "]", "{", "}", "", "<error>" };
 
 	private final static int firstReservedWord = Token.ARRAY, lastReservedWord = Token.WHILE;
 
