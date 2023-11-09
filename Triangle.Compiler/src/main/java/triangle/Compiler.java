@@ -18,6 +18,9 @@
 
 package triangle;
 
+// Adding the cli parser library
+import com.sampullara.cli.Args;
+
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -34,6 +37,7 @@ import triangle.treeDrawer.Drawer;
  * @version 2.1 7 Oct 2003
  * @author Deryck F. Brown
  */
+
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
@@ -99,6 +103,10 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				// Task 2.c
+				System.out.println("AST after folding...");
+				drawer.draw(theAST);
+				showTree = true;
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -124,6 +132,11 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		// New compiler instance
+		Compiler compiler = new Compiler();
+		
+		// Using cli-parser to parse arguments
+		Args.parseOrExit(compiler, args);
 
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
@@ -140,7 +153,7 @@ public class Compiler {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
-	
+
 	private static void parseArgs(String[] args) {
 		for (String s : args) {
 			var sl = s.toLowerCase();
