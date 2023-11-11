@@ -20,12 +20,13 @@ package triangle;
 
 // Adding the cli parser library
 import com.sampullara.cli.Args;
-
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryStats; // task 5.b
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -41,10 +42,19 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	// Task 2.b
+	@Argument(alias = "o", description = "Name of the file containing the object program.")
 	static String objectName = "obj.tam";
 	
+	@Argument(alias = "tree", description = "The AST displayed after contextual analysis")
 	static boolean showTree = false;
+	
+	@Argument(alias = "folding", description = "The AST after folding")
 	static boolean folding = false;
+	
+	// Task 5.b adding the option of "stats" to the arguments
+	@Argument(alias="stats", description = "Summary statistics of character and integer expressions")
+	static boolean stats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -109,6 +119,13 @@ public class Compiler {
 				showTree = true;
 			}
 			
+			// Task 5.b display the summary statistics if passed in the arguments
+			if(stats) {
+				SummaryStats summaryStats = new SummaryStats();
+				theAST.visit(summaryStats);
+				summaryStats.printSummaryStats();
+			}
+			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -163,6 +180,10 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			}
+			// Task 5.b sets stats to true if stats is in the arguments.
+			else if (sl.equals("stats")) {
+				stats = true;
 			}
 		}
 	}

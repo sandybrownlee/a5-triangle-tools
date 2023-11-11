@@ -37,6 +37,7 @@ public final class Scanner {
 
 	// isOperator returns true iff the given character is an operator character.
 
+	// Add ** to list of operators part 3.a 
 	private boolean isOperator(char c) {
 		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
 				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
@@ -190,7 +191,7 @@ public final class Scanner {
 				return Token.CHARLITERAL;
 			} else
 				return Token.ERROR;
-
+		
 		case '.':
 			takeIt();
 			return Token.DOT;

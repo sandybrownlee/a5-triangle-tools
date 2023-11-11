@@ -19,7 +19,7 @@ public class TestScanner {
 		compileExpectSuccess("/hi.tri");
 	}
 	
-
+	
 	@Test
 	public void testHiNewComment() {
 		compileExpectFailure("/hi-newcomment.tri");
@@ -43,6 +43,17 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+	//Task 3.b test for doubling
+	@Test
+	public void testDoubling() {
+		compileExpectSuccess("/double.tri");
+	}
+	
+	//Task 4.b test for {} 
+	@Test
+	public void testCurlyBrackets(){
+		compileExpectSuccess("/while-curly.tri");
+	}
 	
 	
 	private void compileExpectSuccess(String filename) {

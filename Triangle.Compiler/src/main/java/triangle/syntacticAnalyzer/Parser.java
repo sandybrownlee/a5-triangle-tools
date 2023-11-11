@@ -284,16 +284,51 @@ public class Parser {
 				accept(Token.RPAREN);
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
-
+				
+			// Task 3.a ** doubling
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
+				// Get the kind of token and the spelling to ensure it is **
+				if(currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+					
+					// Create the integer literal for doubling, so 2
+					IntegerLiteral intLit = new IntegerLiteral("2", commandPos);
+					
+					// We now need to make the integer literal an integer expression
+					IntegerExpression intExp = new IntegerExpression(intLit, commandPos);
+					
+					// Make the variable name an expression as well
+					VnameExpression varName = new VnameExpression(vAST, commandPos);
+				
+					// And now make * as a new operator
+					Operator op = new Operator("*", commandPos);
+					
+					// Put all the expressions together as a binary expression for the low-level code
+					Expression eAST = new BinaryExpression(varName, op, intExp, commandPos);
+							
+					// Stop with this final command position
+					finish(commandPos);
+					
+					// new assigned command (a=a*2)
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				else {
 				accept(Token.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
+			break;
+			
+		// Task 4.a Curly bracket support
+		case Token.LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
 			break;
 
 		case Token.BEGIN:
@@ -339,6 +374,8 @@ public class Parser {
 		case Token.ELSE:
 		case Token.IN:
 		case Token.EOT:
+		// task 4.a add rclury so the computer knows it is the end of the block
+		case Token.RCURLY:
 
 			finish(commandPos);
 			commandAST = new EmptyCommand(commandPos);
