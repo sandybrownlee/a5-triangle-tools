@@ -42,6 +42,8 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+// import for task 6.a
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -185,6 +187,34 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		return null;
 	}
 
+	// Task 6.a
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+		var loopAddr = emitter.getNextInstrAddr();
+		
+		//ast.C2.visit(this, frame);
+		//emitter.patch(jumpAddr);
+		
+		//ast.C1.visit(this, frame);
+		//ast.E.visit(this, frame);
+		
+		//emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		
+		//  visit the first command
+		ast.C1.visit(this, frame);
+		//emitter.patch(jumpAddr);
+		// visit the while expression
+		ast.E.visit(this, frame);
+		//emitter.patch(jumpAddr);
+		// visit the second command
+		ast.C2.visit(this, frame);
+		emitter.patch(jumpAddr);
+		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		
+		return null;
+	}
+	
 	// Expressions
 	@Override
 	public Integer visitArrayExpression(ArrayExpression ast, Frame frame) {

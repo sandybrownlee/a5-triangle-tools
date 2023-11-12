@@ -41,6 +41,8 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+// Import now command for task 6.a
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -326,9 +328,12 @@ public class Parser {
 			
 		// Task 4.a Curly bracket support
 		case Token.LCURLY:
-			acceptIt();
+			// accept the left curly bracket
+			acceptIt(); 
+			// parse the command
 			commandAST = parseCommand();
-			accept(Token.RCURLY);
+			// stop when we reach the right curly bracket
+			accept(Token.RCURLY); 
 			break;
 
 		case Token.BEGIN:
@@ -368,6 +373,36 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+		
+		case Token.LOOP: {
+			// accept the loop token
+			acceptIt();
+			
+			// parse the command/s
+			// call it c1AST so it is the same as the example in the pdf
+			Command c1AST = parseCommand();
+			
+			// now find the while token and parse e 
+			accept(Token.WHILE);
+			
+			// Since this is an expression we need to parse the expression
+			Expression eAST = parseExpression();
+			
+			// accept the do token and parse c2
+			accept(Token.DO);
+			
+			// From inspecting the loopwhile.tri file I found that C2 is a single command
+			// the program will look for a single command to reflect this
+			Command c2AST = parseSingleCommand();
+			
+			// set the final command position
+			finish(commandPos);
+			
+			// Make a new LoopWhileCommand
+			commandAST = new LoopWhileCommand(c1AST, eAST, c2AST, commandPos);
+			
+		}
+		break;
 
 		case Token.SEMICOLON:
 		case Token.END:
