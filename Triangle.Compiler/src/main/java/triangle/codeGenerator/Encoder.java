@@ -193,23 +193,15 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
 		var loopAddr = emitter.getNextInstrAddr();
 		
-		//ast.C2.visit(this, frame);
-		//emitter.patch(jumpAddr);
-		
-		//ast.C1.visit(this, frame);
-		//ast.E.visit(this, frame);
-		
-		//emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
-		
-		//  visit the first command
-		ast.C1.visit(this, frame);
-		//emitter.patch(jumpAddr);
-		// visit the while expression
-		ast.E.visit(this, frame);
-		//emitter.patch(jumpAddr);
-		// visit the second command
+		// Start at the second command
 		ast.C2.visit(this, frame);
+		// Jump to the address of the next instruction (command 1)
 		emitter.patch(jumpAddr);
+		
+		ast.C1.visit(this, frame);
+		ast.E.visit(this, frame);
+		
+		// Goes through the loop
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		
 		return null;
