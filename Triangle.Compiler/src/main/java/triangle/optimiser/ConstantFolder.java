@@ -1,6 +1,12 @@
 package triangle.optimiser;
 
 import triangle.StdEnvironment;
+import triangle.abstractSyntaxTrees.*;
+import triangle.abstractSyntaxTrees.Literals.BooleanLiteral;
+import triangle.abstractSyntaxTrees.Literals.IntegerLiteral;
+import triangle.abstractSyntaxTrees.terminals.Operator;
+
+import triangle.StdEnvironment;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.abstractSyntaxTrees.actuals.ConstActualParameter;
@@ -496,16 +502,72 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-	// TODO uncomment if you've implemented the repeat command
-//	@Override
-//	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
-//		ast.C.visit(this);
-//		AbstractSyntaxTree replacement = ast.E.visit(this);
-//		if (replacement != null) {
-//			ast.E = (Expression) replacement;
-//		}
-//		return null;
-//	}
+	private SourcePosition dummyPosition = new SourcePosition(0, 0);
+
+	@Override
+	public Expression visitBinaryExpression(BinaryExpression ast) {
+		Expression left = ast.leftExpression.visit(this);
+		Expression right = ast.rightExpression.visit(this);
+
+		if (left instanceof IntegerLiteral && right instanceof IntegerLiteral) {
+			int leftValue = ((IntegerLiteral) left).value;
+			int rightValue = ((IntegerLiteral) right).value;
+
+			switch (ast.operator.spelling) {
+				case "+":
+					return new IntegerLiteral(leftValue + rightValue, dummyPosition);
+				case "=":
+					return new BooleanLiteral(leftValue == rightValue, dummyPosition);
+				case "<":
+					return new BooleanLiteral(leftValue < rightValue, dummyPosition);
+				case "<=":
+					return new BooleanLiteral(leftValue <= rightValue, dummyPosition);
+				case ">":
+					return new BooleanLiteral(leftValue > rightValue, dummyPosition);
+				case ">=":
+					return new BooleanLiteral(leftValue >= rightValue, dummyPosition);
+				case "\\=":
+					return new BooleanLiteral(leftValue != rightValue, dummyPosition);
+
+			}
+		}
+
+		// If not constant Integers or non-Boolean operators, return the original
+		// expression
+		return new BinaryExpression(ast.operator, left, right);
+	}
+
+	@Override
+	public Expression visitBooleanExpression(BooleanExpression ast) {
+		return ast; // Leave Boolean literals unchanged
+	}
+
+	@Override
+	public Expression visitCharacterExpression(CharacterExpression ast) {
+		return ast; // Leave character literals unchanged
+	}
+
+	@Override
+	public Expression visitIntegerExpression(IntegerExpression ast) {
+		return ast; // Leave integer literals unchanged
+	}
+
+	// Add more visit methods for other expression types as needed
+
+	@Override
+	public Expression visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast) {
+		return ast; // Leave binary operator declarations unchanged
+	}
+
+	// @Override
+	// public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
+	// ast.C.visit(this);
+	// AbstractSyntaxTree replacement = ast.E.visit(this);
+	// if (replacement != null) {
+	// ast.E = (Expression) replacement;
+	// }
+	// return null;
+	// }
 
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
@@ -577,7 +639,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}

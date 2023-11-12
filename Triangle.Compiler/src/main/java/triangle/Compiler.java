@@ -18,6 +18,10 @@
 
 package triangle;
 
+import triangle.abstractSyntaxTrees.*;
+import triangle.visitors.Visitor;
+import triangle.visitors.PrettyPrintVisitor;
+import triangle.visitors.TypeDepthVisitor; //all above newly imported - remember in report dumbass
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -27,6 +31,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Argument;
+import com.sampullara.cli.Args;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -34,13 +40,39 @@ import triangle.treeDrawer.Drawer;
  * @version 2.1 7 Oct 2003
  * @author Deryck F. Brown
  */
+public class StatisticsVisitor implements Visitor<Void> {
+	private int characterExpressionCount = 0;
+	private int integerExpressionCount = 0;
+
+	@Override
+	public Void visitCharacterExpression(CharacterExpression ast) {
+		characterExpressionCount++;
+		return null;
+	}
+
+	@Override
+	public Void visitIntegerExpression(IntegerExpression ast) {
+		integerExpressionCount++;
+		return null;
+	}
+
+	public void printStatistics() {
+		System.out.println("Character Expressions: " + characterExpressionCount);
+		System.out.println("Integer Expressions: " + integerExpressionCount);
+	}
+}
+
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+	@argument(alias = "o", description = "show the object program filename")
+	private String objectName = "obj.tam";
+
+	@argument(alias = "tree", description = "Show the tree after contextual analysis")
+	private boolean showTree = false;
+
+	@argument(alias = "folding", description = "Enable constant folding during code generation")
+	private boolean folding = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -88,19 +120,24 @@ public class Compiler {
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
+
 		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
 			if (showingAST) {
 				drawer.draw(theAST);
 			}
-			if (folding) {
+
+			if (compiler.folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+
+			if (hoisting) { // Apply hoisting optimization
+				System.out.println("Hoisting Optimization ...");
+				HoistingOptimizer hoistingOptimizer = new HoistingOptimizer();
+				theAST = theAST.visit(hoistingOptimizer, null);
+			}
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -124,32 +161,40 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: java Compiler [-o=outputfilename] [--tree] [--folding] filename");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		Compiler compiler = new Compiler();
 
-		if (!showTree) {
+		for (String arg : args) {
+			var sl = arg.toLowerCase();
+			if (sl.equals("--tree")) {
+				compiler.showTree = true; // Set showTree flag
+			} else if (sl.equals("--folding")) {
+				compiler.folding = true; // Set folding flag
+			}
+		}
+
+		String sourceName = args[args.length - 1];
+		var compiledOK = compileProgram(sourceName, compiler.objectName, compiler.showTree, compiler.folding);
+
+		if (!compiler.showTree) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
-	
+
 	private static void parseArgs(String[] args) {
+		Compiler compiler = new Compiler(); // Create an instance of the Compiler class
 		for (String s : args) {
 			var sl = s.toLowerCase();
 			if (sl.equals("tree")) {
-				showTree = true;
+				compiler.showTree = true; // Update showTree in the compiler instance
 			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
+				compiler.objectName = s.substring(3); // Update objectName in the compiler instance
 			} else if (sl.equals("folding")) {
-				folding = true;
+				compiler.folding = true; // Update folding in the compiler instance
 			}
 		}
 	}
