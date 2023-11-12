@@ -36,6 +36,11 @@ public class TestScanner {
 		compileExpectSuccess("/hi-newcomment2.tri");
 	}
 	
+	@Test
+	public void testIncrement() {
+		compileExpectSuccess("/increment.tri");
+	}
+	
 
 	@Test
 	public void testBarDemo() {
@@ -47,6 +52,25 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectSuccess("/repeatuntil.tri");
 	}
+
+	// Task 3B Unit test for the double method
+	@Test
+	public void testDouble() {
+		compileExpectSuccess("/double.tri");
+	}
+
+	// Task 4B Unit test for the curly bracket support
+	@Test
+	public void testWhileCurly() {
+		compileExpectSuccess("/while-curly.tri");
+	}
+
+	// Task 6B Unit test for the LoopWhile command
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
+
 	
 	
 	

@@ -38,6 +38,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
@@ -122,6 +123,19 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	// Commands
 
 	// Always returns null. Does not use the given object.
+
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+		// Task 6A Implementing the visitIfCommand in the Checker class for the contextual analyzer
+		ast.C1.visit(this); // C1 visit first in the loopWhile flow
+
+		var eType = ast.E.visit(this); // then the expression
+
+		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+		ast.C2.visit(this); // then the C2 is visited in the loop
+
+		return null;
+	}
 
 	@Override
 	public Void visitRepeatCommand(RepeatCommand ast, Void arg) {

@@ -41,6 +41,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
@@ -286,21 +287,115 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			} 
+			else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				// Implement ++ increment operation
+				if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("++")) {
+					acceptIt();
+
+					// a++ is equivalent as a=a+1 (icrementing by 1)
+					// vAST variable will be updated
+					// "commandPos" is line number of current command in source code
+					// We reuse that for each new AST node we make
+
+					// create IntegerLiteral for 1 (incrementing by 1)
+					IntegerLiteral intLit = new IntegerLiteral("1", commandPos);
+					// wrap IntegerLiteral in IntegerExpression
+					IntegerExpression intExp = new IntegerExpression(intLit, commandPos);
+					// wrap variable name in VnameExpression
+					VnameExpression vnExp = new VnameExpression(vAST, commandPos);
+					// operator is a '+'
+					Operator op = new Operator("+", commandPos);
+
+					// assemble expressions into a BinaryExpression (a+1)
+					Expression eAST = new BinaryExpression(vnExp, op, intExp, commandPos);
+					// set last line of command for debugging purposes
+					finish(commandPos);
+
+					// make assignment (a=a+1)
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				// Task 3A Implement ** double operation (Just like the previous ++ implementation)
+				else if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+
+					// a** is equivalent as a=a*2 (doubling)
+					// vAST variable will be updated
+					// "commandPos" is line number of current command in source code, this will be
+					// reused for each new AST node made
+
+					// create IntegerLiteral for 2 (doubling)
+					IntegerLiteral il = new IntegerLiteral("2", commandPos);
+					// wrap IntegerLiteral in IntegerExpression
+					IntegerExpression ie = new IntegerExpression(il, commandPos);
+					// wrap variable name in VnameExpression
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					// operator is a '*'
+					Operator op = new Operator("*", commandPos);
+
+					// assemble expressions into a BinaryExpression (a*2)
+					Expression eAST = new BinaryExpression(vne, op, ie, commandPos);
+					// set last line of command for debugging purposes
+					finish(commandPos);
+
+					// make assignment (a=a*2)
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				else {
+					accept(Token.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				
 			}
 		}
 			break;
 
-		case Token.BEGIN:
+		// Task 6A: switch case implementation for the loopWhile token
+		case Token.LOOPWHILE: {
+			acceptIt();
+
+			accept(Token.BEGIN); // accept the 'begin' and 'end' tokens at the start/end of triangle program
+			Command c1AST = parseCommand(); // begins a loop
+			accept(Token.END);
+			System.out.println("c1AST: " + c1AST.getPosition());
+
+			accept(Token.WHILE);
+			Expression eAST = parseExpression(); // while loop opens here/ checks vs expression
+			System.out.println("eAST: " + eAST.getPosition());
+
+			accept(Token.DO);
+			Command c2AST = parseSingleCommand(); // do block starts here (executes code inside block)
+			System.out.println("c2AST: " + c2AST.getPosition());
+
+			finish(commandPos);
+			commandAST = new LoopWhileCommand(eAST, c1AST, c2AST, commandPos);
+		}
+			break;
+
+		// BEGIN and END token for triangle
+		case Token.BEGIN: {
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.END);
+		}
+			break;
+		
+		// Task 4A Curly bracket support for both Open and closed curly brackets to use instead/with BEGIN and END statements
+		case Token.LCURLY: { // LCURLY refers to open curly bracket
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY); // RCURLY refers to closed curly bracket
+		}
+			break;
+		
+		case Token.RCURLY: { //
+			finish(commandPos);
+			commandAST = new EmptyCommand(commandPos);
+		}
 			break;
 
 		case Token.LET: {

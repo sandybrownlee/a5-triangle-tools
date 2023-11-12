@@ -37,6 +37,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
@@ -117,6 +118,15 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	}
 
 	// Commands
+	@Override
+	public DrawingTree visitLoopWhileCommand(LoopWhileCommand ast, Void obj) {
+		// Task 6A adding DrawingTree for new loopWhile command method
+		var d1 = ast.E.visit(this);
+		var d2 = ast.C1.visit(this);
+		var d3 = ast.C2.visit(this);
+		return layoutTernary("LoopWhileCom.", d1, d2, d3); // ternary for this loop and 3 params for E,C1,C2
+	}
+
 	@Override
 	public DrawingTree visitRepeatCommand(RepeatCommand ast, Void obj) {
 		var d1 = ast.E.visit(this);

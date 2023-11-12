@@ -42,6 +42,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
@@ -128,7 +129,28 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		TypeDenoterVisitor<Frame, Integer>, VnameVisitor<Frame, RuntimeEntity> {
 
 	// Commands
-	//Override
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		// Task 6A Implementing the visitLoopWhile command in the Encoder class for the code generator
+
+		var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+		var loopAddr = emitter.getNextInstrAddr();
+		var jumpifAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
+
+		ast.C1.visit(this, frame); // order for loopWhile starts with C1 block
+		emitter.patch(jumpAddr); // jumps to Expression
+
+		ast.E.visit(this, frame); // next in order Expression
+		emitter.patch(jumpifAddr); // jumps relative to if expression successful to C2 block
+
+		ast.C2.visit(this, frame); // then the C2 'do' block
+		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr); // once C2 block has been executed, jump back to start of loop
+
+
+		return null;
+	}
+
+	@Override
 	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
 		var loopAddr = emitter.getNextInstrAddr();
  		ast.C.visit(this, frame);

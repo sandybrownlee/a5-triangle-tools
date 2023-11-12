@@ -5,11 +5,15 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 
 public interface CommandVisitor<TArg, TResult> {
+
+	TResult visitLoopWhileCommand(LoopWhileCommand ast, TArg arg);
+	// Task 6A LoopWhile visitor command
 
 	TResult visitAssignCommand(AssignCommand ast, TArg arg);
 
