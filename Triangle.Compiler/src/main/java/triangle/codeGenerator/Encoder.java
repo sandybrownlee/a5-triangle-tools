@@ -138,11 +138,10 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		//var jumpifAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
 
 		ast.C1.visit(this, frame); // order for loopWhile starts with C1 block
+		ast.E.visit(this, frame); // next in order Expression
 		emitter.patch(jumpAddr); // jumps to Expression
 
-		ast.E.visit(this, frame); // next in order Expression
 		//emitter.patch(jumpifAddr); // jumps relative to if expression successful to C2 block
-
 		ast.C2.visit(this, frame); // then the C2 'do' block
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr); // once C2 block has been executed, jump back to start of loop
 
