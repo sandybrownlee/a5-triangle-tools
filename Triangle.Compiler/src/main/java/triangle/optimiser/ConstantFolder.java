@@ -595,14 +595,62 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}
-
+			
+			// Task 7.a 
+			if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 == int2;
+			}
+			if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			}
+			if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			}
+			if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			}
+			if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			}
+			if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			}
+			
+			
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
+				
+			// Task 7.a handle boolean instance
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				// Make an identifier object 
+				Identifier id = new Identifier(foldedValue.toString(), node1.getPosition());
+				
+				if (foldedValue.toString().equalsIgnoreCase("true")) {
+					// If foledValue is true set the new identifier to the true declaration
+					id.decl = StdEnvironment.trueDecl;
+				}
+				// Otherwise it must be false so set the id to false declaration
+				else {
+					id.decl = StdEnvironment.falseDecl;
+				}
+				
+				// Now make it a simple variable name then a vNameExpression
+				// Make a new instance of the simpleVname and add the information
+				// From inspecting the simpleVname class we need to pass two arguments
+				// An identifier (our new id) and its source position
+				SimpleVname simpVname = new SimpleVname(id, node1.getPosition());
+				
+				// Now need to make this a variable name expression using the same method
+				// As before but passing different arguments, the simpVname and source position
+				VnameExpression varNameExp = new VnameExpression(simpVname, node1.getPosition());
+				
+				// Make this a boolean type and return it
+				varNameExp.type = StdEnvironment.booleanType;
+				
+				return varNameExp;
 			}
 		}
 
