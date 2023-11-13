@@ -142,7 +142,7 @@ public class Compiler {
 			System.exit(1);
 		}
 		
-		parseArgs(args);
+		parseArgs();
 
 		String sourceName = args[0];
 		
@@ -153,7 +153,7 @@ public class Compiler {
 		}
 	}
 	
-	private static void parseArgs(String[] args) {
+	private static void parseArgs() {
 		if(argTree.equals("tree")) {
 			showTree = true;
 		}

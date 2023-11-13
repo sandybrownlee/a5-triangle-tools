@@ -446,7 +446,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 	@Override
-	public AbstractSyntaxTree visitIncrementDecrementCommand(IncrementDecrementCommand ast, Void unused) {
+	public AbstractSyntaxTree visitUnaryOperatorCommand(UnaryOperatorCommand ast, Void unused) {
 		return null;
 	}
 
@@ -497,6 +497,11 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void unused) {
+		return null;
+	}
+
+	@Override
+	public AbstractSyntaxTree visitLoopCommand(LoopCommand ast, Void unused) {
 		return null;
 	}
 
@@ -592,7 +597,14 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				Identifier id = null;
+				if(foldedValue.toString().equalsIgnoreCase("TRUE")) {
+					id = new Identifier("true", node1.getPosition());
+					id.decl = StdEnvironment.trueDecl;
+				} else if (foldedValue.toString().equalsIgnoreCase("FALSE")) {
+					id = new Identifier("false", node1.getPosition());
+					id.decl = StdEnvironment.falseDecl;
+				}
 			}
 		}
 

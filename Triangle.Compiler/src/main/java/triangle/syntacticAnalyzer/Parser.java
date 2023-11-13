@@ -277,10 +277,11 @@ public class Parser {
 
 			} else if(currentToken.kind == Token.OPERATOR) {
 				var op = parseOperator();
+				int factor = 1;
 
 				// this new operator is created because ++ and -- are unary operators
 				// so we need a representation of its binary counterpart (a +/- b) to pass into an
-				// IncrementDecrementCommand(...) ctor invocation. Otherwise, you end up with the compiler
+				// UnaryOperatorCommand(...) ctor invocation. Otherwise, you end up with the compiler
 				// trying to parse ++ and -- as binary operators.
 				Operator binaryOperator = null;
 
@@ -289,12 +290,15 @@ public class Parser {
 					binaryOperator = new Operator("+", commandPos);
 				} else if (op.spelling.equals("--")) {
 					binaryOperator = new Operator("-", commandPos);
+				} else if(op.spelling.equals("**")) {
+					binaryOperator = new Operator("*", commandPos);
+					factor = 2;
 				} else syntacticError("\"%\" is not a urany operator.", op.spelling);
 
 
 				finish(commandPos);
 				assert binaryOperator != null;
-                commandAST = new IncrementDecrementCommand(vnameAST, binaryOperator, commandPos);
+                commandAST = new UnaryOperatorCommand(vnameAST, binaryOperator, factor, commandPos);
 				
 			} else {
 				Vname vAST = parseRestOfVname(iAST);
@@ -310,6 +314,12 @@ public class Parser {
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.END);
+			break;
+
+		case Token.LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
 			break;
 
 		case Token.LET: {
@@ -342,7 +352,20 @@ public class Parser {
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
-			break;
+		break;
+
+		case Token.LOOP: {
+			acceptIt();
+			Command cAST = parseSingleCommand();
+			accept(Token.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.DO);
+			cAST = parseSingleCommand();
+
+			finish(commandPos);
+			commandAST = new LoopCommand(eAST, cAST, commandPos);
+		}
+		break;
 
 		case Token.REPEAT: {
 			acceptIt();

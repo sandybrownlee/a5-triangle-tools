@@ -124,7 +124,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 	}
 
 	@Override
-	public Void visitIncrementDecrementCommand(IncrementDecrementCommand ast, Frame frame) {
+	public Void visitUnaryOperatorCommand(UnaryOperatorCommand ast, Frame frame) {
 		var valSize = ast.E.visit(this, frame);
 		encodeStore(ast.V, frame.expand(valSize), valSize);
 		return null;
@@ -184,6 +184,11 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 
 	@Override
 	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
+		return null;
+	}
+
+	@Override
+	public Void visitLoopCommand(LoopCommand ast, Frame frame) {
 		return null;
 	}
 

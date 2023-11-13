@@ -5,7 +5,7 @@ import triangle.abstractSyntaxTrees.commands.*;
 public interface CommandVisitor<TArg, TResult> {
 
 	TResult visitAssignCommand(AssignCommand ast, TArg arg);
-	TResult visitIncrementDecrementCommand(IncrementDecrementCommand ast, TArg arg);
+	TResult visitUnaryOperatorCommand(UnaryOperatorCommand ast, TArg arg);
 
 	TResult visitCallCommand(CallCommand ast, TArg arg);
 
@@ -20,5 +20,6 @@ public interface CommandVisitor<TArg, TResult> {
 	TResult visitWhileCommand(WhileCommand ast, TArg arg);
 
 	TResult visitRepeatCommand(RepeatCommand ast, TArg arg);
+	TResult visitLoopCommand(LoopCommand ast, TArg arg);
 
 }

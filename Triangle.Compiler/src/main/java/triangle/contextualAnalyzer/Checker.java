@@ -123,7 +123,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	}
 
 	@Override
-	public Void visitIncrementDecrementCommand(IncrementDecrementCommand ast, Void unused) {
+	public Void visitUnaryOperatorCommand(UnaryOperatorCommand ast, Void unused) {
 		var vType = ast.V.visit(this);
 		var eType = ast.E.visit(this);
 
@@ -191,6 +191,11 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 	@Override
 	public Void visitRepeatCommand(RepeatCommand ast, Void unused) {
+		return null;
+	}
+
+	@Override
+	public Void visitLoopCommand(LoopCommand ast, Void unused) {
 		return null;
 	}
 
@@ -946,9 +951,12 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 				StdEnvironment.integerType);
 		StdEnvironment.divideDecl = declareStdBinaryOp("/", StdEnvironment.integerType, StdEnvironment.integerType,
 				StdEnvironment.integerType);
+
 		StdEnvironment.barDecl = declareStdUnaryOp("|",  StdEnvironment.integerType, StdEnvironment.integerType);
 		StdEnvironment.incrementDecl = declareStdUnaryOp("++",  StdEnvironment.integerType, StdEnvironment.integerType);
 		StdEnvironment.decrementDecl = declareStdUnaryOp("--",  StdEnvironment.integerType, StdEnvironment.integerType);
+		StdEnvironment.doubleMultDecl = declareStdUnaryOp("**",  StdEnvironment.integerType, StdEnvironment.integerType);
+
 		StdEnvironment.moduloDecl = declareStdBinaryOp("//", StdEnvironment.integerType, StdEnvironment.integerType,
 				StdEnvironment.integerType);
 		StdEnvironment.lessDecl = declareStdBinaryOp("<", StdEnvironment.integerType, StdEnvironment.integerType,

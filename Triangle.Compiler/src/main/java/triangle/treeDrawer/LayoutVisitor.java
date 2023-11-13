@@ -113,10 +113,10 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	}
 
 	@Override
-	public DrawingTree visitIncrementDecrementCommand(IncrementDecrementCommand ast, Void unused) {
+	public DrawingTree visitUnaryOperatorCommand(UnaryOperatorCommand ast, Void unused) {
 		var d1 = ast.V.visit(this);
 		var d2 = ast.E.visit(this);
-		return layoutBinary("IncDecrCom.", d1, d2);
+		return layoutBinary("UnaryOpCom.", d1, d2);
 	}
 
 	@Override
@@ -162,6 +162,11 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 
 	@Override
 	public DrawingTree visitRepeatCommand(RepeatCommand ast, Void unused) {
+		return null;
+	}
+
+	@Override
+	public DrawingTree visitLoopCommand(LoopCommand ast, Void unused) {
 		return null;
 	}
 
