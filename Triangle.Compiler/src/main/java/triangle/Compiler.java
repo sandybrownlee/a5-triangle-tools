@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.StatGenerator;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -49,8 +50,12 @@ public class Compiler {
 	@Argument(alias = "f", description = "Allows for folding")
 	static boolean folding = false;
 
-	@Argument(alias = "ft", description = "Allows for folding")
+	@Argument(alias = "ft", description = "Allows for folding of the tree")
 	static boolean treeFold = false;
+
+	@Argument(value = "s", description = "Shows the statistics for the  total number of CharacterExpressions and IntegerExpressions used")
+	static boolean statistics;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -59,6 +64,8 @@ public class Compiler {
 	private static Emitter emitter;
 	private static ErrorReporter reporter;
 	private static Drawer drawer;
+
+	private static StatGenerator stats;
 
 	/** The AST representing the source program. */
 	private static Program theAST;
@@ -76,7 +83,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -95,6 +102,7 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		stats = new StatGenerator();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -120,6 +128,11 @@ public class Compiler {
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
+			}
+
+			if (statistics) {
+				System.out.println("Statistics Summary:");
+				stats.countExpressionsUsed(theAST);
 			}
 		}
 
@@ -148,13 +161,13 @@ public class Compiler {
 		Args.parse(compiler, args);
 
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=output filename]  [-t]  [-f]");
+			System.out.println("Usage: tc filename [-o=output filename]  [-t]  [-f] [-ft] [-s]");
 			System.exit(1);
 		}
 
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, folding);
+		var compiledOK = compileProgram(sourceName, objectName, showTree, folding, statistics);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);

@@ -74,7 +74,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+public class StatGenerator implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -82,8 +82,27 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
 		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
 		VnameVisitor<Void, AbstractSyntaxTree> {
-	{
 
+	private int charCount = 0;
+	private int intCount = 0;
+
+	public void countExpressionsUsed(Program ast) {
+		ast.visit(this);
+		System.out.println("CharacterExpressions: " + charCount);
+		System.out.println("IntegerExpressions: " + intCount);
+	}
+
+	@Override
+	public AbstractSyntaxTree visitIntegerExpression(IntegerExpression ast, Void arg) {
+		intCount++;
+		return ast;
+	}
+
+	@Override
+	public AbstractSyntaxTree visitCharacterExpression(CharacterExpression ast, Void arg) {
+		charCount++;
+		ast.CL.visit(this);
+		return null;
 	}
 
 	@Override
@@ -301,12 +320,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 	@Override
-	public AbstractSyntaxTree visitCharacterExpression(CharacterExpression ast, Void arg) {
-		ast.CL.visit(this);
-		return null;
-	}
-
-	@Override
 	public AbstractSyntaxTree visitEmptyExpression(EmptyExpression ast, Void arg) {
 		return null;
 	}
@@ -327,11 +340,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 
 		return null;
-	}
-
-	@Override
-	public AbstractSyntaxTree visitIntegerExpression(IntegerExpression ast, Void arg) {
-		return ast;
 	}
 
 	@Override
@@ -501,17 +509,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-	// TODO uncomment if you've implemented the repeat command
-//	@Override
-//	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
-//		ast.C.visit(this);
-//		AbstractSyntaxTree replacement = ast.E.visit(this);
-//		if (replacement != null) {
-//			ast.E = (Expression) replacement;
-//		}
-//		return null;
-//	}
-
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
 		ast.AA.visit(this);
@@ -582,7 +579,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}

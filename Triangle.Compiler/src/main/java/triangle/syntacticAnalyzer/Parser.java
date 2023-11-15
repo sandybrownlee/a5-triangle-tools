@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -288,10 +281,37 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				//If the current token is an operator, and it matches "**" then the following code to allow doubling of a number
+				if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")){
+					acceptIt();
+
+					//Declaring and initialising an integerLiteral, this will be used to inform the compiler what the number will be multipled by
+					IntegerLiteral intLit = new IntegerLiteral("2", commandPos);
+
+					//Declaring and initialising an integerExpression that will be used to wrap the integer literal
+					IntegerExpression intExp = new IntegerExpression(intLit, commandPos);
+
+					//Declaring and initialising a new variableNameExpression that will be used to wrap the variable name
+					VnameExpression vnExp = new VnameExpression(vAST, commandPos);
+
+					//Declaring and initialising a new operator ("*") as a multiplication
+					Operator op = new Operator("*", commandPos);
+
+					//Declaring and initialising  a BinaryExpression by combining the variableNameExpression with the operator
+					//and the integerLiteral. This forms variable*2, e.g. (7*2 which will equal 14)
+					Expression eAST= new BinaryExpression(vnExp, op, intExp, commandPos);
+
+					//This will set what the last line of the command was, this will help when we have to debug
+					finish(commandPos);
+
+					//Now we have the new binaryExpression we now need make it a new assignment for the command
+					commandAST = new AssignCommand(vAST,eAST, commandPos);
+				}else {
+					accept(Token.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -339,6 +359,20 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+
+		case Token.LOOP: {
+			acceptIt();
+			Command c1AST = parseCommand();
+			accept(Token.WHILE);
+			Expression eAST = parseExpression();
+
+			accept(Token.DO);
+			Command c2AST = parseSingleCommand();
+
+			finish(commandPos);
+			commandAST = new LoopWhileCommand(c1AST, eAST, c2AST, commandPos);
+		}
+		break;
 
 		case Token.SEMICOLON:
 		case Token.END:

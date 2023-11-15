@@ -42,10 +42,30 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
-	
-	
-	
-	private void compileExpectSuccess(String filename) {
+
+	/**
+	 * Test to check if the solution I implemented to allow for doubling of a number has worked
+	 */
+	@Test
+	public void testDouble() {
+		compileExpectFailure("/double.tri");
+	}
+
+
+	/**
+	 * Test to tell if I have correctly implemented the ability to use {...} into the compiler
+	 */
+	@Test
+	public void testCurlyBrackets(){
+		compileExpectSuccess("/while-curly.tri");
+	}
+
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
+
+		private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
 		// which adds the programs directory to the list of places Java can easily find files
 		// getResource() below searches for a file, which is in /programs 
