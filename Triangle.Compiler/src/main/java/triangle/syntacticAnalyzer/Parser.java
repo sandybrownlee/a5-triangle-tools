@@ -41,6 +41,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+// import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
@@ -309,8 +310,15 @@ public class Parser {
 		case Token.LCURLY:
 			acceptIt();
 			commandAST = parseCommand();
-			acceptIt(Token.RCURLY);
+			accept(Token.RCURLY);
 			break;
+
+		case Token.LOOP: {
+			acceptIt();
+			commandAST =parseCommand();
+			accept(Token.LOOPEND);
+			break;
+		}
 
 		case Token.LET: {
 			acceptIt();

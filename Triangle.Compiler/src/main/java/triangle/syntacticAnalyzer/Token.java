@@ -67,20 +67,20 @@ final class Token extends Object {
 	INTLITERAL = 0, CHARLITERAL = 1, IDENTIFIER = 2, OPERATOR = 3,
 
 			// reserved words - must be in alphabetical order...
-			ARRAY = 4, BEGIN = 5, CONST = 6, DO = 7, ELSE = 8, END = 9, FUNC = 10, IF = 11, IN = 12, LET = 13, OF = 14,
-			PROC = 15, RECORD = 16, REPEAT = 17, THEN = 18, TYPE = 19, UNTIL = 20, VAR = 21, WHILE = 22,
+			ARRAY = 4, BEGIN = 5, CONST = 6, DO = 7, ELSE = 8, END = 9, FUNC = 10, IF = 11, IN = 12, LET = 13, LOOP = 14, LOOPEND = 15, OF = 16,
+			PROC = 17, RECORD = 18, REPEAT = 19, THEN = 20, TYPE = 21, UNTIL = 22, VAR = 23, WHILE = 24,
 
 			// punctuation...
-			DOT = 23, COLON = 24, SEMICOLON = 25, COMMA = 26, BECOMES = 27, IS = 28,
+			DOT = 25, COLON = 26, SEMICOLON = 27, COMMA = 28, BECOMES = 29, IS = 30,
 
 			// brackets...
-			LPAREN = 29, RPAREN = 30, LBRACKET = 31, RBRACKET = 32, LCURLY = 33, RCURLY = 34,
+			LPAREN = 31, RPAREN = 32, LBRACKET = 33, RBRACKET = 34, LCURLY = 35, RCURLY = 36,
 
 			// special tokens...
-			EOT = 35, ERROR = 36;
+			EOT = 37, ERROR = 38;
 
 	private static String[] tokenTable = new String[] { "<int>", "<char>", "<identifier>", "<operator>", "array",
-			"begin", "const", "do", "else", "end", "func", "if", "in", "let", "of", "proc", "record", "repeat", "then", "type", "until", 
+			"begin", "const", "do", "else", "end", "func", "if", "in", "let", "loop", "loopend", "of", "proc", "record", "repeat", "then", "type", "until", 
 			"var", "while", ".", ":", ";", ",", ":=", "~", "(", ")", "[", "]", "{", "}", "", "<error>" };
 
 	private final static int firstReservedWord = Token.ARRAY, lastReservedWord = Token.WHILE;

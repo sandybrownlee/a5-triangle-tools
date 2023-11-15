@@ -49,6 +49,12 @@ public class TestScanner {
 	// 	compileExpectSuccess("/while-curly.tri");
 	// }
 	
+
+	// @Test
+	// public void testLoopWhile()
+	// {
+	// 	compileExpectSuccess("/loopwhile.tri");
+	// }
 	
 	
 	private void compileExpectSuccess(String filename) {
