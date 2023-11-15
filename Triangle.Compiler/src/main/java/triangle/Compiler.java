@@ -64,7 +64,7 @@ public class Compiler {
 
 	// Task 2B Ammendments:
 	@Argument(alias = "sourceName", description = "Name of the file containing the source program", required = true)
-	static String sourceName = "";
+	static String sourceName = "while-curly.tri";
 
 	@Argument(alias = "objName", description = "Name of the file containing the object program", required = true)
 	static String objectName = "obj.tam";
