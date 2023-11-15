@@ -1,7 +1,6 @@
 package triangle.abstractSyntaxTrees.visitors;
 
 import triangle.abstractSyntaxTrees.commands.*;
-import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 
 public interface CommandVisitor<TArg, TResult> {
 
@@ -18,6 +17,4 @@ public interface CommandVisitor<TArg, TResult> {
 	TResult visitSequentialCommand(SequentialCommand ast, TArg arg);
 
 	TResult visitWhileCommand(WhileCommand ast, TArg arg);
-
-    TResult visitLoopWhileCommand(LoopWhileCommand ast, TArg arg);
 }

@@ -38,7 +38,6 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -170,17 +169,6 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		ast.D.visit(this);
 		ast.C.visit(this);
 		idTable.closeScope();
-		return null;
-	}
-
-	@Override
-	public Void visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
-		ast.C1.visit(this);
-		var eType = ast.E.visit(this);
-
-		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
-		ast.C2.visit(this);
-
 		return null;
 	}
 

@@ -358,20 +358,6 @@ public class Parser {
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
-			break;
-
-		case Token.LOOP: {
-			acceptIt();
-			Command c1AST = parseCommand();
-			accept(Token.WHILE);
-			Expression eAST = parseExpression();
-
-			accept(Token.DO);
-			Command c2AST = parseSingleCommand();
-
-			finish(commandPos);
-			commandAST = new LoopWhileCommand(c1AST, eAST, c2AST, commandPos);
-		}
 		break;
 
 		case Token.SEMICOLON:

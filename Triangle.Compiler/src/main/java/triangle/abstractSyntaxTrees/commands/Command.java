@@ -33,4 +33,5 @@ public abstract class Command extends AbstractSyntaxTree {
 	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> visitor) {
 		return visit(visitor, null);
 	}
+
 }

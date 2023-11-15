@@ -47,9 +47,7 @@ public class TestScanner {
 	 * Test to check if the solution I implemented to allow for doubling of a number has worked
 	 */
 	@Test
-	public void testDouble() {
-		compileExpectFailure("/double.tri");
-	}
+	public void testDouble() {compileExpectSuccess("/double.tri");	}
 
 
 	/**
