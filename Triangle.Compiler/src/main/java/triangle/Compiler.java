@@ -27,6 +27,7 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import triangle.optimiser.SummaryStats; // import new class like the rest
 
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
@@ -61,12 +62,6 @@ public class Compiler {
 	// this
 	// that specify command line arguments for the program
 
-	// @Argument(alias = "m", description = "Statistic to compute for the values", required = false)
-	// protected String statistic = "mean";
-
-	// @Argument(alias = "v", description = "Comma separated (no spaces) list of values", required = true)
-	// protected String values = "1,2,3";
-
 	// Task 2B Ammendments:
 	@Argument(alias = "sourceName", description = "Name of the file containing the source program", required = true)
 	static String sourceName = "";
@@ -83,6 +78,10 @@ public class Compiler {
 	@Argument(alias = "showFoldedAST", description = "Show the AST after folding")
 	static boolean showTreeAfterFolding = false;
 
+	// Task 5B: Add the option of 'stats' for when running the compiler
+	@Argument(alias = "stats", description = "Show number of CharacterExpressions and IntegerExpressions")
+	static boolean stats = false;
+
 	public static void main(String[] args) {
 	    Compiler compiler = new Compiler();
 
@@ -92,7 +91,7 @@ public class Compiler {
 	    Args.parseOrExit(compiler, args);
 	    
 		if (args.length > 0) {
-			var compiledSuccessfully = compileProgram(sourceName, objectName, showTree, folding, showTreeAfterFolding);
+			var compiledSuccessfully = compileProgram(sourceName, objectName, showTree, folding, showTreeAfterFolding, stats);
 
 			if (!showTree) {
 				System.exit(compiledSuccessfully ? 0 : 1);
@@ -115,10 +114,11 @@ public class Compiler {
 	 * @param showingTable true iff the object description details are to be
 	 *                     displayed during code generation (not currently
 	 *                     implemented).
+	 * * @param showStats 		show stats
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showTreeAfterFolding) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showTreeAfterFolding, boolean showStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -156,6 +156,12 @@ public class Compiler {
 				drawer.draw(theAST);
 				showTree = true;
 			}
+			// Task 5B: Adding stats option implementation, will print out smmary of stats to screen after visiting the AST
+			if (stats) {
+				SummaryStats statsSummary = new SummaryStats();
+				theAST.visit(statsSummary);
+				System.out.println("This is the Summary of stats: " + "\n" + "Character Expressions Counter: " + statsSummary.getNumberCharacterExpressions() + "\n" + "Integer Expressions Counter: " + statsSummary.getNumberIntegerExpressions());
+			}
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -172,30 +178,6 @@ public class Compiler {
 		}
 		return successful;
 	}
-
-	// /** THIS IS OLD MAIN METHOD BEFORE ADDED THE CLI PARSER MAIN METHOD
-	//  * Triangle compiler main program.
-	//  *
-	//  * @param args the only command-line argument to the program specifies the
-	//  *             source filename.
-	//  */
-	// public static void main(String[] args) {
-
-	// 	if (args.length < 1) {
-	// 		System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-	// 		System.exit(1);
-	// 	}
-		
-	// 	parseArgs(args);
-
-	// 	String sourceName = args[0];
-		
-	// 	var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-	// 	if (!showTree) {
-	// 		System.exit(compiledOK ? 0 : 1);
-	// 	}
-	// }
 	
 	// private static void parseArgs(String[] args) {
 	// 	for (String s : args) {

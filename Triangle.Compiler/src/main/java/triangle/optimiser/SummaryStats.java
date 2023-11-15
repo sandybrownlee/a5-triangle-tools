@@ -83,7 +83,7 @@ import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.codeGenerator.Frame;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+public class SummaryStats implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -92,7 +92,17 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
 		VnameVisitor<Void, AbstractSyntaxTree> {
 	
+    // Task 5A: creating rolling counter variables for stats and corresponding get methods
+    private int numberCharacterExpressions = 0;
+    private int numberIntegerExpression = 0;
 
+    public int getNumberCharacterExpressions() {
+        return numberCharacterExpressions;
+    }
+
+    public int getNumberIntegerExpressions() {
+        return numberIntegerExpression;
+    }
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -601,42 +611,15 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				foldedValue = int1 * int2;
 			} else if (o.decl == StdEnvironment.subtractDecl) {
 				foldedValue = int1 - int2;
-			// Task 7A amending the constant folding to account for boolean expressions too
-			} else if (o.decl == StdEnvironment.equalDecl) {
-				foldedValue = int1 == int2;
-			} else if (o.decl == StdEnvironment.unequalDecl) {
-				foldedValue = int1 != int2; 
-			} else if (o.decl == StdEnvironment.lessDecl) {
-				foldedValue = int1 < int2;
-			} else if (o.decl == StdEnvironment.notlessDecl) {
-				foldedValue = int1 >= int2;
-			} else if (o.decl == StdEnvironment.notgreaterDecl) {
-				foldedValue = int1 <= int2;
-			} else if (o.decl == StdEnvironment.greaterDecl) {
-				foldedValue = int1 > int2;
 			}
- 
+
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
-			// Task 7A
 			} else if (foldedValue instanceof Boolean) {
-				Identifier identifier = new Identifier(foldedValue.toString(), node1.getPosition());
-
-				if (foldedValue.toString().equals("true")) {
-					identifier.decl = StdEnvironment.trueDecl;
-					SimpleVname svn = new SimpleVname(identifier, node1.getPosition());
-					VnameExpression vne = new VnameExpression(svn, node1.getPosition());
-					return vne;
-
-				} else if (foldedValue.toString().equals("false")) {
-					identifier.decl = StdEnvironment.falseDecl;
-					SimpleVname svn = new SimpleVname(identifier, node1.getPosition());
-					VnameExpression vne = new VnameExpression(svn, node1.getPosition());
-					return vne;
-				}
+				/* currently not handled! */
 			}
 		}
 
