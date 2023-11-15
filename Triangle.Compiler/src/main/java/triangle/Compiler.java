@@ -18,11 +18,14 @@
 
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.ExpressionCounter;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -37,11 +40,16 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "o",description = "file input ref")
 	static String objectName = "obj.tam";
-	
+	@Argument(alias = "tree",description = "tree in ref")
 	static boolean showTree = false;
+	@Argument(alias = "fold",description = "Fold reference")
 	static boolean folding = false;
-
+	@Argument(alias = "fold tree com",description = "Show tree fold")
+	static boolean treeFold=false;
+	@Argument(alias = "Stats", description = "Shows character and integer statistics")
+	static boolean expressionStats;
 	private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
@@ -52,6 +60,8 @@ public class Compiler {
 
 	/** The AST representing the source program. */
 	private static Program theAST;
+
+	private static ExpressionCounter expStats;
 
 	/**
 	 * Compile the source program to TAM machine code.
@@ -85,13 +95,11 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		expStats= new ExpressionCounter();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
 			if (showingAST) {
@@ -100,11 +108,19 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+		if (treeFold){
+				showTree=true;
+				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
+			}
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
+		}
+		if(expressionStats){
+			System.out.println("Expression Stats: \n");
+			expStats.count(theAST);
 		}
 
 		boolean successful = (reporter.getNumErrors() == 0);
@@ -125,12 +141,14 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		Compiler comp= new Compiler();
+		Args.parse(comp, args);
+
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
+
 
 		String sourceName = args[0];
 		
@@ -140,17 +158,5 @@ public class Compiler {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+
 }

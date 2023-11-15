@@ -288,10 +288,22 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+					IntegerLiteral il = new IntegerLiteral("2", commandPos);
+					IntegerExpression ie = new IntegerExpression(il, commandPos);
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					Operator op = new Operator("*", commandPos);
+					Expression eAST = new BinaryExpression(vne, op, ie, commandPos);
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				else {
+					accept(Token.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -339,6 +351,7 @@ public class Parser {
 		case Token.ELSE:
 		case Token.IN:
 		case Token.EOT:
+		case Token.RCURLY:
 
 			finish(commandPos);
 			commandAST = new EmptyCommand(commandPos);
@@ -361,7 +374,6 @@ public class Parser {
 
 	Expression parseExpression() throws SyntaxError {
 		Expression expressionAST = null; // in case there's a syntactic error
-
 		SourcePosition expressionPos = new SourcePosition();
 
 		start(expressionPos);
@@ -445,10 +457,12 @@ public class Parser {
 
 		case Token.LCURLY: {
 			acceptIt();
-			RecordAggregate raAST = parseRecordAggregate();
+			expressionAST=parseSecondaryExpression();
+			/*updated such that after accepting the Left curly brace
+			will then parse the block of code/expression and expect the right closing curly brace
+			*/
 			accept(Token.RCURLY);
 			finish(expressionPos);
-			expressionAST = new RecordExpression(raAST, expressionPos);
 		}
 			break;
 

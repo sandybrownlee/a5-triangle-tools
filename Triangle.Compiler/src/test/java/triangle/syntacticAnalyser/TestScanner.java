@@ -42,6 +42,9 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
+
+	@Test
+	public void testDoubleShortcut(){compileExpectSuccess("/double.tri");}// for part three of assignment and 5
 	
 	
 	
