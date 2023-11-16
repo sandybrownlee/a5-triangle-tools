@@ -11,6 +11,7 @@ repositories {
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+	implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
 }
 
 application {

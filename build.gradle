@@ -2,6 +2,15 @@ apply plugin: 'java'
 
 sourceCompatibility = 11
 
+repositories {
+    mavenCentral()
+}
+
+
+dependencies {
+	implementation group: 'commons-cli', name: 'commons-cli', version: '1.4'
+}
+
 subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }

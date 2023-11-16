@@ -270,37 +270,53 @@ public class Parser {
 
 	Command parseSingleCommand() throws SyntaxError {
 		Command commandAST = null; // in case there's a syntactic error
+	    SourcePosition commandPos = new SourcePosition();
+	    start(commandPos);
 
-		SourcePosition commandPos = new SourcePosition();
-		start(commandPos);
+	    switch (currentToken.kind) {
 
-		switch (currentToken.kind) {
+	        case Token.IDENTIFIER: {
+	            Identifier iAST = parseIdentifier();
+	            if (currentToken.kind == Token.LPAREN) {
+	                acceptIt();
+	                ActualParameterSequence apsAST = parseActualParameterSequence();
+	                accept(Token.RPAREN);
+	                finish(commandPos);
+	                commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-		case Token.IDENTIFIER: {
-			Identifier iAST = parseIdentifier();
-			if (currentToken.kind == Token.LPAREN) {
-				acceptIt();
-				ActualParameterSequence apsAST = parseActualParameterSequence();
-				accept(Token.RPAREN);
-				finish(commandPos);
-				commandAST = new CallCommand(iAST, apsAST, commandPos);
+	            } else {
+	                Vname vAST = parseRestOfVname(iAST);
 
-			} else {
+	                // Check for the doubling operator (a**)
+	                if (currentToken.kind == Token.OPERATOR && currentToken.spelling.equals("**")) {
+	                    acceptIt();
 
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
-		}
-			break;
+	                    // Build the AST for doubling: a = a * 2;
+	                    IntegerLiteral il = new IntegerLiteral("2", commandPos);
+	                    IntegerExpression ie = new IntegerExpression(il, commandPos);
+	                    VnameExpression vne = new VnameExpression(vAST, commandPos);
+	                    Operator op = new Operator("*", commandPos);
+	                    Expression eAST = new BinaryExpression(vne, op, ie, commandPos);
+	                    finish(commandPos);
+	                    commandAST = new AssignCommand(vAST, eAST, commandPos);
+	                } else {
+	                    accept(Token.BECOMES);
+	                    Expression eAST = parseExpression();
+	                    finish(commandPos);
+	                    commandAST = new AssignCommand(vAST, eAST, commandPos);
+	                }
+	            }
+	        }
+	        break;
 
-		case Token.BEGIN:
-			acceptIt();
-			commandAST = parseCommand();
-			accept(Token.END);
-			break;
+		
+			
+			
+		case Token.LCURLY: // {
+            acceptIt();
+            commandAST = parseCommand();
+            accept(Token.RCURLY); // }
+            break;
 
 		case Token.LET: {
 			acceptIt();

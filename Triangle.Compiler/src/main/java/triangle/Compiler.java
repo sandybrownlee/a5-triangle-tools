@@ -27,6 +27,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import org.apache.commons.cli.*;
+
 
 /**
  * The main driver class for the Triangle compiler.
@@ -41,7 +43,9 @@ public class Compiler {
 	
 	static boolean showTree = false;
 	static boolean folding = false;
-
+	static boolean showTreeAfterFolding = false;
+	
+	private static boolean generateStats = false;
 	private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
@@ -101,6 +105,9 @@ public class Compiler {
 				theAST.visit(new ConstantFolder());
 			}
 			
+			StatisticsGenerator statisticsGenerator = new StatisticsGenerator();
+		    statisticsGenerator.generateStatistics(theAST);
+			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -125,32 +132,66 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
+        if (args.length < 1) {
+            System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding] [tree-after-folding] [stats]");
+            System.exit(1);
+        }
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = null;
 
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
+        try {
+            cmd = parser.parse(getOptions(), args);
+        } catch (ParseException e) {
+            System.err.println("Error parsing command line arguments: " + e.getMessage());
+            System.exit(1);
+        }
+
+        showTree = cmd.hasOption("tree");
+        folding = cmd.hasOption("folding");
+        showTreeAfterFolding = cmd.hasOption("tree-after-folding");
+        generateStats = cmd.hasOption("stats"); // Check for the "stats" option
+
+        if (cmd.hasOption("o")) {
+            objectName = cmd.getOptionValue("o");
+        }
+
+        String sourceName = args[0];
+        var compiledOK = compileProgram(sourceName, objectName, showTree, showTreeAfterFolding);
+
+        if (generateStats) {
+            generateStatistics();
+        }
+
+        if (!showTree && !showTreeAfterFolding) {
+            System.exit(compiledOK ? 0 : 1);
+        }
+    }
 	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+	private static void generateStatistics() {
+        if (theAST != null) {
+            System.out.println("Generating and printing statistics...");
+            StatisticsGenerator statisticsGenerator = new StatisticsGenerator();
+            statisticsGenerator.generateStatistics(theAST);
+        } else {
+            System.out.println("No AST available for statistics generation.");
+        }
+    }
+	
+	
+	/**
+	 * @param getOptions Command line arguments parser
+	 *
+	 */
+	private static Options getOptions() {
+        Options options = new Options();
+
+        options.addOption("o", "output", true, "Output filename");
+        options.addOption("tree", false, "Display AST");
+        options.addOption("folding", false, "Enable constant folding");
+        options.addOption("taf", "tree-after-folding", false, "Display AST after folding");
+        options.addOption("stats", false, "Generate and print statistics");
+
+        return options;
+    }
 }

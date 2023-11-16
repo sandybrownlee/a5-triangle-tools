@@ -43,6 +43,22 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+	@Test
+    public void testDoublingOperator() {
+        compileExpectSuccess("/double-test.tri");
+    }
+	
+	@Test
+    public void testCurlyOperator() {
+        compileExpectSuccess("/while-curly-test.tri");
+    }
+	
+	@Test
+    public void testCurlyOperator() {
+        compileExpectSuccess("/while-curly-test.tri");
+    }
+	
+
 	
 	
 	private void compileExpectSuccess(String filename) {
