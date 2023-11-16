@@ -86,12 +86,21 @@ public class StatGenerator implements ActualParameterVisitor<Void, AbstractSynta
 	private int charCount = 0;
 	private int intCount = 0;
 
+	/**
+	 *  When alias  is used in the command line before compiling a program,
+	 *  this is the message that will be displayed to the user
+	 * @param ast
+	 */
 	public void countExpressionsUsed(Program ast) {
 		ast.visit(this);
 		System.out.println("CharacterExpressions: " + charCount);
 		System.out.println("IntegerExpressions: " + intCount);
 	}
 
+	/**
+	 * For each integer or character expression is visited the count will be
+	 * incremented by 1 respectively and returned
+	 */
 	@Override
 	public AbstractSyntaxTree visitIntegerExpression(IntegerExpression ast, Void arg) {
 		intCount++;

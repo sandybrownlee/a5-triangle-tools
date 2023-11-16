@@ -130,6 +130,7 @@ public class Compiler {
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
 
+			//When "s" has been reference in the cmd then this block will run
 			if (statistics) {
 				System.out.println("Statistics Summary:");
 				stats.countExpressionsUsed(theAST);
