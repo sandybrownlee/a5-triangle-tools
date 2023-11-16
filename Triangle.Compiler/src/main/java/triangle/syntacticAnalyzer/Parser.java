@@ -1,8 +1,15 @@
 /*
+<<<<<<< HEAD
  * @(#)Parser.java
  *
  * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  *
+=======
+ * @(#)Parser.java                       
+ * 
+ * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * 
+>>>>>>> 9277d61249762a49eca5ff922b244a4019541432
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
