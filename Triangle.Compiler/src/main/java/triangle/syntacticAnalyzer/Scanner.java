@@ -38,9 +38,10 @@ public final class Scanner {
 	// isOperator returns true iff the given character is an operator character.
 
 	private boolean isOperator(char c) {
-		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
-				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
-	}
+    return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\' 
+            || c == '&' || c == '@' || c == '%' || c == '^' || c == '?' || (c == '*' && currentChar == '*'));
+}
+
 
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -166,7 +167,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':
@@ -245,6 +245,18 @@ public final class Scanner {
 		default:
 			takeIt();
 			return Token.ERROR;
+
+		case '*':
+    			takeIt();
+    			if (currentChar == '*') { 
+        	takeIt(); 
+        	return Token.DOUBLE_STAR; 
+    		} else {
+        		while (isOperator(currentChar))
+            		takeIt();
+        	return Token.OPERATOR;
+    }
+
 		}
 	}
 
