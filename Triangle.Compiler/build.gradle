@@ -11,7 +11,7 @@ repositories {
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
-	implementation 'com.github.rvesse:cli-parser:2.2.0' 
+	implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
 }
 
 application {
