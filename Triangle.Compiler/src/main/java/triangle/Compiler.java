@@ -18,6 +18,7 @@
 
 package triangle;
 
+import com.github.spullara.cli.parser.*;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -38,7 +39,8 @@ public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
 	static String objectName = "obj.tam";
-	
+
+	static boolean showTreeAfterFolding = false;
 	static boolean showTree = false;
 	static boolean folding = false;
 
@@ -124,22 +126,34 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+        CliOptions options = CliFactory.createCliOptions();
+        options.addOption(new CliOption("o", "output", true, "filename"));
+        options.addBooleanOption("tree", "Display AST");
+        options.addBooleanOption("folding", "Enable constant folding");
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
+        CliParser parser = new CliParser(options);
+        try {
+            CliResult result = parser.parse(args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+            if (result.getAllArguments().isEmpty()) {
+                System.out.println("Usage: tc filename [-o=outputfilename] [--tree] [--folding]");
+                System.exit(1);
+            }
 
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
+            String sourceName = result.getAllArguments().get(0);
+            objectName = result.getOptionValue("o", "obj.tam");
+            showTree = result.getBooleanResult("tree");
+            folding = result.getBooleanResult("folding");
+
+            var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+
+            if (!showTree) {
+                System.exit(compiledOK ? 0 : 1);
+            }
+        } catch (Exception e) {
+            System.err.println("Parsing failed. Reason: " + e.getMessage());
+        }
+    }
 	
 	private static void parseArgs(String[] args) {
 		for (String s : args) {
