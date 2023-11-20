@@ -23,7 +23,6 @@ import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 public class WhileCommand extends Command {
-
 	public WhileCommand(Expression eAST, Command cAST, SourcePosition position) {
 		super(position);
 		E = eAST;
@@ -36,4 +35,5 @@ public class WhileCommand extends Command {
 
 	public Expression E;
 	public final Command C;
+//	public boolean loopType;
 }

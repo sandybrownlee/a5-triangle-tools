@@ -19,6 +19,11 @@
 package triangle;
 
 import triangle.abstractSyntaxTrees.Program;
+import triangle.abstractSyntaxTrees.Statistics;
+import triangle.abstractSyntaxTrees.expressions.CharacterExpression;
+import triangle.abstractSyntaxTrees.expressions.IntegerExpression;
+import triangle.abstractSyntaxTrees.visitors.ProgramVisitor;
+import triangle.abstractSyntaxTrees.visitors.StatisticsVisitor;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
@@ -27,6 +32,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+
+import com.sampullara.cli.*;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -37,10 +44,20 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
+    @Argument(alias = "o", description = "Output filename", required = false)
+    static String objectName = "obj.tam";
+    
+    @Argument(alias = "tree", description = "Show tree", required = false)
+    static boolean showTree = false;
+    
+    @Argument(alias = "folding", description = "Enable folding", required = false)
+    static boolean folding = false;
+    
+    @Argument(alias = "fold", description = "Show tree after folding", required = false)
+    static boolean showAfterFolding = false;
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+    @Argument(alias = "stats", description = "Show statistics", required = false)
+    static boolean generateStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -86,12 +103,12 @@ public class Compiler {
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
 
-		// scanner.enableDebugging();
+//		scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
+			 if (showingAST) {
+			 drawer.draw(theAST);
+			 }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
 			if (showingAST) {
@@ -99,6 +116,9 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+			}
+			if (showAfterFolding) {
+				drawer.draw(theAST);
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -116,6 +136,12 @@ public class Compiler {
 		}
 		return successful;
 	}
+	
+	private static void showStats(Program theAST) {
+		StatisticsVisitor statsVisitor = new StatisticsVisitor();
+		statsVisitor.printCounts();
+	}
+
 
 	/**
 	 * Triangle compiler main program.
@@ -126,7 +152,7 @@ public class Compiler {
 	public static void main(String[] args) {
 
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding] [stats]");
 			System.exit(1);
 		}
 		
@@ -136,6 +162,9 @@ public class Compiler {
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
+		if (generateStats) {
+			showStats(theAST);
+		}
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
 		}
@@ -150,6 +179,8 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			} else if (sl.equals("stats")) {
+				generateStats = true;
 			}
 		}
 	}

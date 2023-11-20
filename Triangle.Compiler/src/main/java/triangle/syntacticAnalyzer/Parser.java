@@ -41,6 +41,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -275,7 +276,6 @@ public class Parser {
 		start(commandPos);
 
 		switch (currentToken.kind) {
-
 		case Token.IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
 			if (currentToken.kind == Token.LPAREN) {
@@ -286,12 +286,36 @@ public class Parser {
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
 			} else {
-
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				
+				if (currentToken.kind == Token.OPERATOR && (currentToken.spelling.equals("++") || currentToken.spelling.equals("**"))) {
+					String operator = currentToken.spelling;
+					int operandValue = operator.equals("++") ? 1 : 2;
+					
+					acceptIt();
+					
+					// We could do these as separate if statements, but in that we end up
+					// reusing the code. This more efficient and clean.
+					if (operator.equals("++") || operator.equals("**")) {
+						// Handle both operators with one code block.
+						// Keeps the code cleaner and easier to maintain.
+						IntegerLiteral il = new IntegerLiteral(Integer.toString(operandValue), commandPos);
+						IntegerExpression ie = new IntegerExpression(il, commandPos);
+						VnameExpression vne = new VnameExpression(vAST, commandPos);
+						
+						// Determine  which operator has been used in the TAM source code.
+						Operator op = new Operator(operator.equals("++") ? "+" : "*", commandPos);
+						Expression eAST = new BinaryExpression(vne, op, ie, commandPos);
+						
+						finish(commandPos);
+						commandAST = new AssignCommand(vAST, eAST, commandPos);
+					}
+				} else {
+					accept(Token.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -300,6 +324,13 @@ public class Parser {
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.END);
+			break;
+		
+		// This works the same as the above, but allows the use of {...} as well.
+		case Token.LCURLY :
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.RCURLY);
 			break;
 
 		case Token.LET: {
@@ -333,9 +364,44 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
-
+		
+		// Task 6.
+		case Token.LOOP: {
+			acceptIt();
+			
+			// parseCommand() instead of parseSingleCommand() because:
+			// "which could be multiple commands in a begin...end block".
+			Command c1AST = parseCommand();
+			accept(Token.WHILE);
+			
+			// The expression to check.
+			Expression eAST = parseExpression();
+			accept(Token.DO);
+			Command c2AST = parseCommand();
+			finish(commandPos);
+			
+			// Use SequentialCommand in order to iterate over the loop and do
+			// the checks.
+			Command loop = new WhileCommand(eAST, new SequentialCommand(c1AST, c2AST, commandPos), commandPos);
+			commandAST = loop;
+		}
+			break;
+		
+		case Token.REPEAT: {
+			acceptIt();
+			Command cAST = parseSingleCommand();
+			accept(Token.UNTIL);
+			Expression eAST = parseExpression();
+			finish(commandPos);
+			commandAST = new RepeatCommand(eAST, cAST, commandPos);
+		}
+		
 		case Token.SEMICOLON:
 		case Token.END:
+		
+		// Not entirely sure if this required or not, but I'm placing it in,
+		// as it matches the Token.END above. 
+		case Token.RCURLY:
 		case Token.ELSE:
 		case Token.IN:
 		case Token.EOT:
