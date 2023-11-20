@@ -18,6 +18,7 @@
 
 package triangle.abstractSyntaxTrees.commands;
 
+//import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
@@ -28,10 +29,21 @@ public class SequentialCommand extends Command {
 		C1 = c1AST;
 		C2 = c2AST;
 	}
+	
+//	public SequentialCommand(Command c1AST, Expression eAST, Command c2AST, SourcePosition position, boolean loopType) {
+//	    super(position);
+//	    C1 = c1AST;
+//	    E = eAST;
+//	    C2 = c2AST;
+//	    this.loopType = loopType;
+//	}
+
 
 	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
 		return v.visitSequentialCommand(this, arg);
 	}
 
 	public final Command C1, C2;
+//	public Expression E;
+//	public boolean loopType;
 }
