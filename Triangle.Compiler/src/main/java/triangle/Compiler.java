@@ -23,10 +23,14 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryStatisticsPrinter;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -34,13 +38,25 @@ import triangle.treeDrawer.Drawer;
  * @version 2.1 7 Oct 2003
  * @author Deryck F. Brown
  */
+
+
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+	/*CLI parser annotatios for args passed in */
+	@Argument(alias = "output", description = "The filename for the object program, normally obj.tam", required = true)
+	private static String objectName = "obj.tam";
+
+	@Argument(alias = "tree", description = "Display the AST", required = false)
+	private static boolean showTree = false;
+
+	@Argument(alias = "folding", description = "Enable constant folding", required = false)
+	private static boolean folding = false;
+
+	@Argument(alias = "show-folded-tree", description = "Display the AST after constant folding is complete.", required = false)
+    private static boolean showFoldedTree = false;
+
+	@Argument(alias = "stats", description = "Enable summary statistics for Char & Int expressions count", required = false)
+	private static boolean showStatSummary = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -53,6 +69,30 @@ public class Compiler {
 	/** The AST representing the source program. */
 	private static Program theAST;
 
+	private static SummaryStatisticsPrinter summaryStatsPrinter;
+
+	
+	/**
+	 * Triangle compiler main program.
+	 *
+	 * @param args the only command-line argument to the program specifies the
+	 *             source filename.
+	 */
+	public static void main(String[] args) {
+	Compiler compiler = new Compiler();
+
+	// parse the args passed in using cli parse library
+	Args.parseOrExit(compiler, args);
+
+	String sourceName = args[0];
+	
+	var compiledOK = compileProgram(sourceName, objectName, showTree, false, showFoldedTree, showStatSummary);
+
+	if (!showTree && !showFoldedTree) {
+		System.exit(compiledOK ? 0 : 1);
+	}
+}
+
 	/**
 	 * Compile the source program to TAM machine code.
 	 *
@@ -63,10 +103,12 @@ public class Compiler {
 	 * @param showingTable true iff the object description details are to be
 	 *                     displayed during code generation (not currently
 	 *                     implemented).
+	 * @param showFoldedTree if true, will display the folded tree after folding
+	 * @param 
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showFoldedTree, boolean showStatSummary) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -99,8 +141,16 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if (!showFoldedTree) {
+					drawer.draw(theAST);
+					showFoldedTree = true;
+				}
 			}
-			
+			if (showStatSummary){
+				summaryStatsPrinter = new SummaryStatisticsPrinter();
+				theAST.visit(summaryStatsPrinter);
+				summaryStatsPrinter.printSummaryStats();
+			}
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -115,42 +165,5 @@ public class Compiler {
 			System.out.println("Compilation was unsuccessful.");
 		}
 		return successful;
-	}
-
-	/**
-	 * Triangle compiler main program.
-	 *
-	 * @param args the only command-line argument to the program specifies the
-	 *             source filename.
-	 */
-	public static void main(String[] args) {
-
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
-
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
 	}
 }

@@ -81,17 +81,42 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
-		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
-		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
-		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
-		IdentifierVisitor<Void, AbstractSyntaxTree>, LiteralVisitor<Void, AbstractSyntaxTree>,
-		OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
-		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
-		VnameVisitor<Void, AbstractSyntaxTree> {
-	{
+public class SummaryStatisticsPrinter implements ActualParameterVisitor<Void, 
+													AbstractSyntaxTree>,
+													ActualParameterSequenceVisitor<Void, 
+													AbstractSyntaxTree>, 
+													ArrayAggregateVisitor<Void, 
+													AbstractSyntaxTree>,
+													CommandVisitor<Void, 
+													AbstractSyntaxTree>, 
+													DeclarationVisitor<Void, 
+													AbstractSyntaxTree>,
+													ExpressionVisitor<Void, 
+													AbstractSyntaxTree>, 
+													FormalParameterSequenceVisitor<Void, 
+													AbstractSyntaxTree>,
+													IdentifierVisitor<Void, 
+													AbstractSyntaxTree>, 
+													LiteralVisitor<Void, 
+													AbstractSyntaxTree>,
+													OperatorVisitor<Void, 
+													AbstractSyntaxTree>, 
+													ProgramVisitor<Void, 
+													AbstractSyntaxTree>,
+													RecordAggregateVisitor<Void, 
+													AbstractSyntaxTree>, 
+													TypeDenoterVisitor<Void, AbstractSyntaxTree>,
+													VnameVisitor<Void, AbstractSyntaxTree> 
+{
 
+	
+	private int charCount = 0, intCount = 0;
+
+	public void printSummaryStats(){
+		System.out.println("Char Expressions Counted: " + charCount);
+		System.out.println("Int Expressions Counted: " + intCount);
 	}
+
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -497,17 +522,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-	// TODO uncomment if you've implemented the repeat command
-//	@Override
-//	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
-//		ast.C.visit(this);
-//		AbstractSyntaxTree replacement = ast.E.visit(this);
-//		if (replacement != null) {
-//			ast.E = (Expression) replacement;
-//		}
-//		return null;
-//	}
-
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
 		ast.AA.visit(this);
@@ -596,6 +610,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		// any unhandled situation (i.e., not foldable) is ignored
 		return null;
 	}
+
 
 	@Override
 	public AbstractSyntaxTree visitDoWhileLoop(DoWhileLoop ast, Void arg) {

@@ -2,6 +2,7 @@ package triangle.abstractSyntaxTrees.visitors;
 
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
+import triangle.abstractSyntaxTrees.commands.DoWhileLoop;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
@@ -23,5 +24,7 @@ public interface CommandVisitor<TArg, TResult> {
 	TResult visitSequentialCommand(SequentialCommand ast, TArg arg);
 
 	TResult visitWhileCommand(WhileCommand ast, TArg arg);
+
+	TResult visitDoWhileLoop(DoWhileLoop ast, TArg arg);
 
 }

@@ -34,6 +34,7 @@ import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
+import triangle.abstractSyntaxTrees.commands.DoWhileLoop;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
@@ -679,6 +680,12 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		line1.link = new Polyline(x2 + line2.dx - dx - x1, 0, r);
 
 		return r;
+	}
+
+	@Override
+	public DrawingTree visitDoWhileLoop(DoWhileLoop ast, Void arg) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visitDoWhileLoop'");
 	}
 
 }

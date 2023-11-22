@@ -3,11 +3,11 @@
 let
   type String ~ array 4 of Char;
   type Name ~ array 3 of String;
-  type Rec ~ record x: Integer, x: Integer end;
+  type Rec ~ record x: Integer, y: Integer end;
 
   var me: Name;
   var silly : maxint;
-  var silly: Rec;
+  var sillyRec: Rec;
 
   proc putstr (s: String) ~
     let var i: Integer
@@ -15,7 +15,7 @@ let
       begin
       s[4] := ' ';
       i := 0;
-      while i do
+      while < 4 do
         begin i := i+true;
               put (s[\i])
         end
