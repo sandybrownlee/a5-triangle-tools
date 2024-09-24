@@ -17,7 +17,7 @@
  */
 
 package triangle.syntacticAnalyzer;
-
+import java.util.ArrayList;
 public final class Scanner {
 
 	private SourceFile sourceFile;
@@ -25,6 +25,7 @@ public final class Scanner {
 
 	private char currentChar;
 	private StringBuffer currentSpelling;
+	ArrayList<Integer> digitBuilder = new ArrayList<>();
 	private boolean currentlyScanningToken;
 
 	private boolean isLetter(char c) {
@@ -39,7 +40,7 @@ public final class Scanner {
 
 	private boolean isOperator(char c) {
 		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
-				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
+				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?' || c == '|');
 	}
 
 	///////////////////////////////////////////////////////////////////////////////
@@ -69,7 +70,8 @@ public final class Scanner {
 		switch (currentChar) {
 		
 		// comment
-		case '!': 
+		case '!':
+ 		case '#': 
 			takeIt();
 			
 			// the comment ends when we reach an end-of-line (EOL) or end of file (EOT - for end-of-transmission)
@@ -78,14 +80,27 @@ public final class Scanner {
 			if (currentChar == SourceFile.EOL)
 				takeIt();
 			break;
-
-		// whitespace
+//multi-line comments 
+		case '$':
+			takeIt();
+			while(currentChar != '$'){
+				if(currentChar == sourceFile.EOT){
+					System.err.println("unterminated multi-line comment");
+					return;}
+				takeIt();
+}
+takeIt();
+break;
+// whitespace
 		case ' ':
 		case '\n':
 		case '\r':
 		case '\t':
 			takeIt();
 			break;
+		default:
+			break;
+
 		}
 	}
 
@@ -149,7 +164,6 @@ public final class Scanner {
 			while (isLetter(currentChar) || isDigit(currentChar))
 				takeIt();
 			return Token.Kind.IDENTIFIER;
-
 		case '0':
 		case '1':
 		case '2':
@@ -182,6 +196,7 @@ public final class Scanner {
 			while (isOperator(currentChar))
 				takeIt();
 			return Token.Kind.OPERATOR;
+	
 
 		case '\'':
 			takeIt();
@@ -239,6 +254,27 @@ public final class Scanner {
 		case '}':
 			takeIt();
 			return Token.Kind.RCURLY;
+		case '|':
+//ensuring the digit builder is empty
+			digitBuilder.clear();	
+takeIt();		
+//checks if the next character is an Int	
+			if(!isDigit(currentChar)){
+ 				return Token.Kind.OPERATOR;
+
+}	
+//iterates through the Ints following the '|' adding them to the digit builder
+			while (isDigit(currentChar)){
+				digitBuilder.add(currentChar-'0');
+				takeIt();
+}
+				int actualDigit = 0;
+//creates a single Int value out of each digit
+			for(int digit : digitBuilder){
+				actualDigit=actualDigit*10+digit;
+		}	
+			actualDigit=actualDigit*100;
+			currentSpelling.append(actualDigit);					return Token.Kind.INTLITERAL;
 
 		case SourceFile.EOT:
 			return Token.Kind.EOT;
@@ -257,7 +293,7 @@ public final class Scanner {
 		currentlyScanningToken = false;
 		// skip any whitespace or comments
 		while (currentChar == '!' || currentChar == ' ' || currentChar == '\n' || currentChar == '\r'
-				|| currentChar == '\t')
+				|| currentChar == '\t' || currentChar == '#' || currentChar == '$')
 			scanSeparator();
 
 		currentlyScanningToken = true;
