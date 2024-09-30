@@ -1,0 +1,27 @@
+let
+ var x: Integer;
+ var y: Integer
+in
+begin
+ x:= 4;
+ y:= 4;
+ putint(x+y);
+ puteol();
+ putint(x*y);
+ puteol();
+ if x=y
+  then put('S')
+ else;
+ if x=y
+  then put('a')
+ else;
+ if x=y
+  then put('m')
+ else;
+ if x=y
+  then put('e')
+ else;
+ if x=y
+  then put('!')
+ else;
+end
