@@ -1,8 +1,8 @@
 /*
- * @(#)UnknownRoutine.java                       
- * 
+ * @(#)UnknownRoutine.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,24 +25,24 @@ import triangle.codeGenerator.Frame;
 
 public class UnknownRoutine extends RuntimeEntity implements RoutineEntity {
 
-	private final ObjectAddress address;
+    private final ObjectAddress address;
 
-	public UnknownRoutine(int size, int level, int displacement) {
-		super(size);
-		address = new ObjectAddress(level, displacement);
-	}
+    public UnknownRoutine(int size, int level, int displacement) {
+        super(size);
+        address = new ObjectAddress(level, displacement);
+    }
 
-	public final ObjectAddress getAddress() {
-		return address;
-	}
+    public final ObjectAddress getAddress() {
+        return address;
+    }
 
-	public void encodeCall(Emitter emitter, Frame frame) {
-		emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.getDisplacement());
-		emitter.emit(OpCode.CALLI, 0);
-	}
+    public void encodeCall(Emitter emitter, Frame frame) {
+        emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.getDisplacement());
+        emitter.emit(OpCode.CALLI, 0);
+    }
 
-	public void encodeFetch(Emitter emitter, Frame frame) {
-		emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.getDisplacement());
-	}
+    public void encodeFetch(Emitter emitter, Frame frame) {
+        emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.getDisplacement());
+    }
 
 }

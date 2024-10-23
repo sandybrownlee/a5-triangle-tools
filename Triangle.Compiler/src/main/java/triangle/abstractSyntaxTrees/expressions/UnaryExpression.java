@@ -1,8 +1,8 @@
 /*
- * @(#)UnaryExpression.java                       
- * 
+ * @(#)UnaryExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class UnaryExpression extends Expression {
 
-	public UnaryExpression(Operator oAST, Expression eAST, SourcePosition position) {
-		super(position);
-		O = oAST;
-		E = eAST;
-	}
+    public final Operator   O;
+    public       Expression E;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitUnaryExpression(this, arg);
-	}
+    public UnaryExpression(Operator oAST, Expression eAST, SourcePosition position) {
+        super(position);
+        O = oAST;
+        E = eAST;
+    }
 
-	public Expression E;
-	public final Operator O;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitUnaryExpression(this, arg);
+    }
+
 }

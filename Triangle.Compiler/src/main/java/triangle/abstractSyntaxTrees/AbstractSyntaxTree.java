@@ -1,8 +1,8 @@
 /*
- * @(#)AST.java                       
- * 
+ * @(#)AST.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,16 +23,16 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class AbstractSyntaxTree {
 
-	private final SourcePosition position;
+    private final SourcePosition position;
+    public        RuntimeEntity  entity;
 
-	public AbstractSyntaxTree(SourcePosition position) {
-		this.position = position;
-		entity = null;
-	}
+    public AbstractSyntaxTree(SourcePosition position) {
+        this.position = position;
+        entity = null;
+    }
 
-	public SourcePosition getPosition() {
-		return position;
-	}
+    public SourcePosition getPosition() {
+        return position;
+    }
 
-	public RuntimeEntity entity;
 }

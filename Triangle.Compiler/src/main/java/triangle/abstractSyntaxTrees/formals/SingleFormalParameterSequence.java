@@ -1,8 +1,8 @@
 /*
- * @(#)SingleFormalParameterSequence.java               
- * 
+ * @(#)SingleFormalParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,24 +23,24 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class SingleFormalParameterSequence extends FormalParameterSequence {
 
-	public SingleFormalParameterSequence(FormalParameter fpAST, SourcePosition position) {
-		super(position);
-		FP = fpAST;
-	}
+    public final FormalParameter FP;
 
-	public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSingleFormalParameterSequence(this, arg);
-	}
+    public SingleFormalParameterSequence(FormalParameter fpAST, SourcePosition position) {
+        super(position);
+        FP = fpAST;
+    }
 
-	@Override
-	public boolean equals(Object fpsAST) {
-		if (fpsAST instanceof SingleFormalParameterSequence) {
-			SingleFormalParameterSequence sfpsAST = (SingleFormalParameterSequence) fpsAST;
-			return FP.equals(sfpsAST.FP);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object fpsAST) {
+        if (fpsAST instanceof final SingleFormalParameterSequence sfpsAST) {
+            return FP.equals(sfpsAST.FP);
+        } else {
+            return false;
+        }
+    }
 
-	public final FormalParameter FP;
+    public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSingleFormalParameterSequence(this, arg);
+    }
+
 }

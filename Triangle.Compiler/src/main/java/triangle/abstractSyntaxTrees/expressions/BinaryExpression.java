@@ -1,8 +1,8 @@
 /*
- * @(#)BinaryExpression.java                       
- * 
+ * @(#)BinaryExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,18 +24,19 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class BinaryExpression extends Expression {
 
-	public BinaryExpression(Expression e1AST, Operator oAST, Expression e2AST, SourcePosition position) {
-		super(position);
-		O = oAST;
-		E1 = e1AST;
-		E2 = e2AST;
-	}
+    public final Operator   O;
+    public       Expression E1;
+    public       Expression E2;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitBinaryExpression(this, arg);
-	}
+    public BinaryExpression(Expression e1AST, Operator oAST, Expression e2AST, SourcePosition position) {
+        super(position);
+        O = oAST;
+        E1 = e1AST;
+        E2 = e2AST;
+    }
 
-	public Expression E1;
-	public Expression E2;
-	public final Operator O;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitBinaryExpression(this, arg);
+    }
+
 }

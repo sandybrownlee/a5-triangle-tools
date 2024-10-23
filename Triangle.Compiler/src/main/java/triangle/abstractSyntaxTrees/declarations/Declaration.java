@@ -1,8 +1,8 @@
 /*
- * @(#)Declaration.java                       
- * 
+ * @(#)Declaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class Declaration extends AbstractSyntaxTree {
 
-	public Declaration(SourcePosition position) {
-		super(position);
-		duplicated = false;
-	}
+    public boolean duplicated;
 
-	public boolean duplicated;
+    public Declaration(SourcePosition position) {
+        super(position);
+        duplicated = false;
+    }
 
-	public abstract <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

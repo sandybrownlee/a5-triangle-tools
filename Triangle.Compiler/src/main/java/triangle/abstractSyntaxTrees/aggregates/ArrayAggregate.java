@@ -1,8 +1,8 @@
 /*
- * @(#)ArrayAggregate.java                       
- * 
+ * @(#)ArrayAggregate.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class ArrayAggregate extends AbstractSyntaxTree {
 
-	public ArrayAggregate(SourcePosition position) {
-		super(position);
-		elemCount = 0;
-	}
+    public int elemCount;
 
-	public int elemCount;
+    public ArrayAggregate(SourcePosition position) {
+        super(position);
+        elemCount = 0;
+    }
 
-	public abstract <TArg, TResult> TResult visit(ArrayAggregateVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(ArrayAggregateVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(ArrayAggregateVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(ArrayAggregateVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

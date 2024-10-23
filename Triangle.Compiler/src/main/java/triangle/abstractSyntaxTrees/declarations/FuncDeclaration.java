@@ -1,8 +1,8 @@
 /*
- * @(#)FuncDeclaration.java                       
- * 
+ * @(#)FuncDeclaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -27,31 +27,34 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class FuncDeclaration extends Declaration implements FunctionDeclaration {
 
-	public FuncDeclaration(Identifier iAST, FormalParameterSequence fpsAST, TypeDenoter tAST, Expression eAST,
-			SourcePosition position) {
-		super(position);
-		I = iAST;
-		FPS = fpsAST;
-		T = tAST;
-		E = eAST;
-	}
+    public final Identifier              I;
+    public final FormalParameterSequence FPS;
+    public       TypeDenoter             T;
+    public       Expression              E;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitFuncDeclaration(this, arg);
-	}
+    public FuncDeclaration(
+            Identifier iAST, FormalParameterSequence fpsAST, TypeDenoter tAST, Expression eAST,
+            SourcePosition position
+    ) {
+        super(position);
+        I = iAST;
+        FPS = fpsAST;
+        T = tAST;
+        E = eAST;
+    }
 
-	@Override
-	public FormalParameterSequence getFormals() {
-		return FPS;
-	}
-	
-	@Override
-	public TypeDenoter getType() {
-		return T;
-	}
-	
-	public final Identifier I;
-	public final FormalParameterSequence FPS;
-	public TypeDenoter T;
-	public Expression E;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitFuncDeclaration(this, arg);
+    }
+
+    @Override
+    public FormalParameterSequence getFormals() {
+        return FPS;
+    }
+
+    @Override
+    public TypeDenoter getType() {
+        return T;
+    }
+
 }

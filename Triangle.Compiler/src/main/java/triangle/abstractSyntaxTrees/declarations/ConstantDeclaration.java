@@ -4,6 +4,6 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 
 public interface ConstantDeclaration {
 
-	TypeDenoter getType();
-	
+    TypeDenoter getType();
+
 }

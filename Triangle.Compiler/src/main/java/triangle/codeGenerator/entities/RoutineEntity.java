@@ -5,7 +5,8 @@ import triangle.codeGenerator.Frame;
 
 public interface RoutineEntity {
 
-	void encodeCall(Emitter emitter, Frame frame);
+    void encodeCall(Emitter emitter, Frame frame);
 
-	void encodeFetch(Emitter emitter, Frame frame);
+    void encodeFetch(Emitter emitter, Frame frame);
+
 }

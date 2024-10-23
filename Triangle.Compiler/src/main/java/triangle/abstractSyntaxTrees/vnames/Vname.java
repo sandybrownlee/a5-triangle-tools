@@ -1,8 +1,8 @@
 /*
- * @(#)Vname.java                       
- * 
+ * @(#)Vname.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,23 +24,24 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 /**
- * value (constant) or variable name
+ value (constant) or variable name
  */
 public abstract class Vname extends AbstractSyntaxTree {
 
-	public Vname(SourcePosition position) {
-		super(position);
-		variable = false;
-		type = null;
-	}
+    public boolean variable, indexed;
+    public int         offset;
+    public TypeDenoter type;
 
-	public boolean variable, indexed;
-	public int offset;
-	public TypeDenoter type;
+    public Vname(SourcePosition position) {
+        super(position);
+        variable = false;
+        type = null;
+    }
 
-	public abstract <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

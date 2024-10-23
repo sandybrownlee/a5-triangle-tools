@@ -1,8 +1,8 @@
 /*
- * @(#)IfCommand.java                       
- * 
+ * @(#)IfCommand.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,17 +24,18 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class IfCommand extends Command {
 
-	public IfCommand(Expression eAST, Command c1AST, Command c2AST, SourcePosition position) {
-		super(position);
-		E = eAST;
-		C1 = c1AST;
-		C2 = c2AST;
-	}
+    public final Command C1, C2;
+    public Expression E;
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitIfCommand(this, arg);
-	}
+    public IfCommand(Expression eAST, Command c1AST, Command c2AST, SourcePosition position) {
+        super(position);
+        E = eAST;
+        C1 = c1AST;
+        C2 = c2AST;
+    }
 
-	public Expression E;
-	public final Command C1, C2;
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitIfCommand(this, arg);
+    }
+
 }

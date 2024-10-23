@@ -1,8 +1,8 @@
 /*
- * @(#)IntegerLiteral.java                       
- * 
+ * @(#)IntegerLiteral.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,19 +23,20 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class IntegerLiteral extends Terminal {
 
-	public IntegerLiteral(String spelling, SourcePosition position) {
-		super(spelling, position);
-	}
+    public IntegerLiteral(String spelling, SourcePosition position) {
+        super(spelling, position);
+    }
 
-	public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitIntegerLiteral(this, arg);
-	}
+    public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitIntegerLiteral(this, arg);
+    }
 
-	public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
 
-	public int getValue() {
-		return Integer.parseInt(spelling);
-	}
+    public int getValue() {
+        return Integer.parseInt(spelling);
+    }
+
 }

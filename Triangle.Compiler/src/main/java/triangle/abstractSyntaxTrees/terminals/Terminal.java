@@ -1,8 +1,8 @@
 /*
- * @(#)Terminal.java                       
- * 
+ * @(#)Terminal.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,10 +23,11 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class Terminal extends AbstractSyntaxTree {
 
-	public Terminal(String spelling, SourcePosition position) {
-		super(position);
-		this.spelling = spelling;
-	}
+    public final String spelling;
 
-	public final String spelling;
+    public Terminal(String spelling, SourcePosition position) {
+        super(position);
+        this.spelling = spelling;
+    }
+
 }

@@ -1,8 +1,8 @@
 /*
- * @(#)IntegerExpression.java                       
- * 
+ * @(#)IntegerExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,24 +24,25 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class IntegerExpression extends Expression {
 
-	public IntegerExpression(IntegerLiteral ilAST, SourcePosition position) {
-		super(position);
-		IL = ilAST;
-	}
+    public final IntegerLiteral IL;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitIntegerExpression(this, arg);
-	}
+    public IntegerExpression(IntegerLiteral ilAST, SourcePosition position) {
+        super(position);
+        IL = ilAST;
+    }
 
-	public final IntegerLiteral IL;
+    @Override
+    public boolean isLiteral() {
+        return true;
+    }
 
-	@Override
-	public boolean isLiteral() {
-		return true;
-	}
+    @Override
+    public int getValue() {
+        return IL.getValue();
+    }
 
-	@Override
-	public int getValue() {
-		return IL.getValue();
-	}
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitIntegerExpression(this, arg);
+    }
+
 }

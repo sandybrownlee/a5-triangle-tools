@@ -1,8 +1,8 @@
 /*
- * @(#)BoolTypeDenoter.java                       
- * 
+ * @(#)BoolTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,25 +24,26 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class BoolTypeDenoter extends TypeDenoter {
 
-	public BoolTypeDenoter(SourcePosition position) {
-		super(position);
-	}
+    public BoolTypeDenoter(SourcePosition position) {
+        super(position);
+    }
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitBoolTypeDenoter(this, arg);
-	}
-	
-	@Override
-	public int getSize() {
-		return Machine.booleanSize;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if ((obj != null) && (obj instanceof ErrorTypeDenoter)) {
+            return true;
+        } else {
+            return ((obj != null) && (obj instanceof BoolTypeDenoter));
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if ((obj != null) && (obj instanceof ErrorTypeDenoter)) {
-			return true;
-		} else {
-			return ((obj != null) && (obj instanceof BoolTypeDenoter));
-		}
-	}
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitBoolTypeDenoter(this, arg);
+    }
+
+    @Override
+    public int getSize() {
+        return Machine.booleanSize;
+    }
+
 }

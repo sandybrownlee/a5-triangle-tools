@@ -1,8 +1,8 @@
 /*
- * @(#)TypeDeclaration.java                       
- * 
+ * @(#)TypeDeclaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,16 +25,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class TypeDeclaration extends Declaration {
 
-	public TypeDeclaration(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		T = tAST;
-	}
+    public final Identifier  I;
+    public       TypeDenoter T;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitTypeDeclaration(this, arg);
-	}
+    public TypeDeclaration(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        T = tAST;
+    }
 
-	public final Identifier I;
-	public TypeDenoter T;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitTypeDeclaration(this, arg);
+    }
+
 }

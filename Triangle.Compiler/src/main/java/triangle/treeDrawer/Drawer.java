@@ -1,8 +1,8 @@
 /*
- * @(#)Drawer.java                       
- * 
+ * @(#)Drawer.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -18,55 +18,52 @@
 
 package triangle.treeDrawer;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Point;
-
 import triangle.abstractSyntaxTrees.Program;
+
+import java.awt.*;
 
 public class Drawer {
 
-	private DrawerFrame frame;
-	private DrawerPanel panel;
+    private DrawerFrame frame;
+    private DrawerPanel panel;
 
-	private Program theAST;
-	private DrawingTree theDrawing;
+    private Program     theAST;
+    private DrawingTree theDrawing;
 
-	// Draw the AST representing a complete program.
+    // Draw the AST representing a complete program.
 
-	public void draw(Program ast) {
-		theAST = ast;
-		panel = new DrawerPanel(this);
-		frame = new DrawerFrame(panel);
+    public void draw(Program ast) {
+        theAST = ast;
+        panel = new DrawerPanel(this);
+        frame = new DrawerFrame(panel);
 
-		Font font = new Font("SansSerif", Font.PLAIN, 12);
-		frame.setFont(font);
+        Font font = new Font("SansSerif", Font.PLAIN, 12);
+        frame.setFont(font);
 
-		FontMetrics fontMetrics = frame.getFontMetrics(font);
+        FontMetrics fontMetrics = frame.getFontMetrics(font);
 
-		// another class of visitor is used for drawing the tree: LayoutVisitor
-		// LayoutVisitor is passed to the AST which, in turn, calls visitProgram
-		// and then each AST node is visited. This ultimately constructs a 
-		// DrawingTree, which is structurally the same as the AST but is decorated
-		// with coordinates (and has only DrawingTree objects as nodes)
-		// Each DrawingTree object knows how to paint itself, so it's passed to a
-		// DrawerPanel and DrawerFrame for display 
-		LayoutVisitor layout = new LayoutVisitor(fontMetrics);
-		theDrawing = (DrawingTree) theAST.visit(layout, null);
-		theDrawing.position(new Point(2048, 10));
+        // another class of visitor is used for drawing the tree: LayoutVisitor
+        // LayoutVisitor is passed to the AST which, in turn, calls visitProgram
+        // and then each AST node is visited. This ultimately constructs a
+        // DrawingTree, which is structurally the same as the AST but is decorated
+        // with coordinates (and has only DrawingTree objects as nodes)
+        // Each DrawingTree object knows how to paint itself, so it's passed to a
+        // DrawerPanel and DrawerFrame for display
+        LayoutVisitor layout = new LayoutVisitor(fontMetrics);
+        theDrawing = theAST.visit(layout, null);
+        theDrawing.position(new Point(2048, 10));
 
-		frame.setVisible(true);
-	}
+        frame.setVisible(true);
+    }
 
-	public void paintAST(Graphics g) {
-		g.setColor(panel.getBackground());
-		Dimension d = panel.getSize();
-		g.fillRect(0, 0, d.width, d.height);
+    public void paintAST(Graphics g) {
+        g.setColor(panel.getBackground());
+        Dimension d = panel.getSize();
+        g.fillRect(0, 0, d.width, d.height);
 
-		if (theDrawing != null) {
-			theDrawing.paint(g);
-		}
-	}
+        if (theDrawing != null) {
+            theDrawing.paint(g);
+        }
+    }
+
 }

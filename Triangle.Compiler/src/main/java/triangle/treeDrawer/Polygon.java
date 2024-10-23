@@ -1,8 +1,8 @@
 /*
- * @(#)Polygon.java                       
- * 
+ * @(#)Polygon.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -19,6 +19,8 @@
 package triangle.treeDrawer;
 
 class Polygon {
-	Polyline lower_head, lower_tail;
-	Polyline upper_head, upper_tail;
+
+    Polyline lower_head, lower_tail;
+    Polyline upper_head, upper_tail;
+
 }

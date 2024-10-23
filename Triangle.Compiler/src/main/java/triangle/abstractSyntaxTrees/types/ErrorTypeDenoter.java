@@ -1,8 +1,8 @@
 /*
- * @(#)ErrorTypeDenoter.java                       
- * 
+ * @(#)ErrorTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,21 +23,22 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ErrorTypeDenoter extends TypeDenoter {
 
-	public ErrorTypeDenoter(SourcePosition position) {
-		super(position);
-	}
+    public ErrorTypeDenoter(SourcePosition position) {
+        super(position);
+    }
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitErrorTypeDenoter(this, arg);
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return true;
+    }
 
-	@Override
-	public int getSize() {
-		return 0;
-	}
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitErrorTypeDenoter(this, arg);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return true;
-	}
+    @Override
+    public int getSize() {
+        return 0;
+    }
+
 }

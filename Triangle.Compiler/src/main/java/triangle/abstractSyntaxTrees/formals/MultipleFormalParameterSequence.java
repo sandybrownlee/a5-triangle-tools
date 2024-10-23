@@ -1,8 +1,8 @@
 /*
- * @(#)MultipleFormalParameterSequence.java       
- * 
+ * @(#)MultipleFormalParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,27 +23,29 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class MultipleFormalParameterSequence extends FormalParameterSequence {
 
-	public MultipleFormalParameterSequence(FormalParameter fpAST, FormalParameterSequence fpsAST,
-			SourcePosition position) {
-		super(position);
-		FP = fpAST;
-		FPS = fpsAST;
-	}
+    public final FormalParameter         FP;
+    public final FormalParameterSequence FPS;
 
-	public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitMultipleFormalParameterSequence(this, arg);
-	}
+    public MultipleFormalParameterSequence(
+            FormalParameter fpAST, FormalParameterSequence fpsAST,
+            SourcePosition position
+    ) {
+        super(position);
+        FP = fpAST;
+        FPS = fpsAST;
+    }
 
-	@Override
-	public boolean equals(Object fpsAST) {
-		if (fpsAST instanceof MultipleFormalParameterSequence) {
-			MultipleFormalParameterSequence mfpsAST = (MultipleFormalParameterSequence) fpsAST;
-			return FP.equals(mfpsAST.FP) && FPS.equals(mfpsAST.FPS);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object fpsAST) {
+        if (fpsAST instanceof final MultipleFormalParameterSequence mfpsAST) {
+            return FP.equals(mfpsAST.FP) && FPS.equals(mfpsAST.FPS);
+        } else {
+            return false;
+        }
+    }
 
-	public final FormalParameter FP;
-	public final FormalParameterSequence FPS;
+    public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitMultipleFormalParameterSequence(this, arg);
+    }
+
 }

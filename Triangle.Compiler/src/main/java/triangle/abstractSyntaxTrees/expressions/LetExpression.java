@@ -1,8 +1,8 @@
 /*
- * @(#)LetExpression.java                       
- * 
+ * @(#)LetExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class LetExpression extends Expression {
 
-	public LetExpression(Declaration dAST, Expression eAST, SourcePosition position) {
-		super(position);
-		D = dAST;
-		E = eAST;
-	}
+    public final Declaration D;
+    public       Expression  E;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitLetExpression(this, arg);
-	}
+    public LetExpression(Declaration dAST, Expression eAST, SourcePosition position) {
+        super(position);
+        D = dAST;
+        E = eAST;
+    }
 
-	public final Declaration D;
-	public Expression E;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitLetExpression(this, arg);
+    }
+
 }

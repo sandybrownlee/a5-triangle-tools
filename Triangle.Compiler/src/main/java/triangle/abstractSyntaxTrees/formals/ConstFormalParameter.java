@@ -1,8 +1,8 @@
 /*
- * @(#)ConstFormalParameter.java                       
- * 
+ * @(#)ConstFormalParameter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -26,30 +26,31 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ConstFormalParameter extends FormalParameter implements ConstantDeclaration {
 
-	public ConstFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		T = tAST;
-	}
+    public final Identifier  I;
+    public       TypeDenoter T;
 
-	@Override
-	public TypeDenoter getType() {
-		return T;
-	}
+    public ConstFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        T = tAST;
+    }
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitConstFormalParameter(this, arg);
-	}
+    @Override
+    public TypeDenoter getType() {
+        return T;
+    }
 
-	@Override
-	public boolean equals(Object fpAST) {
-		if (fpAST instanceof ConstFormalParameter cfpAST) {
-			return T.equals(cfpAST.T);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object fpAST) {
+        if (fpAST instanceof ConstFormalParameter cfpAST) {
+            return T.equals(cfpAST.T);
+        } else {
+            return false;
+        }
+    }
 
-	public final Identifier I;
-	public TypeDenoter T;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitConstFormalParameter(this, arg);
+    }
+
 }

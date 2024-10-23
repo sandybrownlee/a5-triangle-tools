@@ -4,9 +4,9 @@ apply plugin: 'application'
 sourceCompatibility = 17
 
 dependencies {
-	implementation project(':Triangle.AbstractMachine')
+    implementation project(':Triangle.AbstractMachine')
 }
 
 application {
-	mainClass = 'Triangle.AbstractMachine.Interpreter'
+    mainClass = 'Triangle.AbstractMachine.Interpreter'
 }

@@ -1,8 +1,8 @@
 /*
- * @(#)CallCommand.java                       
- * 
+ * @(#)CallCommand.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,16 +25,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class CallCommand extends Command {
 
-	public CallCommand(Identifier iAST, ActualParameterSequence apsAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		APS = apsAST;
-	}
+    public final Identifier              I;
+    public final ActualParameterSequence APS;
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitCallCommand(this, arg);
-	}
+    public CallCommand(Identifier iAST, ActualParameterSequence apsAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        APS = apsAST;
+    }
 
-	public final Identifier I;
-	public final ActualParameterSequence APS;
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitCallCommand(this, arg);
+    }
+
 }

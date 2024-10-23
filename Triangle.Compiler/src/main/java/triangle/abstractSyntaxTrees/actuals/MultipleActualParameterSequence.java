@@ -1,8 +1,8 @@
 /*
- * @(#)MultipleActualParameterSequence.java               
- * 
+ * @(#)MultipleActualParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,17 +23,20 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class MultipleActualParameterSequence extends ActualParameterSequence {
 
-	public MultipleActualParameterSequence(ActualParameter apAST, ActualParameterSequence apsAST,
-			SourcePosition position) {
-		super(position);
-		AP = apAST;
-		APS = apsAST;
-	}
+    public final ActualParameter         AP;
+    public final ActualParameterSequence APS;
 
-	public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitMultipleActualParameterSequence(this, arg);
-	}
+    public MultipleActualParameterSequence(
+            ActualParameter apAST, ActualParameterSequence apsAST,
+            SourcePosition position
+    ) {
+        super(position);
+        AP = apAST;
+        APS = apsAST;
+    }
 
-	public final ActualParameter AP;
-	public final ActualParameterSequence APS;
+    public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitMultipleActualParameterSequence(this, arg);
+    }
+
 }

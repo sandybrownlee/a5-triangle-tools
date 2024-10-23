@@ -1,8 +1,8 @@
 /*
- * @(#)Disassembler.java                        
- * 
+ * @(#)Disassembler.java
+ *
  * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,332 +24,333 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 /**
- * Disassembles the TAM code in the given file, and displays the instructions on
- * standard output.
- *
- * For example:
- *
- * <pre>
- *   java TAM.Disassembler obj.tam
- * </pre>
- *
- * <p>
- * Copyright 1991 David A. Watt, University of Glasgow<br>
- * Copyright 1998 Deryck F. Brown, The Robert Gordon University<br>
- * </p>
- *
+ Disassembles the TAM code in the given file, and displays the instructions on
+ standard output.
+ <p>
+ For example:
+
+ <pre>
+ java TAM.Disassembler obj.tam
+ </pre>
+
+ <p>
+ Copyright 1991 David A. Watt, University of Glasgow<br>
+ Copyright 1998 Deryck F. Brown, The Robert Gordon University<br>
+ </p>
  */
 
 public class Disassembler {
 
-	static String objectName;
+    static String objectName;
 
-	static int CT;
+    static int CT;
 
-	/**
-	 * Writes the r-field of an instruction in the form "l<I>reg</I>r", where l and
-	 * r are the bracket characters to use.
-	 *
-	 * @param leftbracket  the character to print before the register.
-	 * @param r            the number of the register.
-	 * @param rightbracket the character to print after the register.
-	 */
-	private static void writeR(char leftbracket, Register r, char rightbracket) {
+    public static void main(String[] args) {
+        System.out.println("********** TAM Disassembler (Sun Version 2.1) **********");
 
-		System.out.print(leftbracket);
-		System.out.print(r.toString());
-		System.out.print(rightbracket);
-	}
+        if (args.length == 1) {
+            objectName = args[0];
+        } else {
+            objectName = "obj.tam";
+        }
 
-	private static void writeR(char leftBracket, int r, char rightBracket) {
-		var register = Register.values()[r];
-		writeR(leftBracket, register, rightBracket);
-	}
+        loadObjectProgram(objectName);
+        disassembleProgram();
+    }
 
-	/**
-	 * Writes a void n-field of an instruction.
-	 */
-	private static void blankN() {
-		System.out.print("      ");
-	}
+    /**
+     Loads the TAM object program into code store from the named file.
 
-	// Writes the n-field of an instruction.
-	/**
-	 * Writes the n-field of an instruction in the form "(n)".
-	 *
-	 * @param n the integer to write.
-	 */
-	private static void writeN(int n) {
-		System.out.print("(" + n + ") ");
-		if (n < 10) {
-			System.out.print("  ");
-		} else if (n < 100) {
-			System.out.print(" ");
-		}
-	}
+     @param objectName the name of the file containing the program.
+     */
+    static void loadObjectProgram(String objectName) {
 
-	/**
-	 * Writes the d-field of an instruction.
-	 *
-	 * @param d the integer to write.
-	 */
-	private static void writeD(int d) {
-		System.out.print(d);
-	}
+        var finished = false;
 
-	/**
-	 * Writes the name of primitive routine with relative address d.
-	 *
-	 * @param d the displacement of the primitive routine.
-	 */
-	private static void writePrimitive(int d) {
-		var primitive = Primitive.values()[d];
-		switch (primitive) {
-		case ID:
-			System.out.print("id      ");
-			break;
-		case NOT:
-			System.out.print("not     ");
-			break;
-		case AND:
-			System.out.print("and     ");
-			break;
-		case OR:
-			System.out.print("or      ");
-			break;
-		case SUCC:
-			System.out.print("succ    ");
-			break;
-		case PRED:
-			System.out.print("pred    ");
-			break;
-		case NEG:
-			System.out.print("neg     ");
-			break;
-		case ADD:
-			System.out.print("add     ");
-			break;
-		case SUB:
-			System.out.print("sub     ");
-			break;
-		case MULT:
-			System.out.print("mult    ");
-			break;
-		case DIV:
-			System.out.print("div     ");
-			break;
-		case MOD:
-			System.out.print("mod     ");
-			break;
-		case LT:
-			System.out.print("lt      ");
-			break;
-		case LE:
-			System.out.print("le      ");
-			break;
-		case GE:
-			System.out.print("ge      ");
-			break;
-		case GT:
-			System.out.print("gt      ");
-			break;
-		case EQ:
-			System.out.print("eq      ");
-			break;
-		case NE:
-			System.out.print("ne      ");
-			break;
-		case EOL:
-			System.out.print("eol     ");
-			break;
-		case EOF:
-			System.out.print("eof     ");
-			break;
-		case GET:
-			System.out.print("get     ");
-			break;
-		case PUT:
-			System.out.print("put     ");
-			break;
-		case GETEOL:
-			System.out.print("geteol  ");
-			break;
-		case PUTEOL:
-			System.out.print("puteol  ");
-			break;
-		case GETINT:
-			System.out.print("getint  ");
-			break;
-		case PUTINT:
-			System.out.print("putint  ");
-			break;
-		case NEW:
-			System.out.print("new     ");
-			break;
-		case DISPOSE:
-			System.out.print("dispose ");
-			break;
-		}
-	}
+        try (var objectFile = new FileInputStream(objectName)) {
+            var objectStream = new DataInputStream(objectFile);
+            var addr = Machine.CB;
+            while (!finished) {
+                Machine.code[addr] = Instruction.read(objectStream);
+                if (Machine.code[addr] == null) {
+                    finished = true;
+                } else {
+                    addr = addr + 1;
+                }
+            }
+            CT = addr;
+        } catch (FileNotFoundException s) {
+            CT = Machine.CB;
+            System.err.println("Error opening object file: " + s);
+        } catch (IOException s) {
+            CT = Machine.CB;
+            System.err.println("Error reading object file: " + s);
+        }
+    }
 
-	/**
-	 * Writes the given instruction in assembly-code format.
-	 *
-	 * @param instr the instruction to display.
-	 */
-	private static void writeInstruction(Instruction instr) {
+    /**
+     Writes the r-field of an instruction in the form "l<I>reg</I>r", where l and
+     r are the bracket characters to use.
 
-		switch (instr.opCode) {
-		case LOAD:
-			System.out.print("LOAD  ");
-			writeN(instr.length);
-			writeD(instr.operand);
-			writeR('[', instr.register, ']');
-			break;
+     @param leftbracket  the character to print before the register.
+     @param r            the number of the register.
+     @param rightbracket the character to print after the register.
+     */
+    private static void writeR(char leftbracket, Register r, char rightbracket) {
 
-		case LOADA:
-			System.out.print("LOADA ");
-			blankN();
-			writeD(instr.operand);
-			writeR('[', instr.register, ']');
-			break;
+        System.out.print(leftbracket);
+        System.out.print(r.toString());
+        System.out.print(rightbracket);
+    }
 
-		case LOADI:
-			System.out.print("LOADI ");
-			writeN(instr.length);
-			break;
+    // Writes the n-field of an instruction.
 
-		case LOADL:
-			System.out.print("LOADL ");
-			blankN();
-			writeD(instr.operand);
-			break;
+    private static void writeR(char leftBracket, int r, char rightBracket) {
+        var register = Register.values()[r];
+        writeR(leftBracket, register, rightBracket);
+    }
 
-		case STORE:
-			System.out.print("STORE ");
-			writeN(instr.length);
-			writeD(instr.operand);
-			writeR('[', instr.register, ']');
-			break;
+    /**
+     Writes a void n-field of an instruction.
+     */
+    private static void blankN() {
+        System.out.print("      ");
+    }
 
-		case STOREI:
-			System.out.print("STOREI");
-			writeN(instr.length);
-			break;
+    /**
+     Writes the n-field of an instruction in the form "(n)".
 
-		case CALL:
-			System.out.print("CALL  ");
-			if (instr.register == Register.PB) {
-				blankN();
-				writePrimitive(instr.operand);
-			} else {
-				writeR('(', instr.length, ')');
-				System.out.print("  ");
-				writeD(instr.operand);
-				writeR('[', instr.register, ']');
-			}
-			break;
+     @param n the integer to write.
+     */
+    private static void writeN(int n) {
+        System.out.print("(" + n + ") ");
+        if (n < 10) {
+            System.out.print("  ");
+        } else if (n < 100) {
+            System.out.print(" ");
+        }
+    }
 
-		case CALLI:
-			System.out.print("CALLI ");
-			break;
+    /**
+     Writes the d-field of an instruction.
 
-		case RETURN:
-			System.out.print("RETURN");
-			writeN(instr.length);
-			writeD(instr.operand);
-			break;
+     @param d the integer to write.
+     */
+    private static void writeD(int d) {
+        System.out.print(d);
+    }
 
-		case PUSH:
-			System.out.print("PUSH  ");
-			blankN();
-			writeD(instr.operand);
-			break;
+    /**
+     Writes the name of primitive routine with relative address d.
 
-		case POP:
-			System.out.print("POP   ");
-			writeN(instr.length);
-			writeD(instr.operand);
-			break;
+     @param d the displacement of the primitive routine.
+     */
+    private static void writePrimitive(int d) {
+        var primitive = Primitive.values()[d];
+        switch (primitive) {
+            case ID:
+                System.out.print("id      ");
+                break;
+            case NOT:
+                System.out.print("not     ");
+                break;
+            case AND:
+                System.out.print("and     ");
+                break;
+            case OR:
+                System.out.print("or      ");
+                break;
+            case SUCC:
+                System.out.print("succ    ");
+                break;
+            case PRED:
+                System.out.print("pred    ");
+                break;
+            case NEG:
+                System.out.print("neg     ");
+                break;
+            case ADD:
+                System.out.print("add     ");
+                break;
+            case SUB:
+                System.out.print("sub     ");
+                break;
+            case MULT:
+                System.out.print("mult    ");
+                break;
+            case DIV:
+                System.out.print("div     ");
+                break;
+            case MOD:
+                System.out.print("mod     ");
+                break;
+            case LT:
+                System.out.print("lt      ");
+                break;
+            case LE:
+                System.out.print("le      ");
+                break;
+            case GE:
+                System.out.print("ge      ");
+                break;
+            case GT:
+                System.out.print("gt      ");
+                break;
+            case EQ:
+                System.out.print("eq      ");
+                break;
+            case NE:
+                System.out.print("ne      ");
+                break;
+            case EOL:
+                System.out.print("eol     ");
+                break;
+            case EOF:
+                System.out.print("eof     ");
+                break;
+            case GET:
+                System.out.print("get     ");
+                break;
+            case PUT:
+                System.out.print("put     ");
+                break;
+            case GETEOL:
+                System.out.print("geteol  ");
+                break;
+            case PUTEOL:
+                System.out.print("puteol  ");
+                break;
+            case GETINT:
+                System.out.print("getint  ");
+                break;
+            case PUTINT:
+                System.out.print("putint  ");
+                break;
+            case NEW:
+                System.out.print("new     ");
+                break;
+            case DISPOSE:
+                System.out.print("dispose ");
+                break;
+        }
+    }
 
-		case JUMP:
-			System.out.print("JUMP  ");
-			blankN();
-			writeD(instr.operand);
-			writeR('[', instr.register, ']');
-			break;
+    // LOADING
 
-		case JUMPI:
-			System.out.print("JUMPI ");
-			break;
+    /**
+     Writes the given instruction in assembly-code format.
 
-		case JUMPIF:
-			System.out.print("JUMPIF");
-			writeN(instr.length);
-			writeD(instr.operand);
-			writeR('[', instr.register, ']');
-			break;
+     @param instr the instruction to display.
+     */
+    private static void writeInstruction(Instruction instr) {
 
-		case HALT:
-			System.out.print("HALT  ");
-		}
-	}
+        switch (instr.opCode) {
+            case LOAD:
+                System.out.print("LOAD  ");
+                writeN(instr.length);
+                writeD(instr.operand);
+                writeR('[', instr.register, ']');
+                break;
 
-	/**
-	 * Writes all instructions of the program in code store.
-	 */
-	private static void disassembleProgram() {
-		for (int addr = Machine.CB; addr < CT; addr++) {
-			System.out.print(addr + ":  ");
-			writeInstruction(Machine.code[addr]);
-			System.out.println();
-		}
-	}
+            case LOADA:
+                System.out.print("LOADA ");
+                blankN();
+                writeD(instr.operand);
+                writeR('[', instr.register, ']');
+                break;
 
-	// LOADING
+            case LOADI:
+                System.out.print("LOADI ");
+                writeN(instr.length);
+                break;
 
-	/**
-	 * Loads the TAM object program into code store from the named file.
-	 *
-	 * @param objectName the name of the file containing the program.
-	 */
-	static void loadObjectProgram(String objectName) {
+            case LOADL:
+                System.out.print("LOADL ");
+                blankN();
+                writeD(instr.operand);
+                break;
 
-		var finished = false;
+            case STORE:
+                System.out.print("STORE ");
+                writeN(instr.length);
+                writeD(instr.operand);
+                writeR('[', instr.register, ']');
+                break;
 
-		try (var objectFile = new FileInputStream(objectName)) {
-			var objectStream = new DataInputStream(objectFile);
-			var addr = Machine.CB;
-			while (!finished) {
-				Machine.code[addr] = Instruction.read(objectStream);
-				if (Machine.code[addr] == null) {
-					finished = true;
-				} else {
-					addr = addr + 1;
-				}
-			}
-			CT = addr;
-		} catch (FileNotFoundException s) {
-			CT = Machine.CB;
-			System.err.println("Error opening object file: " + s);
-		} catch (IOException s) {
-			CT = Machine.CB;
-			System.err.println("Error reading object file: " + s);
-		}
-	}
+            case STOREI:
+                System.out.print("STOREI");
+                writeN(instr.length);
+                break;
 
-	// DISASSEMBLE
+            case CALL:
+                System.out.print("CALL  ");
+                if (instr.register == Register.PB) {
+                    blankN();
+                    writePrimitive(instr.operand);
+                } else {
+                    writeR('(', instr.length, ')');
+                    System.out.print("  ");
+                    writeD(instr.operand);
+                    writeR('[', instr.register, ']');
+                }
+                break;
 
-	public static void main(String[] args) {
-		System.out.println("********** TAM Disassembler (Sun Version 2.1) **********");
+            case CALLI:
+                System.out.print("CALLI ");
+                break;
 
-		if (args.length == 1) {
-			objectName = args[0];
-		} else {
-			objectName = "obj.tam";
-		}
+            case RETURN:
+                System.out.print("RETURN");
+                writeN(instr.length);
+                writeD(instr.operand);
+                break;
 
-		loadObjectProgram(objectName);
-		disassembleProgram();
-	}
+            case PUSH:
+                System.out.print("PUSH  ");
+                blankN();
+                writeD(instr.operand);
+                break;
+
+            case POP:
+                System.out.print("POP   ");
+                writeN(instr.length);
+                writeD(instr.operand);
+                break;
+
+            case JUMP:
+                System.out.print("JUMP  ");
+                blankN();
+                writeD(instr.operand);
+                writeR('[', instr.register, ']');
+                break;
+
+            case JUMPI:
+                System.out.print("JUMPI ");
+                break;
+
+            case JUMPIF:
+                System.out.print("JUMPIF");
+                writeN(instr.length);
+                writeD(instr.operand);
+                writeR('[', instr.register, ']');
+                break;
+
+            case HALT:
+                System.out.print("HALT  ");
+        }
+    }
+
+    // DISASSEMBLE
+
+    /**
+     Writes all instructions of the program in code store.
+     */
+    private static void disassembleProgram() {
+        for (int addr = Machine.CB; addr < CT; addr++) {
+            System.out.print(addr + ":  ");
+            writeInstruction(Machine.code[addr]);
+            System.out.println();
+        }
+    }
+
 }

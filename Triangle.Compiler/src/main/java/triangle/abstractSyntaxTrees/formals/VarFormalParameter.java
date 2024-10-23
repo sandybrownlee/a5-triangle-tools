@@ -1,8 +1,8 @@
 /*
- * @(#)ValFormalParameter.java                       
- * 
+ * @(#)ValFormalParameter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -26,30 +26,31 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class VarFormalParameter extends FormalParameter implements VariableDeclaration {
 
-	public VarFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		T = tAST;
-	}
+    public final Identifier  I;
+    public       TypeDenoter T;
 
-	@Override
-	public TypeDenoter getType() {
-		return T;
-	}
+    public VarFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        T = tAST;
+    }
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitVarFormalParameter(this, arg);
-	}
+    @Override
+    public TypeDenoter getType() {
+        return T;
+    }
 
-	@Override
-	public boolean equals(Object fpAST) {
-		if (fpAST instanceof VarFormalParameter vfpAST) {
-			return T.equals(vfpAST.T);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object fpAST) {
+        if (fpAST instanceof VarFormalParameter vfpAST) {
+            return T.equals(vfpAST.T);
+        } else {
+            return false;
+        }
+    }
 
-	public final Identifier I;
-	public TypeDenoter T;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitVarFormalParameter(this, arg);
+    }
+
 }

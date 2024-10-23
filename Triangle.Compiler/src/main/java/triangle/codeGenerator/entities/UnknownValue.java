@@ -1,8 +1,8 @@
 /*
- * @(#)UnknownValue.java                       
- * 
+ * @(#)UnknownValue.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -27,29 +27,30 @@ import triangle.codeGenerator.Frame;
 
 public class UnknownValue extends RuntimeEntity implements FetchableEntity {
 
-	private final ObjectAddress address;
+    private final ObjectAddress address;
 
-	public UnknownValue(int size, int level, int displacement) {
-		super(size);
-		address = new ObjectAddress(level, displacement);
-	}
+    public UnknownValue(int size, int level, int displacement) {
+        super(size);
+        address = new ObjectAddress(level, displacement);
+    }
 
-	public UnknownValue(int size, Frame frame) {
-		this(size, frame.getLevel(), frame.getSize());
-	}
+    public UnknownValue(int size, Frame frame) {
+        this(size, frame.getLevel(), frame.getSize());
+    }
 
-	public final ObjectAddress getAddress() {
-		return address;
-	}
+    public final ObjectAddress getAddress() {
+        return address;
+    }
 
-	public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
-		if (vname.indexed) {
-			emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.getDisplacement() + vname.offset);
-			emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
-			emitter.emit(OpCode.LOADI, size, 0);
-		} else {
-			emitter.emit(OpCode.LOAD, size, frame.getDisplayRegister(address),
-					address.getDisplacement() + vname.offset);
-		}
-	}
+    public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
+        if (vname.indexed) {
+            emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.getDisplacement() + vname.offset);
+            emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
+            emitter.emit(OpCode.LOADI, size, 0);
+        } else {
+            emitter.emit(OpCode.LOAD, size, frame.getDisplayRegister(address),
+                         address.getDisplacement() + vname.offset);
+        }
+    }
+
 }

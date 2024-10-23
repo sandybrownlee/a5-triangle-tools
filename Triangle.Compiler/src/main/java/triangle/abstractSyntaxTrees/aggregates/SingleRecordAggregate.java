@@ -1,8 +1,8 @@
 /*
- * @(#)SingleRecordAggregate.java               
- * 
+ * @(#)SingleRecordAggregate.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,16 +25,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class SingleRecordAggregate extends RecordAggregate {
 
-	public SingleRecordAggregate(Identifier iAST, Expression eAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		E = eAST;
-	}
+    public final Identifier I;
+    public       Expression E;
 
-	public <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSingleRecordAggregate(this, arg);
-	}
+    public SingleRecordAggregate(Identifier iAST, Expression eAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        E = eAST;
+    }
 
-	public final Identifier I;
-	public Expression E;
+    public <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSingleRecordAggregate(this, arg);
+    }
+
 }

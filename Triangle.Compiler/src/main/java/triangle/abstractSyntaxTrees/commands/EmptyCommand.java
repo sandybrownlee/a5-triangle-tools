@@ -1,8 +1,8 @@
 /*
- * @(#)EmptyCommand.java                       
- * 
+ * @(#)EmptyCommand.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,11 +23,12 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class EmptyCommand extends Command {
 
-	public EmptyCommand(SourcePosition position) {
-		super(position);
-	}
+    public EmptyCommand(SourcePosition position) {
+        super(position);
+    }
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitEmptyCommand(this, arg);
-	}
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitEmptyCommand(this, arg);
+    }
+
 }

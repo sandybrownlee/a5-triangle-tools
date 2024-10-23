@@ -1,8 +1,8 @@
 /*
- * @(#)IntTypeDenoter.java                       
- * 
+ * @(#)IntTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,25 +24,26 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class IntTypeDenoter extends TypeDenoter {
 
-	public IntTypeDenoter(SourcePosition position) {
-		super(position);
-	}
+    public IntTypeDenoter(SourcePosition position) {
+        super(position);
+    }
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitIntTypeDenoter(this, arg);
-	}
-	
-	@Override
-	public int getSize() {
-		return Machine.integerSize;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj != null && obj instanceof ErrorTypeDenoter) {
+            return true;
+        } else {
+            return (obj != null && obj instanceof IntTypeDenoter);
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof ErrorTypeDenoter) {
-			return true;
-		} else {
-			return (obj != null && obj instanceof IntTypeDenoter);
-		}
-	}
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitIntTypeDenoter(this, arg);
+    }
+
+    @Override
+    public int getSize() {
+        return Machine.integerSize;
+    }
+
 }

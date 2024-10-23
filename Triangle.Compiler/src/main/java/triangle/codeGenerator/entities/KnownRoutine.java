@@ -1,8 +1,8 @@
 /*
- * @(#)KnownRoutine.java                       
- * 
+ * @(#)KnownRoutine.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,24 +25,24 @@ import triangle.codeGenerator.Frame;
 
 public class KnownRoutine extends RuntimeEntity implements RoutineEntity {
 
-	private final ObjectAddress address;
+    private final ObjectAddress address;
 
-	public KnownRoutine(int size, int level, int displacement) {
-		super(size);
-		address = new ObjectAddress(level, displacement);
-	}
+    public KnownRoutine(int size, int level, int displacement) {
+        super(size);
+        address = new ObjectAddress(level, displacement);
+    }
 
-	public final ObjectAddress getAddress() {
-		return address;
-	}
+    public final ObjectAddress getAddress() {
+        return address;
+    }
 
-	public void encodeCall(Emitter emitter, Frame frame) {
-		emitter.emit(OpCode.CALL, frame.getDisplayRegister(address), Register.CB, address.getDisplacement());
-	}
+    public void encodeCall(Emitter emitter, Frame frame) {
+        emitter.emit(OpCode.CALL, frame.getDisplayRegister(address), Register.CB, address.getDisplacement());
+    }
 
-	public void encodeFetch(Emitter emitter, Frame frame) {
-		emitter.emit(OpCode.LOADA, frame.getDisplayRegister(address), 0);
-		emitter.emit(OpCode.LOADA, Register.CB, address.getDisplacement());
-	}
+    public void encodeFetch(Emitter emitter, Frame frame) {
+        emitter.emit(OpCode.LOADA, frame.getDisplayRegister(address), 0);
+        emitter.emit(OpCode.LOADA, Register.CB, address.getDisplacement());
+    }
 
 }

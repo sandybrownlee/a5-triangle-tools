@@ -1,8 +1,8 @@
 /*
- * @(#)IdEntry.java                       
- * 
+ * @(#)IdEntry.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -22,16 +22,16 @@ import triangle.abstractSyntaxTrees.declarations.Declaration;
 
 public class IdEntry {
 
-	protected String id;
-	protected Declaration attr;
-	protected int level;
-	protected IdEntry previous;
+    protected String      id;
+    protected Declaration attr;
+    protected int         level;
+    protected IdEntry     previous;
 
-	IdEntry(String id, Declaration attr, int level, IdEntry previous) {
-		this.id = id;
-		this.attr = attr;
-		this.level = level;
-		this.previous = previous;
-	}
+    IdEntry(String id, Declaration attr, int level, IdEntry previous) {
+        this.id = id;
+        this.attr = attr;
+        this.level = level;
+        this.previous = previous;
+    }
 
 }

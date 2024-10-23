@@ -1,8 +1,8 @@
 /*
- * @(#)UnaryOperatorDeclaration.java               
- * 
+ * @(#)UnaryOperatorDeclaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,17 +25,18 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class UnaryOperatorDeclaration extends Declaration {
 
-	public UnaryOperatorDeclaration(Operator oAST, TypeDenoter argAST, TypeDenoter resultAST, SourcePosition position) {
-		super(position);
-		O = oAST;
-		ARG = argAST;
-		RES = resultAST;
-	}
+    public final Operator    O;
+    public final TypeDenoter ARG, RES;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitUnaryOperatorDeclaration(this, arg);
-	}
+    public UnaryOperatorDeclaration(Operator oAST, TypeDenoter argAST, TypeDenoter resultAST, SourcePosition position) {
+        super(position);
+        O = oAST;
+        ARG = argAST;
+        RES = resultAST;
+    }
 
-	public final Operator O;
-	public final TypeDenoter ARG, RES;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitUnaryOperatorDeclaration(this, arg);
+    }
+
 }

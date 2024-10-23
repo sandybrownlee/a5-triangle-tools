@@ -5,8 +5,8 @@ import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 
 public interface ArrayAggregateVisitor<TArg, TResult> {
 
-	TResult visitMultipleArrayAggregate(MultipleArrayAggregate ast, TArg arg);
+    TResult visitMultipleArrayAggregate(MultipleArrayAggregate ast, TArg arg);
 
-	TResult visitSingleArrayAggregate(SingleArrayAggregate ast, TArg arg);
+    TResult visitSingleArrayAggregate(SingleArrayAggregate ast, TArg arg);
 
 }

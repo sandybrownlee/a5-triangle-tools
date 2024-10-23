@@ -1,8 +1,8 @@
 /*
- * @(#)Operator.java                       
- * 
+ * @(#)Operator.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,18 +24,19 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class Operator extends Terminal {
 
-	public Operator(String spelling, SourcePosition position) {
-		super(spelling, position);
-		decl = null;
-	}
+    public Declaration decl;
 
-	public Declaration decl;
+    public Operator(String spelling, SourcePosition position) {
+        super(spelling, position);
+        decl = null;
+    }
 
-	public <TArg, TResult> TResult visit(OperatorVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitOperator(this, arg);
-	}
+    public <TArg, TResult> TResult visit(OperatorVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitOperator(this, arg);
+    }
 
-	public <TArg, TResult> TResult visit(OperatorVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(OperatorVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

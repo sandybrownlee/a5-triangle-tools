@@ -1,8 +1,8 @@
 /*
- * @(#)ProcDeclaration.java                       
- * 
+ * @(#)ProcDeclaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -26,23 +26,24 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ProcDeclaration extends Declaration implements ProcedureDeclaration {
 
-	public ProcDeclaration(Identifier iAST, FormalParameterSequence fpsAST, Command cAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		FPS = fpsAST;
-		C = cAST;
-	}
+    public final Identifier              I;
+    public final FormalParameterSequence FPS;
+    public final Command                 C;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitProcDeclaration(this, arg);
-	}
+    public ProcDeclaration(Identifier iAST, FormalParameterSequence fpsAST, Command cAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        FPS = fpsAST;
+        C = cAST;
+    }
 
-	@Override
-	public FormalParameterSequence getFormals() {
-		return FPS;
-	}
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitProcDeclaration(this, arg);
+    }
 
-	public final Identifier I;
-	public final FormalParameterSequence FPS;
-	public final Command C;
+    @Override
+    public FormalParameterSequence getFormals() {
+        return FPS;
+    }
+
 }

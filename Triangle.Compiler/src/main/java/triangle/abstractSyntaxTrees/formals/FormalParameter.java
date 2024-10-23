@@ -1,8 +1,8 @@
 /*
- * @(#)FormalParameter.java                       
- * 
+ * @(#)FormalParameter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class FormalParameter extends Declaration {
 
-	public FormalParameter(SourcePosition position) {
-		super(position);
-	}
+    public FormalParameter(SourcePosition position) {
+        super(position);
+    }
 
-	@Override
-	public abstract boolean equals(Object fpAST);
+    @Override
+    public abstract boolean equals(Object fpAST);
 
-	public abstract <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

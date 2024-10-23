@@ -1,8 +1,8 @@
 /*
- * @(#)ConstActualParameter.java                       
- * 
+ * @(#)ConstActualParameter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,14 +24,15 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ConstActualParameter extends ActualParameter {
 
-	public ConstActualParameter(Expression eAST, SourcePosition position) {
-		super(position);
-		E = eAST;
-	}
+    public Expression E;
 
-	public <TArg, TResult> TResult visit(ActualParameterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitConstActualParameter(this, arg);
-	}
+    public ConstActualParameter(Expression eAST, SourcePosition position) {
+        super(position);
+        E = eAST;
+    }
 
-	public Expression E;
+    public <TArg, TResult> TResult visit(ActualParameterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitConstActualParameter(this, arg);
+    }
+
 }

@@ -1,8 +1,8 @@
 /*
- * @(#)IfExpression.java                       
- * 
+ * @(#)IfExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,18 +23,19 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class IfExpression extends Expression {
 
-	public IfExpression(Expression e1AST, Expression e2AST, Expression e3AST, SourcePosition position) {
-		super(position);
-		E1 = e1AST;
-		E2 = e2AST;
-		E3 = e3AST;
-	}
+    public Expression E1;
+    public Expression E2;
+    public Expression E3;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitIfExpression(this, arg);
-	}
+    public IfExpression(Expression e1AST, Expression e2AST, Expression e3AST, SourcePosition position) {
+        super(position);
+        E1 = e1AST;
+        E2 = e2AST;
+        E3 = e3AST;
+    }
 
-	public Expression E1;
-	public Expression E2;
-	public Expression E3;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitIfExpression(this, arg);
+    }
+
 }

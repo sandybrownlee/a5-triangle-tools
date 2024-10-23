@@ -1,8 +1,8 @@
 /*
- * @(#)CharacterLiteral.java                       
- * 
+ * @(#)CharacterLiteral.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,19 +23,20 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class CharacterLiteral extends Terminal {
 
-	public CharacterLiteral(String spelling, SourcePosition position) {
-		super(spelling, position);
-	}
+    public CharacterLiteral(String spelling, SourcePosition position) {
+        super(spelling, position);
+    }
 
-	public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitCharacterLiteral(this, arg);
-	}
+    public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitCharacterLiteral(this, arg);
+    }
 
-	public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(LiteralVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
 
-	public int getValue() {
-		return spelling.charAt(1);
-	}
+    public int getValue() {
+        return spelling.charAt(1);
+    }
+
 }

@@ -4,6 +4,6 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 
 public interface IdentifierVisitor<TArg, TResult> {
 
-	TResult visitIdentifier(Identifier ast, TArg arg);
+    TResult visitIdentifier(Identifier ast, TArg arg);
 
 }

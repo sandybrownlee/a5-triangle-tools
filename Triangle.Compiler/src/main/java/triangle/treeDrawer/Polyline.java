@@ -1,8 +1,8 @@
 /*
- * @(#)Polyline.java                       
- * 
+ * @(#)Polyline.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -19,15 +19,17 @@
 package triangle.treeDrawer;
 
 /**
- * used to keep track of the position for components in the tree to be drawn
+ used to keep track of the position for components in the tree to be drawn
  */
 class Polyline {
-	int dx, dy;
-	Polyline link;
 
-	Polyline(int dx, int dy, Polyline link) {
-		this.dx = dx;
-		this.dy = dy;
-		this.link = link;
-	}
+    int dx, dy;
+    Polyline link;
+
+    Polyline(int dx, int dy, Polyline link) {
+        this.dx = dx;
+        this.dy = dy;
+        this.link = link;
+    }
+
 }

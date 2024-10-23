@@ -10,12 +10,12 @@ repositories {
 
 
 dependencies {
-	implementation project(':Triangle.AbstractMachine')
-	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation project(':Triangle.AbstractMachine')
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
 application {
-	mainClass = 'Triangle.Compiler'
+    mainClass = 'Triangle.Compiler'
 }
 
 // allow access to programs for unit tests

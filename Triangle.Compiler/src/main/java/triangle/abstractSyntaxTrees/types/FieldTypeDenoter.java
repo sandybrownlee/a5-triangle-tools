@@ -1,8 +1,8 @@
 /*
- * @(#)FieldTypeDenoter.java                       
- * 
+ * @(#)FieldTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -22,7 +22,8 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class FieldTypeDenoter extends TypeDenoter {
 
-	public FieldTypeDenoter(SourcePosition position) {
-		super(position);
-	}
+    public FieldTypeDenoter(SourcePosition position) {
+        super(position);
+    }
+
 }

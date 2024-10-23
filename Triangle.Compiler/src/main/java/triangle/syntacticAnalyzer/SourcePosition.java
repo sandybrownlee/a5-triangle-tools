@@ -1,8 +1,8 @@
 /*
- * @(#)SourcePosition.java                       
- * 
+ * @(#)SourcePosition.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -20,20 +20,21 @@ package triangle.syntacticAnalyzer;
 
 public class SourcePosition {
 
-	public int start, finish;
+    public int start, finish;
 
-	public SourcePosition() {
-		start = 0;
-		finish = 0;
-	}
+    public SourcePosition() {
+        start = 0;
+        finish = 0;
+    }
 
-	public SourcePosition(int s, int f) {
-		start = s;
-		finish = f;
-	}
+    public SourcePosition(int s, int f) {
+        start = s;
+        finish = f;
+    }
 
-	@Override
-	public String toString() {
-		return "(" + start + ", " + finish + ")";
-	}
+    @Override
+    public String toString() {
+        return "(" + start + ", " + finish + ")";
+    }
+
 }

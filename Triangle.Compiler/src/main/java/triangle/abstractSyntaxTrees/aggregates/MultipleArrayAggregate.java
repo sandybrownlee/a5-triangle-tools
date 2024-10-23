@@ -1,8 +1,8 @@
 /*
- * @(#)MultipleArrayAggregate.java                       
- * 
+ * @(#)MultipleArrayAggregate.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class MultipleArrayAggregate extends ArrayAggregate {
 
-	public MultipleArrayAggregate(Expression eAST, ArrayAggregate aaAST, SourcePosition position) {
-		super(position);
-		E = eAST;
-		AA = aaAST;
-	}
+    public final ArrayAggregate AA;
+    public       Expression     E;
 
-	public <TArg, TResult> TResult visit(ArrayAggregateVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitMultipleArrayAggregate(this, arg);
-	}
+    public MultipleArrayAggregate(Expression eAST, ArrayAggregate aaAST, SourcePosition position) {
+        super(position);
+        E = eAST;
+        AA = aaAST;
+    }
 
-	public Expression E;
-	public final ArrayAggregate AA;
+    public <TArg, TResult> TResult visit(ArrayAggregateVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitMultipleArrayAggregate(this, arg);
+    }
+
 }

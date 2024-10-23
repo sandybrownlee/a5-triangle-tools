@@ -1,8 +1,8 @@
 /*
- * @(#)SimpleTypeDenoter.java                       
- * 
+ * @(#)SimpleTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,24 +24,25 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class SimpleTypeDenoter extends TypeDenoter {
 
-	public SimpleTypeDenoter(Identifier iAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-	}
+    public final Identifier I;
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSimpleTypeDenoter(this, arg);
-	}
-	
-	@Override
-	public int getSize() {
-		return 0;
-	}
+    public SimpleTypeDenoter(Identifier iAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		return false; // should not happen
-	}
+    @Override
+    public boolean equals(Object obj) {
+        return false; // should not happen
+    }
 
-	public final Identifier I;
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSimpleTypeDenoter(this, arg);
+    }
+
+    @Override
+    public int getSize() {
+        return 0;
+    }
+
 }

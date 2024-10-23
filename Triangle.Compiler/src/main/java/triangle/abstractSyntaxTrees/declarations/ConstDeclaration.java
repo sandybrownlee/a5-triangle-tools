@@ -1,8 +1,8 @@
 /*
- * @(#)ConstDeclaration.java                       
- * 
+ * @(#)ConstDeclaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -26,21 +26,22 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ConstDeclaration extends Declaration implements ConstantDeclaration {
 
-	public ConstDeclaration(Identifier iAST, Expression eAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		E = eAST;
-	}
+    public final Identifier I;
+    public       Expression E;
 
-	@Override
-	public TypeDenoter getType() {
-		return E.type;
-	}
-	
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitConstDeclaration(this, arg);
-	}
+    public ConstDeclaration(Identifier iAST, Expression eAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        E = eAST;
+    }
 
-	public final Identifier I;
-	public Expression E;
+    @Override
+    public TypeDenoter getType() {
+        return E.type;
+    }
+
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitConstDeclaration(this, arg);
+    }
+
 }

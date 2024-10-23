@@ -1,8 +1,8 @@
 /*
- * @(#)EqualityRoutine.java                       
- * 
+ * @(#)EqualityRoutine.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -26,25 +26,25 @@ import triangle.codeGenerator.Frame;
 
 public class EqualityRoutine extends RuntimeEntity implements RoutineEntity {
 
-	private final Primitive primitive;
+    private final Primitive primitive;
 
-	public EqualityRoutine(int size, Primitive primitive) {
-		super(size);
-		this.primitive = primitive;
-	}
+    public EqualityRoutine(int size, Primitive primitive) {
+        super(size);
+        this.primitive = primitive;
+    }
 
-	public final Primitive getPrimitive() {
-		return primitive;
-	}
+    public final Primitive getPrimitive() {
+        return primitive;
+    }
 
-	public void encodeCall(Emitter emitter, Frame frame) {
-		emitter.emit(OpCode.LOADL, frame.getSize() / 2);
-		emitter.emit(OpCode.CALL, Register.PB, primitive);
-	}
+    public void encodeCall(Emitter emitter, Frame frame) {
+        emitter.emit(OpCode.LOADL, frame.getSize() / 2);
+        emitter.emit(OpCode.CALL, Register.PB, primitive);
+    }
 
-	public void encodeFetch(Emitter emitter, Frame frame) {
-		emitter.emit(OpCode.LOADA, 0, Register.SB, 0);
-		emitter.emit(OpCode.LOADA, Register.PB, primitive);
-	}
+    public void encodeFetch(Emitter emitter, Frame frame) {
+        emitter.emit(OpCode.LOADA, 0, Register.SB, 0);
+        emitter.emit(OpCode.LOADA, Register.PB, primitive);
+    }
 
 }

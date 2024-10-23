@@ -1,8 +1,8 @@
 /*
- * @(#)UnknownAddress.java                       
- * 
+ * @(#)UnknownAddress.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -28,51 +28,52 @@ import triangle.codeGenerator.Frame;
 
 public class UnknownAddress extends AddressableEntity {
 
-	public UnknownAddress(int size, int level, int displacement) {
-		super(size, level, displacement);
-	}
+    public UnknownAddress(int size, int level, int displacement) {
+        super(size, level, displacement);
+    }
 
-	public void encodeStore(Emitter emitter, Frame frame, int size, Vname vname) {
+    public void encodeStore(Emitter emitter, Frame frame, int size, Vname vname) {
 
-		emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
-		if (vname.indexed) {
-			emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
-		}
+        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
+        if (vname.indexed) {
+            emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
+        }
 
-		int offset = vname.offset;
-		if (offset != 0) {
-			emitter.emit(OpCode.LOADL, 0, offset);
-			emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
-		}
-		emitter.emit(OpCode.STOREI, size, 0);
-	}
+        int offset = vname.offset;
+        if (offset != 0) {
+            emitter.emit(OpCode.LOADL, 0, offset);
+            emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
+        }
+        emitter.emit(OpCode.STOREI, size, 0);
+    }
 
-	public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
-		emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
+    public void encodeFetchAddress(Emitter emitter, Frame frame, Vname vname) {
 
-		if (vname.indexed) {
-			emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
-		}
+        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
+        if (vname.indexed) {
+            emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
+        }
 
-		int offset = vname.offset;
-		if (offset != 0) {
-			emitter.emit(OpCode.LOADL, offset);
-			emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
-		}
-		emitter.emit(OpCode.LOADI, size);
-	}
+        int offset = vname.offset;
+        if (offset != 0) {
+            emitter.emit(OpCode.LOADL, offset);
+            emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
+        }
+    }
 
-	public void encodeFetchAddress(Emitter emitter, Frame frame, Vname vname) {
+    public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
+        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
 
-		emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
-		if (vname.indexed) {
-			emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
-		}
+        if (vname.indexed) {
+            emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
+        }
 
-		int offset = vname.offset;
-		if (offset != 0) {
-			emitter.emit(OpCode.LOADL, offset);
-			emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
-		}
-	}
+        int offset = vname.offset;
+        if (offset != 0) {
+            emitter.emit(OpCode.LOADL, offset);
+            emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
+        }
+        emitter.emit(OpCode.LOADI, size);
+    }
+
 }

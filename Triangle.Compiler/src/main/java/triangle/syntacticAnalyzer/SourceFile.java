@@ -1,8 +1,8 @@
 /*
- * @(#)SourceFile.java                       
- * 
+ * @(#)SourceFile.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -18,55 +18,54 @@
 
 package triangle.syntacticAnalyzer;
 
-import java.net.URL;
-
 public class SourceFile {
 
-	public static final char EOL = '\n';
-	public static final char EOT = '\u0000';
+    public static final char EOL = '\n';
+    public static final char EOT = '\u0000';
 
-	java.io.File sourceFile;
-	java.io.InputStream source;
-	int currentLine;
+    java.io.File        sourceFile;
+    java.io.InputStream source;
+    int                 currentLine;
 
-	public static SourceFile ofPath(String pathname) {
-		try {
-			SourceFile sf = new SourceFile();
-			sf.sourceFile = new java.io.File(pathname);
-			sf.source = new java.io.FileInputStream(sf.sourceFile);
-			return sf;
-		} catch (java.io.IOException s) {
-			return null;
-		}
-	}
-	
-	public static SourceFile fromResource(String handle) {
-		SourceFile sf = new SourceFile();
-		//sf.sourceFile = new java.io.File(pathname);
-		sf.source = sf.getClass().getResourceAsStream(handle);
-		return sf;
-	}
+    private SourceFile() {
+        currentLine = 1;
+    }
 
-	private SourceFile() {
-		currentLine = 1;
-	}
+    public static SourceFile ofPath(String pathname) {
+        try {
+            SourceFile sf = new SourceFile();
+            sf.sourceFile = new java.io.File(pathname);
+            sf.source = new java.io.FileInputStream(sf.sourceFile);
+            return sf;
+        } catch (java.io.IOException s) {
+            return null;
+        }
+    }
 
-	char getSource() {
-		try {
-			int c = source.read();
+    public static SourceFile fromResource(String handle) {
+        SourceFile sf = new SourceFile();
+        //sf.sourceFile = new java.io.File(pathname);
+        sf.source = sf.getClass().getResourceAsStream(handle);
+        return sf;
+    }
 
-			if (c == -1) {
-				c = EOT;
-			} else if (c == EOL) {
-				currentLine++;
-			}
-			return (char) c;
-		} catch (java.io.IOException s) {
-			return EOT;
-		}
-	}
+    char getSource() {
+        try {
+            int c = source.read();
 
-	int getCurrentLine() {
-		return currentLine;
-	}
+            if (c == -1) {
+                c = EOT;
+            } else if (c == EOL) {
+                currentLine++;
+            }
+            return (char) c;
+        } catch (java.io.IOException s) {
+            return EOT;
+        }
+    }
+
+    int getCurrentLine() {
+        return currentLine;
+    }
+
 }

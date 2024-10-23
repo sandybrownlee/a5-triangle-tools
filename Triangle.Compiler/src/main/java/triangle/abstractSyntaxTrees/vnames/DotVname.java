@@ -1,8 +1,8 @@
 /*
- * @(#)DotVname.java                       
- * 
+ * @(#)DotVname.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,21 +23,22 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 /**
- * Value (constant) or variable names including a sub-parts separated by dots. 
- * Example: fruitbox.applecount (fruitbox is a record, containing a variable applecount)
+ Value (constant) or variable names including a sub-parts separated by dots.
+ Example: fruitbox.applecount (fruitbox is a record, containing a variable applecount)
  */
 public class DotVname extends Vname {
 
-	public DotVname(Vname vAST, Identifier iAST, SourcePosition position) {
-		super(position);
-		V = vAST;
-		I = iAST;
-	}
+    public final Identifier I;
+    public final Vname      V;
 
-	public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitDotVname(this, arg);
-	}
+    public DotVname(Vname vAST, Identifier iAST, SourcePosition position) {
+        super(position);
+        V = vAST;
+        I = iAST;
+    }
 
-	public final Identifier I;
-	public final Vname V;
+    public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitDotVname(this, arg);
+    }
+
 }

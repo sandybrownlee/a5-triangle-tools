@@ -1,8 +1,8 @@
 /*
- * @(#)SingleFieldTypeDenoter.java               
- * 
+ * @(#)SingleFieldTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,31 +24,31 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class SingleFieldTypeDenoter extends FieldTypeDenoter {
 
-	public SingleFieldTypeDenoter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		T = tAST;
-	}
+    public final Identifier  I;
+    public       TypeDenoter T;
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSingleFieldTypeDenoter(this, arg);
-	}
-	
-	@Override
-	public int getSize() {
-		return T.getSize();
-	}
+    public SingleFieldTypeDenoter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        T = tAST;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof SingleFieldTypeDenoter) {
-			SingleFieldTypeDenoter ft = (SingleFieldTypeDenoter) obj;
-			return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj != null && obj instanceof final SingleFieldTypeDenoter ft) {
+            return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T);
+        } else {
+            return false;
+        }
+    }
 
-	public final Identifier I;
-	public TypeDenoter T;
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSingleFieldTypeDenoter(this, arg);
+    }
+
+    @Override
+    public int getSize() {
+        return T.getSize();
+    }
+
 }

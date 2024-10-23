@@ -1,8 +1,8 @@
 /*
- * @(#)Field.java                       
- * 
+ * @(#)Field.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -20,14 +20,15 @@ package triangle.codeGenerator.entities;
 
 public class Field extends RuntimeEntity {
 
-	private final int fieldOffset;
+    private final int fieldOffset;
 
-	public Field(int size, int fieldOffset) {
-		super(size);
-		this.fieldOffset = fieldOffset;
-	}
+    public Field(int size, int fieldOffset) {
+        super(size);
+        this.fieldOffset = fieldOffset;
+    }
 
-	public final int getFieldOffset() {
-		return fieldOffset;
-	}
+    public final int getFieldOffset() {
+        return fieldOffset;
+    }
+
 }

@@ -1,8 +1,8 @@
 /*
- * @(#)FormalParameterSequence.java               
- * 
+ * @(#)FormalParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class FormalParameterSequence extends AbstractSyntaxTree {
 
-	public FormalParameterSequence(SourcePosition position) {
-		super(position);
-	}
+    public FormalParameterSequence(SourcePosition position) {
+        super(position);
+    }
 
-	@Override
-	public abstract boolean equals(Object fpsAST);
+    @Override
+    public abstract boolean equals(Object fpsAST);
 
-	public abstract <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

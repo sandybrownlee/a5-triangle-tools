@@ -1,8 +1,8 @@
 /*
- * @(#)ErrorReporter.java                       
- * 
+ * @(#)ErrorReporter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -22,44 +22,45 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ErrorReporter {
 
-	private int numErrors;
-	
-	private boolean throwExceptions;
+    private final boolean throwExceptions;
+    private int numErrors;
 
-	/**
-	 * @param throwExceptions if true, throw exceptions (good for unit tests) otherwise write to stdout
-	 */
-	public ErrorReporter(boolean throwExceptions) {
-		numErrors = 0;
-		this.throwExceptions = throwExceptions;
-	}
+    /**
+     @param throwExceptions if true, throw exceptions (good for unit tests) otherwise write to stdout
+     */
+    public ErrorReporter(boolean throwExceptions) {
+        numErrors = 0;
+        this.throwExceptions = throwExceptions;
+    }
 
-	public void reportError(String message, String tokenName, SourcePosition pos) {
+    public void reportError(String message, String tokenName, SourcePosition pos) {
 
-		numErrors++;
-		
-		String s = ("ERROR: ");
+        numErrors++;
 
-		for (int p = 0; p < message.length(); p++)
-			if (message.charAt(p) == '%')
-				s += tokenName;
-			else
-				s += message.charAt(p);
-		s += (" " + pos.start + ".." + pos.finish);
-		
-		if (throwExceptions) {
-			throw new RuntimeException(s);
-		} else {
-			System.out.println(s);
-		}
-		
-	}
+        String s = ("ERROR: ");
 
-	public void reportRestriction(String message) {
-		System.out.println("RESTRICTION: " + message);
-	}
-	
-	public int getNumErrors() {
-		return numErrors;
-	}
+        for (int p = 0; p < message.length(); p++) {
+            if (message.charAt(p) == '%') {
+                s += tokenName;
+            } else {
+                s += message.charAt(p);
+            }
+        }
+        s += (" " + pos.start + ".." + pos.finish);
+
+        if (throwExceptions) {
+            throw new RuntimeException(s);
+        } else {
+            System.out.println(s);
+        }
+    }
+
+    public void reportRestriction(String message) {
+        System.out.println("RESTRICTION: " + message);
+    }
+
+    public int getNumErrors() {
+        return numErrors;
+    }
+
 }

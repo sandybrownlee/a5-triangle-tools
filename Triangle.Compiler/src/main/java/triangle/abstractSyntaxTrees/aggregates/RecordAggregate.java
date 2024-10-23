@@ -1,8 +1,8 @@
 /*
- * @(#)RecordAggregate.java                       
- * 
+ * @(#)RecordAggregate.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,16 +25,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class RecordAggregate extends AbstractSyntaxTree {
 
-	public RecordAggregate(SourcePosition position) {
-		super(position);
-		type = null;
-	}
+    public FieldTypeDenoter type;
 
-	public FieldTypeDenoter type;
+    public RecordAggregate(SourcePosition position) {
+        super(position);
+        type = null;
+    }
 
-	public abstract <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

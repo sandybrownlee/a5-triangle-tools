@@ -1,8 +1,8 @@
 /*
- * @(#)ArrayExpression.java                       
- * 
+ * @(#)ArrayExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,14 +24,15 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ArrayExpression extends Expression {
 
-	public ArrayExpression(ArrayAggregate aaAST, SourcePosition position) {
-		super(position);
-		AA = aaAST;
-	}
+    public final ArrayAggregate AA;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitArrayExpression(this, arg);
-	}
+    public ArrayExpression(ArrayAggregate aaAST, SourcePosition position) {
+        super(position);
+        AA = aaAST;
+    }
 
-	public final ArrayAggregate AA;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitArrayExpression(this, arg);
+    }
+
 }

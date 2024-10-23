@@ -1,8 +1,8 @@
 /*
- * @(#)Command.java                       
- * 
+ * @(#)Command.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,13 +24,14 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class Command extends AbstractSyntaxTree {
 
-	public Command(SourcePosition position) {
-		super(position);
-	}
+    public Command(SourcePosition position) {
+        super(position);
+    }
 
-	public abstract <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

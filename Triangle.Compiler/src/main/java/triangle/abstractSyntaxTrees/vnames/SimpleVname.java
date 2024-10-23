@@ -1,8 +1,8 @@
 /*
- * @(#)SimpleVname.java                       
- * 
+ * @(#)SimpleVname.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,18 +23,19 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 /**
- * a value or variable name with no sub parts and no array index
+ a value or variable name with no sub parts and no array index
  */
 public class SimpleVname extends Vname {
 
-	public SimpleVname(Identifier iAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-	}
+    public final Identifier I;
 
-	public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSimpleVname(this, arg);
-	}
+    public SimpleVname(Identifier iAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+    }
 
-	public final Identifier I;
+    public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSimpleVname(this, arg);
+    }
+
 }

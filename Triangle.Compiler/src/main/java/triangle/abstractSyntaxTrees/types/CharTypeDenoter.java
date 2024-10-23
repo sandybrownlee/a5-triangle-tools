@@ -1,8 +1,8 @@
 /*
- * @(#)CharTypeDenoter.java                       
- * 
+ * @(#)CharTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,25 +24,26 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class CharTypeDenoter extends TypeDenoter {
 
-	public CharTypeDenoter(SourcePosition position) {
-		super(position);
-	}
+    public CharTypeDenoter(SourcePosition position) {
+        super(position);
+    }
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitCharTypeDenoter(this, arg);
-	}
-	
-	@Override
-	public int getSize() {
-		return Machine.characterSize;
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj != null && obj instanceof ErrorTypeDenoter) {
+            return true;
+        } else {
+            return (obj != null && obj instanceof CharTypeDenoter);
+        }
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof ErrorTypeDenoter) {
-			return true;
-		} else {
-			return (obj != null && obj instanceof CharTypeDenoter);
-		}
-	}
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitCharTypeDenoter(this, arg);
+    }
+
+    @Override
+    public int getSize() {
+        return Machine.characterSize;
+    }
+
 }

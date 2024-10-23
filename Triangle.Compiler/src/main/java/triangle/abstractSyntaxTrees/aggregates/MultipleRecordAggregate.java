@@ -1,8 +1,8 @@
 /*
- * @(#)MultipleRecordAggregate.java               
- * 
+ * @(#)MultipleRecordAggregate.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,18 +25,19 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class MultipleRecordAggregate extends RecordAggregate {
 
-	public MultipleRecordAggregate(Identifier iAST, Expression eAST, RecordAggregate raAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		E = eAST;
-		RA = raAST;
-	}
+    public final Identifier      I;
+    public final RecordAggregate RA;
+    public       Expression      E;
 
-	public <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitMultipleRecordAggregate(this, arg);
-	}
+    public MultipleRecordAggregate(Identifier iAST, Expression eAST, RecordAggregate raAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        E = eAST;
+        RA = raAST;
+    }
 
-	public final Identifier I;
-	public Expression E;
-	public final RecordAggregate RA;
+    public <TArg, TResult> TResult visit(RecordAggregateVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitMultipleRecordAggregate(this, arg);
+    }
+
 }

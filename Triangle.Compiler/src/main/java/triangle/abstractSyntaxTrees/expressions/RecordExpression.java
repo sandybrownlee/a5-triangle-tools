@@ -1,8 +1,8 @@
 /*
- * @(#)RecordExpression.java                       
- * 
+ * @(#)RecordExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,14 +24,15 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class RecordExpression extends Expression {
 
-	public RecordExpression(RecordAggregate raAST, SourcePosition position) {
-		super(position);
-		RA = raAST;
-	}
+    public final RecordAggregate RA;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitRecordExpression(this, arg);
-	}
+    public RecordExpression(RecordAggregate raAST, SourcePosition position) {
+        super(position);
+        RA = raAST;
+    }
 
-	public final RecordAggregate RA;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitRecordExpression(this, arg);
+    }
+
 }

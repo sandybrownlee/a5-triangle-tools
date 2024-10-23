@@ -1,8 +1,8 @@
 /*
- * @(#)WhileCommand.java                       
- * 
+ * @(#)WhileCommand.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,16 +24,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class WhileCommand extends Command {
 
-	public WhileCommand(Expression eAST, Command cAST, SourcePosition position) {
-		super(position);
-		E = eAST;
-		C = cAST;
-	}
+    public final Command    C;
+    public       Expression E;
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitWhileCommand(this, arg);
-	}
+    public WhileCommand(Expression eAST, Command cAST, SourcePosition position) {
+        super(position);
+        E = eAST;
+        C = cAST;
+    }
 
-	public Expression E;
-	public final Command C;
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitWhileCommand(this, arg);
+    }
+
 }

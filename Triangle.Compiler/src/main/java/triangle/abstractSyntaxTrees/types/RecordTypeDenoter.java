@@ -1,8 +1,8 @@
 /*
- * @(#)RecordTypeDenoter.java               
- * 
+ * @(#)RecordTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,30 +23,31 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class RecordTypeDenoter extends TypeDenoter {
 
-	public RecordTypeDenoter(FieldTypeDenoter ftAST, SourcePosition position) {
-		super(position);
-		FT = ftAST;
-	}
+    public FieldTypeDenoter FT;
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitRecordTypeDenoter(this, arg);
-	}
-	
-	@Override
-	public int getSize() {
-		return FT.getSize();
-	}
+    public RecordTypeDenoter(FieldTypeDenoter ftAST, SourcePosition position) {
+        super(position);
+        FT = ftAST;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof ErrorTypeDenoter) {
-			return true;
-		} else if (obj != null && obj instanceof RecordTypeDenoter) {
-			return this.FT.equals(((RecordTypeDenoter) obj).FT);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj != null && obj instanceof ErrorTypeDenoter) {
+            return true;
+        } else if (obj != null && obj instanceof RecordTypeDenoter) {
+            return this.FT.equals(((RecordTypeDenoter) obj).FT);
+        } else {
+            return false;
+        }
+    }
 
-	public FieldTypeDenoter FT;
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitRecordTypeDenoter(this, arg);
+    }
+
+    @Override
+    public int getSize() {
+        return FT.getSize();
+    }
+
 }

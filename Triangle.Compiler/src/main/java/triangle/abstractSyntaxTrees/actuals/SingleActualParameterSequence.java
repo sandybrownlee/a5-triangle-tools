@@ -1,8 +1,8 @@
 /*
- * @(#)SingleActualParameterSequence.java               
- * 
+ * @(#)SingleActualParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,14 +23,15 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class SingleActualParameterSequence extends ActualParameterSequence {
 
-	public SingleActualParameterSequence(ActualParameter apAST, SourcePosition position) {
-		super(position);
-		AP = apAST;
-	}
+    public final ActualParameter AP;
 
-	public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSingleActualParameterSequence(this, arg);
-	}
+    public SingleActualParameterSequence(ActualParameter apAST, SourcePosition position) {
+        super(position);
+        AP = apAST;
+    }
 
-	public final ActualParameter AP;
+    public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSingleActualParameterSequence(this, arg);
+    }
+
 }

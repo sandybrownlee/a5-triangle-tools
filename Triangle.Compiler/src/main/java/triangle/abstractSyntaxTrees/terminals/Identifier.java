@@ -1,8 +1,8 @@
 /*
- * @(#)Identifier.java                       
- * 
+ * @(#)Identifier.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,20 +25,21 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class Identifier extends Terminal {
 
-	public Identifier(String spelling, SourcePosition position) {
-		super(spelling, position);
-		type = null;
-		decl = null;
-	}
+    public TypeDenoter        type;
+    public AbstractSyntaxTree decl; // Either a Declaration or a FieldTypeDenoter
 
-	public TypeDenoter type;
-	public AbstractSyntaxTree decl; // Either a Declaration or a FieldTypeDenoter
+    public Identifier(String spelling, SourcePosition position) {
+        super(spelling, position);
+        type = null;
+        decl = null;
+    }
 
-	public <TArg, TResult> TResult visit(IdentifierVisitor<TArg, TResult> visitor, TArg arg) {
-		return visitor.visitIdentifier(this, arg);
-	}
+    public <TArg, TResult> TResult visit(IdentifierVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitIdentifier(this, arg);
+    }
 
-	public <TArg, TResult> TResult visit(IdentifierVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(IdentifierVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

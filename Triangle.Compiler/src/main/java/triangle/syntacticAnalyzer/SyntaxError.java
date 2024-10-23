@@ -1,8 +1,8 @@
 /*
- * @(#)SyntaxError.java                       
- * 
+ * @(#)SyntaxError.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -20,14 +20,14 @@ package triangle.syntacticAnalyzer;
 
 class SyntaxError extends Exception {
 
-	private static final long serialVersionUID = -5280306336102766860L;
+    private static final long serialVersionUID = -5280306336102766860L;
 
-	SyntaxError() {
-		super();
-	}
+    SyntaxError() {
+        super();
+    }
 
-	SyntaxError(String s) {
-		super(s);
-	}
+    SyntaxError(String s) {
+        super(s);
+    }
 
 }

@@ -7,12 +7,12 @@ import triangle.abstractSyntaxTrees.actuals.VarActualParameter;
 
 public interface ActualParameterVisitor<TArg, TResult> {
 
-	TResult visitConstActualParameter(ConstActualParameter ast, TArg arg);
+    TResult visitConstActualParameter(ConstActualParameter ast, TArg arg);
 
-	TResult visitFuncActualParameter(FuncActualParameter ast, TArg arg);
+    TResult visitFuncActualParameter(FuncActualParameter ast, TArg arg);
 
-	TResult visitProcActualParameter(ProcActualParameter ast, TArg arg);
+    TResult visitProcActualParameter(ProcActualParameter ast, TArg arg);
 
-	TResult visitVarActualParameter(VarActualParameter ast, TArg arg);
+    TResult visitVarActualParameter(VarActualParameter ast, TArg arg);
 
 }

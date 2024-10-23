@@ -1,8 +1,8 @@
 /*
- * @(#)CallExpression.java                       
- * 
+ * @(#)CallExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,16 +25,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class CallExpression extends Expression {
 
-	public CallExpression(Identifier iAST, ActualParameterSequence apsAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		APS = apsAST;
-	}
+    public final Identifier              I;
+    public final ActualParameterSequence APS;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitCallExpression(this, arg);
-	}
+    public CallExpression(Identifier iAST, ActualParameterSequence apsAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        APS = apsAST;
+    }
 
-	public final Identifier I;
-	public final ActualParameterSequence APS;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitCallExpression(this, arg);
+    }
+
 }

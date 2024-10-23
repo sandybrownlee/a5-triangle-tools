@@ -1,8 +1,8 @@
 /*
- * @(#)BinaryOperatorDeclaration.java               
- * 
+ * @(#)BinaryOperatorDeclaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,19 +25,22 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class BinaryOperatorDeclaration extends Declaration {
 
-	public BinaryOperatorDeclaration(Operator oAST, TypeDenoter arg1AST, TypeDenoter arg2AST, TypeDenoter resultAST,
-			SourcePosition position) {
-		super(position);
-		O = oAST;
-		ARG1 = arg1AST;
-		ARG2 = arg2AST;
-		RES = resultAST;
-	}
+    public final Operator    O;
+    public final TypeDenoter ARG1, ARG2, RES;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitBinaryOperatorDeclaration(this, arg);
-	}
+    public BinaryOperatorDeclaration(
+            Operator oAST, TypeDenoter arg1AST, TypeDenoter arg2AST, TypeDenoter resultAST,
+            SourcePosition position
+    ) {
+        super(position);
+        O = oAST;
+        ARG1 = arg1AST;
+        ARG2 = arg2AST;
+        RES = resultAST;
+    }
 
-	public final Operator O;
-	public final TypeDenoter ARG1, ARG2, RES;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitBinaryOperatorDeclaration(this, arg);
+    }
+
 }

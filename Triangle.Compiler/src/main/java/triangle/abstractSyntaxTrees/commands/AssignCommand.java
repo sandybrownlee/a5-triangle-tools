@@ -1,8 +1,8 @@
 /*
- * @(#)AssignCommand.java                       
- * 
+ * @(#)AssignCommand.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,16 +25,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class AssignCommand extends Command {
 
-	public AssignCommand(Vname vAST, Expression eAST, SourcePosition position) {
-		super(position);
-		V = vAST;
-		E = eAST;
-	}
+    public final Vname      V;
+    public       Expression E;
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitAssignCommand(this, arg);
-	}
+    public AssignCommand(Vname vAST, Expression eAST, SourcePosition position) {
+        super(position);
+        V = vAST;
+        E = eAST;
+    }
 
-	public final Vname V;
-	public Expression E;
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitAssignCommand(this, arg);
+    }
+
 }

@@ -1,8 +1,8 @@
 /*
- * @(#)KnownValue.java                       
- * 
+ * @(#)KnownValue.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,19 +25,20 @@ import triangle.codeGenerator.Frame;
 
 public class KnownValue extends RuntimeEntity implements FetchableEntity {
 
-	private final int value;
+    private final int value;
 
-	public KnownValue(int size, int value) {
-		super(size);
-		this.value = value;
-	}
+    public KnownValue(int size, int value) {
+        super(size);
+        this.value = value;
+    }
 
-	public final int getValue() {
-		return value;
-	}
+    public final int getValue() {
+        return value;
+    }
 
-	public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
-		// presumably offset = 0 and indexed = false
-		emitter.emit(OpCode.LOADL, 0, value);
-	}
+    public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
+        // presumably offset = 0 and indexed = false
+        emitter.emit(OpCode.LOADL, 0, value);
+    }
+
 }

@@ -5,8 +5,8 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 
 public interface FunctionDeclaration {
 
-	FormalParameterSequence getFormals();
+    FormalParameterSequence getFormals();
 
-	TypeDenoter getType();
-	
+    TypeDenoter getType();
+
 }

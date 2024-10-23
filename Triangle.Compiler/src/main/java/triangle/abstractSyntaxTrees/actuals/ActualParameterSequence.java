@@ -1,8 +1,8 @@
 /*
- * @(#)ActualParameterSequence.java               
- * 
+ * @(#)ActualParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,13 +24,14 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class ActualParameterSequence extends AbstractSyntaxTree {
 
-	public ActualParameterSequence(SourcePosition position) {
-		super(position);
-	}
+    public ActualParameterSequence(SourcePosition position) {
+        super(position);
+    }
 
-	public abstract <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg);
+    public abstract <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg);
 
-	public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v) {
-		return visit(v, null);
-	}
+    public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v) {
+        return visit(v, null);
+    }
+
 }

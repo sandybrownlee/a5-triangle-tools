@@ -1,8 +1,8 @@
 /*
- * @(#)SequentialCommand.java                       
- * 
+ * @(#)SequentialCommand.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,15 +23,16 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class SequentialCommand extends Command {
 
-	public SequentialCommand(Command c1AST, Command c2AST, SourcePosition position) {
-		super(position);
-		C1 = c1AST;
-		C2 = c2AST;
-	}
+    public final Command C1, C2;
 
-	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSequentialCommand(this, arg);
-	}
+    public SequentialCommand(Command c1AST, Command c2AST, SourcePosition position) {
+        super(position);
+        C1 = c1AST;
+        C2 = c2AST;
+    }
 
-	public final Command C1, C2;
+    public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSequentialCommand(this, arg);
+    }
+
 }

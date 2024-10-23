@@ -1,8 +1,8 @@
 /*
- * @(#)TypeRepresentation.java                       
- * 
+ * @(#)TypeRepresentation.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -20,8 +20,8 @@ package triangle.codeGenerator.entities;
 
 public class TypeRepresentation extends RuntimeEntity {
 
-	public TypeRepresentation(int size) {
-		super(size);
-	}
+    public TypeRepresentation(int size) {
+        super(size);
+    }
 
 }

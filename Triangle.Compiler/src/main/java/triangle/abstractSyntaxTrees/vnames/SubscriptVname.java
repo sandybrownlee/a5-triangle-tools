@@ -1,8 +1,8 @@
 /*
- * @(#)SubscriptVname.java                       
- * 
+ * @(#)SubscriptVname.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,20 +23,21 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 /**
- * a value-or-variable name for an array, with an index, e.g. a[4]  (a is the vAST, 4 is the eAST) 
+ a value-or-variable name for an array, with an index, e.g. a[4]  (a is the vAST, 4 is the eAST)
  */
 public class SubscriptVname extends Vname {
 
-	public SubscriptVname(Vname vAST, Expression eAST, SourcePosition position) {
-		super(position);
-		V = vAST;
-		E = eAST;
-	}
+    public final Vname      V;
+    public       Expression E;
 
-	public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSubscriptVname(this, arg);
-	}
+    public SubscriptVname(Vname vAST, Expression eAST, SourcePosition position) {
+        super(position);
+        V = vAST;
+        E = eAST;
+    }
 
-	public Expression E;
-	public final Vname V;
+    public <TArg, TResult> TResult visit(VnameVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSubscriptVname(this, arg);
+    }
+
 }

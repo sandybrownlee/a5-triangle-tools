@@ -1,8 +1,8 @@
 /*
- * @(#)EmptyActualParameterSequence.java       
- * 
+ * @(#)EmptyActualParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,11 +23,12 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class EmptyActualParameterSequence extends ActualParameterSequence {
 
-	public EmptyActualParameterSequence(SourcePosition position) {
-		super(position);
-	}
+    public EmptyActualParameterSequence(SourcePosition position) {
+        super(position);
+    }
 
-	public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitEmptyActualParameterSequence(this, arg);
-	}
+    public <TArg, TResult> TResult visit(ActualParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitEmptyActualParameterSequence(this, arg);
+    }
+
 }

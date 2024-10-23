@@ -4,6 +4,6 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 
 public interface VariableDeclaration {
 
-	TypeDenoter getType();
-	
+    TypeDenoter getType();
+
 }

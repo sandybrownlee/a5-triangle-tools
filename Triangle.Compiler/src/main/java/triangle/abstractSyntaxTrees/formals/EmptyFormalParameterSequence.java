@@ -1,8 +1,8 @@
 /*
- * @(#)EmptyFormalParameterSequence.java       
- * 
+ * @(#)EmptyFormalParameterSequence.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,16 +23,17 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class EmptyFormalParameterSequence extends FormalParameterSequence {
 
-	public EmptyFormalParameterSequence(SourcePosition position) {
-		super(position);
-	}
+    public EmptyFormalParameterSequence(SourcePosition position) {
+        super(position);
+    }
 
-	public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitEmptyFormalParameterSequence(this, arg);
-	}
+    @Override
+    public boolean equals(Object fpsAST) {
+        return (fpsAST instanceof EmptyFormalParameterSequence);
+    }
 
-	@Override
-	public boolean equals(Object fpsAST) {
-		return (fpsAST instanceof EmptyFormalParameterSequence);
-	}
+    public <TArg, TResult> TResult visit(FormalParameterSequenceVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitEmptyFormalParameterSequence(this, arg);
+    }
+
 }

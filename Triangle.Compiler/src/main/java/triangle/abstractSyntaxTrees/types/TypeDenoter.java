@@ -1,8 +1,8 @@
 /*
- * @(#)TypeDenoter.java                       
- * 
+ * @(#)TypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,18 +24,19 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class TypeDenoter extends AbstractSyntaxTree {
 
-	public TypeDenoter(SourcePosition position) {
-		super(position);
-	}
+    public TypeDenoter(SourcePosition position) {
+        super(position);
+    }
 
-	@Override
-	public abstract boolean equals(Object obj);
+    @Override
+    public abstract boolean equals(Object obj);
 
-	public abstract <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
-	
-	public abstract int getSize();
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
+    public abstract int getSize();
+
 }

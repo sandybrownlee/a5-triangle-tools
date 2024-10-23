@@ -1,8 +1,8 @@
 /*
- * @(#)ProcFormalParameter.java                       
- * 
+ * @(#)ProcFormalParameter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,31 +25,31 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ProcFormalParameter extends FormalParameter implements ProcedureDeclaration {
 
-	public ProcFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		FPS = fpsAST;
-	}
+    public final Identifier              I;
+    public final FormalParameterSequence FPS;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitProcFormalParameter(this, arg);
-	}
+    public ProcFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        FPS = fpsAST;
+    }
 
-	@Override
-	public FormalParameterSequence getFormals() {
-		return FPS;
-	}
+    @Override
+    public FormalParameterSequence getFormals() {
+        return FPS;
+    }
 
-	@Override
-	public boolean equals(Object fpAST) {
-		if (fpAST instanceof ProcFormalParameter) {
-			ProcFormalParameter pfpAST = (ProcFormalParameter) fpAST;
-			return FPS.equals(pfpAST.FPS);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object fpAST) {
+        if (fpAST instanceof final ProcFormalParameter pfpAST) {
+            return FPS.equals(pfpAST.FPS);
+        } else {
+            return false;
+        }
+    }
 
-	public final Identifier I;
-	public final FormalParameterSequence FPS;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitProcFormalParameter(this, arg);
+    }
+
 }

@@ -1,8 +1,8 @@
 /*
- * @(#)SequentialDeclaration.java               
- * 
+ * @(#)SequentialDeclaration.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,15 +23,16 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class SequentialDeclaration extends Declaration {
 
-	public SequentialDeclaration(Declaration d1AST, Declaration d2AST, SourcePosition position) {
-		super(position);
-		D1 = d1AST;
-		D2 = d2AST;
-	}
+    public final Declaration D1, D2;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSequentialDeclaration(this, arg);
-	}
+    public SequentialDeclaration(Declaration d1AST, Declaration d2AST, SourcePosition position) {
+        super(position);
+        D1 = d1AST;
+        D2 = d2AST;
+    }
 
-	public final Declaration D1, D2;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitSequentialDeclaration(this, arg);
+    }
+
 }

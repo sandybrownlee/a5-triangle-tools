@@ -1,8 +1,8 @@
 /*
- * @(#)StdEnvironment.java                       
- * 
+ * @(#)StdEnvironment.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -28,23 +28,23 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 
 public final class StdEnvironment {
 
-	// These are small ASTs representing standard types.
+    // These are small ASTs representing standard types.
 
-	public static TypeDenoter booleanType, charType, integerType, anyType, errorType;
+    public static TypeDenoter booleanType, charType, integerType, anyType, errorType;
 
-	public static TypeDeclaration booleanDecl, charDecl, integerDecl;
+    public static TypeDeclaration booleanDecl, charDecl, integerDecl;
 
-	// These are small ASTs representing "declarations" of standard entities.
+    // These are small ASTs representing "declarations" of standard entities.
 
-	public static ConstDeclaration falseDecl, trueDecl, maxintDecl;
+    public static ConstDeclaration falseDecl, trueDecl, maxintDecl;
 
-	public static UnaryOperatorDeclaration notDecl;
+    public static UnaryOperatorDeclaration notDecl;
 
-	public static BinaryOperatorDeclaration andDecl, orDecl, addDecl, subtractDecl, multiplyDecl, divideDecl,
-			moduloDecl, equalDecl, unequalDecl, lessDecl, notlessDecl, greaterDecl, notgreaterDecl;
+    public static BinaryOperatorDeclaration andDecl, orDecl, addDecl, subtractDecl, multiplyDecl, divideDecl,
+            moduloDecl, equalDecl, unequalDecl, lessDecl, notlessDecl, greaterDecl, notgreaterDecl;
 
-	public static ProcDeclaration getDecl, putDecl, getintDecl, putintDecl, geteolDecl, puteolDecl;
+    public static ProcDeclaration getDecl, putDecl, getintDecl, putintDecl, geteolDecl, puteolDecl;
 
-	public static FuncDeclaration chrDecl, ordDecl, eolDecl, eofDecl;
+    public static FuncDeclaration chrDecl, ordDecl, eolDecl, eofDecl;
 
 }

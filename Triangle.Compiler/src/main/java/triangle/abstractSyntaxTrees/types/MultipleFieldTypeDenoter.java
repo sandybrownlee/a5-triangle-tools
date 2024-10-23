@@ -1,8 +1,8 @@
 /*
- * @(#)MultipleFieldTypeDenoter.java               
- * 
+ * @(#)MultipleFieldTypeDenoter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,34 +24,36 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
 
-	public MultipleFieldTypeDenoter(Identifier iAST, TypeDenoter tAST, FieldTypeDenoter ftAST,
-			SourcePosition position) {
-		super(position);
-		I = iAST;
-		T = tAST;
-		FT = ftAST;
-	}
+    public final Identifier       I;
+    public       TypeDenoter      T;
+    public       FieldTypeDenoter FT;
 
-	public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitMultipleFieldTypeDenoter(this, arg);
-	}
-	
-	@Override
-	public int getSize() {
-		return T.getSize() + FT.getSize();
-	}
+    public MultipleFieldTypeDenoter(
+            Identifier iAST, TypeDenoter tAST, FieldTypeDenoter ftAST,
+            SourcePosition position
+    ) {
+        super(position);
+        I = iAST;
+        T = tAST;
+        FT = ftAST;
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj != null && obj instanceof MultipleFieldTypeDenoter) {
-			MultipleFieldTypeDenoter ft = (MultipleFieldTypeDenoter) obj;
-			return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T) && this.FT.equals(ft.FT);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public boolean equals(Object obj) {
+        if (obj != null && obj instanceof final MultipleFieldTypeDenoter ft) {
+            return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T) && this.FT.equals(ft.FT);
+        } else {
+            return false;
+        }
+    }
 
-	public final Identifier I;
-	public TypeDenoter T;
-	public FieldTypeDenoter FT;
+    public <TArg, TResult> TResult visit(TypeDenoterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitMultipleFieldTypeDenoter(this, arg);
+    }
+
+    @Override
+    public int getSize() {
+        return T.getSize() + FT.getSize();
+    }
+
 }

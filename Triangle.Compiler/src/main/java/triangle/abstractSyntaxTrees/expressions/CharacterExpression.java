@@ -1,8 +1,8 @@
 /*
- * @(#)CharacterExpression.java                       
- * 
+ * @(#)CharacterExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,24 +24,25 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class CharacterExpression extends Expression {
 
-	public CharacterExpression(CharacterLiteral clAST, SourcePosition position) {
-		super(position);
-		CL = clAST;
-	}
+    public final CharacterLiteral CL;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitCharacterExpression(this, arg);
-	}
+    public CharacterExpression(CharacterLiteral clAST, SourcePosition position) {
+        super(position);
+        CL = clAST;
+    }
 
-	public final CharacterLiteral CL;
-	
-	@Override
-	public boolean isLiteral() {
-		return true;
-	}
-	
-	@Override
-	public int getValue() {
-		return CL.getValue();
-	}
+    @Override
+    public boolean isLiteral() {
+        return true;
+    }
+
+    @Override
+    public int getValue() {
+        return CL.getValue();
+    }
+
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitCharacterExpression(this, arg);
+    }
+
 }

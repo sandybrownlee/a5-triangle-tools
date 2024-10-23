@@ -1,8 +1,8 @@
 /*
- * @(#)ObjectAddress.java                       
- * 
+ * @(#)ObjectAddress.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -20,20 +20,21 @@ package triangle.codeGenerator.entities;
 
 public class ObjectAddress {
 
-	private final int level;
+    private final int level;
 
-	private final int displacement;
+    private final int displacement;
 
-	public ObjectAddress(int level, int displacement) {
-		this.level = level;
-		this.displacement = displacement;
-	}
+    public ObjectAddress(int level, int displacement) {
+        this.level = level;
+        this.displacement = displacement;
+    }
 
-	public final int getLevel() {
-		return level;
-	}
+    public final int getLevel() {
+        return level;
+    }
 
-	public int getDisplacement() {
-		return displacement;
-	}
+    public int getDisplacement() {
+        return displacement;
+    }
+
 }

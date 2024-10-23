@@ -1,8 +1,8 @@
 /*
- * @(#)VnameExpression.java                       
- * 
+ * @(#)VnameExpression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,14 +24,15 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class VnameExpression extends Expression {
 
-	public VnameExpression(Vname vAST, SourcePosition position) {
-		super(position);
-		V = vAST;
-	}
+    public final Vname V;
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitVnameExpression(this, arg);
-	}
+    public VnameExpression(Vname vAST, SourcePosition position) {
+        super(position);
+        V = vAST;
+    }
 
-	public final Vname V;
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitVnameExpression(this, arg);
+    }
+
 }

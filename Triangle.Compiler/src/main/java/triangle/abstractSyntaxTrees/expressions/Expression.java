@@ -1,8 +1,8 @@
 /*
- * @(#)Expression.java                       
- * 
+ * @(#)Expression.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -25,24 +25,25 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class Expression extends AbstractSyntaxTree {
 
-	public Expression(SourcePosition position) {
-		super(position);
-		type = null;
-	}
+    public TypeDenoter type;
 
-	public TypeDenoter type;
+    public Expression(SourcePosition position) {
+        super(position);
+        type = null;
+    }
 
-	public boolean isLiteral() {
-		return false;
-	}
+    public boolean isLiteral() {
+        return false;
+    }
 
-	public int getValue() {
-		throw new UnsupportedOperationException();
-	}
+    public int getValue() {
+        throw new UnsupportedOperationException();
+    }
 
-	public abstract <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor, TArg arg);
+    public abstract <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor) {
+        return visit(visitor, null);
+    }
+
 }

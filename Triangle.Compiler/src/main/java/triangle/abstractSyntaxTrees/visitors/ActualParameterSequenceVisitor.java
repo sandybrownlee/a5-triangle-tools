@@ -6,10 +6,10 @@ import triangle.abstractSyntaxTrees.actuals.SingleActualParameterSequence;
 
 public interface ActualParameterSequenceVisitor<TArg, TResult> {
 
-	TResult visitEmptyActualParameterSequence(EmptyActualParameterSequence ast, TArg arg);
+    TResult visitEmptyActualParameterSequence(EmptyActualParameterSequence ast, TArg arg);
 
-	TResult visitMultipleActualParameterSequence(MultipleActualParameterSequence ast, TArg arg);
+    TResult visitMultipleActualParameterSequence(MultipleActualParameterSequence ast, TArg arg);
 
-	TResult visitSingleActualParameterSequence(SingleActualParameterSequence ast, TArg arg);
+    TResult visitSingleActualParameterSequence(SingleActualParameterSequence ast, TArg arg);
 
 }

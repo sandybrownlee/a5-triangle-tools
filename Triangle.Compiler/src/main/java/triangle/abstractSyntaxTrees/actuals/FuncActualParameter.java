@@ -1,8 +1,8 @@
 /*
- * @(#)FuncActualParameter.java                       
- * 
+ * @(#)FuncActualParameter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,14 +24,15 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class FuncActualParameter extends ActualParameter {
 
-	public FuncActualParameter(Identifier iAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-	}
+    public final Identifier I;
 
-	public <TArg, TResult> TResult visit(ActualParameterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitFuncActualParameter(this, arg);
-	}
+    public FuncActualParameter(Identifier iAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+    }
 
-	public final Identifier I;
+    public <TArg, TResult> TResult visit(ActualParameterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitFuncActualParameter(this, arg);
+    }
+
 }

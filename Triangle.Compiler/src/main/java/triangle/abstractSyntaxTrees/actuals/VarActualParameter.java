@@ -1,8 +1,8 @@
 /*
- * @(#)VarActualParameter.java                       
- * 
+ * @(#)VarActualParameter.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -24,14 +24,15 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class VarActualParameter extends ActualParameter {
 
-	public VarActualParameter(Vname vAST, SourcePosition position) {
-		super(position);
-		V = vAST;
-	}
+    public final Vname V;
 
-	public <TArg, TResult> TResult visit(ActualParameterVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitVarActualParameter(this, arg);
-	}
+    public VarActualParameter(Vname vAST, SourcePosition position) {
+        super(position);
+        V = vAST;
+    }
 
-	public final Vname V;
+    public <TArg, TResult> TResult visit(ActualParameterVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitVarActualParameter(this, arg);
+    }
+
 }
