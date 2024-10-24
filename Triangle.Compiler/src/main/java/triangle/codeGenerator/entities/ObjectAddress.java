@@ -18,24 +18,6 @@
 
 package triangle.codeGenerator.entities;
 
-// TODO: Make record class
-public class ObjectAddress {
-
-    private final int level;
-
-    private final int displacement;
-
-    public ObjectAddress(int level, int displacement) {
-        this.level = level;
-        this.displacement = displacement;
-    }
-
-    public final int getLevel() {
-        return level;
-    }
-
-    public int getDisplacement() {
-        return displacement;
-    }
+public record ObjectAddress(int level, int displacement) {
 
 }

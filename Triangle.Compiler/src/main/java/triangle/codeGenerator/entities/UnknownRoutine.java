@@ -37,12 +37,12 @@ public class UnknownRoutine extends RuntimeEntity implements RoutineEntity {
     }
 
     public void encodeCall(Emitter emitter, Frame frame) {
-        emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.getDisplacement());
+        emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.displacement());
         emitter.emit(OpCode.CALLI, 0);
     }
 
     public void encodeFetch(Emitter emitter, Frame frame) {
-        emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.getDisplacement());
+        emitter.emit(OpCode.LOAD, Machine.closureSize, frame.getDisplayRegister(address), address.displacement());
     }
 
 }

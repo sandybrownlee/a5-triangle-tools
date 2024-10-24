@@ -44,12 +44,12 @@ public class UnknownValue extends RuntimeEntity implements FetchableEntity {
 
     public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
         if (vname.indexed) {
-            emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.getDisplacement() + vname.offset);
+            emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.displacement() + vname.offset);
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
             emitter.emit(OpCode.LOADI, size, 0);
         } else {
             emitter.emit(OpCode.LOAD, size, frame.getDisplayRegister(address),
-                         address.getDisplacement() + vname.offset);
+                         address.displacement() + vname.offset);
         }
     }
 

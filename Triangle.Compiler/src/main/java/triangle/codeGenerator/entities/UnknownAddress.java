@@ -34,7 +34,7 @@ public class UnknownAddress extends AddressableEntity {
 
     public void encodeStore(Emitter emitter, Frame frame, int size, Vname vname) {
 
-        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
+        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.displacement());
         if (vname.indexed) {
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
         }
@@ -49,7 +49,7 @@ public class UnknownAddress extends AddressableEntity {
 
     public void encodeFetchAddress(Emitter emitter, Frame frame, Vname vname) {
 
-        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
+        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.displacement());
         if (vname.indexed) {
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
         }
@@ -62,7 +62,7 @@ public class UnknownAddress extends AddressableEntity {
     }
 
     public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
-        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.getDisplacement());
+        emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.displacement());
 
         if (vname.indexed) {
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);

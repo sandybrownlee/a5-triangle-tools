@@ -37,17 +37,17 @@ public class KnownAddress extends AddressableEntity {
 
     public void encodeStore(Emitter emitter, Frame frame, int size, Vname vname) {
         if (vname.indexed) {
-            emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.getDisplacement() + vname.offset);
+            emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.displacement() + vname.offset);
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
             emitter.emit(OpCode.STOREI, size, 0);
         } else {
             emitter.emit(OpCode.STORE, size, frame.getDisplayRegister(address),
-                         address.getDisplacement() + vname.offset);
+                         address.displacement() + vname.offset);
         }
     }
 
     public void encodeFetchAddress(Emitter emitter, Frame frame, Vname vname) {
-        emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.getDisplacement() + vname.offset);
+        emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.displacement() + vname.offset);
         if (vname.indexed) {
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
         }
@@ -55,12 +55,12 @@ public class KnownAddress extends AddressableEntity {
 
     public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
         if (vname.indexed) {
-            emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.getDisplacement() + vname.offset);
+            emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.displacement() + vname.offset);
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);
             emitter.emit(OpCode.LOADI, size, 0);
         } else {
             emitter.emit(OpCode.LOAD, size, frame.getDisplayRegister(address),
-                         address.getDisplacement() + vname.offset);
+                         address.displacement() + vname.offset);
         }
     }
 

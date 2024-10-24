@@ -64,12 +64,12 @@ public class Frame {
      @return the display register required for static addressing
      */
     public Register getDisplayRegister(ObjectAddress address) {
-        if (address.getLevel() == 0) {
+        if (address.level() == 0) {
             return Register.SB;
         }
 
-        if (level - address.getLevel() <= 6) {
-            return Register.values()[Register.LB.ordinal() + level - address.getLevel()]; // LB|L1|...|L6
+        if (level - address.level() <= 6) {
+            return Register.values()[Register.LB.ordinal() + level - address.level()]; // LB|L1|...|L6
         }
 
         // _errorReporter.ReportRestriction("can't access data more than 6 levels out");

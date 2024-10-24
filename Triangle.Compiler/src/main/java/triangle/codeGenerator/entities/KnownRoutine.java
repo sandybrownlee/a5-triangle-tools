@@ -37,12 +37,12 @@ public class KnownRoutine extends RuntimeEntity implements RoutineEntity {
     }
 
     public void encodeCall(Emitter emitter, Frame frame) {
-        emitter.emit(OpCode.CALL, frame.getDisplayRegister(address), Register.CB, address.getDisplacement());
+        emitter.emit(OpCode.CALL, frame.getDisplayRegister(address), Register.CB, address.displacement());
     }
 
     public void encodeFetch(Emitter emitter, Frame frame) {
         emitter.emit(OpCode.LOADA, frame.getDisplayRegister(address), 0);
-        emitter.emit(OpCode.LOADA, Register.CB, address.getDisplacement());
+        emitter.emit(OpCode.LOADA, Register.CB, address.displacement());
     }
 
 }

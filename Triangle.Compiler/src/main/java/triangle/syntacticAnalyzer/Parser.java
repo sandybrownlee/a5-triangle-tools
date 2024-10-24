@@ -115,8 +115,8 @@ public class Parser {
         try {
             Command cAST = parseCommand();
             programAST = new Program(cAST, previousTokenPosition);
-            if (currentToken.kind != Token.Kind.EOT) {
-                syntacticError("\"%\" not expected after end of program", currentToken.spelling);
+            if (currentToken.kind() != Token.Kind.EOT) {
+                syntacticError("\"%\" not expected after end of program", currentToken.spelling());
             }
         } catch (SyntaxError s) {
             return null;
@@ -128,8 +128,8 @@ public class Parser {
     // (used where we've already done the check)
 
     void accept(Token.Kind tokenExpected) throws SyntaxError {
-        if (currentToken.kind == tokenExpected) {
-            previousTokenPosition = currentToken.position;
+        if (currentToken.kind() == tokenExpected) {
+            previousTokenPosition = currentToken.position();
             currentToken = lexicalAnalyser.scan();
         } else {
             syntacticError("\"%\" expected here", Token.spell(tokenExpected));
@@ -141,7 +141,7 @@ public class Parser {
     // character of the first token of the phrase.
 
     void acceptIt() {
-        previousTokenPosition = currentToken.position;
+        previousTokenPosition = currentToken.position();
         currentToken = lexicalAnalyser.scan();
     }
 
@@ -150,7 +150,7 @@ public class Parser {
     // character of the last token of the phrase.
 
     void start(SourcePosition position) {
-        position.start = currentToken.position.start;
+        position.start = currentToken.position().start;
     }
 
     void finish(SourcePosition position) {
@@ -164,7 +164,7 @@ public class Parser {
     ///////////////////////////////////////////////////////////////////////////////
 
     void syntacticError(String messageTemplate, String tokenQuoted) throws SyntaxError {
-        SourcePosition pos = currentToken.position;
+        SourcePosition pos = currentToken.position();
         errorReporter.reportError(messageTemplate, tokenQuoted, pos);
         throw (new SyntaxError());
     }
@@ -181,9 +181,9 @@ public class Parser {
     IntegerLiteral parseIntegerLiteral() throws SyntaxError {
         IntegerLiteral IL = null;
 
-        if (currentToken.kind == Token.Kind.INTLITERAL) {
-            previousTokenPosition = currentToken.position;
-            String spelling = currentToken.spelling;
+        if (currentToken.kind() == Token.Kind.INTLITERAL) {
+            previousTokenPosition = currentToken.position();
+            String spelling = currentToken.spelling();
             IL = new IntegerLiteral(spelling, previousTokenPosition);
             currentToken = lexicalAnalyser.scan();
         } else {
@@ -200,9 +200,9 @@ public class Parser {
     CharacterLiteral parseCharacterLiteral() throws SyntaxError {
         CharacterLiteral CL = null;
 
-        if (currentToken.kind == Token.Kind.CHARLITERAL) {
-            previousTokenPosition = currentToken.position;
-            String spelling = currentToken.spelling;
+        if (currentToken.kind() == Token.Kind.CHARLITERAL) {
+            previousTokenPosition = currentToken.position();
+            String spelling = currentToken.spelling();
             CL = new CharacterLiteral(spelling, previousTokenPosition);
             currentToken = lexicalAnalyser.scan();
         } else {
@@ -219,9 +219,9 @@ public class Parser {
     Identifier parseIdentifier() throws SyntaxError {
         Identifier I = null;
 
-        if (currentToken.kind == Token.Kind.IDENTIFIER) {
-            previousTokenPosition = currentToken.position;
-            String spelling = currentToken.spelling;
+        if (currentToken.kind() == Token.Kind.IDENTIFIER) {
+            previousTokenPosition = currentToken.position();
+            String spelling = currentToken.spelling();
             I = new Identifier(spelling, previousTokenPosition);
             currentToken = lexicalAnalyser.scan();
         } else {
@@ -238,9 +238,9 @@ public class Parser {
     Operator parseOperator() throws SyntaxError {
         Operator O = null;
 
-        if (currentToken.kind == Token.Kind.OPERATOR) {
-            previousTokenPosition = currentToken.position;
-            String spelling = currentToken.spelling;
+        if (currentToken.kind() == Token.Kind.OPERATOR) {
+            previousTokenPosition = currentToken.position();
+            String spelling = currentToken.spelling();
             O = new Operator(spelling, previousTokenPosition);
             currentToken = lexicalAnalyser.scan();
         } else {
@@ -267,7 +267,7 @@ public class Parser {
 
         start(commandPos);
         commandAST = parseSingleCommand();
-        while (currentToken.kind == Token.Kind.SEMICOLON) {
+        while (currentToken.kind() == Token.Kind.SEMICOLON) {
             acceptIt();
             Command c2AST = parseSingleCommand();
             finish(commandPos);
@@ -282,11 +282,11 @@ public class Parser {
         SourcePosition commandPos = new SourcePosition();
         start(commandPos);
 
-        switch (currentToken.kind) {
+        switch (currentToken.kind()) {
 
             case IDENTIFIER: {
                 Identifier iAST = parseIdentifier();
-                if (currentToken.kind == Token.Kind.LPAREN) {
+                if (currentToken.kind() == Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
                     accept(Token.Kind.RPAREN);
@@ -352,7 +352,7 @@ public class Parser {
                 break;
 
             default:
-                syntacticError("\"%\" cannot start a command", currentToken.spelling);
+                syntacticError("\"%\" cannot start a command", currentToken.spelling());
                 break;
         }
 
@@ -373,7 +373,7 @@ public class Parser {
 
         start(expressionPos);
 
-        switch (currentToken.kind) {
+        switch (currentToken.kind()) {
 
             case LET: {
                 acceptIt();
@@ -412,7 +412,7 @@ public class Parser {
         start(expressionPos);
 
         expressionAST = parsePrimaryExpression();
-        while (currentToken.kind == Token.Kind.OPERATOR) {
+        while (currentToken.kind() == Token.Kind.OPERATOR) {
             Operator opAST = parseOperator();
             Expression e2AST = parsePrimaryExpression();
             expressionAST = new BinaryExpression(expressionAST, opAST, e2AST, expressionPos);
@@ -426,7 +426,7 @@ public class Parser {
         SourcePosition expressionPos = new SourcePosition();
         start(expressionPos);
 
-        switch (currentToken.kind) {
+        switch (currentToken.kind()) {
 
             case INTLITERAL: {
                 IntegerLiteral ilAST = parseIntegerLiteral();
@@ -462,7 +462,7 @@ public class Parser {
 
             case IDENTIFIER: {
                 Identifier iAST = parseIdentifier();
-                if (currentToken.kind == Token.Kind.LPAREN) {
+                if (currentToken.kind() == Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
                     accept(Token.Kind.RPAREN);
@@ -491,7 +491,7 @@ public class Parser {
                 break;
 
             default:
-                syntacticError("\"%\" cannot start an expression", currentToken.spelling);
+                syntacticError("\"%\" cannot start an expression", currentToken.spelling());
                 break;
         }
         return expressionAST;
@@ -508,7 +508,7 @@ public class Parser {
         accept(Token.Kind.IS);
         Expression eAST = parseExpression();
 
-        if (currentToken.kind == Token.Kind.COMMA) {
+        if (currentToken.kind() == Token.Kind.COMMA) {
             acceptIt();
             RecordAggregate aAST = parseRecordAggregate();
             finish(aggregatePos);
@@ -528,7 +528,7 @@ public class Parser {
         start(aggregatePos);
 
         Expression eAST = parseExpression();
-        if (currentToken.kind == Token.Kind.COMMA) {
+        if (currentToken.kind() == Token.Kind.COMMA) {
             acceptIt();
             ArrayAggregate aAST = parseArrayAggregate();
             finish(aggregatePos);
@@ -560,9 +560,9 @@ public class Parser {
         vnamePos = identifierAST.getPosition();
         Vname vAST = new SimpleVname(identifierAST, vnamePos);
 
-        while (currentToken.kind == Token.Kind.DOT || currentToken.kind == Token.Kind.LBRACKET) {
+        while (currentToken.kind() == Token.Kind.DOT || currentToken.kind() == Token.Kind.LBRACKET) {
 
-            if (currentToken.kind == Token.Kind.DOT) {
+            if (currentToken.kind() == Token.Kind.DOT) {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 vAST = new DotVname(vAST, iAST, vnamePos);
@@ -590,7 +590,7 @@ public class Parser {
         SourcePosition declarationPos = new SourcePosition();
         start(declarationPos);
         declarationAST = parseSingleDeclaration();
-        while (currentToken.kind == Token.Kind.SEMICOLON) {
+        while (currentToken.kind() == Token.Kind.SEMICOLON) {
             acceptIt();
             Declaration d2AST = parseSingleDeclaration();
             finish(declarationPos);
@@ -605,7 +605,7 @@ public class Parser {
         SourcePosition declarationPos = new SourcePosition();
         start(declarationPos);
 
-        switch (currentToken.kind) {
+        switch (currentToken.kind()) {
 
             case CONST: {
                 acceptIt();
@@ -666,7 +666,7 @@ public class Parser {
             break;
 
             default:
-                syntacticError("\"%\" cannot start a declaration", currentToken.spelling);
+                syntacticError("\"%\" cannot start a declaration", currentToken.spelling());
                 break;
         }
         return declarationAST;
@@ -684,7 +684,7 @@ public class Parser {
         SourcePosition formalsPos = new SourcePosition();
 
         start(formalsPos);
-        if (currentToken.kind == Token.Kind.RPAREN) {
+        if (currentToken.kind() == Token.Kind.RPAREN) {
             finish(formalsPos);
             formalsAST = new EmptyFormalParameterSequence(formalsPos);
         } else {
@@ -700,7 +700,7 @@ public class Parser {
         SourcePosition formalsPos = new SourcePosition();
         start(formalsPos);
         FormalParameter fpAST = parseFormalParameter();
-        if (currentToken.kind == Token.Kind.COMMA) {
+        if (currentToken.kind() == Token.Kind.COMMA) {
             acceptIt();
             FormalParameterSequence fpsAST = parseProperFormalParameterSequence();
             finish(formalsPos);
@@ -718,7 +718,7 @@ public class Parser {
         SourcePosition formalPos = new SourcePosition();
         start(formalPos);
 
-        switch (currentToken.kind) {
+        switch (currentToken.kind()) {
 
             case IDENTIFIER: {
                 Identifier iAST = parseIdentifier();
@@ -764,7 +764,7 @@ public class Parser {
             break;
 
             default:
-                syntacticError("\"%\" cannot start a formal parameter", currentToken.spelling);
+                syntacticError("\"%\" cannot start a formal parameter", currentToken.spelling());
                 break;
         }
         return formalAST;
@@ -776,7 +776,7 @@ public class Parser {
         SourcePosition actualsPos = new SourcePosition();
 
         start(actualsPos);
-        if (currentToken.kind == Token.Kind.RPAREN) {
+        if (currentToken.kind() == Token.Kind.RPAREN) {
             finish(actualsPos);
             actualsAST = new EmptyActualParameterSequence(actualsPos);
         } else {
@@ -793,7 +793,7 @@ public class Parser {
 
         start(actualsPos);
         ActualParameter apAST = parseActualParameter();
-        if (currentToken.kind == Token.Kind.COMMA) {
+        if (currentToken.kind() == Token.Kind.COMMA) {
             acceptIt();
             ActualParameterSequence apsAST = parseProperActualParameterSequence();
             finish(actualsPos);
@@ -812,7 +812,7 @@ public class Parser {
 
         start(actualPos);
 
-        switch (currentToken.kind) {
+        switch (currentToken.kind()) {
 
             case IDENTIFIER:
             case INTLITERAL:
@@ -854,7 +854,7 @@ public class Parser {
             break;
 
             default:
-                syntacticError("\"%\" cannot start an actual parameter", currentToken.spelling);
+                syntacticError("\"%\" cannot start an actual parameter", currentToken.spelling());
                 break;
         }
         return actualAST;
@@ -872,7 +872,7 @@ public class Parser {
 
         start(typePos);
 
-        switch (currentToken.kind) {
+        switch (currentToken.kind()) {
 
             case IDENTIFIER: {
                 Identifier iAST = parseIdentifier();
@@ -901,7 +901,7 @@ public class Parser {
             break;
 
             default:
-                syntacticError("\"%\" cannot start a type denoter", currentToken.spelling);
+                syntacticError("\"%\" cannot start a type denoter", currentToken.spelling());
                 break;
         }
         return typeAST;
@@ -917,7 +917,7 @@ public class Parser {
         Identifier iAST = parseIdentifier();
         accept(Token.Kind.COLON);
         TypeDenoter tAST = parseTypeDenoter();
-        if (currentToken.kind == Token.Kind.COMMA) {
+        if (currentToken.kind() == Token.Kind.COMMA) {
             acceptIt();
             FieldTypeDenoter fAST = parseFieldTypeDenoter();
             finish(fieldPos);

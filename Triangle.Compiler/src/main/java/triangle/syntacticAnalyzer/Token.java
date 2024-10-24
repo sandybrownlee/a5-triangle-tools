@@ -18,13 +18,9 @@
 
 package triangle.syntacticAnalyzer;
 
-final class Token {
+record Token(triangle.syntacticAnalyzer.Token.Kind kind, String spelling, SourcePosition position) {
 
-    final Kind           kind;
-    final String         spelling;
-    final SourcePosition position;
-
-    public Token(Kind kind, String spelling, SourcePosition position) {
+    Token(Kind kind, String spelling, SourcePosition position) {
 
         // If this token is an identifier, is it also a reserved word?
         if (kind == Kind.IDENTIFIER) {
