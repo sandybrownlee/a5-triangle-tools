@@ -18,6 +18,8 @@
 
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -36,10 +38,20 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
     /** The filename for the object program, normally obj.tam. */
+    @Argument(description = "The name of the file to store the object code into")
     static String objectName = "obj.tam";
 
-    static boolean showTree = false;
-    static boolean folding  = false;
+    @Argument(description = "The name of the source file to compile", required = true)
+    private static String sourceName;
+
+    @Argument(description = "Whether or not to show the tree")
+    private static boolean showTree;
+
+    @Argument(description = "Whether or not to turn on constant folding")
+    private static boolean folding;
+
+    @Argument(description = "Whether or not to show the tree after folding")
+    private static boolean showTreeAfterFolding;
 
     /**
      Triangle compiler main program.
@@ -48,15 +60,7 @@ public class Compiler {
      source filename.
      */
     public static void main(String[] args) {
-
-        if (args.length < 1) {
-            System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-            System.exit(1);
-        }
-
-        parseArgs(args);
-
-        String sourceName = args[0];
+        Args.parseOrExit(Compiler.class, args);
 
         var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
