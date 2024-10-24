@@ -66,5 +66,6 @@ Triangle.AbstractMachine.Disassembler/triangle-disassembler.iml
 Triangle.AbstractMachine.Interpreter/triangle-interpreter.iml
 Triangle.AbstractMachine/triangle-abstractmachine.iml
 Triangle.Compiler/triangle-compiler.iml
+triangle-tools.iml
 
 *.tam
