@@ -26,7 +26,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.Serial;
 
-class DrawerFrame extends JFrame {
+final class DrawerFrame extends JFrame {
 
     /**
 
@@ -66,6 +66,10 @@ class DrawerFrame extends JFrame {
         });
 
         contentPane.add(jScrollPane);
+    }
+
+    @Override protected void finalize() throws Throwable {
+        super.finalize();
     }
 
 }
