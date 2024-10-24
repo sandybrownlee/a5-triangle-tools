@@ -104,8 +104,8 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // If not, reports a syntactic error.
 
     public Program parseProgram() {
-        previousTokenPosition.start = 0;
-        previousTokenPosition.finish = 0;
+        previousTokenPosition.setStart(0);
+        previousTokenPosition.setFinish(0);
         currentToken = lexicalAnalyser.scan();
 
         try {
@@ -146,11 +146,11 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // character of the last token of the phrase.
 
     void start(SourcePosition position) {
-        position.start = currentToken.position().start;
+        position.setStart(currentToken.position().getStart());
     }
 
     void finish(SourcePosition position) {
-        position.finish = previousTokenPosition.finish;
+        position.setFinish(previousTokenPosition.getFinish());
     }
 
     ///////////////////////////////////////////////////////////////////////////////

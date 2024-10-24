@@ -20,7 +20,8 @@ package triangle.syntacticAnalyzer;
 
 public class SourcePosition {
 
-    public int start, finish;
+    private int start;
+    private int finish;
 
     public SourcePosition() {
         start = 0;
@@ -35,6 +36,22 @@ public class SourcePosition {
     @Override
     public String toString() {
         return "(" + start + ", " + finish + ")";
+    }
+
+    public int getStart() {
+        return start;
+    }
+
+    public void setStart(int start) {
+        this.start = start;
+    }
+
+    public int getFinish() {
+        return finish;
+    }
+
+    public void setFinish(int finish) {
+        this.finish = finish;
     }
 
 }

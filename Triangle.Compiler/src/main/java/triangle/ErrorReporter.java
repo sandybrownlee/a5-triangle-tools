@@ -46,7 +46,7 @@ public class ErrorReporter {
                 s.append(message.charAt(p));
             }
         }
-        s.append(" ").append(pos.start).append("..").append(pos.finish);
+        s.append(" ").append(pos.getStart()).append("..").append(pos.getFinish());
 
         if (throwExceptions) {
             throw new RuntimeException(s.toString());
