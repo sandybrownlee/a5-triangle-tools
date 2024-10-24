@@ -20,9 +20,9 @@ package triangle.syntacticAnalyzer;
 
 final class Token {
 
-    Kind           kind;
-    String         spelling;
-    SourcePosition position;
+    final Kind           kind;
+    final String         spelling;
+    final SourcePosition position;
 
     public Token(Kind kind, String spelling, SourcePosition position) {
 

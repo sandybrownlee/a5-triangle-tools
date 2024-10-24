@@ -143,6 +143,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
      called by all visitor methods here; could be used to insert debugging information
      */
     public static void writeTableDetails(AbstractSyntaxTree ast) {
+        // TODO
     }
 
     // Commands

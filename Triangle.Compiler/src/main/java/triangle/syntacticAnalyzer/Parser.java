@@ -103,6 +103,7 @@ public class Parser {
     // If so, fetches the next Token.Kind.
     // If not, reports a syntactic error.
 
+    // TODO: refactor
     public Program parseProgram() {
 
         Program programAST = null;
@@ -195,6 +196,7 @@ public class Parser {
     // parseCharacterLiteral parses a character-literal, and constructs a leaf
     // AST to represent it.
 
+    // TODO: refactor
     CharacterLiteral parseCharacterLiteral() throws SyntaxError {
         CharacterLiteral CL = null;
 
@@ -213,6 +215,7 @@ public class Parser {
     // parseIdentifier parses an identifier, and constructs a leaf AST to
     // represent it.
 
+    // TODO: refactor
     Identifier parseIdentifier() throws SyntaxError {
         Identifier I = null;
 
@@ -231,6 +234,7 @@ public class Parser {
     // parseOperator parses an operator, and constructs a leaf AST to
     // represent it.
 
+    // TODO: refactor
     Operator parseOperator() throws SyntaxError {
         Operator O = null;
 
@@ -255,6 +259,7 @@ public class Parser {
     // parseCommand parses the command, and constructs an AST
     // to represent its phrase structure.
 
+    // TODO: refactor
     Command parseCommand() throws SyntaxError {
         Command commandAST = null; // in case there's a syntactic error
 
@@ -360,6 +365,7 @@ public class Parser {
     //
     ///////////////////////////////////////////////////////////////////////////////
 
+    // TODO: refactor
     Expression parseExpression() throws SyntaxError {
         Expression expressionAST = null; // in case there's a syntactic error
 
@@ -398,6 +404,7 @@ public class Parser {
         return expressionAST;
     }
 
+    // TODO: refactor
     Expression parseSecondaryExpression() throws SyntaxError {
         Expression expressionAST = null; // in case there's a syntactic error
 
@@ -490,6 +497,7 @@ public class Parser {
         return expressionAST;
     }
 
+    // TODO: refactor
     RecordAggregate parseRecordAggregate() throws SyntaxError {
         RecordAggregate aggregateAST = null; // in case there's a syntactic error
 
@@ -512,6 +520,7 @@ public class Parser {
         return aggregateAST;
     }
 
+    // TODO: refactor
     ArrayAggregate parseArrayAggregate() throws SyntaxError {
         ArrayAggregate aggregateAST = null; // in case there's a syntactic error
 
@@ -537,6 +546,7 @@ public class Parser {
     //
     ///////////////////////////////////////////////////////////////////////////////
 
+    // TODO: refactor
     Vname parseVname() throws SyntaxError {
         Vname vnameAST = null; // in case there's a syntactic error
         Identifier iAST = parseIdentifier();
@@ -544,6 +554,7 @@ public class Parser {
         return vnameAST;
     }
 
+    // TODO: refactor
     Vname parseRestOfVname(Identifier identifierAST) throws SyntaxError {
         SourcePosition vnamePos = new SourcePosition();
         vnamePos = identifierAST.getPosition();
@@ -572,6 +583,7 @@ public class Parser {
     //
     ///////////////////////////////////////////////////////////////////////////////
 
+    // TODO: refactor
     Declaration parseDeclaration() throws SyntaxError {
         Declaration declarationAST = null; // in case there's a syntactic error
 
@@ -681,6 +693,7 @@ public class Parser {
         return formalsAST;
     }
 
+    // TODO: refactor
     FormalParameterSequence parseProperFormalParameterSequence() throws SyntaxError {
         FormalParameterSequence formalsAST = null; // in case there's a syntactic error;
 
@@ -772,6 +785,7 @@ public class Parser {
         return actualsAST;
     }
 
+    // TODO: refactor
     ActualParameterSequence parseProperActualParameterSequence() throws SyntaxError {
         ActualParameterSequence actualsAST = null; // in case there's a syntactic error
 
@@ -893,6 +907,7 @@ public class Parser {
         return typeAST;
     }
 
+    // TODO: refactor
     FieldTypeDenoter parseFieldTypeDenoter() throws SyntaxError {
         FieldTypeDenoter fieldAST = null; // in case there's a syntactic error
 

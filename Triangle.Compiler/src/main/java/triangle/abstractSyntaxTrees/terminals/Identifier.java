@@ -25,8 +25,8 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class Identifier extends Terminal {
 
-    public TypeDenoter        type;
-    public AbstractSyntaxTree decl; // Either a Declaration or a FieldTypeDenoter
+    public final TypeDenoter        type;
+    public       AbstractSyntaxTree decl; // Either a Declaration or a FieldTypeDenoter
 
     public Identifier(String spelling, SourcePosition position) {
         super(spelling, position);

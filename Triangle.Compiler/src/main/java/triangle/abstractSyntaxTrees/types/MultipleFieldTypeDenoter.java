@@ -25,8 +25,8 @@ import triangle.syntacticAnalyzer.SourcePosition;
 public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
 
     public final Identifier       I;
+    public final FieldTypeDenoter FT;
     public       TypeDenoter      T;
-    public       FieldTypeDenoter FT;
 
     public MultipleFieldTypeDenoter(
             Identifier iAST, TypeDenoter tAST, FieldTypeDenoter ftAST,
@@ -40,7 +40,7 @@ public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof final MultipleFieldTypeDenoter ft) {
+        if (obj instanceof final MultipleFieldTypeDenoter ft) {
             return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T) && this.FT.equals(ft.FT);
         } else {
             return false;

@@ -32,9 +32,9 @@ public class RecordTypeDenoter extends TypeDenoter {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof ErrorTypeDenoter) {
+        if (obj instanceof ErrorTypeDenoter) {
             return true;
-        } else if (obj != null && obj instanceof RecordTypeDenoter) {
+        } else if (obj instanceof RecordTypeDenoter) {
             return this.FT.equals(((RecordTypeDenoter) obj).FT);
         } else {
             return false;

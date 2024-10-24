@@ -92,10 +92,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
                                        TypeDenoterVisitor<Void, AbstractSyntaxTree>,
                                        VnameVisitor<Void, AbstractSyntaxTree> {
 
-    {
-
-    }
-
     @Override
     public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
         ast.I.visit(this);
@@ -575,6 +571,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
         return null;
     }
 
+    // TODO: This method is all over the place. Refactor
     public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
         // the only case we know how to deal with for now is two IntegerExpressions
         if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {

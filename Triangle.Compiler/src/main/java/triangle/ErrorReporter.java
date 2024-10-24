@@ -23,7 +23,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 public class ErrorReporter {
 
     private final boolean throwExceptions;
-    private int numErrors;
+    private       int     numErrors;
 
     /**
      @param throwExceptions if true, throw exceptions (good for unit tests) otherwise write to stdout
@@ -37,6 +37,7 @@ public class ErrorReporter {
 
         numErrors++;
 
+        // TODO: replace with StringBuffer for performance
         String s = ("ERROR: ");
 
         for (int p = 0; p < message.length(); p++) {

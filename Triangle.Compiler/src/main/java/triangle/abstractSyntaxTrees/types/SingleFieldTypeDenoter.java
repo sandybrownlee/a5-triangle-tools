@@ -35,7 +35,7 @@ public class SingleFieldTypeDenoter extends FieldTypeDenoter {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof final SingleFieldTypeDenoter ft) {
+        if (obj instanceof final SingleFieldTypeDenoter ft) {
             return (this.I.spelling.compareTo(ft.I.spelling) == 0) && this.T.equals(ft.T);
         } else {
             return false;

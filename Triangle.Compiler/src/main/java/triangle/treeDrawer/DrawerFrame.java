@@ -24,13 +24,14 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.io.Serial;
 
 class DrawerFrame extends JFrame {
 
     /**
 
      */
-    private static final long serialVersionUID = -3650404598416929282L;
+    @Serial private static final long serialVersionUID = -3650404598416929282L;
 
     public DrawerFrame(JPanel panel) {
         setSize(300, 200);
@@ -41,6 +42,8 @@ class DrawerFrame extends JFrame {
         setTitle("Triangle Compiler Abstract Syntax Tree");
         setSize(screenWidth / 2, screenHeight / 2);
         setLocation(screenWidth / 4, screenHeight / 4);
+
+        // TODO:
         // Image img = tk.getImage("icon.gif");
         // setIconImage(img);
 

@@ -35,9 +35,9 @@ public class ArrayTypeDenoter extends TypeDenoter {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof ErrorTypeDenoter) {
+        if (obj instanceof ErrorTypeDenoter) {
             return true;
-        } else if (obj != null && obj instanceof ArrayTypeDenoter) {
+        } else if (obj instanceof ArrayTypeDenoter) {
             return this.IL.spelling.compareTo(((ArrayTypeDenoter) obj).IL.spelling) == 0
                    && this.T.equals(((ArrayTypeDenoter) obj).T);
         } else {

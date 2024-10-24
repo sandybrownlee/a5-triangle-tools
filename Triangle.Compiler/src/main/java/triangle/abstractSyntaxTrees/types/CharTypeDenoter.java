@@ -30,10 +30,10 @@ public class CharTypeDenoter extends TypeDenoter {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj != null && obj instanceof ErrorTypeDenoter) {
+        if (obj instanceof ErrorTypeDenoter) {
             return true;
         } else {
-            return (obj != null && obj instanceof CharTypeDenoter);
+            return (obj instanceof CharTypeDenoter);
         }
     }
 

@@ -27,6 +27,7 @@ public class ErrorTypeDenoter extends TypeDenoter {
         super(position);
     }
 
+    // TODO: Why does this unconditionally return true?
     @Override
     public boolean equals(Object obj) {
         return true;

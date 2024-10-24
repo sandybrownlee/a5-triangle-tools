@@ -24,7 +24,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class Program extends AbstractSyntaxTree {
 
-    public Command C;
+    public final Command C;
 
     public Program(Command cAST, SourcePosition position) {
         super(position);

@@ -22,11 +22,13 @@ import java.awt.*;
 
 public class DrawingTree {
 
-    private final int   FIXED_FONT_HEIGHT = 10;
-    private final Color nodeColor         = new Color(250, 220, 100);
-    String caption;
-    int    width, height;
-    Point pos, offset;
+    private static final int    FIXED_FONT_HEIGHT = 10;
+    final                String caption;
+    final                int    width;
+    final                int    height;
+    final                Point  pos;
+    final                Point  offset;
+    private final        Color  nodeColor         = new Color(250, 220, 100);
     Polygon       contour;
     DrawingTree   parent;
     DrawingTree[] children;
@@ -44,8 +46,8 @@ public class DrawingTree {
 
     public void setChildren(DrawingTree[] children) {
         this.children = children;
-        for (int i = 0; i < children.length; i++) {
-            children[i].parent = this;
+        for (final DrawingTree child : children) {
+            child.parent = this;
         }
     }
 

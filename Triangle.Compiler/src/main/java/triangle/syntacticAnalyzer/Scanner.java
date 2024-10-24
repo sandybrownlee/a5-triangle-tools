@@ -57,6 +57,7 @@ public final class Scanner {
     // takeIt appends the current character to the current token, and gets
     // the next character from the source program.
 
+    // TODO: 'Token' exposed outside defined visibility scope
     public Token scan() {
         Token tok;
         SourcePosition pos;
@@ -98,12 +99,11 @@ public final class Scanner {
 
             // comment
             case '!':
-                takeIt();
 
                 // the comment ends when we reach an end-of-line (EOL) or end of file (EOT - for end-of-transmission)
-                while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT)) {
+                do {
                     takeIt();
-                }
+                } while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT));
                 if (currentChar == SourceFile.EOL) {
                     takeIt();
                 }
@@ -175,10 +175,9 @@ public final class Scanner {
             case 'X':
             case 'Y':
             case 'Z':
-                takeIt();
-                while (isLetter(currentChar) || isDigit(currentChar)) {
+                do {
                     takeIt();
-                }
+                } while (isLetter(currentChar) || isDigit(currentChar));
                 return Token.Kind.IDENTIFIER;
 
             case '0':
@@ -191,10 +190,9 @@ public final class Scanner {
             case '7':
             case '8':
             case '9':
-                takeIt();
-                while (isDigit(currentChar)) {
+                do {
                     takeIt();
-                }
+                } while (isDigit(currentChar));
                 return Token.Kind.INTLITERAL;
 
             case '+':
@@ -210,10 +208,9 @@ public final class Scanner {
             case '%':
             case '^':
             case '?':
-                takeIt();
-                while (isOperator(currentChar)) {
+                do {
                     takeIt();
-                }
+                } while (isOperator(currentChar));
                 return Token.Kind.OPERATOR;
 
             case '\'':

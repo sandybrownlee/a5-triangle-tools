@@ -24,18 +24,15 @@ import java.awt.*;
 
 public class Drawer {
 
-    private DrawerFrame frame;
     private DrawerPanel panel;
 
-    private Program     theAST;
     private DrawingTree theDrawing;
 
     // Draw the AST representing a complete program.
 
     public void draw(Program ast) {
-        theAST = ast;
         panel = new DrawerPanel(this);
-        frame = new DrawerFrame(panel);
+        DrawerFrame frame = new DrawerFrame(panel);
 
         Font font = new Font("SansSerif", Font.PLAIN, 12);
         frame.setFont(font);
@@ -50,7 +47,7 @@ public class Drawer {
         // Each DrawingTree object knows how to paint itself, so it's passed to a
         // DrawerPanel and DrawerFrame for display
         LayoutVisitor layout = new LayoutVisitor(fontMetrics);
-        theDrawing = theAST.visit(layout, null);
+        theDrawing = ast.visit(layout, null);
         theDrawing.position(new Point(2048, 10));
 
         frame.setVisible(true);

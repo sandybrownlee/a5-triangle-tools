@@ -21,7 +21,7 @@ public class Emitter {
     // CB.
     // The address of the next instruction is held in nextInstrAddr.
 
-    ErrorReporter errorReporter;
+    final ErrorReporter errorReporter;
 
     int nextInstrAddr;
 
@@ -101,9 +101,9 @@ public class Emitter {
     }
 
     /**
-     Saves the object program in the given object file.
+     Saves the program into an object file.
 
-     @param objectFile the object file
+     @param objectFileName the name to give to the created the object file
      */
     public void saveObjectProgram(String objectFileName) {
         try (var objectFile = new FileOutputStream(objectFileName)) {

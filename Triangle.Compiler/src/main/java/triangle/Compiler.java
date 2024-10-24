@@ -41,17 +41,6 @@ public class Compiler {
     static boolean showTree = false;
     static boolean folding  = false;
 
-    private static Scanner       scanner;
-    private static Parser        parser;
-    private static Checker       checker;
-    private static Encoder       encoder;
-    private static Emitter       emitter;
-    private static ErrorReporter reporter;
-    private static Drawer        drawer;
-
-    /** The AST representing the source program. */
-    private static Program theAST;
-
     /**
      Triangle compiler main program.
 
@@ -102,20 +91,25 @@ public class Compiler {
             System.exit(1);
         }
 
-        scanner = new Scanner(source);
-        reporter = new ErrorReporter(false);
-        parser = new Parser(scanner, reporter);
-        checker = new Checker(reporter);
-        emitter = new Emitter(reporter);
-        encoder = new Encoder(emitter, reporter);
-        drawer = new Drawer();
+        Scanner scanner = new Scanner(source);
+        ErrorReporter reporter = new ErrorReporter(false);
+        Parser parser = new Parser(scanner, reporter);
+        Checker checker = new Checker(reporter);
+        Emitter emitter = new Emitter(reporter);
+        Encoder encoder = new Encoder(emitter, reporter);
+        Drawer drawer = new Drawer();
 
         // scanner.enableDebugging();
-        theAST = parser.parseProgram(); // 1st pass
+
+        // The AST representing the source program.
+        Program theAST = parser.parseProgram(); // 1st pass
         if (reporter.getNumErrors() == 0) {
+
+            // TODO:
             // if (showingAST) {
             // drawer.draw(theAST);
             // }
+
             System.out.println("Contextual Analysis ...");
             checker.check(theAST); // 2nd pass
             if (showingAST) {

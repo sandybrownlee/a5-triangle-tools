@@ -30,10 +30,10 @@ public class BoolTypeDenoter extends TypeDenoter {
 
     @Override
     public boolean equals(Object obj) {
-        if ((obj != null) && (obj instanceof ErrorTypeDenoter)) {
+        if (obj instanceof ErrorTypeDenoter) {
             return true;
         } else {
-            return ((obj != null) && (obj instanceof BoolTypeDenoter));
+            return obj instanceof BoolTypeDenoter;
         }
     }
 

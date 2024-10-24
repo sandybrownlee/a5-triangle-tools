@@ -18,6 +18,7 @@
 
 package triangle.codeGenerator.entities;
 
+// TODO: Make record class
 public class ObjectAddress {
 
     private final int level;

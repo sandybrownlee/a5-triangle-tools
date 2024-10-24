@@ -18,9 +18,11 @@
 
 package triangle.syntacticAnalyzer;
 
+import java.io.Serial;
+
 class SyntaxError extends Exception {
 
-    private static final long serialVersionUID = -5280306336102766860L;
+    @Serial private static final long serialVersionUID = -5280306336102766860L;
 
     SyntaxError() {
         super();

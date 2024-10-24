@@ -20,14 +20,15 @@ package triangle.treeDrawer;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.Serial;
 
 class DrawerPanel extends JPanel {
 
     /**
 
      */
-    private static final long   serialVersionUID = 565914745506889669L;
-    private final        Drawer drawer;
+    @Serial private static final long   serialVersionUID = 565914745506889669L;
+    private final                Drawer drawer;
 
     public DrawerPanel(Drawer drawer) {
         setPreferredSize(new Dimension(4096, 4096));

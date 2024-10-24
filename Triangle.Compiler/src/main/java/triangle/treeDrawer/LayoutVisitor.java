@@ -107,8 +107,8 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
                                       RecordAggregateVisitor<Void, DrawingTree>, TypeDenoterVisitor<Void, DrawingTree>,
                                       VnameVisitor<Void, DrawingTree> {
 
-    private final int BORDER     = 5;
-    private final int PARENT_SEP = 30;
+    private static final int BORDER     = 5;
+    private static final int PARENT_SEP = 30;
 
     private final FontMetrics fontMetrics;
 

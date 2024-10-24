@@ -22,10 +22,10 @@ import triangle.abstractSyntaxTrees.declarations.Declaration;
 
 public class IdEntry {
 
-    protected String      id;
-    protected Declaration attr;
-    protected int         level;
-    protected IdEntry     previous;
+    protected final String      id;
+    protected final Declaration attr;
+    protected final int         level;
+    protected final IdEntry     previous;
 
     IdEntry(String id, Declaration attr, int level, IdEntry previous) {
         this.id = id;

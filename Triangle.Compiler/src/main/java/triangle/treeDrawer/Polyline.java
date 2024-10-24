@@ -23,7 +23,8 @@ package triangle.treeDrawer;
  */
 class Polyline {
 
-    int dx, dy;
+    final int dx;
+    final int dy;
     Polyline link;
 
     Polyline(int dx, int dy, Polyline link) {
