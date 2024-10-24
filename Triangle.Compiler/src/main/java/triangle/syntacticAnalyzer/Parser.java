@@ -264,49 +264,46 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     }
 
     Command parseSingleCommand() throws SyntaxError {
-        Command commandAST = null; // in case there's a syntactic error
-
         SourcePosition commandPos = new SourcePosition();
         start(commandPos);
 
-        switch (currentToken.kind()) {
+        return switch (currentToken.kind()) {
 
-            case IDENTIFIER: {
+            case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
                 if (currentToken.kind() == Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
                     accept(Token.Kind.RPAREN);
                     finish(commandPos);
-                    commandAST = new CallCommand(iAST, apsAST, commandPos);
+                    yield new CallCommand(iAST, apsAST, commandPos);
                 } else {
 
                     Vname vAST = parseRestOfVname(iAST);
                     accept(Token.Kind.BECOMES);
                     Expression eAST = parseExpression();
                     finish(commandPos);
-                    commandAST = new AssignCommand(vAST, eAST, commandPos);
+                    yield new AssignCommand(vAST, eAST, commandPos);
                 }
             }
-            break;
 
-            case BEGIN:
+            case BEGIN -> {
                 acceptIt();
-                commandAST = parseCommand();
+                Command x = parseCommand();
                 accept(Token.Kind.END);
-                break;
+                yield x;
+            }
 
-            case LET: {
+            case LET -> {
                 acceptIt();
                 Declaration dAST = parseDeclaration();
                 accept(Token.Kind.IN);
                 Command cAST = parseSingleCommand();
                 finish(commandPos);
-                commandAST = new LetCommand(dAST, cAST, commandPos);
+                yield new LetCommand(dAST, cAST, commandPos);
             }
-            break;
 
-            case IF: {
+            case IF -> {
                 acceptIt();
                 Expression eAST = parseExpression();
                 accept(Token.Kind.THEN);
@@ -314,36 +311,28 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
                 accept(Token.Kind.ELSE);
                 Command c2AST = parseSingleCommand();
                 finish(commandPos);
-                commandAST = new IfCommand(eAST, c1AST, c2AST, commandPos);
+                yield new IfCommand(eAST, c1AST, c2AST, commandPos);
             }
-            break;
 
-            case WHILE: {
+            case WHILE -> {
                 acceptIt();
                 Expression eAST = parseExpression();
                 accept(Token.Kind.DO);
                 Command cAST = parseSingleCommand();
                 finish(commandPos);
-                commandAST = new WhileCommand(eAST, cAST, commandPos);
+                yield new WhileCommand(eAST, cAST, commandPos);
             }
-            break;
 
-            case SEMICOLON:
-            case END:
-            case ELSE:
-            case IN:
-            case EOT:
-
+            case SEMICOLON, END, ELSE, IN, EOT -> {
                 finish(commandPos);
-                commandAST = new EmptyCommand(commandPos);
-                break;
+                yield new EmptyCommand(commandPos);
+            }
 
-            default:
+            default -> {
                 syntacticError("\"%\" cannot start a command", currentToken.spelling());
-                break;
-        }
-
-        return commandAST;
+                yield null;
+            }
+        };
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -394,80 +383,73 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     }
 
     Expression parsePrimaryExpression() throws SyntaxError {
-        Expression expressionAST = null; // in case there's a syntactic error
-
         SourcePosition expressionPos = new SourcePosition();
         start(expressionPos);
 
-        switch (currentToken.kind()) {
+        return switch (currentToken.kind()) {
 
-            case INTLITERAL: {
+            case INTLITERAL -> {
                 IntegerLiteral ilAST = parseIntegerLiteral();
                 finish(expressionPos);
-                expressionAST = new IntegerExpression(ilAST, expressionPos);
+                yield new IntegerExpression(ilAST, expressionPos);
             }
-            break;
 
-            case CHARLITERAL: {
+            case CHARLITERAL -> {
                 CharacterLiteral clAST = parseCharacterLiteral();
                 finish(expressionPos);
-                expressionAST = new CharacterExpression(clAST, expressionPos);
+                yield new CharacterExpression(clAST, expressionPos);
             }
-            break;
 
-            case LBRACKET: {
+            case LBRACKET -> {
                 acceptIt();
                 ArrayAggregate aaAST = parseArrayAggregate();
                 accept(Token.Kind.RBRACKET);
                 finish(expressionPos);
-                expressionAST = new ArrayExpression(aaAST, expressionPos);
+                yield new ArrayExpression(aaAST, expressionPos);
             }
-            break;
 
-            case LCURLY: {
+            case LCURLY -> {
                 acceptIt();
                 RecordAggregate raAST = parseRecordAggregate();
                 accept(Token.Kind.RCURLY);
                 finish(expressionPos);
-                expressionAST = new RecordExpression(raAST, expressionPos);
+                yield new RecordExpression(raAST, expressionPos);
             }
-            break;
 
-            case IDENTIFIER: {
+            case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
                 if (currentToken.kind() == Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
                     accept(Token.Kind.RPAREN);
                     finish(expressionPos);
-                    expressionAST = new CallExpression(iAST, apsAST, expressionPos);
+                    yield new CallExpression(iAST, apsAST, expressionPos);
                 } else {
                     Vname vAST = parseRestOfVname(iAST);
                     finish(expressionPos);
-                    expressionAST = new VnameExpression(vAST, expressionPos);
+                    yield new VnameExpression(vAST, expressionPos);
                 }
             }
-            break;
 
-            case OPERATOR: {
+            case OPERATOR -> {
                 Operator opAST = parseOperator();
                 Expression eAST = parsePrimaryExpression();
                 finish(expressionPos);
-                expressionAST = new UnaryExpression(opAST, eAST, expressionPos);
+                yield new UnaryExpression(opAST, eAST, expressionPos);
             }
-            break;
 
-            case LPAREN:
+            case LPAREN -> {
                 acceptIt();
-                expressionAST = parseExpression();
+                Expression x = parseExpression();
                 accept(Token.Kind.RPAREN);
-                break;
+                yield x;
+            }
 
-            default:
+            default -> {
                 syntacticError("\"%\" cannot start an expression", currentToken.spelling());
-                break;
-        }
-        return expressionAST;
+                yield null;
+            }
+        };
     }
 
     RecordAggregate parseRecordAggregate() throws SyntaxError {
@@ -564,34 +546,30 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     }
 
     Declaration parseSingleDeclaration() throws SyntaxError {
-        Declaration declarationAST = null; // in case there's a syntactic error
-
         SourcePosition declarationPos = new SourcePosition();
         start(declarationPos);
 
-        switch (currentToken.kind()) {
+        return switch (currentToken.kind()) {
 
-            case CONST: {
+            case CONST -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.IS);
                 Expression eAST = parseExpression();
                 finish(declarationPos);
-                declarationAST = new ConstDeclaration(iAST, eAST, declarationPos);
+                yield new ConstDeclaration(iAST, eAST, declarationPos);
             }
-            break;
 
-            case VAR: {
+            case VAR -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(declarationPos);
-                declarationAST = new VarDeclaration(iAST, tAST, declarationPos);
+                yield new VarDeclaration(iAST, tAST, declarationPos);
             }
-            break;
 
-            case PROC: {
+            case PROC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.LPAREN);
@@ -600,11 +578,10 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
                 accept(Token.Kind.IS);
                 Command cAST = parseSingleCommand();
                 finish(declarationPos);
-                declarationAST = new ProcDeclaration(iAST, fpsAST, cAST, declarationPos);
+                yield new ProcDeclaration(iAST, fpsAST, cAST, declarationPos);
             }
-            break;
 
-            case FUNC: {
+            case FUNC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.LPAREN);
@@ -615,25 +592,23 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
                 accept(Token.Kind.IS);
                 Expression eAST = parseExpression();
                 finish(declarationPos);
-                declarationAST = new FuncDeclaration(iAST, fpsAST, tAST, eAST, declarationPos);
+                yield new FuncDeclaration(iAST, fpsAST, tAST, eAST, declarationPos);
             }
-            break;
 
-            case TYPE: {
+            case TYPE -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.IS);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(declarationPos);
-                declarationAST = new TypeDeclaration(iAST, tAST, declarationPos);
+                yield new TypeDeclaration(iAST, tAST, declarationPos);
             }
-            break;
 
-            default:
+            default -> {
                 syntacticError("\"%\" cannot start a declaration", currentToken.spelling());
-                break;
-        }
-        return declarationAST;
+                yield null;
+            }
+        };
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -677,61 +652,55 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     }
 
     FormalParameter parseFormalParameter() throws SyntaxError {
-        FormalParameter formalAST = null; // in case there's a syntactic error;
-
         SourcePosition formalPos = new SourcePosition();
         start(formalPos);
 
-        switch (currentToken.kind()) {
+        return switch (currentToken.kind()) {
 
-            case IDENTIFIER: {
+            case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
-                formalAST = new ConstFormalParameter(iAST, tAST, formalPos);
+                yield new ConstFormalParameter(iAST, tAST, formalPos);
             }
-            break;
 
-            case VAR: {
+            case VAR -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
-                formalAST = new VarFormalParameter(iAST, tAST, formalPos);
+                yield new VarFormalParameter(iAST, tAST, formalPos);
             }
-            break;
 
-            case PROC: {
-                acceptIt();
-                Identifier iAST = parseIdentifier();
-                accept(Token.Kind.LPAREN);
-                FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Token.Kind.RPAREN);
-                finish(formalPos);
-                formalAST = new ProcFormalParameter(iAST, fpsAST, formalPos);
-            }
-            break;
-
-            case FUNC: {
+            case PROC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 accept(Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
                 accept(Token.Kind.RPAREN);
+                finish(formalPos);
+                yield new ProcFormalParameter(iAST, fpsAST, formalPos);
+            }
+
+            case FUNC -> {
+                acceptIt();
+                Identifier iAST = parseIdentifier();
+                accept(Token.Kind.LPAREN);
+                FormalParameterSequence fpsAST = parseFormalParameterSequence();
+                accept(Token.Kind.RPAREN);
                 accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
-                formalAST = new FuncFormalParameter(iAST, fpsAST, tAST, formalPos);
+                yield new FuncFormalParameter(iAST, fpsAST, tAST, formalPos);
             }
-            break;
 
-            default:
+            default -> {
                 syntacticError("\"%\" cannot start a formal parameter", currentToken.spelling());
-                break;
-        }
-        return formalAST;
+                yield null;
+            }
+        };
     }
 
     ActualParameterSequence parseActualParameterSequence() throws SyntaxError {
@@ -770,58 +739,44 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     }
 
     ActualParameter parseActualParameter() throws SyntaxError {
-        ActualParameter actualAST = null; // in case there's a syntactic error
-
         SourcePosition actualPos = new SourcePosition();
 
         start(actualPos);
 
-        switch (currentToken.kind()) {
+        return switch (currentToken.kind()) {
 
-            case IDENTIFIER:
-            case INTLITERAL:
-            case CHARLITERAL:
-            case OPERATOR:
-            case LET:
-            case IF:
-            case LPAREN:
-            case LBRACKET:
-            case LCURLY: {
+            case IDENTIFIER, INTLITERAL, CHARLITERAL, OPERATOR, LET, IF, LPAREN, LBRACKET, LCURLY -> {
                 Expression eAST = parseExpression();
                 finish(actualPos);
-                actualAST = new ConstActualParameter(eAST, actualPos);
+                yield new ConstActualParameter(eAST, actualPos);
             }
-            break;
 
-            case VAR: {
+            case VAR -> {
                 acceptIt();
                 Vname vAST = parseVname();
                 finish(actualPos);
-                actualAST = new VarActualParameter(vAST, actualPos);
+                yield new VarActualParameter(vAST, actualPos);
             }
-            break;
 
-            case PROC: {
+            case PROC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 finish(actualPos);
-                actualAST = new ProcActualParameter(iAST, actualPos);
+                yield new ProcActualParameter(iAST, actualPos);
             }
-            break;
 
-            case FUNC: {
+            case FUNC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 finish(actualPos);
-                actualAST = new FuncActualParameter(iAST, actualPos);
+                yield new FuncActualParameter(iAST, actualPos);
             }
-            break;
 
-            default:
+            default -> {
                 syntacticError("\"%\" cannot start an actual parameter", currentToken.spelling());
-                break;
-        }
-        return actualAST;
+                yield null;
+            }
+        };
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -831,44 +786,39 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     ///////////////////////////////////////////////////////////////////////////////
 
     TypeDenoter parseTypeDenoter() throws SyntaxError {
-        TypeDenoter typeAST = null; // in case there's a syntactic error
         SourcePosition typePos = new SourcePosition();
 
         start(typePos);
 
-        switch (currentToken.kind()) {
-
-            case IDENTIFIER: {
+        return switch (currentToken.kind()) {
+            case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
                 finish(typePos);
-                typeAST = new SimpleTypeDenoter(iAST, typePos);
+                yield new SimpleTypeDenoter(iAST, typePos);
             }
-            break;
 
-            case ARRAY: {
+            case ARRAY -> {
                 acceptIt();
                 IntegerLiteral ilAST = parseIntegerLiteral();
                 accept(Token.Kind.OF);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(typePos);
-                typeAST = new ArrayTypeDenoter(ilAST, tAST, typePos);
+                yield new ArrayTypeDenoter(ilAST, tAST, typePos);
             }
-            break;
 
-            case RECORD: {
+            case RECORD -> {
                 acceptIt();
                 FieldTypeDenoter fAST = parseFieldTypeDenoter();
                 accept(Token.Kind.END);
                 finish(typePos);
-                typeAST = new RecordTypeDenoter(fAST, typePos);
+                yield new RecordTypeDenoter(fAST, typePos);
             }
-            break;
 
-            default:
+            default -> {
                 syntacticError("\"%\" cannot start a type denoter", currentToken.spelling());
-                break;
-        }
-        return typeAST;
+                yield null;
+            }
+        };
     }
 
     FieldTypeDenoter parseFieldTypeDenoter() throws SyntaxError {
