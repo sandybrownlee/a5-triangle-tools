@@ -26,9 +26,12 @@ import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
 import triangle.syntacticAnalyzer.Parser;
-import triangle.syntacticAnalyzer.Scanner;
-import triangle.syntacticAnalyzer.SourceFile;
+import triangle.syntacticAnalyzer.Lexer;
 import triangle.treeDrawer.Drawer;
+
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 
 /**
  The main driver class for the Triangle compiler.
@@ -62,7 +65,13 @@ public class Compiler {
     public static void main(String[] args) {
         Args.parseOrExit(Compiler.class, args);
 
-        var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+        boolean compiledOK = false;
+        try {
+            compiledOK = compileProgram(new FileInputStream(sourceName), objectName, showTree, false);
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not open file: " + sourceName);
+            System.exit(1);
+        }
 
         if (!showTree) {
             System.exit(compiledOK ? 0 : 1);
@@ -72,7 +81,7 @@ public class Compiler {
     /**
      Compile the source program to TAM machine code.
 
-     @param sourceName   the name of the file containing the source program.
+     @param inputStream   an {@link InputStream} from which to read the source code
      @param objectName   the name of the file containing the object program.
      @param showingAST   true iff the AST is to be displayed after contextual
      analysis
@@ -83,27 +92,21 @@ public class Compiler {
      @return true iff the source program is free of compile-time errors, otherwise
      false.
      */
-    static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+    static boolean compileProgram(InputStream inputStream, String objectName, boolean showingAST, boolean showingTable) {
 
         System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
         System.out.println("Syntactic Analysis ...");
-        SourceFile source = SourceFile.ofPath(sourceName);
 
-        if (source == null) {
-            System.out.println("Can't access source file " + sourceName);
-            System.exit(1);
-        }
-
-        Scanner scanner = new Scanner(source);
+        Lexer lexer = new Lexer(inputStream);
         ErrorReporter reporter = new ErrorReporter(false);
-        Parser parser = new Parser(scanner, reporter);
+        Parser parser = new Parser(lexer, reporter);
         Checker checker = new Checker(reporter);
         Emitter emitter = new Emitter(reporter);
         Encoder encoder = new Encoder(emitter, reporter);
         Drawer drawer = new Drawer();
 
-        // scanner.enableDebugging();
+        // lexer.enableDebugging();
 
         // The AST representing the source program.
         Program theAST = parser.parseProgram(); // 1st pass

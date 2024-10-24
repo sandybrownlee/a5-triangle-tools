@@ -3,42 +3,41 @@ package triangle.syntacticAnalyser;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import triangle.ErrorReporter;
+import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
-import triangle.syntacticAnalyzer.Scanner;
-import triangle.syntacticAnalyzer.SourceFile;
 
 import static org.junit.Assert.*;
 
 public class TestScanner {
 
-    /* some individual unit tests for helper methods in Scanner */
+    /* some individual unit tests for helper methods in Lexer */
 
     @Test
     public void testIsDigit() {
-        assertTrue(Scanner.isDigit('0'));
-        assertTrue(Scanner.isDigit('1'));
-        assertTrue(Scanner.isDigit('5'));
-        assertTrue(Scanner.isDigit('8'));
-        assertTrue(Scanner.isDigit('9'));
-        assertFalse(Scanner.isDigit('a'));
-        assertFalse(Scanner.isDigit('Z'));
-        assertFalse(Scanner.isDigit('&'));
-        assertFalse(Scanner.isDigit(';'));
-        assertFalse(Scanner.isDigit('\n'));
+        assertTrue(Lexer.isDigit('0'));
+        assertTrue(Lexer.isDigit('1'));
+        assertTrue(Lexer.isDigit('5'));
+        assertTrue(Lexer.isDigit('8'));
+        assertTrue(Lexer.isDigit('9'));
+        assertFalse(Lexer.isDigit('a'));
+        assertFalse(Lexer.isDigit('Z'));
+        assertFalse(Lexer.isDigit('&'));
+        assertFalse(Lexer.isDigit(';'));
+        assertFalse(Lexer.isDigit('\n'));
     }
 
     @Test
     public void testIsOperator() {
-        assertTrue(Scanner.isOperator('*'));
-        assertTrue(Scanner.isOperator('/'));
-        assertTrue(Scanner.isOperator('?'));
-        assertTrue(Scanner.isOperator('+'));
-        assertTrue(Scanner.isOperator('-'));
-        assertFalse(Scanner.isOperator('a'));
-        assertFalse(Scanner.isOperator('Z'));
-        assertFalse(Scanner.isOperator('1'));
-        assertFalse(Scanner.isOperator(';'));
-        assertFalse(Scanner.isOperator('\n'));
+        assertTrue(Lexer.isOperator('*'));
+        assertTrue(Lexer.isOperator('/'));
+        assertTrue(Lexer.isOperator('?'));
+        assertTrue(Lexer.isOperator('+'));
+        assertTrue(Lexer.isOperator('-'));
+        assertFalse(Lexer.isOperator('a'));
+        assertFalse(Lexer.isOperator('Z'));
+        assertFalse(Lexer.isOperator('1'));
+        assertFalse(Lexer.isOperator(';'));
+        assertFalse(Lexer.isOperator('\n'));
     }
 
 
@@ -79,11 +78,10 @@ public class TestScanner {
         // which adds the programs directory to the list of places Java can easily find files
         // getResource() below searches for a file, which is in /programs
         //SourceFile source = SourceFile.ofPath(this.getClass().getResource(filename).getFile().toString());
-        SourceFile source = SourceFile.fromResource(filename);
 
-        Scanner scanner = new Scanner(source);
+        Lexer lexer = Lexer.fromResource(filename);
         ErrorReporter reporter = new ErrorReporter(true);
-        Parser parser = new Parser(scanner, reporter);
+        Parser parser = new Parser(lexer, reporter);
 
         parser.parseProgram();
 
@@ -94,10 +92,9 @@ public class TestScanner {
 
     private void compileExpectFailure(String filename) {
         //SourceFile source = SourceFile.ofPath(this.getClass().getResource(filename).getFile().toString());
-        SourceFile source = SourceFile.fromResource(filename);
-        Scanner scanner = new Scanner(source);
+        Lexer lexer = Lexer.fromResource(filename);
         ErrorReporter reporter = new ErrorReporter(true);
-        Parser parser = new Parser(scanner, reporter);
+        Parser parser = new Parser(lexer, reporter);
 
         // we expect an exception here as the program has invalid syntax
         assertThrows(RuntimeException.class, new ThrowingRunnable() {

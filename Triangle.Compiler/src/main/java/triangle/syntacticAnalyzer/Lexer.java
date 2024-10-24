@@ -1,5 +1,5 @@
 /*
- * @(#)Scanner.java
+ * @(#)Lexer.java
  *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  *
@@ -18,19 +18,32 @@
 
 package triangle.syntacticAnalyzer;
 
-public final class Scanner {
+import java.io.InputStream;
 
-    private final SourceFile sourceFile;
+public final class Lexer {
+
+    public static final char EOL = '\n';
+    public static final char EOT = '\u0000';
+
+    private final InputStream source;
     private       boolean    debug;
 
     private char         currentChar;
     private StringBuffer currentSpelling;
     private boolean      currentlyScanningToken;
 
-    public Scanner(SourceFile source) {
-        sourceFile = source;
-        currentChar = sourceFile.getSource();
+    int                 currentLine;
+
+    public Lexer(InputStream source) {
+        this.source = source;
+
+        currentChar = getSource();
         debug = false;
+        currentLine = 1;
+    }
+
+    public static Lexer fromResource(String handle) {
+        return new Lexer(Lexer.class.getResourceAsStream(handle));
     }
 
     public static boolean isLetter(char c) {
@@ -72,11 +85,11 @@ public final class Scanner {
         currentlyScanningToken = true;
         currentSpelling = new StringBuffer();
         pos = new SourcePosition();
-        pos.setStart(sourceFile.getCurrentLine());
+        pos.setStart(currentLine);
 
         kind = scanToken();
 
-        pos.setFinish(sourceFile.getCurrentLine());
+        pos.setFinish(currentLine);
         tok = new Token(kind, currentSpelling.toString(), pos);
         if (debug) {
             System.out.println(tok);
@@ -86,11 +99,26 @@ public final class Scanner {
 
     // scanSeparator skips a single separator.
 
+    char getSource() {
+        try {
+            int c = source.read();
+
+            if (c == -1) {
+                c = EOT;
+            } else if (c == EOL) {
+                currentLine++;
+            }
+            return (char) c;
+        } catch (java.io.IOException s) {
+            return EOT;
+        }
+    }
+
     private void takeIt() {
         if (currentlyScanningToken) {
             currentSpelling.append(currentChar);
         }
-        currentChar = sourceFile.getSource();
+        currentChar = getSource();
     }
 
     private void scanSeparator() {
@@ -102,8 +130,8 @@ public final class Scanner {
                 // the comment ends when we reach an end-of-line (EOL) or end of file (EOT - for end-of-transmission)
                 do {
                     takeIt();
-                } while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT));
-                if (currentChar == SourceFile.EOL) {
+                } while ((currentChar != EOL) && (currentChar != EOT));
+                if (currentChar == EOL) {
                     takeIt();
                 }
                 break;
@@ -271,7 +299,7 @@ public final class Scanner {
                 takeIt();
                 return Token.Kind.RCURLY;
 
-            case SourceFile.EOT:
+            case EOT:
                 return Token.Kind.EOT;
 
             default:

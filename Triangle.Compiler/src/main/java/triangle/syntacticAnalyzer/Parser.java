@@ -88,12 +88,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 
 @SuppressWarnings("SwitchStatementWithTooFewBranches") public class Parser {
 
-    private final Scanner        lexicalAnalyser;
-    private final ErrorReporter  errorReporter;
+    private final Lexer         lexicalAnalyser;
+    private final ErrorReporter errorReporter;
     private       Token          currentToken;
     private       SourcePosition previousTokenPosition;
 
-    public Parser(Scanner lexer, ErrorReporter reporter) {
+    public Parser(Lexer lexer, ErrorReporter reporter) {
         lexicalAnalyser = lexer;
         errorReporter = reporter;
         previousTokenPosition = new SourcePosition();
