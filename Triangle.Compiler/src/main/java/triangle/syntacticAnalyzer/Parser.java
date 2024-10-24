@@ -112,7 +112,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             Command cAST = parseCommand();
             Program programAST = new Program(cAST, previousTokenPosition);
             if (currentToken.kind() != Lexer.Token.Kind.EOT) {
-                syntacticError("\"%\" not expected after end of program", currentToken.spelling());
+                syntacticError("\"%\" not expected after end of program", currentToken.text());
             }
             return programAST;
         } catch (SyntaxError s) {
@@ -177,7 +177,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     IntegerLiteral parseIntegerLiteral() throws SyntaxError {
         if (currentToken.kind() == Lexer.Token.Kind.INTLITERAL) {
             previousTokenPosition = currentToken.position();
-            String spelling = currentToken.spelling();
+            String spelling = currentToken.text();
             IntegerLiteral IL = new IntegerLiteral(spelling, previousTokenPosition);
 
             currentToken = lexicalAnalyser.scan();
@@ -196,7 +196,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     CharacterLiteral parseCharacterLiteral() throws SyntaxError {
         if (currentToken.kind() == Lexer.Token.Kind.CHARLITERAL) {
             previousTokenPosition = currentToken.position();
-            String spelling = currentToken.spelling();
+            String spelling = currentToken.text();
             CharacterLiteral CL = new CharacterLiteral(spelling, previousTokenPosition);
             currentToken = lexicalAnalyser.scan();
             return CL;
@@ -213,7 +213,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 
         if (currentToken.kind() == Lexer.Token.Kind.IDENTIFIER) {
             previousTokenPosition = currentToken.position();
-            String spelling = currentToken.spelling();
+            String spelling = currentToken.text();
             Identifier I = new Identifier(spelling, previousTokenPosition);
             currentToken = lexicalAnalyser.scan();
 
@@ -230,7 +230,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     Operator parseOperator() throws SyntaxError {
         if (currentToken.kind() == Lexer.Token.Kind.OPERATOR) {
             previousTokenPosition = currentToken.position();
-            String spelling = currentToken.spelling();
+            String spelling = currentToken.text();
             Operator O = new Operator(spelling, previousTokenPosition);
             currentToken = lexicalAnalyser.scan();
             return O;
@@ -329,7 +329,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a command", currentToken.spelling());
+                syntacticError("\"%\" cannot start a command", currentToken.text());
                 yield null;
             }
         };
@@ -446,7 +446,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start an expression", currentToken.spelling());
+                syntacticError("\"%\" cannot start an expression", currentToken.text());
                 yield null;
             }
         };
@@ -605,7 +605,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a declaration", currentToken.spelling());
+                syntacticError("\"%\" cannot start a declaration", currentToken.text());
                 yield null;
             }
         };
@@ -697,7 +697,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a formal parameter", currentToken.spelling());
+                syntacticError("\"%\" cannot start a formal parameter", currentToken.text());
                 yield null;
             }
         };
@@ -773,7 +773,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start an actual parameter", currentToken.spelling());
+                syntacticError("\"%\" cannot start an actual parameter", currentToken.text());
                 yield null;
             }
         };
@@ -815,7 +815,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a type denoter", currentToken.spelling());
+                syntacticError("\"%\" cannot start a type denoter", currentToken.text());
                 yield null;
             }
         };

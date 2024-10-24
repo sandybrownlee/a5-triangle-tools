@@ -1,6 +1,7 @@
 /*
  * @(#)Lexer.java
  *
+ * Revisions and updates (c) 2024 Zaraksh Rahman. zar00024@students.stir.ac.uk
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  *
  * Original release:
@@ -20,6 +21,7 @@ package triangle.syntacticAnalyzer;
 
 import java.io.InputStream;
 
+// TODO: logging
 public final class Lexer {
 
     // TODO: make configurable for '\r\n' or '\n'
@@ -27,19 +29,15 @@ public final class Lexer {
     public static final char EOT = '\u0000';
 
     private final InputStream source;
-    private       boolean    debug;
-
+    int currentLine;
     private char         currentChar;
     private StringBuffer currentSpelling;
     private boolean      currentlyScanningToken;
-
-    int                 currentLine;
 
     public Lexer(InputStream source) {
         this.source = source;
 
         currentChar = getSource();
-        debug = false;
         currentLine = 1;
     }
 
@@ -47,29 +45,10 @@ public final class Lexer {
         return new Lexer(Lexer.class.getResourceAsStream(handle));
     }
 
-    public static boolean isLetter(char c) {
-        return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
-    }
-
-    // isOperator returns true iff the given character is an operator character.
-
-    public static boolean isDigit(char c) {
-        return (c >= '0' && c <= '9');
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////
-
     public static boolean isOperator(char c) {
         return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
                 || c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
     }
-
-    public void enableDebugging() {
-        debug = true;
-    }
-
-    // takeIt appends the current character to the current token, and gets
-    // the next character from the source program.
 
     Token scan() {
         Token tok;
@@ -92,13 +71,8 @@ public final class Lexer {
 
         pos.setFinish(currentLine);
         tok = new Token(kind, currentSpelling.toString(), pos);
-        if (debug) {
-            System.out.println(tok);
-        }
         return tok;
     }
-
-    // scanSeparator skips a single separator.
 
     char getSource() {
         try {
@@ -151,95 +125,28 @@ public final class Lexer {
 
         switch (currentChar) {
 
-            case 'a':
-            case 'b':
-            case 'c':
-            case 'd':
-            case 'e':
-            case 'f':
-            case 'g':
-            case 'h':
-            case 'i':
-            case 'j':
-            case 'k':
-            case 'l':
-            case 'm':
-            case 'n':
-            case 'o':
-            case 'p':
-            case 'q':
-            case 'r':
-            case 's':
-            case 't':
-            case 'u':
-            case 'v':
-            case 'w':
-            case 'x':
-            case 'y':
-            case 'z':
-            case 'A':
-            case 'B':
-            case 'C':
-            case 'D':
-            case 'E':
-            case 'F':
-            case 'G':
-            case 'H':
-            case 'I':
-            case 'J':
-            case 'K':
-            case 'L':
-            case 'M':
-            case 'N':
-            case 'O':
-            case 'P':
-            case 'Q':
-            case 'R':
-            case 'S':
-            case 'T':
-            case 'U':
-            case 'V':
-            case 'W':
-            case 'X':
-            case 'Y':
-            case 'Z':
+            case Character c when Character.isLetter(c): {
                 do {
                     takeIt();
-                } while (isLetter(currentChar) || isDigit(currentChar));
+                } while (Character.isLetter(currentChar) || Character.isDigit(currentChar));
+
                 return Token.Kind.IDENTIFIER;
+            }
 
-            case '0':
-            case '1':
-            case '2':
-            case '3':
-            case '4':
-            case '5':
-            case '6':
-            case '7':
-            case '8':
-            case '9':
+            case Character c when Character.isDigit(c): {
                 do {
                     takeIt();
-                } while (isDigit(currentChar));
-                return Token.Kind.INTLITERAL;
+                } while (Character.isDigit(currentChar));
 
-            case '+':
-            case '-':
-            case '*':
-            case '/':
-            case '=':
-            case '<':
-            case '>':
-            case '\\':
-            case '&':
-            case '@':
-            case '%':
-            case '^':
-            case '?':
+                return Token.Kind.INTLITERAL;
+            }
+
+            case Character c when isOperator(c): {
                 do {
                     takeIt();
                 } while (isOperator(currentChar));
                 return Token.Kind.OPERATOR;
+            }
 
             case '\'':
                 takeIt();
@@ -309,18 +216,18 @@ public final class Lexer {
         }
     }
 
-    record Token(Kind kind, String spelling, SourcePosition position) {
+    record Token(Kind kind, String text, SourcePosition position) {
 
-        Token(Kind kind, String spelling, SourcePosition position) {
+        Token(Kind kind, String text, SourcePosition position) {
 
             // If this token is an identifier, is it also a reserved word?
             if (kind == Kind.IDENTIFIER) {
-                this.kind = Kind.fromSpelling(spelling);
+                this.kind = Kind.fromSpelling(text);
             } else {
                 this.kind = kind;
             }
 
-            this.spelling = spelling;
+            this.text = text;
             this.position = position;
         }
 
@@ -330,7 +237,7 @@ public final class Lexer {
 
         @Override
         public String toString() {
-            return "Kind=" + kind + ", spelling=" + spelling + ", position=" + position;
+            return "Kind=" + kind + ", text=" + text + ", position=" + position;
         }
 
         // Token classes...
@@ -361,7 +268,7 @@ public final class Lexer {
             }
 
             /**
-             iterate over the reserved words above to find the one with a given spelling
+             iterate over the reserved words above to find the one with a given text
              need to specify firstReservedWord and lastReservedWord (inclusive) for this
              to work!
 

@@ -13,20 +13,6 @@ public class TestScanner {
     /* some individual unit tests for helper methods in Lexer */
 
     @Test
-    public void testIsDigit() {
-        assertTrue(Lexer.isDigit('0'));
-        assertTrue(Lexer.isDigit('1'));
-        assertTrue(Lexer.isDigit('5'));
-        assertTrue(Lexer.isDigit('8'));
-        assertTrue(Lexer.isDigit('9'));
-        assertFalse(Lexer.isDigit('a'));
-        assertFalse(Lexer.isDigit('Z'));
-        assertFalse(Lexer.isDigit('&'));
-        assertFalse(Lexer.isDigit(';'));
-        assertFalse(Lexer.isDigit('\n'));
-    }
-
-    @Test
     public void testIsOperator() {
         assertTrue(Lexer.isOperator('*'));
         assertTrue(Lexer.isOperator('/'));
@@ -39,7 +25,6 @@ public class TestScanner {
         assertFalse(Lexer.isOperator(';'));
         assertFalse(Lexer.isOperator('\n'));
     }
-
 
     /* these tests all try to compile example programs... */
 

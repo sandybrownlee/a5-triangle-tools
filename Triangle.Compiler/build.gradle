@@ -2,12 +2,25 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'jacoco'
 
-sourceCompatibility = 17
+sourceCompatibility = 23
 
 repositories {
     mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(23)
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.compilerArgs += "--enable-preview"
+}
+
+tasks.withType(Test).configureEach {
+    options.compilerArgs += "--enable-preview"
+}
 
 dependencies {
     implementation project(':Triangle.AbstractMachine')
