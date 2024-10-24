@@ -60,3 +60,11 @@ local.properties
 # Typically, this file would be tracked if it contains build/dependency configurations:
 #.project
 /.gradle/
+
+# project specific iml files
+Triangle.AbstractMachine.Disassembler/triangle-disassembler.iml
+Triangle.AbstractMachine.Interpreter/triangle-interpreter.iml
+Triangle.AbstractMachine/triangle-abstractmachine.iml
+Triangle.Compiler/triangle-compiler.iml
+
+*.tam
