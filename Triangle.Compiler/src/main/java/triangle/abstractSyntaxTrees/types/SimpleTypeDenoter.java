@@ -31,6 +31,7 @@ public class SimpleTypeDenoter extends TypeDenoter {
         I = iAST;
     }
 
+    // TODO: Why does this unconditionally return false?
     @Override
     public boolean equals(Object obj) {
         return false; // should not happen

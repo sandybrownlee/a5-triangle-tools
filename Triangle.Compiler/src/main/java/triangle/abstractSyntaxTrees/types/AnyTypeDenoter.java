@@ -27,6 +27,7 @@ public class AnyTypeDenoter extends TypeDenoter {
         super(position);
     }
 
+    // TODO: Why does this unconditionally return false?
     @Override
     public boolean equals(Object obj) {
         return false;

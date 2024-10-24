@@ -28,6 +28,8 @@ public class CharTypeDenoter extends TypeDenoter {
         super(position);
     }
 
+    // TODO: this equals() method is wrong, ErrorTypeDenoter is neither a super nor sub class of this class.
+    //      see also: ErrorTypeDenoter.java:32
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof ErrorTypeDenoter) {
