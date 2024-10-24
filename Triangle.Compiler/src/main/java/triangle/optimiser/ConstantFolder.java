@@ -571,25 +571,17 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
         return null;
     }
 
-    // TODO: This method is all over the place. Refactor
+    // TODO: Handle other kinds of constant folding
     public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
         // the only case we know how to deal with for now is two IntegerExpressions
         if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
             int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
             int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
-            Object foldedValue = null;
-
             if (o.decl == StdEnvironment.addDecl) {
-                foldedValue = int1 + int2;
-            }
-
-            if (foldedValue instanceof Integer) {
-                IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
+                IntegerLiteral il = new IntegerLiteral(Integer.toString(int1 + int2), node1.getPosition());
                 IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
                 ie.type = StdEnvironment.integerType;
                 return ie;
-            } else if (foldedValue instanceof Boolean) {
-                /* currently not handled! */
             }
         }
 
