@@ -37,20 +37,19 @@ public class ErrorReporter {
 
         numErrors++;
 
-        // TODO: replace with StringBuffer for performance
-        String s = ("ERROR: ");
+        StringBuffer s = new StringBuffer("ERROR: ");
 
         for (int p = 0; p < message.length(); p++) {
             if (message.charAt(p) == '%') {
-                s += tokenName;
+                s.append(tokenName);
             } else {
-                s += message.charAt(p);
+                s.append(message.charAt(p));
             }
         }
-        s += (" " + pos.start + ".." + pos.finish);
+        s.append(" ").append(pos.start).append("..").append(pos.finish);
 
         if (throwExceptions) {
-            throw new RuntimeException(s);
+            throw new RuntimeException(s.toString());
         } else {
             System.out.println(s);
         }
