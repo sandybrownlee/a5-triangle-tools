@@ -57,8 +57,7 @@ public final class Scanner {
     // takeIt appends the current character to the current token, and gets
     // the next character from the source program.
 
-    // TODO: 'Token' exposed outside defined visibility scope
-    public Token scan() {
+    Token scan() {
         Token tok;
         SourcePosition pos;
         Token.Kind kind;
