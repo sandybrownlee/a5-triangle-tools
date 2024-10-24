@@ -89,8 +89,8 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 @SuppressWarnings("SwitchStatementWithTooFewBranches") public class Parser {
 
     private final Lexer         lexicalAnalyser;
-    private final ErrorReporter errorReporter;
-    private       Token          currentToken;
+    private final ErrorReporter  errorReporter;
+    private       Lexer.Token    currentToken;
     private       SourcePosition previousTokenPosition;
 
     public Parser(Lexer lexer, ErrorReporter reporter) {
@@ -111,7 +111,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         try {
             Command cAST = parseCommand();
             Program programAST = new Program(cAST, previousTokenPosition);
-            if (currentToken.kind() != Token.Kind.EOT) {
+            if (currentToken.kind() != Lexer.Token.Kind.EOT) {
                 syntacticError("\"%\" not expected after end of program", currentToken.spelling());
             }
             return programAST;
@@ -123,12 +123,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // acceptIt simply moves to the next token with no checking
     // (used where we've already done the check)
 
-    void accept(Token.Kind tokenExpected) throws SyntaxError {
+    void accept(Lexer.Token.Kind tokenExpected) throws SyntaxError {
         if (currentToken.kind() == tokenExpected) {
             previousTokenPosition = currentToken.position();
             currentToken = lexicalAnalyser.scan();
         } else {
-            syntacticError("\"%\" expected here", Token.spell(tokenExpected));
+            syntacticError("\"%\" expected here", Lexer.Token.spell(tokenExpected));
         }
     }
 
@@ -175,7 +175,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // a leaf AST to represent it.
 
     IntegerLiteral parseIntegerLiteral() throws SyntaxError {
-        if (currentToken.kind() == Token.Kind.INTLITERAL) {
+        if (currentToken.kind() == Lexer.Token.Kind.INTLITERAL) {
             previousTokenPosition = currentToken.position();
             String spelling = currentToken.spelling();
             IntegerLiteral IL = new IntegerLiteral(spelling, previousTokenPosition);
@@ -194,7 +194,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // AST to represent it.
 
     CharacterLiteral parseCharacterLiteral() throws SyntaxError {
-        if (currentToken.kind() == Token.Kind.CHARLITERAL) {
+        if (currentToken.kind() == Lexer.Token.Kind.CHARLITERAL) {
             previousTokenPosition = currentToken.position();
             String spelling = currentToken.spelling();
             CharacterLiteral CL = new CharacterLiteral(spelling, previousTokenPosition);
@@ -211,7 +211,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 
     Identifier parseIdentifier() throws SyntaxError {
 
-        if (currentToken.kind() == Token.Kind.IDENTIFIER) {
+        if (currentToken.kind() == Lexer.Token.Kind.IDENTIFIER) {
             previousTokenPosition = currentToken.position();
             String spelling = currentToken.spelling();
             Identifier I = new Identifier(spelling, previousTokenPosition);
@@ -228,7 +228,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // represent it.
 
     Operator parseOperator() throws SyntaxError {
-        if (currentToken.kind() == Token.Kind.OPERATOR) {
+        if (currentToken.kind() == Lexer.Token.Kind.OPERATOR) {
             previousTokenPosition = currentToken.position();
             String spelling = currentToken.spelling();
             Operator O = new Operator(spelling, previousTokenPosition);
@@ -254,7 +254,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 
         start(commandPos);
         Command commandAST = parseSingleCommand(); // in case there's a syntactic error
-        while (currentToken.kind() == Token.Kind.SEMICOLON) {
+        while (currentToken.kind() == Lexer.Token.Kind.SEMICOLON) {
             acceptIt();
             Command c2AST = parseSingleCommand();
             finish(commandPos);
@@ -271,16 +271,16 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 
             case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
-                if (currentToken.kind() == Token.Kind.LPAREN) {
+                if (currentToken.kind() == Lexer.Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
-                    accept(Token.Kind.RPAREN);
+                    accept(Lexer.Token.Kind.RPAREN);
                     finish(commandPos);
                     yield new CallCommand(iAST, apsAST, commandPos);
                 } else {
 
                     Vname vAST = parseRestOfVname(iAST);
-                    accept(Token.Kind.BECOMES);
+                    accept(Lexer.Token.Kind.BECOMES);
                     Expression eAST = parseExpression();
                     finish(commandPos);
                     yield new AssignCommand(vAST, eAST, commandPos);
@@ -290,14 +290,14 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case BEGIN -> {
                 acceptIt();
                 Command x = parseCommand();
-                accept(Token.Kind.END);
+                accept(Lexer.Token.Kind.END);
                 yield x;
             }
 
             case LET -> {
                 acceptIt();
                 Declaration dAST = parseDeclaration();
-                accept(Token.Kind.IN);
+                accept(Lexer.Token.Kind.IN);
                 Command cAST = parseSingleCommand();
                 finish(commandPos);
                 yield new LetCommand(dAST, cAST, commandPos);
@@ -306,9 +306,9 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case IF -> {
                 acceptIt();
                 Expression eAST = parseExpression();
-                accept(Token.Kind.THEN);
+                accept(Lexer.Token.Kind.THEN);
                 Command c1AST = parseSingleCommand();
-                accept(Token.Kind.ELSE);
+                accept(Lexer.Token.Kind.ELSE);
                 Command c2AST = parseSingleCommand();
                 finish(commandPos);
                 yield new IfCommand(eAST, c1AST, c2AST, commandPos);
@@ -317,7 +317,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case WHILE -> {
                 acceptIt();
                 Expression eAST = parseExpression();
-                accept(Token.Kind.DO);
+                accept(Lexer.Token.Kind.DO);
                 Command cAST = parseSingleCommand();
                 finish(commandPos);
                 yield new WhileCommand(eAST, cAST, commandPos);
@@ -350,7 +350,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case LET -> {
                 acceptIt();
                 Declaration dAST = parseDeclaration();
-                accept(Token.Kind.IN);
+                accept(Lexer.Token.Kind.IN);
                 Expression eAST = parseExpression();
                 finish(expressionPos);
                 yield new LetExpression(dAST, eAST, expressionPos);
@@ -358,9 +358,9 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case IF -> {
                 acceptIt();
                 Expression e1AST = parseExpression();
-                accept(Token.Kind.THEN);
+                accept(Lexer.Token.Kind.THEN);
                 Expression e2AST = parseExpression();
-                accept(Token.Kind.ELSE);
+                accept(Lexer.Token.Kind.ELSE);
                 Expression e3AST = parseExpression();
                 finish(expressionPos);
                 yield new IfExpression(e1AST, e2AST, e3AST, expressionPos);
@@ -374,7 +374,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         start(expressionPos);
 
         Expression expressionAST = parsePrimaryExpression(); // in case there's a syntactic error
-        while (currentToken.kind() == Token.Kind.OPERATOR) {
+        while (currentToken.kind() == Lexer.Token.Kind.OPERATOR) {
             Operator opAST = parseOperator();
             Expression e2AST = parsePrimaryExpression();
             expressionAST = new BinaryExpression(expressionAST, opAST, e2AST, expressionPos);
@@ -403,7 +403,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case LBRACKET -> {
                 acceptIt();
                 ArrayAggregate aaAST = parseArrayAggregate();
-                accept(Token.Kind.RBRACKET);
+                accept(Lexer.Token.Kind.RBRACKET);
                 finish(expressionPos);
                 yield new ArrayExpression(aaAST, expressionPos);
             }
@@ -411,17 +411,17 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case LCURLY -> {
                 acceptIt();
                 RecordAggregate raAST = parseRecordAggregate();
-                accept(Token.Kind.RCURLY);
+                accept(Lexer.Token.Kind.RCURLY);
                 finish(expressionPos);
                 yield new RecordExpression(raAST, expressionPos);
             }
 
             case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
-                if (currentToken.kind() == Token.Kind.LPAREN) {
+                if (currentToken.kind() == Lexer.Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
-                    accept(Token.Kind.RPAREN);
+                    accept(Lexer.Token.Kind.RPAREN);
                     finish(expressionPos);
                     yield new CallExpression(iAST, apsAST, expressionPos);
                 } else {
@@ -441,7 +441,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case LPAREN -> {
                 acceptIt();
                 Expression x = parseExpression();
-                accept(Token.Kind.RPAREN);
+                accept(Lexer.Token.Kind.RPAREN);
                 yield x;
             }
 
@@ -457,7 +457,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         start(aggregatePos);
 
         Identifier iAST = parseIdentifier();
-        accept(Token.Kind.IS);
+        accept(Lexer.Token.Kind.IS);
         Expression eAST = parseExpression();
 
         return switch (currentToken.kind()) {
@@ -509,16 +509,16 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         SourcePosition vnamePos = identifierAST.getPosition();
         Vname vAST = new SimpleVname(identifierAST, vnamePos);
 
-        while (currentToken.kind() == Token.Kind.DOT || currentToken.kind() == Token.Kind.LBRACKET) {
+        while (currentToken.kind() == Lexer.Token.Kind.DOT || currentToken.kind() == Lexer.Token.Kind.LBRACKET) {
 
-            if (currentToken.kind() == Token.Kind.DOT) {
+            if (currentToken.kind() == Lexer.Token.Kind.DOT) {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 vAST = new DotVname(vAST, iAST, vnamePos);
             } else {
                 acceptIt();
                 Expression eAST = parseExpression();
-                accept(Token.Kind.RBRACKET);
+                accept(Lexer.Token.Kind.RBRACKET);
                 finish(vnamePos);
                 vAST = new SubscriptVname(vAST, eAST, vnamePos);
             }
@@ -536,7 +536,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         SourcePosition declarationPos = new SourcePosition();
         start(declarationPos);
         Declaration declarationAST = parseSingleDeclaration();
-        while (currentToken.kind() == Token.Kind.SEMICOLON) {
+        while (currentToken.kind() == Lexer.Token.Kind.SEMICOLON) {
             acceptIt();
             Declaration d2AST = parseSingleDeclaration();
             finish(declarationPos);
@@ -554,7 +554,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case CONST -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.IS);
+                accept(Lexer.Token.Kind.IS);
                 Expression eAST = parseExpression();
                 finish(declarationPos);
                 yield new ConstDeclaration(iAST, eAST, declarationPos);
@@ -563,7 +563,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case VAR -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.COLON);
+                accept(Lexer.Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(declarationPos);
                 yield new VarDeclaration(iAST, tAST, declarationPos);
@@ -572,10 +572,10 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case PROC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.LPAREN);
+                accept(Lexer.Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Token.Kind.RPAREN);
-                accept(Token.Kind.IS);
+                accept(Lexer.Token.Kind.RPAREN);
+                accept(Lexer.Token.Kind.IS);
                 Command cAST = parseSingleCommand();
                 finish(declarationPos);
                 yield new ProcDeclaration(iAST, fpsAST, cAST, declarationPos);
@@ -584,12 +584,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case FUNC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.LPAREN);
+                accept(Lexer.Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Token.Kind.RPAREN);
-                accept(Token.Kind.COLON);
+                accept(Lexer.Token.Kind.RPAREN);
+                accept(Lexer.Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
-                accept(Token.Kind.IS);
+                accept(Lexer.Token.Kind.IS);
                 Expression eAST = parseExpression();
                 finish(declarationPos);
                 yield new FuncDeclaration(iAST, fpsAST, tAST, eAST, declarationPos);
@@ -598,7 +598,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case TYPE -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.IS);
+                accept(Lexer.Token.Kind.IS);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(declarationPos);
                 yield new TypeDeclaration(iAST, tAST, declarationPos);
@@ -623,7 +623,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         SourcePosition formalsPos = new SourcePosition();
 
         start(formalsPos);
-        if (currentToken.kind() == Token.Kind.RPAREN) {
+        if (currentToken.kind() == Lexer.Token.Kind.RPAREN) {
             finish(formalsPos);
             formalsAST = new EmptyFormalParameterSequence(formalsPos);
         } else {
@@ -659,7 +659,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 
             case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.COLON);
+                accept(Lexer.Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
                 yield new ConstFormalParameter(iAST, tAST, formalPos);
@@ -668,7 +668,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case VAR -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.COLON);
+                accept(Lexer.Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
                 yield new VarFormalParameter(iAST, tAST, formalPos);
@@ -677,9 +677,9 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case PROC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.LPAREN);
+                accept(Lexer.Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Token.Kind.RPAREN);
+                accept(Lexer.Token.Kind.RPAREN);
                 finish(formalPos);
                 yield new ProcFormalParameter(iAST, fpsAST, formalPos);
             }
@@ -687,10 +687,10 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case FUNC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Token.Kind.LPAREN);
+                accept(Lexer.Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Token.Kind.RPAREN);
-                accept(Token.Kind.COLON);
+                accept(Lexer.Token.Kind.RPAREN);
+                accept(Lexer.Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
                 yield new FuncFormalParameter(iAST, fpsAST, tAST, formalPos);
@@ -709,7 +709,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         SourcePosition actualsPos = new SourcePosition();
 
         start(actualsPos);
-        if (currentToken.kind() == Token.Kind.RPAREN) {
+        if (currentToken.kind() == Lexer.Token.Kind.RPAREN) {
             finish(actualsPos);
             actualsAST = new EmptyActualParameterSequence(actualsPos);
         } else {
@@ -800,7 +800,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case ARRAY -> {
                 acceptIt();
                 IntegerLiteral ilAST = parseIntegerLiteral();
-                accept(Token.Kind.OF);
+                accept(Lexer.Token.Kind.OF);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(typePos);
                 yield new ArrayTypeDenoter(ilAST, tAST, typePos);
@@ -809,7 +809,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case RECORD -> {
                 acceptIt();
                 FieldTypeDenoter fAST = parseFieldTypeDenoter();
-                accept(Token.Kind.END);
+                accept(Lexer.Token.Kind.END);
                 finish(typePos);
                 yield new RecordTypeDenoter(fAST, typePos);
             }
@@ -826,7 +826,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 
         start(fieldPos);
         Identifier iAST = parseIdentifier();
-        accept(Token.Kind.COLON);
+        accept(Lexer.Token.Kind.COLON);
         TypeDenoter tAST = parseTypeDenoter();
 
         return switch (currentToken.kind()) {
