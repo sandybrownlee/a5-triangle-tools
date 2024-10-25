@@ -27,10 +27,12 @@ import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Lexer;
+import triangle.syntacticAnalyzer.SyntaxError;
 import triangle.treeDrawer.Drawer;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 /**
@@ -71,6 +73,14 @@ public class Compiler {
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             System.exit(1);
+        } catch (IOException e) {
+            System.err.println("IOException while compiling");
+            e.printStackTrace();
+            System.exit(1);
+        } catch (SyntaxError e) {
+            System.err.println("SyntaxError while compiling");
+            e.printStackTrace();
+            System.exit(1);
         }
 
         if (!showTree) {
@@ -92,7 +102,8 @@ public class Compiler {
      @return true iff the source program is free of compile-time errors, otherwise
      false.
      */
-    static boolean compileProgram(InputStream inputStream, String objectName, boolean showingAST, boolean showingTable) {
+    static boolean compileProgram(InputStream inputStream, String objectName, boolean showingAST, boolean showingTable)
+            throws IOException, SyntaxError {
 
         System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 

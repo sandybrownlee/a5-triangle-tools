@@ -86,12 +86,14 @@ import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 
+import java.io.IOException;
+
 @SuppressWarnings("SwitchStatementWithTooFewBranches") public class Parser {
 
     private final Lexer         lexicalAnalyser;
-    private final ErrorReporter  errorReporter;
-    private       Lexer.Token    currentToken;
-    private       SourcePosition previousTokenPosition;
+    private final ErrorReporter   errorReporter;
+    private       Token currentTextToken;
+    private       SourcePosition  previousTokenPosition;
 
     public Parser(Lexer lexer, ErrorReporter reporter) {
         lexicalAnalyser = lexer;
@@ -100,35 +102,31 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     }
 
     // accept checks whether the current token matches tokenExpected.
-    // If so, fetches the next Token.Kind.
+    // If so, fetches the next TextToken.Kind.
     // If not, reports a syntactic error.
 
-    public Program parseProgram() {
+    public Program parseProgram() throws IOException, SyntaxError {
         previousTokenPosition.setStart(0);
         previousTokenPosition.setFinish(0);
-        currentToken = lexicalAnalyser.scan();
+        currentTextToken = lexicalAnalyser.nextToken();
 
-        try {
-            Command cAST = parseCommand();
-            Program programAST = new Program(cAST, previousTokenPosition);
-            if (currentToken.kind() != Lexer.Token.Kind.EOT) {
-                syntacticError("\"%\" not expected after end of program", currentToken.text());
-            }
-            return programAST;
-        } catch (SyntaxError s) {
-            return null;
+        Command cAST = parseCommand();
+        Program programAST = new Program(cAST, previousTokenPosition);
+        if (currentTextToken.getKind() != Token.Kind.EOT) {
+            syntacticError("\"%\" not expected after end of program");
         }
+        return programAST;
     }
 
     // acceptIt simply moves to the next token with no checking
     // (used where we've already done the check)
 
-    void accept(Lexer.Token.Kind tokenExpected) throws SyntaxError {
-        if (currentToken.kind() == tokenExpected) {
-            previousTokenPosition = currentToken.position();
-            currentToken = lexicalAnalyser.scan();
+    void accept(Token.Kind tokenExpected) throws SyntaxError, IOException {
+        if (currentTextToken.getKind() == tokenExpected) {
+            previousTokenPosition = currentTextToken.getPosition();
+            currentTextToken = lexicalAnalyser.nextToken();
         } else {
-            syntacticError("\"%\" expected here", Lexer.Token.spell(tokenExpected));
+            syntacticError(tokenExpected + " expected here");
         }
     }
 
@@ -136,9 +134,9 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // This is defined to be the position of the first
     // character of the first token of the phrase.
 
-    void acceptIt() {
-        previousTokenPosition = currentToken.position();
-        currentToken = lexicalAnalyser.scan();
+    void acceptIt() throws IOException {
+        previousTokenPosition = currentTextToken.getPosition();
+        currentTextToken = lexicalAnalyser.nextToken();
     }
 
     // finish records the position of the end of a phrase.
@@ -146,7 +144,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // character of the last token of the phrase.
 
     void start(SourcePosition position) {
-        position.setStart(currentToken.position().getStart());
+        position.setStart(currentTextToken.getPosition().getStart());
     }
 
     void finish(SourcePosition position) {
@@ -159,10 +157,8 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     //
     ///////////////////////////////////////////////////////////////////////////////
 
-    void syntacticError(String messageTemplate, String tokenQuoted) throws SyntaxError {
-        SourcePosition pos = currentToken.position();
-        errorReporter.reportError(messageTemplate, tokenQuoted, pos);
-        throw (new SyntaxError());
+    void syntacticError(String message) throws SyntaxError {
+        throw new SyntaxError(message);
     }
 
     ///////////////////////////////////////////////////////////////////////////////
@@ -174,18 +170,16 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // parseIntegerLiteral parses an integer-literal, and constructs
     // a leaf AST to represent it.
 
-    IntegerLiteral parseIntegerLiteral() throws SyntaxError {
-        if (currentToken.kind() == Lexer.Token.Kind.INTLITERAL) {
-            previousTokenPosition = currentToken.position();
-            String spelling = currentToken.text();
-            IntegerLiteral IL = new IntegerLiteral(spelling, previousTokenPosition);
+    IntegerLiteral parseIntegerLiteral() throws SyntaxError, IOException {
+        if (currentTextToken.getKind() == Token.Kind.INTLITERAL) {
+            previousTokenPosition = currentTextToken.getPosition();
+            IntegerLiteral IL = new IntegerLiteral(((TextToken) currentTextToken).getText(), previousTokenPosition);
 
-            currentToken = lexicalAnalyser.scan();
+            currentTextToken = lexicalAnalyser.nextToken();
 
             return IL;
         } else {
-            syntacticError("integer literal expected here", "");
-
+            syntacticError("integer literal expected here");
             return null;
         }
     }
@@ -193,15 +187,14 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // parseCharacterLiteral parses a character-literal, and constructs a leaf
     // AST to represent it.
 
-    CharacterLiteral parseCharacterLiteral() throws SyntaxError {
-        if (currentToken.kind() == Lexer.Token.Kind.CHARLITERAL) {
-            previousTokenPosition = currentToken.position();
-            String spelling = currentToken.text();
-            CharacterLiteral CL = new CharacterLiteral(spelling, previousTokenPosition);
-            currentToken = lexicalAnalyser.scan();
+    CharacterLiteral parseCharacterLiteral() throws SyntaxError, IOException {
+        if (currentTextToken.getKind() == Token.Kind.CHARLITERAL) {
+            previousTokenPosition = currentTextToken.getPosition();
+            CharacterLiteral CL = new CharacterLiteral(((TextToken) currentTextToken).getText(), previousTokenPosition);
+            currentTextToken = lexicalAnalyser.nextToken();
             return CL;
         } else {
-            syntacticError("character literal expected here", "");
+            syntacticError("character literal expected here");
             return null;
         }
     }
@@ -209,17 +202,16 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // parseIdentifier parses an identifier, and constructs a leaf AST to
     // represent it.
 
-    Identifier parseIdentifier() throws SyntaxError {
+    Identifier parseIdentifier() throws SyntaxError, IOException {
 
-        if (currentToken.kind() == Lexer.Token.Kind.IDENTIFIER) {
-            previousTokenPosition = currentToken.position();
-            String spelling = currentToken.text();
-            Identifier I = new Identifier(spelling, previousTokenPosition);
-            currentToken = lexicalAnalyser.scan();
+        if (currentTextToken.getKind() == Token.Kind.IDENTIFIER) {
+            previousTokenPosition = currentTextToken.getPosition();
+            Identifier I = new Identifier(((TextToken) currentTextToken).getText(), previousTokenPosition);
+            currentTextToken = lexicalAnalyser.nextToken();
 
             return I;
         } else {
-            syntacticError("identifier expected here", "");
+            syntacticError("identifier expected here");
             return null;
         }
     }
@@ -227,15 +219,14 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // parseOperator parses an operator, and constructs a leaf AST to
     // represent it.
 
-    Operator parseOperator() throws SyntaxError {
-        if (currentToken.kind() == Lexer.Token.Kind.OPERATOR) {
-            previousTokenPosition = currentToken.position();
-            String spelling = currentToken.text();
-            Operator O = new Operator(spelling, previousTokenPosition);
-            currentToken = lexicalAnalyser.scan();
+    Operator parseOperator() throws SyntaxError, IOException {
+        if (currentTextToken.getKind() == Token.Kind.OPERATOR) {
+            previousTokenPosition = currentTextToken.getPosition();
+            Operator O = new Operator(((TextToken) currentTextToken).getText(), previousTokenPosition);
+            currentTextToken = lexicalAnalyser.nextToken();
             return O;
         } else {
-            syntacticError("operator expected here", "");
+            syntacticError("operator expected here");
             return null;
         }
     }
@@ -249,12 +240,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     // parseCommand parses the command, and constructs an AST
     // to represent its phrase structure.
 
-    Command parseCommand() throws SyntaxError {
+    Command parseCommand() throws SyntaxError, IOException {
         SourcePosition commandPos = new SourcePosition();
 
         start(commandPos);
         Command commandAST = parseSingleCommand(); // in case there's a syntactic error
-        while (currentToken.kind() == Lexer.Token.Kind.SEMICOLON) {
+        while (currentTextToken.getKind() == Token.Kind.SEMICOLON) {
             acceptIt();
             Command c2AST = parseSingleCommand();
             finish(commandPos);
@@ -263,24 +254,24 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         return commandAST;
     }
 
-    Command parseSingleCommand() throws SyntaxError {
+    Command parseSingleCommand() throws SyntaxError, IOException {
         SourcePosition commandPos = new SourcePosition();
         start(commandPos);
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
 
             case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
-                if (currentToken.kind() == Lexer.Token.Kind.LPAREN) {
+                if (currentTextToken.getKind() == Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
-                    accept(Lexer.Token.Kind.RPAREN);
+                    accept(Token.Kind.RPAREN);
                     finish(commandPos);
                     yield new CallCommand(iAST, apsAST, commandPos);
                 } else {
 
                     Vname vAST = parseRestOfVname(iAST);
-                    accept(Lexer.Token.Kind.BECOMES);
+                    accept(Token.Kind.BECOMES);
                     Expression eAST = parseExpression();
                     finish(commandPos);
                     yield new AssignCommand(vAST, eAST, commandPos);
@@ -290,14 +281,14 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case BEGIN -> {
                 acceptIt();
                 Command x = parseCommand();
-                accept(Lexer.Token.Kind.END);
+                accept(Token.Kind.END);
                 yield x;
             }
 
             case LET -> {
                 acceptIt();
                 Declaration dAST = parseDeclaration();
-                accept(Lexer.Token.Kind.IN);
+                accept(Token.Kind.IN);
                 Command cAST = parseSingleCommand();
                 finish(commandPos);
                 yield new LetCommand(dAST, cAST, commandPos);
@@ -306,9 +297,9 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case IF -> {
                 acceptIt();
                 Expression eAST = parseExpression();
-                accept(Lexer.Token.Kind.THEN);
+                accept(Token.Kind.THEN);
                 Command c1AST = parseSingleCommand();
-                accept(Lexer.Token.Kind.ELSE);
+                accept(Token.Kind.ELSE);
                 Command c2AST = parseSingleCommand();
                 finish(commandPos);
                 yield new IfCommand(eAST, c1AST, c2AST, commandPos);
@@ -317,7 +308,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case WHILE -> {
                 acceptIt();
                 Expression eAST = parseExpression();
-                accept(Lexer.Token.Kind.DO);
+                accept(Token.Kind.DO);
                 Command cAST = parseSingleCommand();
                 finish(commandPos);
                 yield new WhileCommand(eAST, cAST, commandPos);
@@ -329,7 +320,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a command", currentToken.text());
+                syntacticError("\"%\" cannot start a command");
                 yield null;
             }
         };
@@ -341,16 +332,16 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     //
     ///////////////////////////////////////////////////////////////////////////////
 
-    Expression parseExpression() throws SyntaxError {
+    Expression parseExpression() throws SyntaxError, IOException {
         SourcePosition expressionPos = new SourcePosition();
 
         start(expressionPos);
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
             case LET -> {
                 acceptIt();
                 Declaration dAST = parseDeclaration();
-                accept(Lexer.Token.Kind.IN);
+                accept(Token.Kind.IN);
                 Expression eAST = parseExpression();
                 finish(expressionPos);
                 yield new LetExpression(dAST, eAST, expressionPos);
@@ -358,9 +349,9 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case IF -> {
                 acceptIt();
                 Expression e1AST = parseExpression();
-                accept(Lexer.Token.Kind.THEN);
+                accept(Token.Kind.THEN);
                 Expression e2AST = parseExpression();
-                accept(Lexer.Token.Kind.ELSE);
+                accept(Token.Kind.ELSE);
                 Expression e3AST = parseExpression();
                 finish(expressionPos);
                 yield new IfExpression(e1AST, e2AST, e3AST, expressionPos);
@@ -369,12 +360,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         };
     }
 
-    Expression parseSecondaryExpression() throws SyntaxError {
+    Expression parseSecondaryExpression() throws SyntaxError, IOException {
         SourcePosition expressionPos = new SourcePosition();
         start(expressionPos);
 
         Expression expressionAST = parsePrimaryExpression(); // in case there's a syntactic error
-        while (currentToken.kind() == Lexer.Token.Kind.OPERATOR) {
+        while (currentTextToken.getKind() == Token.Kind.OPERATOR) {
             Operator opAST = parseOperator();
             Expression e2AST = parsePrimaryExpression();
             expressionAST = new BinaryExpression(expressionAST, opAST, e2AST, expressionPos);
@@ -382,11 +373,11 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         return expressionAST;
     }
 
-    Expression parsePrimaryExpression() throws SyntaxError {
+    Expression parsePrimaryExpression() throws SyntaxError, IOException {
         SourcePosition expressionPos = new SourcePosition();
         start(expressionPos);
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
 
             case INTLITERAL -> {
                 IntegerLiteral ilAST = parseIntegerLiteral();
@@ -400,28 +391,28 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
                 yield new CharacterExpression(clAST, expressionPos);
             }
 
-            case LBRACKET -> {
+            case LBRACK -> {
                 acceptIt();
                 ArrayAggregate aaAST = parseArrayAggregate();
-                accept(Lexer.Token.Kind.RBRACKET);
+                accept(Token.Kind.RBRACK);
                 finish(expressionPos);
                 yield new ArrayExpression(aaAST, expressionPos);
             }
 
-            case LCURLY -> {
+            case LBRACE -> {
                 acceptIt();
                 RecordAggregate raAST = parseRecordAggregate();
-                accept(Lexer.Token.Kind.RCURLY);
+                accept(Token.Kind.RBRACE);
                 finish(expressionPos);
                 yield new RecordExpression(raAST, expressionPos);
             }
 
             case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
-                if (currentToken.kind() == Lexer.Token.Kind.LPAREN) {
+                if (currentTextToken.getKind() == Token.Kind.LPAREN) {
                     acceptIt();
                     ActualParameterSequence apsAST = parseActualParameterSequence();
-                    accept(Lexer.Token.Kind.RPAREN);
+                    accept(Token.Kind.RPAREN);
                     finish(expressionPos);
                     yield new CallExpression(iAST, apsAST, expressionPos);
                 } else {
@@ -441,26 +432,26 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case LPAREN -> {
                 acceptIt();
                 Expression x = parseExpression();
-                accept(Lexer.Token.Kind.RPAREN);
+                accept(Token.Kind.RPAREN);
                 yield x;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start an expression", currentToken.text());
+                syntacticError("\"%\" cannot start an expression");
                 yield null;
             }
         };
     }
 
-    RecordAggregate parseRecordAggregate() throws SyntaxError {
+    RecordAggregate parseRecordAggregate() throws SyntaxError, IOException {
         SourcePosition aggregatePos = new SourcePosition();
         start(aggregatePos);
 
         Identifier iAST = parseIdentifier();
-        accept(Lexer.Token.Kind.IS);
+        accept(Token.Kind.IS);
         Expression eAST = parseExpression();
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
             case COMMA -> {
                 acceptIt();
                 RecordAggregate aAST = parseRecordAggregate();
@@ -474,13 +465,13 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         };
     }
 
-    ArrayAggregate parseArrayAggregate() throws SyntaxError {
+    ArrayAggregate parseArrayAggregate() throws SyntaxError, IOException {
         SourcePosition aggregatePos = new SourcePosition();
         start(aggregatePos);
 
         Expression eAST = parseExpression();
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
             case COMMA -> {
                 acceptIt();
                 ArrayAggregate aAST = parseArrayAggregate();
@@ -500,25 +491,25 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     //
     ///////////////////////////////////////////////////////////////////////////////
 
-    Vname parseVname() throws SyntaxError {
+    Vname parseVname() throws SyntaxError, IOException {
         Identifier iAST = parseIdentifier();
         return parseRestOfVname(iAST);
     }
 
-    Vname parseRestOfVname(Identifier identifierAST) throws SyntaxError {
+    Vname parseRestOfVname(Identifier identifierAST) throws SyntaxError, IOException {
         SourcePosition vnamePos = identifierAST.getPosition();
         Vname vAST = new SimpleVname(identifierAST, vnamePos);
 
-        while (currentToken.kind() == Lexer.Token.Kind.DOT || currentToken.kind() == Lexer.Token.Kind.LBRACKET) {
+        while (currentTextToken.getKind() == Token.Kind.DOT || currentTextToken.getKind() == Token.Kind.LBRACK) {
 
-            if (currentToken.kind() == Lexer.Token.Kind.DOT) {
+            if (currentTextToken.getKind() == Token.Kind.DOT) {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
                 vAST = new DotVname(vAST, iAST, vnamePos);
             } else {
                 acceptIt();
                 Expression eAST = parseExpression();
-                accept(Lexer.Token.Kind.RBRACKET);
+                accept(Token.Kind.RBRACK);
                 finish(vnamePos);
                 vAST = new SubscriptVname(vAST, eAST, vnamePos);
             }
@@ -532,11 +523,11 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     //
     ///////////////////////////////////////////////////////////////////////////////
 
-    Declaration parseDeclaration() throws SyntaxError {
+    Declaration parseDeclaration() throws SyntaxError, IOException {
         SourcePosition declarationPos = new SourcePosition();
         start(declarationPos);
         Declaration declarationAST = parseSingleDeclaration();
-        while (currentToken.kind() == Lexer.Token.Kind.SEMICOLON) {
+        while (currentTextToken.getKind() == Token.Kind.SEMICOLON) {
             acceptIt();
             Declaration d2AST = parseSingleDeclaration();
             finish(declarationPos);
@@ -545,16 +536,16 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         return declarationAST;
     }
 
-    Declaration parseSingleDeclaration() throws SyntaxError {
+    Declaration parseSingleDeclaration() throws SyntaxError, IOException {
         SourcePosition declarationPos = new SourcePosition();
         start(declarationPos);
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
 
             case CONST -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.IS);
+                accept(Token.Kind.IS);
                 Expression eAST = parseExpression();
                 finish(declarationPos);
                 yield new ConstDeclaration(iAST, eAST, declarationPos);
@@ -563,7 +554,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case VAR -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.COLON);
+                accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(declarationPos);
                 yield new VarDeclaration(iAST, tAST, declarationPos);
@@ -572,10 +563,10 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case PROC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.LPAREN);
+                accept(Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Lexer.Token.Kind.RPAREN);
-                accept(Lexer.Token.Kind.IS);
+                accept(Token.Kind.RPAREN);
+                accept(Token.Kind.IS);
                 Command cAST = parseSingleCommand();
                 finish(declarationPos);
                 yield new ProcDeclaration(iAST, fpsAST, cAST, declarationPos);
@@ -584,12 +575,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case FUNC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.LPAREN);
+                accept(Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Lexer.Token.Kind.RPAREN);
-                accept(Lexer.Token.Kind.COLON);
+                accept(Token.Kind.RPAREN);
+                accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
-                accept(Lexer.Token.Kind.IS);
+                accept(Token.Kind.IS);
                 Expression eAST = parseExpression();
                 finish(declarationPos);
                 yield new FuncDeclaration(iAST, fpsAST, tAST, eAST, declarationPos);
@@ -598,14 +589,14 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case TYPE -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.IS);
+                accept(Token.Kind.IS);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(declarationPos);
                 yield new TypeDeclaration(iAST, tAST, declarationPos);
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a declaration", currentToken.text());
+                syntacticError("\"%\" cannot start a declaration");
                 yield null;
             }
         };
@@ -617,13 +608,13 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     //
     ///////////////////////////////////////////////////////////////////////////////
 
-    FormalParameterSequence parseFormalParameterSequence() throws SyntaxError {
+    FormalParameterSequence parseFormalParameterSequence() throws SyntaxError, IOException {
         FormalParameterSequence formalsAST;
 
         SourcePosition formalsPos = new SourcePosition();
 
         start(formalsPos);
-        if (currentToken.kind() == Lexer.Token.Kind.RPAREN) {
+        if (currentTextToken.getKind() == Token.Kind.RPAREN) {
             finish(formalsPos);
             formalsAST = new EmptyFormalParameterSequence(formalsPos);
         } else {
@@ -632,12 +623,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         return formalsAST;
     }
 
-    FormalParameterSequence parseProperFormalParameterSequence() throws SyntaxError {
+    FormalParameterSequence parseProperFormalParameterSequence() throws SyntaxError, IOException {
         SourcePosition formalsPos = new SourcePosition();
         start(formalsPos);
         FormalParameter fpAST = parseFormalParameter();
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
             case COMMA -> {
                 acceptIt();
                 FormalParameterSequence fpsAST = parseProperFormalParameterSequence();
@@ -651,15 +642,15 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         };
     }
 
-    FormalParameter parseFormalParameter() throws SyntaxError {
+    FormalParameter parseFormalParameter() throws SyntaxError, IOException {
         SourcePosition formalPos = new SourcePosition();
         start(formalPos);
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
 
             case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.COLON);
+                accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
                 yield new ConstFormalParameter(iAST, tAST, formalPos);
@@ -668,7 +659,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case VAR -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.COLON);
+                accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
                 yield new VarFormalParameter(iAST, tAST, formalPos);
@@ -677,9 +668,9 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case PROC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.LPAREN);
+                accept(Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Lexer.Token.Kind.RPAREN);
+                accept(Token.Kind.RPAREN);
                 finish(formalPos);
                 yield new ProcFormalParameter(iAST, fpsAST, formalPos);
             }
@@ -687,29 +678,29 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case FUNC -> {
                 acceptIt();
                 Identifier iAST = parseIdentifier();
-                accept(Lexer.Token.Kind.LPAREN);
+                accept(Token.Kind.LPAREN);
                 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-                accept(Lexer.Token.Kind.RPAREN);
-                accept(Lexer.Token.Kind.COLON);
+                accept(Token.Kind.RPAREN);
+                accept(Token.Kind.COLON);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(formalPos);
                 yield new FuncFormalParameter(iAST, fpsAST, tAST, formalPos);
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a formal parameter", currentToken.text());
+                syntacticError("\"%\" cannot start a formal parameter");
                 yield null;
             }
         };
     }
 
-    ActualParameterSequence parseActualParameterSequence() throws SyntaxError {
+    ActualParameterSequence parseActualParameterSequence() throws SyntaxError, IOException {
         ActualParameterSequence actualsAST;
 
         SourcePosition actualsPos = new SourcePosition();
 
         start(actualsPos);
-        if (currentToken.kind() == Lexer.Token.Kind.RPAREN) {
+        if (currentTextToken.getKind() == Token.Kind.RPAREN) {
             finish(actualsPos);
             actualsAST = new EmptyActualParameterSequence(actualsPos);
         } else {
@@ -718,13 +709,13 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         return actualsAST;
     }
 
-    ActualParameterSequence parseProperActualParameterSequence() throws SyntaxError {
+    ActualParameterSequence parseProperActualParameterSequence() throws SyntaxError, IOException {
         SourcePosition actualsPos = new SourcePosition();
 
         start(actualsPos);
         ActualParameter apAST = parseActualParameter();
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
             case COMMA -> {
                 acceptIt();
                 ActualParameterSequence apsAST = parseProperActualParameterSequence();
@@ -738,14 +729,14 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
         };
     }
 
-    ActualParameter parseActualParameter() throws SyntaxError {
+    ActualParameter parseActualParameter() throws SyntaxError, IOException {
         SourcePosition actualPos = new SourcePosition();
 
         start(actualPos);
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
 
-            case IDENTIFIER, INTLITERAL, CHARLITERAL, OPERATOR, LET, IF, LPAREN, LBRACKET, LCURLY -> {
+            case IDENTIFIER, INTLITERAL, CHARLITERAL, OPERATOR, LET, IF, LPAREN, LBRACK, LBRACE -> {
                 Expression eAST = parseExpression();
                 finish(actualPos);
                 yield new ConstActualParameter(eAST, actualPos);
@@ -773,7 +764,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             }
 
             default -> {
-                syntacticError("\"%\" cannot start an actual parameter", currentToken.text());
+                syntacticError("\"%\" cannot start an actual parameter");
                 yield null;
             }
         };
@@ -785,12 +776,12 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
     //
     ///////////////////////////////////////////////////////////////////////////////
 
-    TypeDenoter parseTypeDenoter() throws SyntaxError {
+    TypeDenoter parseTypeDenoter() throws SyntaxError, IOException {
         SourcePosition typePos = new SourcePosition();
 
         start(typePos);
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
             case IDENTIFIER -> {
                 Identifier iAST = parseIdentifier();
                 finish(typePos);
@@ -800,7 +791,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case ARRAY -> {
                 acceptIt();
                 IntegerLiteral ilAST = parseIntegerLiteral();
-                accept(Lexer.Token.Kind.OF);
+                accept(Token.Kind.OF);
                 TypeDenoter tAST = parseTypeDenoter();
                 finish(typePos);
                 yield new ArrayTypeDenoter(ilAST, tAST, typePos);
@@ -809,27 +800,27 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
             case RECORD -> {
                 acceptIt();
                 FieldTypeDenoter fAST = parseFieldTypeDenoter();
-                accept(Lexer.Token.Kind.END);
+                accept(Token.Kind.END);
                 finish(typePos);
                 yield new RecordTypeDenoter(fAST, typePos);
             }
 
             default -> {
-                syntacticError("\"%\" cannot start a type denoter", currentToken.text());
+                syntacticError("\"%\" cannot start a type denoter");
                 yield null;
             }
         };
     }
 
-    FieldTypeDenoter parseFieldTypeDenoter() throws SyntaxError {
+    FieldTypeDenoter parseFieldTypeDenoter() throws SyntaxError, IOException {
         SourcePosition fieldPos = new SourcePosition();
 
         start(fieldPos);
         Identifier iAST = parseIdentifier();
-        accept(Lexer.Token.Kind.COLON);
+        accept(Token.Kind.COLON);
         TypeDenoter tAST = parseTypeDenoter();
 
-        return switch (currentToken.kind()) {
+        return switch (currentTextToken.getKind()) {
             case COMMA -> {
                 acceptIt();
                 FieldTypeDenoter fAST = parseFieldTypeDenoter();

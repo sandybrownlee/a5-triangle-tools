@@ -1,30 +1,18 @@
 package triangle.syntacticAnalyser;
 
+import junit.framework.AssertionFailedError;
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 import triangle.ErrorReporter;
 import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
+import triangle.syntacticAnalyzer.SyntaxError;
+
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
 public class TestScanner {
-
-    /* some individual unit tests for helper methods in Lexer */
-
-    @Test
-    public void testIsOperator() {
-        assertTrue(Lexer.isOperator('*'));
-        assertTrue(Lexer.isOperator('/'));
-        assertTrue(Lexer.isOperator('?'));
-        assertTrue(Lexer.isOperator('+'));
-        assertTrue(Lexer.isOperator('-'));
-        assertFalse(Lexer.isOperator('a'));
-        assertFalse(Lexer.isOperator('Z'));
-        assertFalse(Lexer.isOperator('1'));
-        assertFalse(Lexer.isOperator(';'));
-        assertFalse(Lexer.isOperator('\n'));
-    }
 
     /* these tests all try to compile example programs... */
 
@@ -68,7 +56,13 @@ public class TestScanner {
         ErrorReporter reporter = new ErrorReporter(true);
         Parser parser = new Parser(lexer, reporter);
 
-        parser.parseProgram();
+        try {
+            parser.parseProgram();
+        } catch (IOException e) {
+            throw new AssertionFailedError();
+        } catch (SyntaxError e) {
+            throw new AssertionFailedError();
+        }
 
         // we should get to here with no exceptions
 
@@ -84,7 +78,13 @@ public class TestScanner {
         // we expect an exception here as the program has invalid syntax
         assertThrows(RuntimeException.class, new ThrowingRunnable() {
             public void run() {
-                parser.parseProgram();
+                try {
+                    parser.parseProgram();
+                } catch (IOException e) {
+                    throw new AssertionFailedError();
+                } catch (SyntaxError e) {
+                    throw new AssertionFailedError();
+                }
             }
         });
 

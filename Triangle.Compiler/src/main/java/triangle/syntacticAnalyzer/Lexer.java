@@ -19,281 +19,258 @@
 
 package triangle.syntacticAnalyzer;
 
-import java.io.InputStream;
+import org.w3c.dom.Text;
 
-// TODO: logging
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public final class Lexer {
 
     // TODO: make configurable for '\r\n' or '\n'
     public static final char EOL = '\n';
     public static final char EOT = '\u0000';
 
-    private final InputStream source;
-    int currentLine;
-    private char         currentChar;
-    private StringBuffer currentSpelling;
-    private boolean      currentlyScanningToken;
+    private static final List<Character>         operators     = List.of('+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%', '^', '?');
+    private static final Map<String, Token.Kind> reservedWords = new HashMap<>();
+
+    static {
+        reservedWords.put("array", Token.Kind.ARRAY);
+        reservedWords.put("begin", Token.Kind.BEGIN);
+        reservedWords.put("const", Token.Kind.CONST);
+        reservedWords.put("do", Token.Kind.DO);
+        reservedWords.put("else", Token.Kind.ELSE);
+        reservedWords.put("end", Token.Kind.END);
+        reservedWords.put("func", Token.Kind.FUNC);
+        reservedWords.put("if", Token.Kind.IF);
+        reservedWords.put("in", Token.Kind.IN);
+        reservedWords.put("let", Token.Kind.LET);
+        reservedWords.put("of", Token.Kind.OF);
+        reservedWords.put("proc", Token.Kind.PROC);
+        reservedWords.put("record", Token.Kind.RECORD);
+        reservedWords.put("then", Token.Kind.THEN);
+        reservedWords.put("type", Token.Kind.TYPE);
+        reservedWords.put("var", Token.Kind.VAR);
+        reservedWords.put("while", Token.Kind.WHILE);
+    }
+
+    private final InputStream  source;
+    private final StringBuffer buffer;
+    private       int          line;
+    private       int          column;
 
     public Lexer(InputStream source) {
         this.source = source;
-
-        currentChar = getSource();
-        currentLine = 1;
+        this.line = 1;
+        this.column = 1;
+        this.buffer = new StringBuffer();
     }
 
     public static Lexer fromResource(String handle) {
         return new Lexer(Lexer.class.getResourceAsStream(handle));
     }
 
-    public static boolean isOperator(char c) {
-        return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
-                || c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
-    }
-
-    Token scan() {
-        Token tok;
-        SourcePosition pos;
-        Token.Kind kind;
-
-        currentlyScanningToken = false;
-        // skip any whitespace or comments
-        while (currentChar == '!' || currentChar == ' ' || currentChar == '\n' || currentChar == '\r'
-               || currentChar == '\t') {
-            scanSeparator();
+    Token nextToken() throws IOException {
+        if (buffer.isEmpty()) {
+            read();
         }
 
-        currentlyScanningToken = true;
-        currentSpelling = new StringBuffer();
-        pos = new SourcePosition();
-        pos.setStart(currentLine);
+        Token toEmit = switch (lastChar()) {
 
-        kind = scanToken();
-
-        pos.setFinish(currentLine);
-        tok = new Token(kind, currentSpelling.toString(), pos);
-        return tok;
-    }
-
-    char getSource() {
-        try {
-            int c = source.read();
-
-            if (c == -1) {
-                c = EOT;
-            } else if (c == EOL) {
-                currentLine++;
-            }
-            return (char) c;
-        } catch (java.io.IOException s) {
-            return EOT;
-        }
-    }
-
-    private void takeIt() {
-        if (currentlyScanningToken) {
-            currentSpelling.append(currentChar);
-        }
-        currentChar = getSource();
-    }
-
-    private void scanSeparator() {
-        switch (currentChar) {
-
-            // comment
-            case '!':
-
-                // the comment ends when we reach an end-of-line (EOL) or end of file (EOT - for end-of-transmission)
+            case Character c when Character.isWhitespace(c) -> {
                 do {
-                    takeIt();
-                } while ((currentChar != EOL) && (currentChar != EOT));
-                if (currentChar == EOL) {
-                    takeIt();
+                    read();
+                } while (Character.isWhitespace(lastChar()));
+
+                char lastRead = lastChar();
+                resetBuffer();
+                buffer.append(lastRead);
+
+                yield nextToken();
+            }
+
+            case '!' -> {
+                do {
+                    read();
+                } while (lastChar() != EOL);
+
+                // no need to put EOL back into the buffer
+                resetBuffer();
+
+                yield nextToken();
+            }
+
+            case EOT -> new Token(Token.Kind.EOT, line, column);
+
+            case '(' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.LPAREN, line, column);
+            }
+            case ')' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.RPAREN, line, column);
+            }
+            case '[' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.LBRACK, line, column);
+            }
+            case ']' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.RBRACK, line, column);
+            }
+            case '{' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.LBRACE, line, column);
+            }
+            case '}' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.RBRACE, line, column);
+            }
+            case '.' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.DOT, line, column);
+            }
+
+            case ':' -> {
+                int line = this.line;
+                int column = this.column;
+
+                read();
+
+                if (lastChar() == '=') {
+                    resetBuffer();
+                    yield new Token(Token.Kind.BECOMES, line, column);
                 }
-                break;
 
-            // whitespace
-            case ' ':
-            case '\n':
-            case '\r':
-            case '\t':
-                takeIt();
-                break;
-        }
-    }
+                Token token = new Token(Token.Kind.COLON, line, column);
 
-    private Token.Kind scanToken() {
+                char lastRead = lastChar();
+                resetBuffer();
+                buffer.append(lastRead);
 
-        switch (currentChar) {
-
-            case Character c when Character.isLetter(c): {
-                do {
-                    takeIt();
-                } while (Character.isLetter(currentChar) || Character.isDigit(currentChar));
-
-                return Token.Kind.IDENTIFIER;
+                yield token;
             }
 
-            case Character c when Character.isDigit(c): {
-                do {
-                    takeIt();
-                } while (Character.isDigit(currentChar));
-
-                return Token.Kind.INTLITERAL;
+            case ';' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.SEMICOLON, line, column);
+            }
+            case ',' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.COMMA, line, column);
+            }
+            case '~' -> {
+                resetBuffer();
+                yield new Token(Token.Kind.IS, line, column);
             }
 
-            case Character c when isOperator(c): {
+            case Character c when Character.isDigit(c) -> {
+                int line = this.line;
+                int column = this.column;
+
                 do {
-                    takeIt();
-                } while (isOperator(currentChar));
-                return Token.Kind.OPERATOR;
+                    read();
+                } while (Character.isDigit(lastChar()));
+
+                Token token = new TextToken(Token.Kind.INTLITERAL, line, column, buffer.substring(0, buffer.length() - 1));
+
+                char lastRead = lastChar();
+                resetBuffer();
+                buffer.append(lastRead);
+
+                yield token;
             }
 
-            case '\'':
-                takeIt();
-                takeIt(); // the quoted character
-                if (currentChar == '\'') {
-                    takeIt();
-                    return Token.Kind.CHARLITERAL;
+            case '\'' -> {
+                int line = this.line;
+                int column = this.column;
+
+                read();
+                read();
+                if (!(lastChar() == '\'')) {
+                    yield new Token(Token.Kind.ERROR, line, column);
+                }
+
+                Token token = new TextToken(Token.Kind.CHARLITERAL, line, column, String.valueOf(buffer.charAt(1)));
+
+                resetBuffer();
+
+                yield token;
+            }
+
+            case Character c when Character.isLetter(c) -> {
+                int line = this.line;
+                int column = this.column;
+
+                do {
+                    read();
+                } while (Character.isLetter(lastChar()) || Character.isDigit(lastChar()));
+
+                Token token;
+                if (reservedWords.containsKey(buffer.substring(0, buffer.length() - 1))) {
+                    token = new Token(reservedWords.get(buffer.substring(0, buffer.length() - 1)), line, column);
                 } else {
-                    return Token.Kind.ERROR;
+                    token = new TextToken(Token.Kind.IDENTIFIER, line, column, buffer.substring(0, buffer.length() - 1));
                 }
 
-            case '.':
-                takeIt();
-                return Token.Kind.DOT;
+                char lastRead = lastChar();
+                resetBuffer();
+                buffer.append(lastRead);
 
-            case ':':
-                takeIt();
-                if (currentChar == '=') {
-                    takeIt();
-                    return Token.Kind.BECOMES;
-                } else {
-                    return Token.Kind.COLON;
-                }
+                yield token;
+            }
 
-            case ';':
-                takeIt();
-                return Token.Kind.SEMICOLON;
+            case Character c when operators.contains(c) -> {
+                int line = this.line;
+                int column = this.column;
 
-            case ',':
-                takeIt();
-                return Token.Kind.COMMA;
+                do {
+                    read();
+                } while (operators.contains(lastChar()));
 
-            case '~':
-                takeIt();
-                return Token.Kind.IS;
+                Token token = new TextToken(Token.Kind.OPERATOR, line, column, buffer.substring(0, buffer.length() - 1));
 
-            case '(':
-                takeIt();
-                return Token.Kind.LPAREN;
+                char lastRead = lastChar();
+                resetBuffer();
+                buffer.append(lastRead);
 
-            case ')':
-                takeIt();
-                return Token.Kind.RPAREN;
+                yield token;
+            }
 
-            case '[':
-                takeIt();
-                return Token.Kind.LBRACKET;
+            default -> throw new RuntimeException();
+        };
 
-            case ']':
-                takeIt();
-                return Token.Kind.RBRACKET;
-
-            case '{':
-                takeIt();
-                return Token.Kind.LCURLY;
-
-            case '}':
-                takeIt();
-                return Token.Kind.RCURLY;
-
-            case EOT:
-                return Token.Kind.EOT;
-
-            default:
-                takeIt();
-                return Token.Kind.ERROR;
-        }
+        System.out.println(toEmit.getKind() + " " + (toEmit instanceof TextToken tt ? tt.getText() : "#") + " " + toEmit.getLine() + "," + toEmit.getColumn());
+        return toEmit;
     }
 
-    record Token(Kind kind, String text, SourcePosition position) {
+    void read() throws IOException {
+        int c = source.read();
 
-        Token(Kind kind, String text, SourcePosition position) {
-
-            // If this token is an identifier, is it also a reserved word?
-            if (kind == Kind.IDENTIFIER) {
-                this.kind = Kind.fromSpelling(text);
-            } else {
-                this.kind = kind;
-            }
-
-            this.text = text;
-            this.position = position;
+        if (c == -1) {
+            source.close();
+            buffer.append(EOT);
+            return;
         }
 
-        public static String spell(Kind kind) {
-            return kind.spelling;
+        if ((char) c == EOL) {
+            line++;
+            column = 0;
+        } else {
+            column++;
         }
 
-        @Override
-        public String toString() {
-            return "Kind=" + kind + ", text=" + text + ", position=" + position;
-        }
+        buffer.append((char) c);
+    }
 
-        // Token classes...
+    private char lastChar() {
+        return buffer.charAt(buffer.length() - 1);
+    }
 
-        public enum Kind {
-            // literals, identifiers, operators...
-            INTLITERAL("<int>"), CHARLITERAL("<char>"), IDENTIFIER("<identifier>"), OPERATOR("<operator>"),
-
-            // reserved words - keep in alphabetical order for ease of maintenance...
-            ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"),
-            LET("let"), OF("of"),
-            PROC("proc"), RECORD("record"), THEN("then"), TYPE("type"), VAR("var"), WHILE("while"),
-
-            // punctuation...
-            DOT("."), COLON(":"), SEMICOLON(";"), COMMA(","), BECOMES(":="), IS("~"),
-
-            // brackets...
-            LPAREN("("), RPAREN(")"), LBRACKET("["), RBRACKET("]"), LCURLY("{"), RCURLY("}"),
-
-            // special tokens...
-            EOT(""), ERROR("<error>");
-
-            private final static Kind firstReservedWord = ARRAY, lastReservedWord = WHILE;
-            public final String spelling;
-
-            Kind(String spelling) {
-                this.spelling = spelling;
-            }
-
-            /**
-             iterate over the reserved words above to find the one with a given text
-             need to specify firstReservedWord and lastReservedWord (inclusive) for this
-             to work!
-
-             @return Kind.IDENTIFIER if no matching token class found
-             */
-            public static Kind fromSpelling(String spelling) {
-                boolean isRW = false;
-                for (Kind kind : Kind.values()) {
-                    if (kind == firstReservedWord) {
-                        isRW = true;
-                    }
-
-                    if (isRW && kind.spelling.equals(spelling)) {
-                        return kind;
-                    }
-
-                    if (kind == lastReservedWord) {
-                        // if we get here, we've not found a match, so break and return failure
-                        break;
-                    }
-                }
-                return Kind.IDENTIFIER;
-            }
-        }
-
+    private void resetBuffer() {
+        buffer.setLength(0);
     }
 
 }

@@ -20,7 +20,7 @@ package triangle.syntacticAnalyzer;
 
 import java.io.Serial;
 
-class SyntaxError extends Exception {
+public class SyntaxError extends Exception {
 
     @Serial private static final long serialVersionUID = -5280306336102766860L;
 
