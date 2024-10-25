@@ -153,17 +153,4 @@ public class Compiler {
         return successful;
     }
 
-    private static void parseArgs(String[] args) {
-        for (String s : args) {
-            var sl = s.toLowerCase();
-            if (sl.equals("tree")) {
-                showTree = true;
-            } else if (sl.startsWith("-o=")) {
-                objectName = s.substring(3);
-            } else if (sl.equals("folding")) {
-                folding = true;
-            }
-        }
-    }
-
 }
