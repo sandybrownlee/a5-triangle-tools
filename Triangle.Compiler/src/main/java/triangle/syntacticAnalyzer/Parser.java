@@ -20,95 +20,41 @@ package triangle.syntacticAnalyzer;
 
 import triangle.ErrorReporter;
 import triangle.abstractSyntaxTrees.Program;
-import triangle.abstractSyntaxTrees.actuals.ActualParameter;
-import triangle.abstractSyntaxTrees.actuals.ActualParameterSequence;
-import triangle.abstractSyntaxTrees.actuals.ConstActualParameter;
-import triangle.abstractSyntaxTrees.actuals.EmptyActualParameterSequence;
-import triangle.abstractSyntaxTrees.actuals.FuncActualParameter;
-import triangle.abstractSyntaxTrees.actuals.MultipleActualParameterSequence;
-import triangle.abstractSyntaxTrees.actuals.ProcActualParameter;
-import triangle.abstractSyntaxTrees.actuals.SingleActualParameterSequence;
-import triangle.abstractSyntaxTrees.actuals.VarActualParameter;
-import triangle.abstractSyntaxTrees.aggregates.ArrayAggregate;
-import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
-import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
-import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
-import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
-import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
-import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
-import triangle.abstractSyntaxTrees.declarations.Declaration;
-import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
-import triangle.abstractSyntaxTrees.declarations.ProcDeclaration;
-import triangle.abstractSyntaxTrees.declarations.SequentialDeclaration;
-import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
-import triangle.abstractSyntaxTrees.expressions.ArrayExpression;
-import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
-import triangle.abstractSyntaxTrees.expressions.CallExpression;
-import triangle.abstractSyntaxTrees.expressions.CharacterExpression;
-import triangle.abstractSyntaxTrees.expressions.Expression;
-import triangle.abstractSyntaxTrees.expressions.IfExpression;
-import triangle.abstractSyntaxTrees.expressions.IntegerExpression;
-import triangle.abstractSyntaxTrees.expressions.LetExpression;
-import triangle.abstractSyntaxTrees.expressions.RecordExpression;
-import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
-import triangle.abstractSyntaxTrees.expressions.VnameExpression;
-import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
-import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
-import triangle.abstractSyntaxTrees.formals.FormalParameter;
-import triangle.abstractSyntaxTrees.formals.FormalParameterSequence;
-import triangle.abstractSyntaxTrees.formals.FuncFormalParameter;
-import triangle.abstractSyntaxTrees.formals.MultipleFormalParameterSequence;
-import triangle.abstractSyntaxTrees.formals.ProcFormalParameter;
-import triangle.abstractSyntaxTrees.formals.SingleFormalParameterSequence;
-import triangle.abstractSyntaxTrees.formals.VarFormalParameter;
-import triangle.abstractSyntaxTrees.terminals.CharacterLiteral;
-import triangle.abstractSyntaxTrees.terminals.Identifier;
-import triangle.abstractSyntaxTrees.terminals.IntegerLiteral;
-import triangle.abstractSyntaxTrees.terminals.Operator;
-import triangle.abstractSyntaxTrees.types.ArrayTypeDenoter;
-import triangle.abstractSyntaxTrees.types.FieldTypeDenoter;
-import triangle.abstractSyntaxTrees.types.MultipleFieldTypeDenoter;
-import triangle.abstractSyntaxTrees.types.RecordTypeDenoter;
-import triangle.abstractSyntaxTrees.types.SimpleTypeDenoter;
-import triangle.abstractSyntaxTrees.types.SingleFieldTypeDenoter;
-import triangle.abstractSyntaxTrees.types.TypeDeclaration;
-import triangle.abstractSyntaxTrees.types.TypeDenoter;
-import triangle.abstractSyntaxTrees.vnames.DotVname;
-import triangle.abstractSyntaxTrees.vnames.SimpleVname;
-import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
-import triangle.abstractSyntaxTrees.vnames.Vname;
+import triangle.abstractSyntaxTrees.actuals.*;
+import triangle.abstractSyntaxTrees.aggregates.*;
+import triangle.abstractSyntaxTrees.commands.*;
+import triangle.abstractSyntaxTrees.declarations.*;
+import triangle.abstractSyntaxTrees.expressions.*;
+import triangle.abstractSyntaxTrees.formals.*;
+import triangle.abstractSyntaxTrees.terminals.*;
+import triangle.abstractSyntaxTrees.types.*;
+import triangle.abstractSyntaxTrees.vnames.*;
 
 import java.io.IOException;
 
 @SuppressWarnings("SwitchStatementWithTooFewBranches") public class Parser {
 
-    private final Lexer         lexicalAnalyser;
-    private final ErrorReporter   errorReporter;
-    private       Token currentTextToken;
-    private       SourcePosition  previousTokenPosition;
+    private final Lexer          lexer;
+    private final ErrorReporter  errorReporter;
+    private       Token          currentTextToken;
+    private       SourcePosition previousTokenPosition;
 
     public Parser(Lexer lexer, ErrorReporter reporter) {
-        lexicalAnalyser = lexer;
+        this.lexer = lexer;
         errorReporter = reporter;
         previousTokenPosition = new SourcePosition();
     }
 
-    // accept checks whether the current token matches tokenExpected.
-    // If so, fetches the next TextToken.Kind.
-    // If not, reports a syntactic error.
+    ///////////////////////////////////////////////////////////////////////////////
+    //
+    // PROGRAMS
+    //
+    ///////////////////////////////////////////////////////////////////////////////
 
     public Program parseProgram() throws IOException, SyntaxError {
         previousTokenPosition.setStart(0);
         previousTokenPosition.setFinish(0);
-        currentTextToken = lexicalAnalyser.nextToken();
+        currentTextToken = lexer.nextToken();
 
         Command cAST = parseCommand();
         Program programAST = new Program(cAST, previousTokenPosition);
@@ -118,44 +64,38 @@ import java.io.IOException;
         return programAST;
     }
 
-    // acceptIt simply moves to the next token with no checking
-    // (used where we've already done the check)
-
+    // accept checks whether the current token matches tokenExpected.
+    // If so, fetches the next TextToken.Kind.
+    // If not, reports a syntactic error.
     void accept(Token.Kind tokenExpected) throws SyntaxError, IOException {
         if (currentTextToken.getKind() == tokenExpected) {
             previousTokenPosition = currentTextToken.getPosition();
-            currentTextToken = lexicalAnalyser.nextToken();
+            currentTextToken = lexer.nextToken();
         } else {
             syntacticError(tokenExpected + " expected here");
         }
     }
 
+    // acceptIt simply moves to the next token with no checking
+    // (used where we've already done the check)
+    void acceptIt() throws IOException {
+        previousTokenPosition = currentTextToken.getPosition();
+        currentTextToken = lexer.nextToken();
+    }
+
     // start records the position of the start of a phrase.
     // This is defined to be the position of the first
     // character of the first token of the phrase.
-
-    void acceptIt() throws IOException {
-        previousTokenPosition = currentTextToken.getPosition();
-        currentTextToken = lexicalAnalyser.nextToken();
+    void start(SourcePosition position) {
+        position.setStart(currentTextToken.getPosition().getStart());
     }
 
     // finish records the position of the end of a phrase.
     // This is defined to be the position of the last
     // character of the last token of the phrase.
-
-    void start(SourcePosition position) {
-        position.setStart(currentTextToken.getPosition().getStart());
-    }
-
     void finish(SourcePosition position) {
         position.setFinish(previousTokenPosition.getFinish());
     }
-
-    ///////////////////////////////////////////////////////////////////////////////
-    //
-    // PROGRAMS
-    //
-    ///////////////////////////////////////////////////////////////////////////////
 
     void syntacticError(String message) throws SyntaxError {
         errorReporter.reportError(message, currentTextToken.getPosition());
@@ -170,13 +110,12 @@ import java.io.IOException;
 
     // parseIntegerLiteral parses an integer-literal, and constructs
     // a leaf AST to represent it.
-
     IntegerLiteral parseIntegerLiteral() throws SyntaxError, IOException {
         if (currentTextToken.getKind() == Token.Kind.INTLITERAL) {
             previousTokenPosition = currentTextToken.getPosition();
             IntegerLiteral IL = new IntegerLiteral(((TextToken) currentTextToken).getText(), previousTokenPosition);
 
-            currentTextToken = lexicalAnalyser.nextToken();
+            currentTextToken = lexer.nextToken();
 
             return IL;
         } else {
@@ -187,12 +126,11 @@ import java.io.IOException;
 
     // parseCharacterLiteral parses a character-literal, and constructs a leaf
     // AST to represent it.
-
     CharacterLiteral parseCharacterLiteral() throws SyntaxError, IOException {
         if (currentTextToken.getKind() == Token.Kind.CHARLITERAL) {
             previousTokenPosition = currentTextToken.getPosition();
             CharacterLiteral CL = new CharacterLiteral(((TextToken) currentTextToken).getText(), previousTokenPosition);
-            currentTextToken = lexicalAnalyser.nextToken();
+            currentTextToken = lexer.nextToken();
             return CL;
         } else {
             syntacticError("character literal expected here");
@@ -202,13 +140,12 @@ import java.io.IOException;
 
     // parseIdentifier parses an identifier, and constructs a leaf AST to
     // represent it.
-
     Identifier parseIdentifier() throws SyntaxError, IOException {
 
         if (currentTextToken.getKind() == Token.Kind.IDENTIFIER) {
             previousTokenPosition = currentTextToken.getPosition();
             Identifier I = new Identifier(((TextToken) currentTextToken).getText(), previousTokenPosition);
-            currentTextToken = lexicalAnalyser.nextToken();
+            currentTextToken = lexer.nextToken();
 
             return I;
         } else {
@@ -219,12 +156,11 @@ import java.io.IOException;
 
     // parseOperator parses an operator, and constructs a leaf AST to
     // represent it.
-
     Operator parseOperator() throws SyntaxError, IOException {
         if (currentTextToken.getKind() == Token.Kind.OPERATOR) {
             previousTokenPosition = currentTextToken.getPosition();
             Operator O = new Operator(((TextToken) currentTextToken).getText(), previousTokenPosition);
-            currentTextToken = lexicalAnalyser.nextToken();
+            currentTextToken = lexer.nextToken();
             return O;
         } else {
             syntacticError("operator expected here");
@@ -240,7 +176,6 @@ import java.io.IOException;
 
     // parseCommand parses the command, and constructs an AST
     // to represent its phrase structure.
-
     Command parseCommand() throws SyntaxError, IOException {
         SourcePosition commandPos = new SourcePosition();
 
