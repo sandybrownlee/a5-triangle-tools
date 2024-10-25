@@ -19,8 +19,6 @@
 
 package triangle.syntacticAnalyzer;
 
-import org.w3c.dom.Text;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
@@ -242,7 +240,7 @@ public final class Lexer {
             default -> throw new RuntimeException();
         };
 
-        System.out.println(toEmit.getKind() + " " + (toEmit instanceof TextToken tt ? tt.getText() : "#") + " " + toEmit.getLine() + "," + toEmit.getColumn());
+//        System.out.println(toEmit.getKind() + " " + (toEmit instanceof TextToken tt ? tt.getText() : "#") + " " + toEmit.getLine() + "," + toEmit.getColumn());
         return toEmit;
     }
 

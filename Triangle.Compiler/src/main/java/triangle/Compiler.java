@@ -25,8 +25,8 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
-import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Lexer;
+import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.SyntaxError;
 import triangle.treeDrawer.Drawer;
 
