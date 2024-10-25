@@ -93,38 +93,38 @@ public final class Lexer {
                 } while (lastChar() != EOL);
 
                 // no need to put EOL back into the buffer
-                resetBuffer();
+                reset();
                 yield nextToken();
             }
 
             case EOT -> new Token(Token.Kind.EOT, line, column);
 
             case '(' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.LPAREN, line, column);
             }
             case ')' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.RPAREN, line, column);
             }
             case '[' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.LBRACK, line, column);
             }
             case ']' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.RBRACK, line, column);
             }
             case '{' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.LBRACE, line, column);
             }
             case '}' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.RBRACE, line, column);
             }
             case '.' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.DOT, line, column);
             }
 
@@ -135,7 +135,7 @@ public final class Lexer {
                 read();
 
                 if (lastChar() == '=') {
-                    resetBuffer();
+                    reset();
                     yield new Token(Token.Kind.BECOMES, line, column);
                 }
 
@@ -145,15 +145,15 @@ public final class Lexer {
             }
 
             case ';' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.SEMICOLON, line, column);
             }
             case ',' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.COMMA, line, column);
             }
             case '~' -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.IS, line, column);
             }
 
@@ -181,7 +181,7 @@ public final class Lexer {
                 }
 
                 Token token = new TextToken(Token.Kind.CHARLITERAL, line, column, String.valueOf(buffer.charAt(1)));
-                resetBuffer();
+                reset();
                 yield token;
             }
 
@@ -193,12 +193,12 @@ public final class Lexer {
                     read();
                 } while (Character.isLetter(lastChar()) || Character.isDigit(lastChar()));
 
-                Token token;
-                if (reservedWords.containsKey(buffer.substring(0, buffer.length() - 1))) {
-                    token = new Token(reservedWords.get(buffer.substring(0, buffer.length() - 1)), line, column);
-                } else {
-                    token = new TextToken(Token.Kind.IDENTIFIER, line, column, buffer.substring(0, buffer.length() - 1));
-                }
+                // if the matched string is a reserved word, then create a token of the corresponding type
+                String matchedString = buffer.substring(0, buffer.length() - 1);
+                Token token = reservedWords.containsKey(matchedString) ?
+                        new Token(reservedWords.get(matchedString), line, column) :
+                        // else we have an identifier token
+                        new TextToken(Token.Kind.IDENTIFIER, line, column, matchedString);
 
                 resetExceptLast();
                 yield token;
@@ -218,7 +218,7 @@ public final class Lexer {
             }
 
             default -> {
-                resetBuffer();
+                reset();
                 yield new Token(Token.Kind.ERROR, line, column);
             }
         };
@@ -251,13 +251,13 @@ public final class Lexer {
         return buffer.charAt(buffer.length() - 1);
     }
 
-    private void resetBuffer() {
+    private void reset() {
         buffer.setLength(0);
     }
 
     private void resetExceptLast() {
         char lastRead = lastChar();
-        resetBuffer();
+        reset();
         buffer.append(lastRead);
     }
 
