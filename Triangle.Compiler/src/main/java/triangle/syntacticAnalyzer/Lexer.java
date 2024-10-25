@@ -261,4 +261,20 @@ public final class Lexer {
         buffer.append(lastRead);
     }
 
+    public void dump() throws IOException {
+        Token tok = nextToken();
+
+        if (tok.getKind() == Token.Kind.EOT) {
+            return;
+        }
+
+        System.out.println(pretty(tok));
+        dump();
+    }
+
+    private String pretty(final Token tok) {
+        return tok.getLine() + "," + tok.getColumn() + "\t\t"
+               + tok.getKind() + " " + (tok instanceof TextToken tt ? tt.getText() : "#");
+    }
+
 }
