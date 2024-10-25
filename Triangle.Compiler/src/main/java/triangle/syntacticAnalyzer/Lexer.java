@@ -31,7 +31,8 @@ public final class Lexer {
     public static final char EOL = '\n';
     public static final char EOT = '\u0000';
 
-    private static final List<Character>         operators     = List.of('+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%', '^', '?');
+    private static final List<Character>         operators     = List.of('+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%',
+                                                                         '^', '?');
     private static final Map<String, Token.Kind> reservedWords = new HashMap<>();
 
     static {
@@ -82,10 +83,7 @@ public final class Lexer {
                     read();
                 } while (Character.isWhitespace(lastChar()));
 
-                char lastRead = lastChar();
-                resetBuffer();
-                buffer.append(lastRead);
-
+                resetExceptLast();
                 yield nextToken();
             }
 
@@ -96,7 +94,6 @@ public final class Lexer {
 
                 // no need to put EOL back into the buffer
                 resetBuffer();
-
                 yield nextToken();
             }
 
@@ -143,11 +140,7 @@ public final class Lexer {
                 }
 
                 Token token = new Token(Token.Kind.COLON, line, column);
-
-                char lastRead = lastChar();
-                resetBuffer();
-                buffer.append(lastRead);
-
+                resetExceptLast();
                 yield token;
             }
 
@@ -173,11 +166,7 @@ public final class Lexer {
                 } while (Character.isDigit(lastChar()));
 
                 Token token = new TextToken(Token.Kind.INTLITERAL, line, column, buffer.substring(0, buffer.length() - 1));
-
-                char lastRead = lastChar();
-                resetBuffer();
-                buffer.append(lastRead);
-
+                resetExceptLast();
                 yield token;
             }
 
@@ -192,9 +181,7 @@ public final class Lexer {
                 }
 
                 Token token = new TextToken(Token.Kind.CHARLITERAL, line, column, String.valueOf(buffer.charAt(1)));
-
                 resetBuffer();
-
                 yield token;
             }
 
@@ -213,10 +200,7 @@ public final class Lexer {
                     token = new TextToken(Token.Kind.IDENTIFIER, line, column, buffer.substring(0, buffer.length() - 1));
                 }
 
-                char lastRead = lastChar();
-                resetBuffer();
-                buffer.append(lastRead);
-
+                resetExceptLast();
                 yield token;
             }
 
@@ -229,11 +213,7 @@ public final class Lexer {
                 } while (operators.contains(lastChar()));
 
                 Token token = new TextToken(Token.Kind.OPERATOR, line, column, buffer.substring(0, buffer.length() - 1));
-
-                char lastRead = lastChar();
-                resetBuffer();
-                buffer.append(lastRead);
-
+                resetExceptLast();
                 yield token;
             }
 
@@ -243,7 +223,8 @@ public final class Lexer {
             }
         };
 
-//        System.out.println(toEmit.getKind() + " " + (toEmit instanceof TextToken tt ? tt.getText() : "#") + " " + toEmit.getLine() + "," + toEmit.getColumn());
+//        System.out.println(toEmit.getKind() + " " + (toEmit instanceof TextToken tt ? tt.getText() : "#") + " " + toEmit
+//        .getLine() + "," + toEmit.getColumn());
         return toEmit;
     }
 
@@ -272,6 +253,12 @@ public final class Lexer {
 
     private void resetBuffer() {
         buffer.setLength(0);
+    }
+
+    private void resetExceptLast() {
+        char lastRead = lastChar();
+        resetBuffer();
+        buffer.append(lastRead);
     }
 
 }
