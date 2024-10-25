@@ -15,11 +15,15 @@ java {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    options.compilerArgs += "--enable-preview"
+    options.compilerArgs += ['--enable-preview']
+}
+
+tasks.withType(JavaExec).configureEach {
+    jvmArgs += '--enable-preview'
 }
 
 tasks.withType(Test).configureEach {
-    options.compilerArgs += "--enable-preview"
+    jvmArgs += "--enable-preview"
 }
 
 dependencies {
