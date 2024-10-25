@@ -158,6 +158,7 @@ import java.io.IOException;
     ///////////////////////////////////////////////////////////////////////////////
 
     void syntacticError(String message) throws SyntaxError {
+        errorReporter.reportError(message, currentTextToken.getPosition());
         throw new SyntaxError(message);
     }
 

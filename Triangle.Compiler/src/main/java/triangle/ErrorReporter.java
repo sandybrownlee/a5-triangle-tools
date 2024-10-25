@@ -33,19 +33,13 @@ public class ErrorReporter {
         this.throwExceptions = throwExceptions;
     }
 
-    public void reportError(String message, String tokenName, SourcePosition pos) {
+    public void reportError(String message, SourcePosition pos) {
 
         numErrors++;
 
         StringBuffer s = new StringBuffer("ERROR: ");
 
-        for (int p = 0; p < message.length(); p++) {
-            if (message.charAt(p) == '%') {
-                s.append(tokenName);
-            } else {
-                s.append(message.charAt(p));
-            }
-        }
+        s.append(message);
         s.append(" ").append(pos.getStart()).append("..").append(pos.getFinish());
 
         if (throwExceptions) {

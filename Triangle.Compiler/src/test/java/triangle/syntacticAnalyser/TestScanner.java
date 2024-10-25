@@ -70,21 +70,16 @@ public class TestScanner {
     }
 
     private void compileExpectFailure(String filename) {
-        //SourceFile source = SourceFile.ofPath(this.getClass().getResource(filename).getFile().toString());
         Lexer lexer = Lexer.fromResource(filename);
         ErrorReporter reporter = new ErrorReporter(true);
         Parser parser = new Parser(lexer, reporter);
 
         // we expect an exception here as the program has invalid syntax
-        assertThrows(RuntimeException.class, new ThrowingRunnable() {
-            public void run() {
-                try {
-                    parser.parseProgram();
-                } catch (IOException e) {
-                    throw new AssertionFailedError();
-                } catch (SyntaxError e) {
-                    throw new AssertionFailedError();
-                }
+        assertThrows(RuntimeException.class, () -> {
+            try {
+                parser.parseProgram();
+            } catch (IOException | SyntaxError e) {
+                throw new RuntimeException();
             }
         });
 

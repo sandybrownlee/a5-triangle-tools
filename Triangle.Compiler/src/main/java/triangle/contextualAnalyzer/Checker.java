@@ -797,16 +797,16 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
     }
 
     private void reportError(String message, Terminal spellingNode, AbstractSyntaxTree positionNode) {
-        reporter.reportError(message, spellingNode.spelling, positionNode.getPosition());
+        reporter.reportError(message, positionNode.getPosition());
     }
 
     private void reportError(String message, AbstractSyntaxTree positionNode) {
-        reporter.reportError(message, "", positionNode.getPosition());
+        reporter.reportError(message, positionNode.getPosition());
     }
 
     private void checkAndReportError(boolean condition, String message, String token, SourcePosition position) {
         if (!condition) {
-            reporter.reportError(message, token, position);
+            reporter.reportError(message, position);
         }
     }
 
