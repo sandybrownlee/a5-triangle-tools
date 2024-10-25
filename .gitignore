@@ -68,4 +68,11 @@ Triangle.AbstractMachine/triangle-abstractmachine.iml
 Triangle.Compiler/triangle-compiler.iml
 triangle-tools.iml
 
+# triangle object files
 *.tam
+
+# intelliJ build output directories
+Triangle.AbstractMachine.Disassembler/out/**
+Triangle.AbstractMachine.Interpreter/out/**
+Triangle.AbstractMachine/out/**
+Triangle.Compiler/out/**
