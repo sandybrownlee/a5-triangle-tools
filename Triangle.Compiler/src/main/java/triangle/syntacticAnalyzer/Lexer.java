@@ -237,7 +237,10 @@ public final class Lexer {
                 yield token;
             }
 
-            default -> throw new RuntimeException();
+            default -> {
+                resetBuffer();
+                yield new Token(Token.Kind.ERROR, line, column);
+            }
         };
 
 //        System.out.println(toEmit.getKind() + " " + (toEmit instanceof TextToken tt ? tt.getText() : "#") + " " + toEmit.getLine() + "," + toEmit.getColumn());
