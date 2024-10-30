@@ -17,7 +17,8 @@
  */
 
 package triangle;
-
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -35,12 +36,22 @@ import triangle.treeDrawer.Drawer;
  * @author Deryck F. Brown
  */
 public class Compiler {
+	// the cli parser library lets us make instance variables with annotations like this
+		// that specify command line arguments for the program
+	    @Argument(alias = "s", description = "Statistic to compute for the values", required = false)
+	    static boolean showTree = false;
+	    
+	    @Argument(alias = "f", description = "Comma separated (no spaces) list of values", required = false)
+		static boolean folding = false;
+	    
+	    @Argument(alias = "o", description = "Comma separated (no spaces) list of values", required = false)
+	    static String objectName = "obj.tam";
+	    
+	    @Argument(alias = "sa", description = "Statistic to compute for the values", required = false)
+	    static boolean showTreeAfter = false;
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -97,10 +108,14 @@ public class Compiler {
 			if (showingAST) {
 				drawer.draw(theAST);
 			}
-			if (folding) {
+			if (folding){
 				theAST.visit(new ConstantFolder());
+				 // Show AST after folding if requested
 			}
-			
+			if (showTreeAfter) {
+				theAST.visit(new ConstantFolder());
+                drawer.draw(theAST);
+            }
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -124,19 +139,20 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-
+		Compiler compiler = new Compiler();
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
 		
-		parseArgs(args);
+		//parseArgs(args);
+		Args.parseOrExit(compiler, args);
 
 		String sourceName = args[0];
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
-		if (!showTree) {
+		if (!showTree && !showTreeAfter) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
