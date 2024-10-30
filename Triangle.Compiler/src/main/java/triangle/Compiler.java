@@ -18,6 +18,9 @@
 
 package triangle;
 
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -37,10 +40,14 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "oN", description = "objectName", required = false)
 	static String objectName = "obj.tam";
-	
+	@Argument(alias = "sT", description = "showTree", required = false)
 	static boolean showTree = false;
+	@Argument(alias = "f", description = "folding", required = false)
 	static boolean folding = false;
+	@Argument(alias = "sTA", description = "showTreeAfter", required = false)
+	static boolean showTreeAfter = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -114,6 +121,10 @@ public class Compiler {
 		} else {
 			System.out.println("Compilation was unsuccessful.");
 		}
+
+		if(showTreeAfter){
+			drawer.draw(theAST);
+		}
 		return successful;
 	}
 
@@ -126,11 +137,12 @@ public class Compiler {
 	public static void main(String[] args) {
 
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-o=outputfilename] [t] [folding]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
+
+		Args.parseOrExit(new Compiler(), args);
+		//parseArgs(args);
 
 		String sourceName = args[0];
 		
@@ -141,16 +153,16 @@ public class Compiler {
 		}
 	}
 	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+//	private static void parseArgs(String[] args) {
+//		for (String s : args) {
+//			var sl = s.toLowerCase();
+//			if (sl.equals("tree")) {
+//				showTree = true;
+//			} else if (sl.startsWith("-o=")) {
+//				objectName = s.substring(3);
+//			} else if (sl.equals("folding")) {
+//				folding = true;
+//			}
+//		}
+//	}
 }
