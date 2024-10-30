@@ -39,3 +39,4 @@ public class IntegerLiteral extends Terminal {
 		return Integer.parseInt(spelling);
 	}
 }
+
