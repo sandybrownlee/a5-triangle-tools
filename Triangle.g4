@@ -1,5 +1,9 @@
 grammar Triangle ;
 
+@header {
+package in.zaraksh;
+}
+
 program : stmt_seq EOF ;
 
 stmt_seq : stmt (SEMICOLON | SEMICOLON stmt_seq)? ;
@@ -7,7 +11,6 @@ stmt : BEGIN stmt_seq END
      | LET decl_seq IN stmt
      | IF expr THEN stmt? ELSE stmt?                 // else is allowed to be not followed by a statement
      | WHILE expr DO stmt
-     | ident LPAREN arg_seq? RPAREN                 // procedure/function call
      | ident ASSIGN expr
      | expr ;
 
