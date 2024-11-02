@@ -266,12 +266,13 @@ public class Parser {
         if (lastToken.getKind() == Token.Kind.OPERATOR) {
             String operator = ((TextToken) lastToken).getText();
             shift(Token.Kind.OPERATOR);
+
             if (EXPRESSION_FIRST_SET.contains(lastToken.getKind())) {
                 Expression secondExpression = parseExpression();
                 return new BinaryOp(operator, firstExpression, secondExpression);
-            } else {
-                return new UnaryOp(operator, firstExpression);
             }
+
+            return new UnaryOp(operator, firstExpression);
         }
 
         return firstExpression;
