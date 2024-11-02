@@ -4,7 +4,7 @@ sealed public interface Argument permits Argument.FuncArgument, Argument.VarArgu
 
     record VarArgument(Expression.Identifier identifier) implements Argument { }
 
-    record FuncArgument(String funcName) implements Argument { }
+    record FuncArgument(Expression.Identifier func) implements Argument { }
 
     interface Visitor<ST,T> {
         T visit(ST state, Argument argument);

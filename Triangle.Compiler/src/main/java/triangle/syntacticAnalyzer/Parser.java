@@ -341,9 +341,8 @@ public class Parser {
         return switch (lastToken.getKind()) {
             case PROC, FUNC -> {
                 shift(Token.Kind.PROC);
-                String callableName = ((TextToken) lastToken).getText();
-                shift(Token.Kind.IDENTIFIER);
-                yield new Argument.FuncArgument(callableName);
+                Identifier callable = parseIdentifier();
+                yield new Argument.FuncArgument(callable);
             }
             case VAR -> {
                 shift(Token.Kind.VAR);
