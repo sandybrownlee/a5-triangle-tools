@@ -8,7 +8,7 @@ sealed public interface Argument permits Argument.ExprArgument, Argument.FuncArg
 
     record ExprArgument(Expression expression) implements Argument { }
 
-    interface Visitor<T> {
-        T visit(Argument argument);
+    interface Visitor<ST,T> {
+        T visit(ST state, Argument argument);
     }
 }

@@ -17,7 +17,7 @@ sealed public interface Declaration
 
     record TypeDeclaration(String name, Type type) implements Declaration { }
 
-    interface Visitor<T> {
-        T visit(Declaration declaration);
+    interface Visitor<ST,T> {
+        T visit(ST state, Declaration declaration);
     }
 }

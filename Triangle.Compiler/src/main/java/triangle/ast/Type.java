@@ -16,7 +16,7 @@ sealed public interface Type permits Type.ArrayType, Type.RecordType, Type.TypeI
 
     record VoidType() implements Type { }
 
-    interface Visitor<T> {
-        T visit(Type type);
+    interface Visitor<ST,T> {
+        T visit(ST state, Type type);
     }
 }

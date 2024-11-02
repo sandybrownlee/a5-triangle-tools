@@ -38,7 +38,7 @@ sealed public interface Expression extends Statement, Argument
 
     record CallExpression(Identifier callable, List<Argument> arguments) implements Expression { }
 
-    interface Visitor<T> {
-        T visit(Expression expression);
+    interface Visitor<ST,T> {
+        T visit(ST state, Expression expression);
     }
 }
