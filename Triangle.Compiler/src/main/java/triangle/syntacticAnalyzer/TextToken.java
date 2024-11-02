@@ -13,4 +13,8 @@ final class TextToken extends Token {
         return text;
     }
 
+    @Override public String toString() {
+        return text;
+    }
+
 }

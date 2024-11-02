@@ -187,7 +187,7 @@ public class Parser {
                 yield identifier;
             }
             case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> parseExpression();
-            default -> throw new RuntimeException();
+            default -> throw new SyntaxError(lastToken);
         };
     }
 
@@ -260,7 +260,7 @@ public class Parser {
                 yield new UnaryOp(operator, expression);
             }
 
-            default -> throw new RuntimeException();
+            default -> throw new SyntaxError(lastToken);
         };
 
         if (lastToken.getKind() == Token.Kind.OPERATOR) {
@@ -319,7 +319,7 @@ public class Parser {
                 shift(Token.Kind.END);
                 yield new RecordType(fieldTypes);
             }
-            default -> throw new RuntimeException();
+            default -> throw new SyntaxError(lastToken);
         };
     }
 
@@ -350,7 +350,7 @@ public class Parser {
                 yield new Argument.VarArgument(parseIdentifier());
             }
             case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> new Argument.ExprArgument(parseExpression());
-            default -> throw new RuntimeException();
+            default -> throw new SyntaxError(lastToken);
         };
     }
 
@@ -478,7 +478,7 @@ public class Parser {
                 Type type = parseType();
                 yield new Declaration.TypeDeclaration(typeName, type);
             }
-            default -> throw new RuntimeException();
+            default -> throw new SyntaxError(lastToken);
         };
     }
 
@@ -535,13 +535,13 @@ public class Parser {
                 Type funcType = parseType();
                 yield new CallableParameter(funcName, parameters, funcType);
             }
-            default -> throw new RuntimeException();
+            default -> throw new SyntaxError(lastToken);
         };
     }
 
-    private void shift(Token.Kind expectedKind) throws IOException {
+    private void shift(Token.Kind expectedKind) throws IOException, SyntaxError {
         if (lastToken.getKind() != expectedKind) {
-            throw new RuntimeException();
+            throw new SyntaxError(lastToken, expectedKind);
         }
         lastToken = lexer.nextToken();
     }

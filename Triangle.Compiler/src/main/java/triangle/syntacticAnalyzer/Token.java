@@ -40,4 +40,9 @@ class Token {
         // special tokens...
         EOT, ERROR
     }
+
+    @Override public String toString() {
+        return kind.toString();
+    }
+
 }

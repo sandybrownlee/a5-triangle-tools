@@ -78,8 +78,7 @@ public class Compiler {
             e.printStackTrace();
             System.exit(1);
         } catch (SyntaxError e) {
-            System.err.println("SyntaxError while compiling");
-            e.printStackTrace();
+            System.err.println("SyntaxError while compiling: " + e.getMessage());
             System.exit(1);
         }
 

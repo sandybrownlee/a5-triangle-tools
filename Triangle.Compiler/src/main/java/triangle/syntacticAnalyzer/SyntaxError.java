@@ -1,6 +1,7 @@
 /*
  * @(#)SyntaxError.java
  *
+ * Revisions and updates (c) 2024 Zaraksh Rahman. zar00024@students.stir.ac.uk
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  *
  * Original release:
@@ -18,18 +19,13 @@
 
 package triangle.syntacticAnalyzer;
 
-import java.io.Serial;
-
 public class SyntaxError extends Exception {
 
-    @Serial private static final long serialVersionUID = -5280306336102766860L;
-
-    SyntaxError() {
-        super();
+    SyntaxError(Token token, Token.Kind expected) {
+        super("expected: " + expected + " got: " + token + " at line " + token.getLine() + ", column " + token.getColumn());
     }
 
-    SyntaxError(String s) {
-        super(s);
+    SyntaxError(Token token) {
+        super("unexpected token: " + token + " at line " + token.getLine() + ", column " + token.getColumn());
     }
-
 }
