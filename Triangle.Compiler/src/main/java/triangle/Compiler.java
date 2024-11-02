@@ -40,6 +40,8 @@ import java.io.InputStream;
 
  @author Deryck F. Brown
  @version 2.1 7 Oct 2003 */
+// TODO: replace ErrorReporter with robust logging
+// TODO: debugging mode
 public class Compiler {
 
     /** The filename for the object program, normally obj.tam. */
