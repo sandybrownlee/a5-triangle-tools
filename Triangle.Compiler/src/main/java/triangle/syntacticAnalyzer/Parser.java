@@ -41,25 +41,21 @@ import java.util.Set;
 
 public class Parser {
 
-    private static final Set<Token.Kind> IDENTIFIER_FIRST_SET  = new HashSet<>();
     private static final Set<Token.Kind> EXPRESSION_FIRST_SET  = new HashSet<>();
     private static final Set<Token.Kind> STATEMENT_FIRST_SET   = new HashSet<>();
     private static final Set<Token.Kind> DECLARATION_FIRST_SET = new HashSet<>();
 
     // manual transitive closure for FIRST sets of ident, expr, and stmt
     static {
-        IDENTIFIER_FIRST_SET.add(Token.Kind.IDENTIFIER);
         DECLARATION_FIRST_SET.addAll(Set.of(Token.Kind.CONST, Token.Kind.VAR, Token.Kind.PROC, Token.Kind.FUNC, Token.Kind.TYPE));
 
         EXPRESSION_FIRST_SET.addAll(Set.of(
                 Token.Kind.INTLITERAL, Token.Kind.CHARLITERAL, Token.Kind.LBRACK, Token.Kind.LBRACE, Token.Kind.LPAREN,
                 Token.Kind.LET, Token.Kind.IF, Token.Kind.IDENTIFIER, Token.Kind.OPERATOR
         ));
-        EXPRESSION_FIRST_SET.addAll(IDENTIFIER_FIRST_SET);
 
         STATEMENT_FIRST_SET.addAll(
-                Set.of(Token.Kind.BEGIN, Token.Kind.LET, Token.Kind.IF, Token.Kind.WHILE, Token.Kind.LOOP, Token.Kind.REPEAT));
-        STATEMENT_FIRST_SET.addAll(IDENTIFIER_FIRST_SET);
+                Set.of(Token.Kind.BEGIN, Token.Kind.LET, Token.Kind.IF, Token.Kind.WHILE, Token.Kind.LOOP, Token.Kind.REPEAT, Token.Kind.IDENTIFIER));
         STATEMENT_FIRST_SET.addAll(EXPRESSION_FIRST_SET);
     }
 
@@ -111,38 +107,22 @@ public class Parser {
                 Expression condition = parseExpression();
                 shift(); // THEN
 
-                // TODO: proper conflict resolution will need Stack<Token>
-                // This block manually checks if the next token is in FIRST(stmt); it is essentially a hacked in shift/reduce
-                // conflict resolution
-                if (lastToken.getKind() == Token.Kind.ELSE) {
-                    shift(); // ELSE
-                    if (lastToken.getKind() == Token.Kind.SEMICOLON) {
+                Optional<Statement> consequent =
+                        (lastToken.getKind() == Token.Kind.ELSE) ? Optional.empty() : Optional.of(parseStmt());
+                shift(); // ELSE
+
+                // else branches are allowed to end in SEMICOLON, another statement, or nothing at all
+                Optional<Statement> alternative = switch (lastToken.getKind()) {
+                    case SEMICOLON -> {
                         shift(); // SEMICOLON
-                        yield new IfStatement(condition, Optional.empty(), Optional.empty());
-                    } else {
-                        if (STATEMENT_FIRST_SET.contains(lastToken.getKind())) {
-                            Statement alternative = parseStmt();
-                            yield new IfStatement(condition, Optional.empty(), Optional.of(alternative));
-                        } else {
-                            yield new IfStatement(condition, Optional.empty(), Optional.empty());
-                        }
+                        yield Optional.empty();
                     }
-                } else {
-                    Statement consequent = parseStmt();
-                    shift(); // ELSE
-                    if (lastToken.getKind() == Token.Kind.SEMICOLON) {
-                        shift(); // SEMICOLON
-                        yield new IfStatement(condition, Optional.of(consequent), Optional.empty());
-                    } else {
-                        if (STATEMENT_FIRST_SET.contains(lastToken.getKind())) {
-                            Statement alternative = parseStmt();
-                            yield new IfStatement(condition, Optional.of(consequent), Optional.of(alternative));
-                        } else {
-                            yield new IfStatement(condition, Optional.of(consequent), Optional.empty());
-                        }
-                    }
-                }
-                // upto here is the shift/reduce resolution
+                    case Token.Kind k when STATEMENT_FIRST_SET.contains(k) -> Optional.of(parseStmt());
+                    // anything that can't start a statement is assumed to be a skipped else branch
+                    default -> Optional.empty();
+                };
+
+                yield new IfStatement(condition, consequent, alternative);
             }
             case WHILE -> {
                 shift(); // WHILE
@@ -173,35 +153,37 @@ public class Parser {
                     yield new RepeatUntilStatement(condition, statement);
                 }
             }
-            // TODO: this just replicates the IDENTIFIER branch of parseExpression(), but we should do this properly with
-            //       lookaheads; will need a Stack<Token>
-            case Token.Kind k when IDENTIFIER_FIRST_SET.contains(k) -> {
+            case IDENTIFIER -> {
                 Identifier identifier = parseIdentifier();
                 if (lastToken.getKind() == Token.Kind.BECOMES) {
                     shift(); // BECOMES
                     Expression expression = parseExpression();
                     yield new AssignStatement(identifier, expression);
-                } else {
-                    if (lastToken.getKind() == Token.Kind.LPAREN) {
-                        shift(); // LPAREN
-                        @SuppressWarnings("unchecked") List<Argument> arguments =
-                                (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseArgSeq();
-                        shift(); // RPAREN
-                        yield new CallExpression(identifier, arguments);
-                    } else {
-                        if (lastToken.getKind() == Token.Kind.OPERATOR) {
-                            String operator = ((TextToken) lastToken).getText();
-                            shift(); // OPERATOR
-                            if (EXPRESSION_FIRST_SET.contains(lastToken.getKind())) {
-                                Expression secondExpression = parseExpression();
-                                yield new BinaryOp(operator, identifier, secondExpression);
-                            } else {
-                                yield new UnaryOp(operator, identifier);
-                            }
-                        }
-                        yield identifier;
-                    }
                 }
+
+                // check if the identifier leads into a call
+                if (lastToken.getKind() == Token.Kind.LPAREN) {
+                    shift(); // LPAREN
+                    @SuppressWarnings("unchecked") List<Argument> arguments =
+                            (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseArgSeq();
+                    shift(); // RPAREN
+                    yield new CallExpression(identifier, arguments);
+                }
+
+                // check if the identifier leads into a side-effectful operation
+                if (lastToken.getKind() == Token.Kind.OPERATOR) {
+                    String operator = ((TextToken) lastToken).getText();
+                    shift(); // OPERATOR
+
+                    if (EXPRESSION_FIRST_SET.contains(lastToken.getKind())) {
+                        Expression secondExpression = parseExpression();
+                        yield new BinaryOp(operator, identifier, secondExpression);
+                    }
+
+                    yield new UnaryOp(operator, identifier);
+                }
+
+                yield identifier;
             }
             case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> parseExpression();
             default -> throw new RuntimeException();
@@ -256,7 +238,7 @@ public class Parser {
                 Expression alternative = parseExpression();
                 yield new IfExpression(condition, consequent, alternative);
             }
-            case Token.Kind _ when IDENTIFIER_FIRST_SET.contains(lastToken.getKind()) -> {
+            case IDENTIFIER -> {
                 Identifier identifier = parseIdentifier();
 
                 if (lastToken.getKind() == Token.Kind.LPAREN) {
