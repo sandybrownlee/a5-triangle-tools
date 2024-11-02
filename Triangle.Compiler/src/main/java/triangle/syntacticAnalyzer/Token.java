@@ -24,10 +24,6 @@ class Token {
         return kind;
     }
 
-    @Deprecated SourcePosition getPosition() {
-        return new SourcePosition(line, column);
-    }
-
     public enum Kind {
         // literals, identifiers, operators...
         INTLITERAL, CHARLITERAL, IDENTIFIER, OPERATOR,
