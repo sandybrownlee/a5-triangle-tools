@@ -1,5 +1,5 @@
 package triangle.ast;
 
-public interface ProgramVisitor {
-    void visit(Program program);
+public interface ProgramVisitor<T> {
+    T visit(Program program);
 }

@@ -10,7 +10,7 @@ sealed public interface Parameter permits Parameter.ConstParameter, Parameter.Ca
 
     record CallableParameter(String callable, List<Parameter> parameters, Type returnType) implements Parameter { }
 
-    interface Visitor {
-        void visit(Parameter parameter);
+    interface Visitor<T> {
+        T visit(Parameter parameter);
     }
 }
