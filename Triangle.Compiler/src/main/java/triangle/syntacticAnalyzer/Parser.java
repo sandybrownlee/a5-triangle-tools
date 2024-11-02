@@ -349,7 +349,7 @@ public class Parser {
                 shift(Token.Kind.VAR);
                 yield new Argument.VarArgument(parseIdentifier());
             }
-            case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> new Argument.ExprArgument(parseExpression());
+            case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> parseExpression();
             default -> throw new SyntaxError(lastToken);
         };
     }
