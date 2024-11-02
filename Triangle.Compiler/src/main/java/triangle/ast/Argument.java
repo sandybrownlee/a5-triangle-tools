@@ -1,9 +1,10 @@
 package triangle.ast;
 
-sealed public interface Argument permits Expression, Argument.FuncArgument, Argument.VarArgument {
+sealed public interface Argument permits Argument.ExprArgument, Argument.FuncArgument, Argument.VarArgument, Expression {
 
-    record VarArgument(Expression.Identifier var) implements Argument { }
+    record VarArgument(Expression.Identifier identifier) implements Argument { }
 
-    record FuncArgument(Expression.Identifier func) implements Argument { }
+    record FuncArgument(String funcName) implements Argument { }
 
+    record ExprArgument(Expression expression) implements Argument { }
 }

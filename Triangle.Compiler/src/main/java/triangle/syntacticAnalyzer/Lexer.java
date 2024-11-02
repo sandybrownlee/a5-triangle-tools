@@ -32,7 +32,7 @@ public final class Lexer {
     public static final char EOT = '\u0000';
 
     private static final List<Character>         operators     = List.of('+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%',
-                                                                         '^', '?');
+                                                                         '^', '?', '|');
     private static final Map<String, Token.Kind> reservedWords = new HashMap<>();
 
     static {
@@ -46,11 +46,14 @@ public final class Lexer {
         reservedWords.put("if", Token.Kind.IF);
         reservedWords.put("in", Token.Kind.IN);
         reservedWords.put("let", Token.Kind.LET);
+        reservedWords.put("loop", Token.Kind.LOOP);
         reservedWords.put("of", Token.Kind.OF);
         reservedWords.put("proc", Token.Kind.PROC);
         reservedWords.put("record", Token.Kind.RECORD);
+        reservedWords.put("repeat", Token.Kind.REPEAT);
         reservedWords.put("then", Token.Kind.THEN);
         reservedWords.put("type", Token.Kind.TYPE);
+        reservedWords.put("until", Token.Kind.UNTIL);
         reservedWords.put("var", Token.Kind.VAR);
         reservedWords.put("while", Token.Kind.WHILE);
     }
@@ -87,7 +90,18 @@ public final class Lexer {
                 yield nextToken();
             }
 
-            case '!' -> {
+            case '$' -> {
+                // TODO: should block comments be stackable?
+                do {
+                    read();
+                } while (lastChar() != '$');
+
+                // no need to put '$' back into the buffer
+                reset();
+                yield nextToken();
+            }
+
+            case '!', '#' -> {
                 do {
                     read();
                 } while (lastChar() != EOL);

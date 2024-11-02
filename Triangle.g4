@@ -6,12 +6,15 @@ package in.zaraksh;
 
 program : stmt_seq EOF ;
 
-stmt_seq : stmt (SEMICOLON | SEMICOLON stmt_seq)? ;
+stmt_seq : stmt SEMICOLON? stmt_seq? ;
 stmt : BEGIN stmt_seq END
      | LET decl_seq IN stmt
-     | IF expr THEN stmt? ELSE stmt?                 // else is allowed to be not followed by a statement
+     | IF expr THEN stmt? ELSE (SEMICOLON | stmt?)                 // else is allowed to be not followed by a statement
      | WHILE expr DO stmt
-     | ident ASSIGN expr
+     | LOOP stmt WHILE expr DO stmt
+     | REPEAT stmt WHILE expr
+     | REPEAT stmt UNTIL expr
+     | ident BECOMES expr
      | expr ;
 
 expr : INTLITERAL
@@ -48,7 +51,7 @@ field : IDENTIFIER IS expr ;
 field_type_seq : field_type (COMMA field_type_seq)? ;
 field_type : IDENTIFIER COLON type ;
 
-decl_seq : decl (SEMICOLON | SEMICOLON decl_seq)? ;
+decl_seq : decl SEMICOLON? decl_seq? ;
 decl : CONST IDENTIFIER IS expr
      | VAR IDENTIFIER COLON type
      | PROC IDENTIFIER LPAREN param_seq? RPAREN IS stmt
@@ -63,14 +66,19 @@ param : IDENTIFIER COLON type
 
 // Send whitespace to hidden channel instead of skipping because we need whitespace to split tokens apart at
 WHITESPACE : [ \t\n\r\f]+ -> channel(HIDDEN) ;
+
 // When '!' is encountered, keep skipping characters until a '\n' is encountered
-COMMENT : '!' ~('\n')* -> skip;
+BANG_COMMENT : '!' ~('\n')* '\n' -> skip;
+// When '#' is encountered, keep skipping characters until a '\n' is encountered
+HASH_COMMENT : '#' ~('\n')* '\n' -> skip;
+// When '$' is encountered, keep skipping characters until a '$' is encountered
+BLOCK_COMMENT : '$' ~('$')* '$' -> skip;
 
 INTLITERAL : [0-9]+ ;
 CHARLITERAL : '\'' . '\'' ;
-OPERATOR : ('+'|'-'|'*'|'/'|'='|'<'|'>'|'\\'|'&'|'@'|'%'|'^'|'?')+ ;
+OPERATOR : ('+'|'-'|'*'|'/'|'='|'<'|'>'|'\\'|'&'|'@'|'%'|'^'|'?'|'|')+ ;
 DOT : '.' ;
-ASSIGN : ':=' ;
+BECOMES : ':=' ;
 COLON : ':' ;
 SEMICOLON : ';' ;
 COMMA : ',' ;
@@ -93,11 +101,14 @@ FUNC : 'func' ;
 IF : 'if' ;
 IN : 'in' ;
 LET : 'let' ;
+LOOP : 'loop' ;
 OF : 'of' ;
 PROC : 'proc' ;
 RECORD : 'record' ;
+REPEAT : 'repeat' ;
 THEN : 'then' ;
 TYPE : 'type' ;
+UNTIL : 'until' ;
 VAR : 'var' ;
 WHILE : 'while' ;
 

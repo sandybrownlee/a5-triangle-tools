@@ -7,24 +7,34 @@ sealed public interface Expression extends Statement, Argument
                 Expression.LetExpression, Expression.LitArray, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.UnaryOp {
 
+    sealed interface Identifier extends Expression permits Identifier.BasicIdentifier, Identifier.RecordAccess,
+                                                           Identifier.ArraySubscript {
+
+        record BasicIdentifier(String identifier) implements Identifier { }
+
+        record RecordAccess(Identifier record, Identifier field) implements Identifier { }
+
+        record ArraySubscript(Identifier array, Expression subscript) implements Identifier { }
+
+    }
+
     record LitInt(int value) implements Expression { }
 
     record LitChar(char value) implements Expression { }
 
     record LitArray(List<Expression> values) implements Expression { }
 
-    // TODO: make Map<Identifier, Expression>
-    record LitRecord(List<Identifier> fieldNames, List<Expression> values) implements Expression { }
+    record LitRecord(List<RecordField> fieldValues) implements Expression {
+        public record RecordField(String fieldName, Expression value) { }
+    }
 
-    record UnaryOp(Identifier operator, Expression operand) implements Expression { }
+    record UnaryOp(String operator, Expression operand) implements Expression { }
 
-    record BinaryOp(Identifier operator, Expression loperand, Expression roperand) implements Expression { }
+    record BinaryOp(String operator, Expression loperand, Expression roperand) implements Expression { }
 
     record LetExpression(List<Declaration> declarations, Expression expression) implements Expression { }
 
     record IfExpression(Expression condition, Expression consequent, Expression alternative) implements Expression { }
-
-    record Identifier(String value) implements Expression, Type { }
 
     record CallExpression(Identifier callable, List<Argument> arguments) implements Expression { }
 
