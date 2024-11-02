@@ -261,6 +261,7 @@ public final class Lexer {
         buffer.append(lastRead);
     }
 
+    // TODO: Remove
     public void dump() throws IOException {
         Token tok = nextToken();
 
@@ -268,13 +269,9 @@ public final class Lexer {
             return;
         }
 
-        System.out.println(pretty(tok));
+        System.out.println(tok.getLine() + "," + tok.getColumn() + "\t\t"
+                           + tok.getKind() + " " + (tok instanceof TextToken tt ? tt.getText() : "#"));
         dump();
-    }
-
-    private String pretty(final Token tok) {
-        return tok.getLine() + "," + tok.getColumn() + "\t\t"
-               + tok.getKind() + " " + (tok instanceof TextToken tt ? tt.getText() : "#");
     }
 
 }
