@@ -27,4 +27,7 @@ sealed public interface Statement extends AST
 
     record AssignStatement(Expression.Identifier identifier, Expression expression) implements Statement { }
 
+    interface Visitor {
+        void visit(Statement statement);
+    }
 }

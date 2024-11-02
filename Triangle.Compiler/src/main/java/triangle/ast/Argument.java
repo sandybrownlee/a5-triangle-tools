@@ -7,4 +7,8 @@ sealed public interface Argument permits Argument.ExprArgument, Argument.FuncArg
     record FuncArgument(String funcName) implements Argument { }
 
     record ExprArgument(Expression expression) implements Argument { }
+
+    interface Visitor {
+        void visit(Argument argument);
+    }
 }
