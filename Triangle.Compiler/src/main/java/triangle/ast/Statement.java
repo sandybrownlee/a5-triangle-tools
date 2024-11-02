@@ -3,12 +3,11 @@ package triangle.ast;
 import java.util.List;
 import java.util.Optional;
 
-sealed public interface Statement permits Expression, Statement.AssignStatement, Statement.CallStatement,
-                                          Statement.IfStatement, Statement.LetStatement, Statement.LoopWhileStatement,
-                                          Statement.RepeatUntilStatement, Statement.RepeatWhileStatement,
-                                          Statement.StatementBlock, Statement.WhileStatement {
+sealed public interface Statement permits Expression, Statement.AssignStatement, Statement.IfStatement, Statement.LetStatement,
+                                          Statement.LoopWhileStatement, Statement.RepeatUntilStatement,
+                                          Statement.RepeatWhileStatement, Statement.StatementBlock, Statement.WhileStatement {
 
-    interface Visitor<ST,T> {
+    interface Visitor<ST, T> {
 
         T visit(ST state, Statement statement);
 
@@ -28,8 +27,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
     record RepeatWhileStatement(Expression condition, Statement statement) implements Statement { }
 
     record RepeatUntilStatement(Expression condition, Statement statement) implements Statement { }
-
-    record CallStatement(Expression.Identifier callable, List<Argument> arguments) implements Statement { }
 
     record AssignStatement(Expression.Identifier identifier, Expression expression) implements Statement { }
 
