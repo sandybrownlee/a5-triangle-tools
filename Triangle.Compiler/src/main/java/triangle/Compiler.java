@@ -24,12 +24,12 @@ import triangle.ast.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
-import triangle.optimiser.ConstantFolder;
 import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.SyntaxError;
 import triangle.treeDrawer.Drawer;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -71,6 +71,13 @@ public class Compiler {
 
         boolean compiledOK = false;
         try {
+//            for (String path : new File("programs/").list()) {
+//                if (!path.equals("errors.tri")) {
+//                    System.out.println("programs/" + path);
+//                    compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
+//                }
+//            }
+
             compiledOK = compileProgram(new FileInputStream(sourceName), objectName, showTree, false);
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
@@ -119,9 +126,11 @@ public class Compiler {
         Drawer drawer = new Drawer();
 
         // lexer.enableDebugging();
+//        lexer.dump();
 
         // The AST representing the source program.
         Program theAST = parser.parseProgram(); // 1st pass
+        System.out.println(new ASTPrinter().visit(null, theAST));
         if (reporter.getNumErrors() == 0) {
 
             // TODO:
@@ -130,18 +139,18 @@ public class Compiler {
             // }
 
             System.out.println("Contextual Analysis ...");
-            checker.check(theAST); // 2nd pass
-            if (showingAST) {
-                drawer.draw(theAST);
-            }
-            if (folding) {
-                theAST.visit(new ConstantFolder());
-            }
-
-            if (reporter.getNumErrors() == 0) {
-                System.out.println("Code Generation ...");
-                encoder.encodeRun(theAST, showingTable); // 3rd pass
-            }
+//            checker.check(theAST); // 2nd pass
+//            if (showingAST) {
+//                drawer.draw(theAST);
+//            }
+//            if (folding) {
+//                theAST.visit(new ConstantFolder());
+//            }
+//
+//            if (reporter.getNumErrors() == 0) {
+//                System.out.println("Code Generation ...");
+//                encoder.encodeRun(theAST, showingTable); // 3rd pass
+//            }
         }
 
         boolean successful = (reporter.getNumErrors() == 0);
