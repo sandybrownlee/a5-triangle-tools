@@ -16,6 +16,10 @@ sealed public interface Expression extends Statement, Argument
 
         record ArraySubscript(Identifier array, Expression subscript) implements Identifier { }
 
+        interface Visitor<ST, T> {
+            T visit(ST state, Identifier identifier);
+        }
+
     }
 
     record LitInt(int value) implements Expression { }
