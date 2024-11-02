@@ -19,7 +19,7 @@
 
 package triangle.syntacticAnalyzer;
 
-import triangle.ast.AST.*;
+import triangle.ast.Program;
 import triangle.ast.Argument;
 import triangle.ast.Declaration;
 import triangle.ast.Expression;

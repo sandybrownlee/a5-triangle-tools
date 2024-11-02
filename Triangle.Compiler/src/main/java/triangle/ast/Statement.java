@@ -3,10 +3,16 @@ package triangle.ast;
 import java.util.List;
 import java.util.Optional;
 
-sealed public interface Statement extends AST
-        permits Expression, Statement.AssignStatement, Statement.CallStatement, Statement.IfStatement, Statement.LetStatement,
-                Statement.LoopWhileStatement, Statement.RepeatUntilStatement, Statement.RepeatWhileStatement,
-                Statement.StatementBlock, Statement.WhileStatement {
+sealed public interface Statement permits Expression, Statement.AssignStatement, Statement.CallStatement,
+                                          Statement.IfStatement, Statement.LetStatement, Statement.LoopWhileStatement,
+                                          Statement.RepeatUntilStatement, Statement.RepeatWhileStatement,
+                                          Statement.StatementBlock, Statement.WhileStatement {
+
+    interface Visitor {
+
+        void visit(Statement statement);
+
+    }
 
     record StatementBlock(List<Statement> statements) implements Statement { }
 
@@ -27,7 +33,4 @@ sealed public interface Statement extends AST
 
     record AssignStatement(Expression.Identifier identifier, Expression expression) implements Statement { }
 
-    interface Visitor {
-        void visit(Statement statement);
-    }
 }
