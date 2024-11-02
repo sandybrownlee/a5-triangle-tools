@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class LetCommand extends Command {
+@Deprecated public class LetCommand extends Command {
 
     public final Declaration D;
     public final Command     C;

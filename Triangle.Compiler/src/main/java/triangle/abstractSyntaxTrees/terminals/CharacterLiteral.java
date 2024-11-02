@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.terminals;
 import triangle.abstractSyntaxTrees.visitors.LiteralVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class CharacterLiteral extends Terminal {
+@Deprecated public class CharacterLiteral extends Terminal {
 
     public CharacterLiteral(String spelling, SourcePosition position) {
         super(spelling, position);

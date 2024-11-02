@@ -25,7 +25,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Frame;
 
-public class UnknownValue extends RuntimeEntity implements FetchableEntity {
+@Deprecated public class UnknownValue extends RuntimeEntity implements FetchableEntity {
 
     private final ObjectAddress address;
 

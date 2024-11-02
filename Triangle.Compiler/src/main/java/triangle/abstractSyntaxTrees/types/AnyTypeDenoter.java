@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.types;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class AnyTypeDenoter extends TypeDenoter {
+@Deprecated public class AnyTypeDenoter extends TypeDenoter {
 
     public AnyTypeDenoter(SourcePosition position) {
         super(position);

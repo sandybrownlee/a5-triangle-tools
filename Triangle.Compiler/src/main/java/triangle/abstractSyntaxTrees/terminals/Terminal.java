@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.terminals;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class Terminal extends AbstractSyntaxTree {
+@Deprecated public abstract class Terminal extends AbstractSyntaxTree {
 
     public final String spelling;
 

@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class BinaryOperatorDeclaration extends Declaration {
+@Deprecated public class BinaryOperatorDeclaration extends Declaration {
 
     public final Operator    O;
     public final TypeDenoter ARG1, ARG2, RES;

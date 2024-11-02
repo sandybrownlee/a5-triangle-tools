@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.terminals.IntegerLiteral;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ArrayTypeDenoter extends TypeDenoter {
+@Deprecated public class ArrayTypeDenoter extends TypeDenoter {
 
     public final IntegerLiteral IL;
     public       TypeDenoter    T;

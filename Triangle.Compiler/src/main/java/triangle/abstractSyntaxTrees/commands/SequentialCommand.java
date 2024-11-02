@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.commands;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class SequentialCommand extends Command {
+@Deprecated public class SequentialCommand extends Command {
 
     public final Command C1, C2;
 

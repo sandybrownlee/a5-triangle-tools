@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class Declaration extends AbstractSyntaxTree {
+@Deprecated public abstract class Declaration extends AbstractSyntaxTree {
 
     public boolean duplicated;
 

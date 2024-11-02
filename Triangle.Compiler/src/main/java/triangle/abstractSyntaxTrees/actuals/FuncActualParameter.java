@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class FuncActualParameter extends ActualParameter {
+@Deprecated public class FuncActualParameter extends ActualParameter {
 
     public final Identifier I;
 

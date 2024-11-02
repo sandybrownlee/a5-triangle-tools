@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class AssignCommand extends Command {
+@Deprecated public class AssignCommand extends Command {
 
     public final Vname      V;
     public       Expression E;

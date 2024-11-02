@@ -20,7 +20,7 @@ package triangle.contextualAnalyzer;
 
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 
-public class IdEntry {
+@Deprecated public class IdEntry {
 
     protected final String      id;
     protected final Declaration attr;

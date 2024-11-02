@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class ActualParameter extends AbstractSyntaxTree {
+@Deprecated public abstract class ActualParameter extends AbstractSyntaxTree {
 
     public ActualParameter(SourcePosition position) {
         super(position);

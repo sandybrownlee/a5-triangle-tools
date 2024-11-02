@@ -2,7 +2,7 @@ package triangle.abstractSyntaxTrees.declarations;
 
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 
-public interface VariableDeclaration {
+@Deprecated public interface VariableDeclaration {
 
     TypeDenoter getType();
 

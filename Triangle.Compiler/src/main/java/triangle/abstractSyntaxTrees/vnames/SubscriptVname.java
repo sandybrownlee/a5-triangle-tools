@@ -25,7 +25,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 /**
  a value-or-variable name for an array, with an index, e.g. a[4]  (a is the vAST, 4 is the eAST)
  */
-public class SubscriptVname extends Vname {
+@Deprecated public class SubscriptVname extends Vname {
 
     public final Vname      V;
     public       Expression E;

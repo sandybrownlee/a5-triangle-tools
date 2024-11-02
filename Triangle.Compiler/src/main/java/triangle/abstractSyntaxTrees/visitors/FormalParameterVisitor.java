@@ -5,7 +5,7 @@ import triangle.abstractSyntaxTrees.formals.FuncFormalParameter;
 import triangle.abstractSyntaxTrees.formals.ProcFormalParameter;
 import triangle.abstractSyntaxTrees.formals.VarFormalParameter;
 
-public interface FormalParameterVisitor<TArg, TResult> {
+@Deprecated public interface FormalParameterVisitor<TArg, TResult> {
 
     TResult visitConstFormalParameter(ConstFormalParameter ast, TArg arg);
 

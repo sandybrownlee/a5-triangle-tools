@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class Command extends AbstractSyntaxTree {
+@Deprecated public abstract class Command extends AbstractSyntaxTree {
 
     public Command(SourcePosition position) {
         super(position);

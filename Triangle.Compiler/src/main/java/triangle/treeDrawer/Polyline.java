@@ -21,7 +21,7 @@ package triangle.treeDrawer;
 /**
  used to keep track of the position for components in the tree to be drawn
  */
-class Polyline {
+@Deprecated class Polyline {
 
     final int dx;
     final int dy;

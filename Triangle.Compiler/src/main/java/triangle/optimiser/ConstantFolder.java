@@ -80,7 +80,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+@Deprecated public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
                                        ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>,
                                        ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
                                        CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,

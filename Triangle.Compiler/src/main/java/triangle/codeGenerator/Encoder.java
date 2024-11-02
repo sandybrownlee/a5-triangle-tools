@@ -118,7 +118,7 @@ import triangle.codeGenerator.entities.UnknownAddress;
 import triangle.codeGenerator.entities.UnknownRoutine;
 import triangle.codeGenerator.entities.UnknownValue;
 
-public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
+@Deprecated public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
                                       ActualParameterSequenceVisitor<Frame, Integer>, ArrayAggregateVisitor<Frame, Integer>,
                                       CommandVisitor<Frame, Void>, DeclarationVisitor<Frame, Integer>,
                                       ExpressionVisitor<Frame, Integer>,

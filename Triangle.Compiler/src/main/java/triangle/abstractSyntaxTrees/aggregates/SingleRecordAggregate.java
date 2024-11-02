@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.RecordAggregateVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class SingleRecordAggregate extends RecordAggregate {
+@Deprecated public class SingleRecordAggregate extends RecordAggregate {
 
     public final Identifier I;
     public       Expression E;

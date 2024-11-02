@@ -25,7 +25,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 /**
  a value or variable name with no sub parts and no array index
  */
-public class SimpleVname extends Vname {
+@Deprecated public class SimpleVname extends Vname {
 
     public final Identifier I;
 

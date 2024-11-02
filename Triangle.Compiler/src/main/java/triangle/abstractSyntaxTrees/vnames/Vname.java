@@ -26,7 +26,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 /**
  value (constant) or variable name
  */
-public abstract class Vname extends AbstractSyntaxTree {
+@Deprecated public abstract class Vname extends AbstractSyntaxTree {
 
     public boolean variable, indexed;
     public int         offset;

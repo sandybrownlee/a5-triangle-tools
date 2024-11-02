@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class CallCommand extends Command {
+@Deprecated public class CallCommand extends Command {
 
     public final Identifier              I;
     public final ActualParameterSequence APS;

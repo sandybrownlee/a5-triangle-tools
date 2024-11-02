@@ -12,7 +12,7 @@ import triangle.abstractSyntaxTrees.expressions.RecordExpression;
 import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
 import triangle.abstractSyntaxTrees.expressions.VnameExpression;
 
-public interface ExpressionVisitor<TArg, TResult> {
+@Deprecated public interface ExpressionVisitor<TArg, TResult> {
 
     TResult visitArrayExpression(ArrayExpression ast, TArg arg);
 

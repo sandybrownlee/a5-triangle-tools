@@ -26,7 +26,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
  Value (constant) or variable names including a sub-parts separated by dots.
  Example: fruitbox.applecount (fruitbox is a record, containing a variable applecount)
  */
-public class DotVname extends Vname {
+@Deprecated public class DotVname extends Vname {
 
     public final Identifier I;
     public final Vname      V;

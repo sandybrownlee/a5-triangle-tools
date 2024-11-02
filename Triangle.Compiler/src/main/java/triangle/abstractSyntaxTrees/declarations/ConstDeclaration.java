@@ -24,7 +24,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ConstDeclaration extends Declaration implements ConstantDeclaration {
+@Deprecated public class ConstDeclaration extends Declaration implements ConstantDeclaration {
 
     public final Identifier I;
     public       Expression E;

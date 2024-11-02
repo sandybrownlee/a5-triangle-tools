@@ -9,7 +9,7 @@ import triangle.abstractSyntaxTrees.types.IntTypeDenoter;
 import triangle.abstractSyntaxTrees.types.RecordTypeDenoter;
 import triangle.abstractSyntaxTrees.types.SimpleTypeDenoter;
 
-public interface TypeDenoterVisitor<TArg, TResult> extends FieldTypeDenoterVisitor<TArg, TResult> {
+@Deprecated public interface TypeDenoterVisitor<TArg, TResult> extends FieldTypeDenoterVisitor<TArg, TResult> {
 
     TResult visitAnyTypeDenoter(AnyTypeDenoter ast, TArg arg);
 

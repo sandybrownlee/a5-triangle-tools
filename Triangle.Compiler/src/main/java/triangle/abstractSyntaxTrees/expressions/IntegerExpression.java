@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.terminals.IntegerLiteral;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class IntegerExpression extends Expression {
+@Deprecated public class IntegerExpression extends Expression {
 
     public final IntegerLiteral IL;
 

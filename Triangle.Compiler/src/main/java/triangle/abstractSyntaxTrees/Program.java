@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.visitors.ProgramVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class Program extends AbstractSyntaxTree {
+@Deprecated public class Program extends AbstractSyntaxTree {
 
     public final Command C;
 

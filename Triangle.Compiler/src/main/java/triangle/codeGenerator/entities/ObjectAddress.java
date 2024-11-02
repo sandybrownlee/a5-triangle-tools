@@ -18,6 +18,6 @@
 
 package triangle.codeGenerator.entities;
 
-public record ObjectAddress(int level, int displacement) {
+@Deprecated public record ObjectAddress(int level, int displacement) {
 
 }

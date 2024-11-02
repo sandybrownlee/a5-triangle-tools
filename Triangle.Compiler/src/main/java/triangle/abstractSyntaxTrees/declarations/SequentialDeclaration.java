@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.declarations;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class SequentialDeclaration extends Declaration {
+@Deprecated public class SequentialDeclaration extends Declaration {
 
     public final Declaration D1, D2;
 

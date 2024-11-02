@@ -24,7 +24,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ConstFormalParameter extends FormalParameter implements ConstantDeclaration {
+@Deprecated public class ConstFormalParameter extends FormalParameter implements ConstantDeclaration {
 
     public final Identifier  I;
     public       TypeDenoter T;

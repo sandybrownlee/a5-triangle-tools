@@ -24,7 +24,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class VarFormalParameter extends FormalParameter implements VariableDeclaration {
+@Deprecated public class VarFormalParameter extends FormalParameter implements VariableDeclaration {
 
     public final Identifier  I;
     public       TypeDenoter T;

@@ -8,7 +8,7 @@ import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 
-public interface CommandVisitor<TArg, TResult> {
+@Deprecated public interface CommandVisitor<TArg, TResult> {
 
     TResult visitAssignCommand(AssignCommand ast, TArg arg);
 

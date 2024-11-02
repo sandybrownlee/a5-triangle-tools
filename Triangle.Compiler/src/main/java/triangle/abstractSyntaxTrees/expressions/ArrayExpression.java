@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.aggregates.ArrayAggregate;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ArrayExpression extends Expression {
+@Deprecated public class ArrayExpression extends Expression {
 
     public final ArrayAggregate AA;
 

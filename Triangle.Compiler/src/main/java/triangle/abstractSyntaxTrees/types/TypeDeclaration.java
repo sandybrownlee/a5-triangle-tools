@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class TypeDeclaration extends Declaration {
+@Deprecated public class TypeDeclaration extends Declaration {
 
     public final Identifier  I;
     public       TypeDenoter T;

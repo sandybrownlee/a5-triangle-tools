@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class SimpleTypeDenoter extends TypeDenoter {
+@Deprecated public class SimpleTypeDenoter extends TypeDenoter {
 
     public final Identifier I;
 

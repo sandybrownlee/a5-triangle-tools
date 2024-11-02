@@ -109,7 +109,7 @@ import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public final class Checker implements ActualParameterVisitor<FormalParameter, Void>,
+@Deprecated public final class Checker implements ActualParameterVisitor<FormalParameter, Void>,
                                       ActualParameterSequenceVisitor<FormalParameterSequence, Void>,
                                       ArrayAggregateVisitor<Void, TypeDenoter>,
                                       CommandVisitor<Void, Void>, DeclarationVisitor<Void, Void>,

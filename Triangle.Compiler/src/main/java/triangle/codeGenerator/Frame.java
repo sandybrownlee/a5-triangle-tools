@@ -21,7 +21,7 @@ package triangle.codeGenerator;
 import triangle.abstractMachine.Register;
 import triangle.codeGenerator.entities.ObjectAddress;
 
-public class Frame {
+@Deprecated public class Frame {
 
     public static final Frame Initial = new Frame(0, 0);
 

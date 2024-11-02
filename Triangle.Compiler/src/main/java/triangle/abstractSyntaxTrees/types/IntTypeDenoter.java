@@ -22,7 +22,7 @@ import triangle.abstractMachine.Machine;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class IntTypeDenoter extends TypeDenoter {
+@Deprecated public class IntTypeDenoter extends TypeDenoter {
 
     public IntTypeDenoter(SourcePosition position) {
         super(position);

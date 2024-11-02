@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Frame;
 
-public class KnownValue extends RuntimeEntity implements FetchableEntity {
+@Deprecated public class KnownValue extends RuntimeEntity implements FetchableEntity {
 
     private final int value;
 

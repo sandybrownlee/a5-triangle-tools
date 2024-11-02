@@ -26,7 +26,7 @@ import triangle.abstractSyntaxTrees.declarations.UnaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.types.TypeDeclaration;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 
-public final class StdEnvironment {
+@Deprecated public final class StdEnvironment {
 
     // These are small ASTs representing standard types.
 

@@ -20,7 +20,7 @@ package triangle.abstractSyntaxTrees.types;
 
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class FieldTypeDenoter extends TypeDenoter {
+@Deprecated public abstract class FieldTypeDenoter extends TypeDenoter {
 
     public FieldTypeDenoter(SourcePosition position) {
         super(position);

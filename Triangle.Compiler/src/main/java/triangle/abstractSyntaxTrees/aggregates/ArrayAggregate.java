@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.ArrayAggregateVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class ArrayAggregate extends AbstractSyntaxTree {
+@Deprecated public abstract class ArrayAggregate extends AbstractSyntaxTree {
 
     public int elemCount;
 

@@ -20,7 +20,7 @@ package triangle.treeDrawer;
 
 import java.awt.*;
 
-public class DrawingTree {
+@Deprecated public class DrawingTree {
 
     private static final int    FIXED_FONT_HEIGHT = 10;
     final                String caption;

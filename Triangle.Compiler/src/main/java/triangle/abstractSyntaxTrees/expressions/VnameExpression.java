@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class VnameExpression extends Expression {
+@Deprecated public class VnameExpression extends Expression {
 
     public final Vname V;
 

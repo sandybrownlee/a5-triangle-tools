@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.terminals.CharacterLiteral;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class CharacterExpression extends Expression {
+@Deprecated public class CharacterExpression extends Expression {
 
     public final CharacterLiteral CL;
 

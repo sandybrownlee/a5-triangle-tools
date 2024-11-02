@@ -24,7 +24,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ProcDeclaration extends Declaration implements ProcedureDeclaration {
+@Deprecated public class ProcDeclaration extends Declaration implements ProcedureDeclaration {
 
     public final Identifier              I;
     public final FormalParameterSequence FPS;

@@ -5,7 +5,7 @@ import triangle.abstractSyntaxTrees.actuals.FuncActualParameter;
 import triangle.abstractSyntaxTrees.actuals.ProcActualParameter;
 import triangle.abstractSyntaxTrees.actuals.VarActualParameter;
 
-public interface ActualParameterVisitor<TArg, TResult> {
+@Deprecated public interface ActualParameterVisitor<TArg, TResult> {
 
     TResult visitConstActualParameter(ConstActualParameter ast, TArg arg);
 

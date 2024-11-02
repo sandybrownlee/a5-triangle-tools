@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class Expression extends AbstractSyntaxTree {
+@Deprecated public abstract class Expression extends AbstractSyntaxTree {
 
     public TypeDenoter type;
 

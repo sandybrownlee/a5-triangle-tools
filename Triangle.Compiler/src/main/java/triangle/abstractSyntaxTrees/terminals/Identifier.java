@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.IdentifierVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class Identifier extends Terminal {
+@Deprecated public class Identifier extends Terminal {
 
     public final TypeDenoter        type;
     public       AbstractSyntaxTree decl; // Either a Declaration or a FieldTypeDenoter

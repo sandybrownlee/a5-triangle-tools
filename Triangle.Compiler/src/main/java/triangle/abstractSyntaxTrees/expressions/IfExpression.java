@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.expressions;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class IfExpression extends Expression {
+@Deprecated public class IfExpression extends Expression {
 
     public Expression E1;
     public Expression E2;

@@ -22,7 +22,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.io.Serial;
 
-class DrawerPanel extends JPanel {
+@Deprecated class DrawerPanel extends JPanel {
 
     /**
 

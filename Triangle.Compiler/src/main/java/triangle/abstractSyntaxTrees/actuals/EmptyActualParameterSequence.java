@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.actuals;
 import triangle.abstractSyntaxTrees.visitors.ActualParameterSequenceVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class EmptyActualParameterSequence extends ActualParameterSequence {
+@Deprecated public class EmptyActualParameterSequence extends ActualParameterSequence {
 
     public EmptyActualParameterSequence(SourcePosition position) {
         super(position);

@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class RecordExpression extends Expression {
+@Deprecated public class RecordExpression extends Expression {
 
     public final RecordAggregate RA;
 

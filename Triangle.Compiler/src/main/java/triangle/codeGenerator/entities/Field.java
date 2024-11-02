@@ -18,7 +18,7 @@
 
 package triangle.codeGenerator.entities;
 
-public class Field extends RuntimeEntity {
+@Deprecated public class Field extends RuntimeEntity {
 
     private final int fieldOffset;
 

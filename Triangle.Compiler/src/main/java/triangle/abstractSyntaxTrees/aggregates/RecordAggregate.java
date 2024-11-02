@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.types.FieldTypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.RecordAggregateVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class RecordAggregate extends AbstractSyntaxTree {
+@Deprecated public abstract class RecordAggregate extends AbstractSyntaxTree {
 
     public FieldTypeDenoter type;
 

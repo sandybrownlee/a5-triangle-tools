@@ -25,7 +25,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Frame;
 
-public class KnownAddress extends AddressableEntity {
+@Deprecated public class KnownAddress extends AddressableEntity {
 
     public KnownAddress(int size, int level, int displacement) {
         super(size, level, displacement);

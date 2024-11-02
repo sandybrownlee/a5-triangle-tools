@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.expressions;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class EmptyExpression extends Expression {
+@Deprecated public class EmptyExpression extends Expression {
 
     public EmptyExpression(SourcePosition position) {
         super(position);

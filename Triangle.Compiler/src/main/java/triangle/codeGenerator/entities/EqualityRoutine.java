@@ -24,7 +24,7 @@ import triangle.abstractMachine.Register;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Frame;
 
-public class EqualityRoutine extends RuntimeEntity implements RoutineEntity {
+@Deprecated public class EqualityRoutine extends RuntimeEntity implements RoutineEntity {
 
     private final Primitive primitive;
 

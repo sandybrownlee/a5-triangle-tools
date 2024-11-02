@@ -4,7 +4,7 @@ import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.MultipleFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.SingleFormalParameterSequence;
 
-public interface FormalParameterSequenceVisitor<TArg, TResult> {
+@Deprecated public interface FormalParameterSequenceVisitor<TArg, TResult> {
 
     TResult visitEmptyFormalParameterSequence(EmptyFormalParameterSequence ast, TArg arg);
 

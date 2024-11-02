@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
+@Deprecated public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
 
     public final Identifier       I;
     public final FieldTypeDenoter FT;

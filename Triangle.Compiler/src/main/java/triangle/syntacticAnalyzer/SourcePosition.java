@@ -18,7 +18,7 @@
 
 package triangle.syntacticAnalyzer;
 
-public class SourcePosition {
+@Deprecated public class SourcePosition {
 
     private int start;
     private int finish;

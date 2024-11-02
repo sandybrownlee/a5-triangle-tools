@@ -20,7 +20,7 @@ package triangle.codeGenerator.entities;
 
 // Run-time object
 
-public abstract class RuntimeEntity {
+@Deprecated public abstract class RuntimeEntity {
 
     private final int size;
 

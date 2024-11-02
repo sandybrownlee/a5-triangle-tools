@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class LetExpression extends Expression {
+@Deprecated public class LetExpression extends Expression {
 
     public final Declaration D;
     public       Expression  E;

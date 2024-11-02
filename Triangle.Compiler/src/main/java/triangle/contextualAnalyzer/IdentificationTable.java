@@ -20,7 +20,7 @@ package triangle.contextualAnalyzer;
 
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 
-public final class IdentificationTable {
+@Deprecated public final class IdentificationTable {
 
     private int     level;
     private IdEntry latest;

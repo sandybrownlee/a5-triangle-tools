@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class CallExpression extends Expression {
+@Deprecated public class CallExpression extends Expression {
 
     public final Identifier              I;
     public final ActualParameterSequence APS;

@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.visitors.OperatorVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class Operator extends Terminal {
+@Deprecated public class Operator extends Terminal {
 
     public Declaration decl;
 

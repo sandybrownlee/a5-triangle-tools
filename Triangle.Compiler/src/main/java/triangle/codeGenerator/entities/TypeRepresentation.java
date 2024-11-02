@@ -18,7 +18,7 @@
 
 package triangle.codeGenerator.entities;
 
-public class TypeRepresentation extends RuntimeEntity {
+@Deprecated public class TypeRepresentation extends RuntimeEntity {
 
     public TypeRepresentation(int size) {
         super(size);

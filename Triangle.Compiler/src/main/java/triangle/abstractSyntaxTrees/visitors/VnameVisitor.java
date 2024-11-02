@@ -4,7 +4,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public interface VnameVisitor<TArg, TResult> {
+@Deprecated public interface VnameVisitor<TArg, TResult> {
 
     TResult visitDotVname(DotVname ast, TArg arg);
 

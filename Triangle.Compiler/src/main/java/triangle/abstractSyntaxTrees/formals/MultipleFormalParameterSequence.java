@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.formals;
 import triangle.abstractSyntaxTrees.visitors.FormalParameterSequenceVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class MultipleFormalParameterSequence extends FormalParameterSequence {
+@Deprecated public class MultipleFormalParameterSequence extends FormalParameterSequence {
 
     public final FormalParameter         FP;
     public final FormalParameterSequence FPS;

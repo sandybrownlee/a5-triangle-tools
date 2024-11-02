@@ -24,7 +24,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class FuncFormalParameter extends FormalParameter implements FunctionDeclaration {
+@Deprecated public class FuncFormalParameter extends FormalParameter implements FunctionDeclaration {
 
     public final Identifier              I;
     public final FormalParameterSequence FPS;

@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.commands;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class EmptyCommand extends Command {
+@Deprecated public class EmptyCommand extends Command {
 
     public EmptyCommand(SourcePosition position) {
         super(position);

@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class VarActualParameter extends ActualParameter {
+@Deprecated public class VarActualParameter extends ActualParameter {
 
     public final Vname V;
 

@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.types;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class RecordTypeDenoter extends TypeDenoter {
+@Deprecated public class RecordTypeDenoter extends TypeDenoter {
 
     public FieldTypeDenoter FT;
 

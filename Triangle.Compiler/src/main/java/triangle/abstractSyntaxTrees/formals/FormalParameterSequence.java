@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.FormalParameterSequenceVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class FormalParameterSequence extends AbstractSyntaxTree {
+@Deprecated public abstract class FormalParameterSequence extends AbstractSyntaxTree {
 
     public FormalParameterSequence(SourcePosition position) {
         super(position);

@@ -20,7 +20,7 @@ package triangle;
 
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ErrorReporter {
+@Deprecated public class ErrorReporter {
 
     private final boolean throwExceptions;
     private       int     numErrors;

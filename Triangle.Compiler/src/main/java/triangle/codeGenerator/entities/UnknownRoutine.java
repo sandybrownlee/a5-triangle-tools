@@ -23,7 +23,7 @@ import triangle.abstractMachine.OpCode;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Frame;
 
-public class UnknownRoutine extends RuntimeEntity implements RoutineEntity {
+@Deprecated public class UnknownRoutine extends RuntimeEntity implements RoutineEntity {
 
     private final ObjectAddress address;
 

@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.formals;
 import triangle.abstractSyntaxTrees.visitors.FormalParameterSequenceVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class EmptyFormalParameterSequence extends FormalParameterSequence {
+@Deprecated public class EmptyFormalParameterSequence extends FormalParameterSequence {
 
     public EmptyFormalParameterSequence(SourcePosition position) {
         super(position);

@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.Program;
 
 import java.awt.*;
 
-public class Drawer {
+@Deprecated public class Drawer {
 
     private DrawerPanel panel;
 

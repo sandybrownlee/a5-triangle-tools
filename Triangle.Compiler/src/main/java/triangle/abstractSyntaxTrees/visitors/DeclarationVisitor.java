@@ -9,7 +9,7 @@ import triangle.abstractSyntaxTrees.declarations.UnaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
 import triangle.abstractSyntaxTrees.types.TypeDeclaration;
 
-public interface DeclarationVisitor<TArg, TResult> extends FormalParameterVisitor<TArg, TResult> {
+@Deprecated public interface DeclarationVisitor<TArg, TResult> extends FormalParameterVisitor<TArg, TResult> {
 
     TResult visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, TArg arg);
 

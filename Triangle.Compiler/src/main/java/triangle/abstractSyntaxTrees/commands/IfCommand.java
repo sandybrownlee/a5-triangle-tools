@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class IfCommand extends Command {
+@Deprecated public class IfCommand extends Command {
 
     public final Command C1, C2;
     public Expression E;

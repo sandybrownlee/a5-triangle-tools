@@ -97,7 +97,7 @@ import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
 import java.awt.*;
 
-public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
+@Deprecated public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
                                       ActualParameterSequenceVisitor<Void, DrawingTree>, ArrayAggregateVisitor<Void, DrawingTree>,
                                       CommandVisitor<Void, DrawingTree>, DeclarationVisitor<Void, DrawingTree>,
                                       ExpressionVisitor<Void, DrawingTree>,

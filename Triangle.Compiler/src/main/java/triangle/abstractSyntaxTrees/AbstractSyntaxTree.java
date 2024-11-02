@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees;
 import triangle.codeGenerator.entities.RuntimeEntity;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public abstract class AbstractSyntaxTree {
+@Deprecated public abstract class AbstractSyntaxTree {
 
     private final SourcePosition position;
     public        RuntimeEntity  entity;

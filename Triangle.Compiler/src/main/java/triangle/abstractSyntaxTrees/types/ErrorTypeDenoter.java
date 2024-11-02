@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.types;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ErrorTypeDenoter extends TypeDenoter {
+@Deprecated public class ErrorTypeDenoter extends TypeDenoter {
 
     public ErrorTypeDenoter(SourcePosition position) {
         super(position);

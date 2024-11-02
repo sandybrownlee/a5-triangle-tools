@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class UnaryExpression extends Expression {
+@Deprecated public class UnaryExpression extends Expression {
 
     public final Operator   O;
     public       Expression E;

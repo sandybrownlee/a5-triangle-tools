@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class VarDeclaration extends Declaration implements VariableDeclaration {
+@Deprecated public class VarDeclaration extends Declaration implements VariableDeclaration {
 
     public final Identifier  I;
     public       TypeDenoter T;

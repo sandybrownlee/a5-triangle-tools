@@ -4,7 +4,7 @@ import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Frame;
 
-public abstract class AddressableEntity extends RuntimeEntity implements FetchableEntity {
+@Deprecated public abstract class AddressableEntity extends RuntimeEntity implements FetchableEntity {
 
     protected final ObjectAddress address;
 

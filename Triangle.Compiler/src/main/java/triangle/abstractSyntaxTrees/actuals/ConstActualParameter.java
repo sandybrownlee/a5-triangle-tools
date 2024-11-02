@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ConstActualParameter extends ActualParameter {
+@Deprecated public class ConstActualParameter extends ActualParameter {
 
     public Expression E;
 
