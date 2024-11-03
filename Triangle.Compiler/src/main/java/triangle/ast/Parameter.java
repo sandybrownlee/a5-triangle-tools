@@ -2,9 +2,17 @@ package triangle.ast;
 
 import java.util.List;
 
-sealed public interface Parameter permits Parameter.FuncParameter, Parameter.VarParameter {
+sealed public interface Parameter permits Parameter.ConstParameter, Parameter.FuncParameter, Parameter.VarParameter {
 
     String getName();
+
+    record ConstParameter(String name, Type type) implements Parameter {
+
+        @Override public String getName() {
+            return name;
+        }
+
+    }
 
     record VarParameter(String name, Type type) implements Parameter {
 

@@ -503,7 +503,7 @@ public class Parser {
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 Type varType = parseType();
-                yield new VarParameter(varName, varType);
+                yield new ConstParameter(varName, varType);
             }
             case VAR -> {
                 shift(Token.Kind.VAR);

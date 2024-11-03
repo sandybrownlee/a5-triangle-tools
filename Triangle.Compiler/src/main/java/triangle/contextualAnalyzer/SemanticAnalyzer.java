@@ -398,6 +398,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
             }
 
             case Parameter.VarParameter(String _, Type type) -> visit(state, type);
+            case Parameter.ConstParameter(String _, Type type) -> visit(state, type);
         };
     }
 

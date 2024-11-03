@@ -96,6 +96,11 @@ public final class ASTPrinter implements AllVisitor<Void, String, Exception> {
                     visit(state, funcParameter.returnType())
             );
             case Parameter.VarParameter varParameter -> varParameter.name() + ":" + visit(state, varParameter.type());
+            case Parameter.ConstParameter constParameter -> String.format(
+                    "CONST %s : %s",
+                    constParameter.getName(),
+                    visit(state, constParameter.type())
+            );
         };
     }
 
