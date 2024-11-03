@@ -162,15 +162,6 @@ public class Parser {
                     yield new AssignStatement(identifier, expression);
                 }
 
-                // check if the identifier leads into a call
-                if (lastToken.getKind() == Token.Kind.LPAREN) {
-                    shift(Token.Kind.LPAREN);
-                    @SuppressWarnings("unchecked") List<Argument> arguments =
-                            (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseArgSeq();
-                    shift(Token.Kind.RPAREN);
-                    yield new CallExpression(identifier, arguments);
-                }
-
                 // check if the identifier leads into a side-effectful operation
                 if (lastToken.getKind() == Token.Kind.OPERATOR) {
                     String operator = ((TextToken) lastToken).getText();
@@ -184,7 +175,7 @@ public class Parser {
                     yield new UnaryOp(operator, identifier);
                 }
 
-                yield identifier;
+                yield parseIfCall(identifier);
             }
             case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> parseExpression();
             default -> throw new SyntaxError(lastToken);
@@ -239,19 +230,7 @@ public class Parser {
                 Expression alternative = parseExpression();
                 yield new IfExpression(condition, consequent, alternative);
             }
-            case IDENTIFIER -> {
-                Identifier identifier = parseIdentifier();
-
-                if (lastToken.getKind() == Token.Kind.LPAREN) {
-                    shift(Token.Kind.LPAREN);
-                    @SuppressWarnings("unchecked") List<Argument> arguments =
-                            (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseArgSeq();
-                    shift(Token.Kind.RPAREN);
-                    yield new CallExpression(identifier, arguments);
-                }
-
-                yield identifier;
-            }
+            case IDENTIFIER -> parseIfCall(parseIdentifier());
             // unary prefix op
             case OPERATOR -> {
                 String operator = ((TextToken) lastToken).getText();
@@ -293,6 +272,18 @@ public class Parser {
                 shift(Token.Kind.RBRACK);
                 identifier = new Identifier.ArraySubscript(identifier, arraySubscript);
             }
+        }
+
+        return identifier;
+    }
+
+    private Expression parseIfCall(Identifier identifier) throws IOException, SyntaxError {
+        if (lastToken.getKind() == Token.Kind.LPAREN) {
+            shift(Token.Kind.LPAREN);
+            @SuppressWarnings("unchecked") List<Argument> arguments =
+                    (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseArgSeq();
+            shift(Token.Kind.RPAREN);
+            return new CallExpression(identifier, arguments);
         }
 
         return identifier;
