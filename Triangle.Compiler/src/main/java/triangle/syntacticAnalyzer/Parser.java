@@ -52,7 +52,7 @@ public class Parser {
 
         EXPRESSION_FIRST_SET.addAll(Set.of(
                 Token.Kind.INTLITERAL, Token.Kind.CHARLITERAL, Token.Kind.LBRACK, Token.Kind.LBRACE, Token.Kind.LPAREN,
-                Token.Kind.LET, Token.Kind.IF, Token.Kind.IDENTIFIER, Token.Kind.OPERATOR
+                Token.Kind.LET, Token.Kind.IF, Token.Kind.IDENTIFIER, Token.Kind.OPERATOR, Token.Kind.FALSE, Token.Kind.TRUE
         ));
 
         STATEMENT_FIRST_SET.addAll(
@@ -185,6 +185,14 @@ public class Parser {
 
     private Expression parseExpression() throws IOException, SyntaxError {
         Expression firstExpression = switch (lastToken.getKind()) {
+            case TRUE -> {
+                shift(Token.Kind.TRUE);
+                yield new LitBool(true);
+            }
+            case FALSE -> {
+                shift(Token.Kind.FALSE);
+                yield new LitBool(false);
+            }
             case INTLITERAL -> {
                 LitInt litInt = new LitInt(Integer.parseInt(((TextToken) lastToken).getText()));
                 shift(Token.Kind.INTLITERAL);

@@ -3,8 +3,8 @@ package triangle.ast;
 import java.util.List;
 
 sealed public interface Expression extends Statement, Argument
-        permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression,
-                Expression.LetExpression, Expression.LitArray, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
+        permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
+                Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.UnaryOp {
 
     sealed interface Identifier extends Expression permits Identifier.BasicIdentifier, Identifier.RecordAccess,
@@ -21,6 +21,8 @@ sealed public interface Expression extends Statement, Argument
         }
 
     }
+
+    record LitBool(boolean value) implements Expression { }
 
     record LitInt(int value) implements Expression { }
 

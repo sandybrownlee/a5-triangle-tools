@@ -26,7 +26,7 @@ class Token {
 
     public enum Kind {
         // literals, identifiers, operators...
-        INTLITERAL, CHARLITERAL, IDENTIFIER, OPERATOR,
+        INTLITERAL, CHARLITERAL, IDENTIFIER, OPERATOR, TRUE, FALSE,
 
         // reserved words - keep in alphabetical order for ease of maintenance...
         ARRAY, BEGIN, CONST, DO, ELSE, END, FUNC, IF, IN, LET, LOOP, OF, PROC, RECORD, REPEAT, THEN, TYPE, UNTIL, VAR, WHILE,

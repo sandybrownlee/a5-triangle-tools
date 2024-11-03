@@ -83,6 +83,7 @@ public final class ASTPrinter implements AllVisitor<Void, String, Exception> {
                     unaryOp.operator(),
                     visit(state, unaryOp.operand())
             );
+            case Expression.LitBool litBool -> Boolean.toString(litBool.value());
         } + ")";
     }
 

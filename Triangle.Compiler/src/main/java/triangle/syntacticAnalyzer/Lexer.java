@@ -42,6 +42,7 @@ public final class Lexer {
         reservedWords.put("do", Token.Kind.DO);
         reservedWords.put("else", Token.Kind.ELSE);
         reservedWords.put("end", Token.Kind.END);
+        reservedWords.put("false", Token.Kind.FALSE);
         reservedWords.put("func", Token.Kind.FUNC);
         reservedWords.put("if", Token.Kind.IF);
         reservedWords.put("in", Token.Kind.IN);
@@ -52,6 +53,7 @@ public final class Lexer {
         reservedWords.put("record", Token.Kind.RECORD);
         reservedWords.put("repeat", Token.Kind.REPEAT);
         reservedWords.put("then", Token.Kind.THEN);
+        reservedWords.put("true", Token.Kind.TRUE);
         reservedWords.put("type", Token.Kind.TYPE);
         reservedWords.put("until", Token.Kind.UNTIL);
         reservedWords.put("var", Token.Kind.VAR);
