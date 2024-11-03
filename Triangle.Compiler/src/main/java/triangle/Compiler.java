@@ -72,16 +72,10 @@ public class Compiler {
 
         boolean compiledOK = false;
         try {
-//            for (String path : new File("programs/").list()) {
-//                if (!path.equals("errors.tri")) {
-//                    System.out.println("programs/" + path);
-//                    compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
-//                }
-//
-//                System.in.read();
-//            }
-
-            compiledOK = compileProgram(new FileInputStream(sourceName), objectName, showTree, false);
+            for (String path : new File("programs/").list()) {
+                System.out.println("programs/" + path);
+                compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
+            }
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             System.exit(1);

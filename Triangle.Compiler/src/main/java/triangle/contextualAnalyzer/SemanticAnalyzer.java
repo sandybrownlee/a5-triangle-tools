@@ -38,7 +38,6 @@ import java.util.Optional;
 // Statefully checks that all uses of indentifiers and types are valid. Uses exceptions for control flow
 // TODO: try to accumulate errors instead of failing at the first one
 // TODO: refactor to actually use ST typevar of visitors
-// TODO: actual polymorphism
 // TODO: annotate AST with source code positions
 public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAnalyzer.SemanticException> {
 
