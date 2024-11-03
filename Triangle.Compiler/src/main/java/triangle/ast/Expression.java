@@ -32,9 +32,9 @@ sealed public interface Expression extends Statement, Argument
         public record RecordField(String name, Expression value) { }
     }
 
-    record UnaryOp(String operator, Expression operand) implements Expression { }
+    record UnaryOp(Identifier.BasicIdentifier operator, Expression operand) implements Expression { }
 
-    record BinaryOp(String operator, Expression leftOperand, Expression rightOperand) implements Expression { }
+    record BinaryOp(Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand) implements Expression { }
 
     record LetExpression(List<Declaration> declarations, Expression expression) implements Expression { }
 

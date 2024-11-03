@@ -165,7 +165,7 @@ public class Parser {
 
                 // check if the identifier leads into a side-effectful operation
                 if (lastToken.getKind() == Token.Kind.OPERATOR) {
-                    String operator = ((TextToken) lastToken).getText();
+                    Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(((TextToken) lastToken).getText());
                     shift(Token.Kind.OPERATOR);
 
                     if (EXPRESSION_FIRST_SET.contains(lastToken.getKind())) {
@@ -234,7 +234,7 @@ public class Parser {
             case IDENTIFIER -> parseIfCall(parseIdentifier());
             // unary prefix op
             case OPERATOR -> {
-                String operator = ((TextToken) lastToken).getText();
+                Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(((TextToken) lastToken).getText());
                 shift(Token.Kind.OPERATOR);
                 Expression expression = parseExpression();
                 yield new UnaryOp(operator, expression);
@@ -244,7 +244,7 @@ public class Parser {
         };
 
         if (lastToken.getKind() == Token.Kind.OPERATOR) {
-            String operator = ((TextToken) lastToken).getText();
+            Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(((TextToken) lastToken).getText());
             shift(Token.Kind.OPERATOR);
 
             if (EXPRESSION_FIRST_SET.contains(lastToken.getKind())) {
