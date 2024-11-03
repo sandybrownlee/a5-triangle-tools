@@ -445,7 +445,7 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
-                yield new Declaration.FuncDeclaration(procName, parameters, new VoidType(), statement);
+                yield new Declaration.CallableDeclaration(procName, parameters, new VoidType(), statement);
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
@@ -459,7 +459,7 @@ public class Parser {
                 Type type = parseType();
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                yield new Declaration.FuncDeclaration(funcName, parameters, type, expression);
+                yield new Declaration.CallableDeclaration(funcName, parameters, type, expression);
             }
             case TYPE -> {
                 shift(Token.Kind.TYPE);

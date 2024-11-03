@@ -26,12 +26,12 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
                     constDeclaration.name(),
                     visit(state, constDeclaration.value())
             );
-            case Declaration.FuncDeclaration funcDeclaration -> String.format(
-                    "FUNC %s (%s) {%s} %s ",
-                    funcDeclaration.callable(),
-                    funcDeclaration.parameters().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
-                    visit(state, funcDeclaration.expression()),
-                    visit(state, funcDeclaration.returnType())
+            case Declaration.CallableDeclaration callableDeclaration -> String.format(
+                    "CALLABLE %s (%s) {%s} %s ",
+                    callableDeclaration.callable(),
+                    callableDeclaration.parameters().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
+                    visit(state, callableDeclaration.expression()),
+                    visit(state, callableDeclaration.returnType())
             );
             case Declaration.TypeDeclaration typeDeclaration -> String.format(
                     "%s : %s",
