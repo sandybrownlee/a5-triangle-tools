@@ -33,12 +33,6 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
                     visit(state, funcDeclaration.expression()),
                     visit(state, funcDeclaration.returnType())
             );
-            case Declaration.ProcDeclaration procDeclaration -> String.format(
-                    "PROC %s (%s) {%s}",
-                    procDeclaration.proc(),
-                    procDeclaration.parameters().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
-                    visit(state, procDeclaration.statement())
-            );
             case Declaration.TypeDeclaration typeDeclaration -> String.format(
                     "%s : %s",
                     typeDeclaration.name(),

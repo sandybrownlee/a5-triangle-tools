@@ -454,7 +454,7 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
-                yield new Declaration.ProcDeclaration(procName, parameters, statement);
+                yield new Declaration.FuncDeclaration(procName, parameters, new VoidType(), statement);
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
