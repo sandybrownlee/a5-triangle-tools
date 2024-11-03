@@ -26,12 +26,12 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
                     constDeclaration.name(),
                     visit(state, constDeclaration.value())
             );
-            case Declaration.CallableDeclaration callableDeclaration -> String.format(
+            case Declaration.FuncDeclaration funcDeclaration -> String.format(
                     "CALLABLE %s (%s) {%s} %s ",
-                    callableDeclaration.callable(),
-                    callableDeclaration.parameters().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
-                    visit(state, callableDeclaration.expression()),
-                    visit(state, callableDeclaration.returnType())
+                    funcDeclaration.func(),
+                    funcDeclaration.parameters().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
+                    visit(state, funcDeclaration.expression()),
+                    visit(state, funcDeclaration.returnType())
             );
             case Declaration.TypeDeclaration typeDeclaration -> String.format(
                     "%s : %s",
@@ -50,10 +50,10 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
                     visit(state, binaryOp.leftOperand()),
                     visit(state, binaryOp.rightOperand())
             );
-            case Expression.CallExpression callExpression -> String.format(
+            case Expression.FunCall funCall -> String.format(
                     "FUNCALL %s (%s)",
-                    visit(state, callExpression.callable()),
-                    callExpression.arguments().stream().map(a -> visit(state, a) + ",").reduce("", String::concat)
+                    visit(state, funCall.callable()),
+                    funCall.arguments().stream().map(a -> visit(state, a) + ",").reduce("", String::concat)
             );
             case Expression.Identifier identifier -> visit(state, identifier);
             case Expression.IfExpression ifExpression -> String.format(
@@ -88,11 +88,11 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
 
     @Override public String visit(final Void state, final Parameter parameter) {
         return switch (parameter) {
-            case Parameter.CallableParameter callableParameter -> String.format(
+            case Parameter.FuncParameter funcParameter -> String.format(
                     "CALLABLE %s (%s) : %s",
-                    callableParameter.callable(),
-                    callableParameter.parameters().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
-                    visit(state, callableParameter.returnType())
+                    funcParameter.callable(),
+                    funcParameter.parameters().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
+                    visit(state, funcParameter.returnType())
             );
             case Parameter.VarParameter varParameter -> varParameter.name() + ":" + visit(state, varParameter.type());
         };

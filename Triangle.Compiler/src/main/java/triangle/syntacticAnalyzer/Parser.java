@@ -283,7 +283,7 @@ public class Parser {
             @SuppressWarnings("unchecked") List<Argument> arguments =
                     (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseArgSeq();
             shift(Token.Kind.RPAREN);
-            return new CallExpression(identifier, arguments);
+            return new FunCall(identifier, arguments);
         }
 
         return identifier;
@@ -437,7 +437,7 @@ public class Parser {
             }
             case PROC -> {
                 shift(Token.Kind.PROC);
-                String procName = ((TextToken) lastToken).getText();
+                String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
                 @SuppressWarnings("unchecked") List<Parameter> parameters =
@@ -445,7 +445,7 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
-                yield new Declaration.CallableDeclaration(procName, parameters, new VoidType(), statement);
+                yield new Declaration.FuncDeclaration(funcName, parameters, new VoidType(), statement);
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
@@ -459,7 +459,7 @@ public class Parser {
                 Type type = parseType();
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                yield new Declaration.CallableDeclaration(funcName, parameters, type, expression);
+                yield new Declaration.FuncDeclaration(funcName, parameters, type, expression);
             }
             case TYPE -> {
                 shift(Token.Kind.TYPE);
@@ -506,13 +506,13 @@ public class Parser {
             }
             case PROC -> {
                 shift(Token.Kind.PROC);
-                String procName = ((TextToken) lastToken).getText();
+                String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
                 @SuppressWarnings("unchecked") List<Parameter> parameters =
                         (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseParamSeq();
                 shift(Token.Kind.RPAREN);
-                yield new CallableParameter(procName, parameters, new VoidType());
+                yield new FuncParameter(funcName, parameters, new VoidType());
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
@@ -524,7 +524,7 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.COLON);
                 Type funcType = parseType();
-                yield new CallableParameter(funcName, parameters, funcType);
+                yield new FuncParameter(funcName, parameters, funcType);
             }
             default -> throw new SyntaxError(lastToken);
         };

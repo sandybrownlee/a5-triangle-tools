@@ -3,7 +3,7 @@ package triangle.ast;
 import java.util.List;
 
 sealed public interface Declaration
-        permits Declaration.ConstDeclaration, Declaration.CallableDeclaration, Declaration.TypeDeclaration,
+        permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.TypeDeclaration,
                 Declaration.VarDeclaration {
 
     interface Visitor<ST, T> {
@@ -16,7 +16,7 @@ sealed public interface Declaration
 
     record VarDeclaration(String name, Type type) implements Declaration { }
 
-    record CallableDeclaration(String callable, List<Parameter> parameters, Type returnType, Statement expression)
+    record FuncDeclaration(String func, List<Parameter> parameters, Type returnType, Statement expression)
             implements Declaration { }
 
     record TypeDeclaration(String name, Type type) implements Declaration { }

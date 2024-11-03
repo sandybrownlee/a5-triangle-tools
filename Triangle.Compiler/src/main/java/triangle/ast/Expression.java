@@ -3,7 +3,7 @@ package triangle.ast;
 import java.util.List;
 
 sealed public interface Expression extends Statement, Argument
-        permits Expression.BinaryOp, Expression.CallExpression, Expression.Identifier, Expression.IfExpression,
+        permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression,
                 Expression.LetExpression, Expression.LitArray, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.UnaryOp {
 
@@ -40,7 +40,7 @@ sealed public interface Expression extends Statement, Argument
 
     record IfExpression(Expression condition, Expression consequent, Expression alternative) implements Expression { }
 
-    record CallExpression(Identifier callable, List<Argument> arguments) implements Expression { }
+    record FunCall(Identifier callable, List<Argument> arguments) implements Expression { }
 
     interface Visitor<ST,T> {
         T visit(ST state, Expression expression);
