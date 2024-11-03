@@ -448,7 +448,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                     throw new SemanticException.TypeError(lType, rType);
                 }
 
-                if (symtab.isConstant(Identifier.getRoot(lvalue))) {
+                if (symtab.isConstant(lvalue.root())) {
                     throw new SemanticException.AssignmentToConstant(sourcePos, lvalue);
                 }
             }

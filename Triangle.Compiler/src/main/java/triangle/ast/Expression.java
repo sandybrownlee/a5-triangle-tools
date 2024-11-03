@@ -18,14 +18,7 @@ sealed public interface Expression extends Statement, Argument
         // e.g., arr[i] -> root = arr
         //       recx.recy.recz -> root = recx
         // this is needed, for example, to check if a record is a constant or not
-        // TODO: BasicIdentifier root();
-        @Deprecated static BasicIdentifier getRoot(Identifier identifier) {
-            return switch (identifier) {
-                case ArraySubscript arraySubscript -> getRoot(arraySubscript.array());
-                case BasicIdentifier basicIdentifier -> basicIdentifier;
-                case RecordAccess recordAccess -> getRoot(recordAccess.record());
-            };
-        }
+        BasicIdentifier root();
 
         SourcePosition sourcePos();
 
@@ -35,11 +28,29 @@ sealed public interface Expression extends Statement, Argument
 
         }
 
-        record BasicIdentifier(SourcePosition sourcePos, String name) implements Identifier { }
+        record BasicIdentifier(SourcePosition sourcePos, String name) implements Identifier {
 
-        record RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) implements Identifier { }
+            @Override public BasicIdentifier root() {
+                return this;
+            }
 
-        record ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) implements Identifier { }
+        }
+
+        record RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) implements Identifier {
+
+            @Override public BasicIdentifier root() {
+                return record.root();
+            }
+
+        }
+
+        record ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) implements Identifier {
+
+            @Override public BasicIdentifier root() {
+                return array.root();
+            }
+
+        }
 
     }
 
