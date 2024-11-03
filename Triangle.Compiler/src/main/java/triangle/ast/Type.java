@@ -3,7 +3,8 @@ package triangle.ast;
 import java.util.List;
 
 sealed public interface Type
-        permits Type.ArrayType, Type.BasicType, Type.BoolType, Type.CharType, Type.IntType, Type.RecordType, Type.VoidType {
+        permits Type.ArrayType, Type.BasicType, Type.BoolType, Type.CharType, Type.FuncType, Type.IntType, Type.RecordType,
+                Type.VoidType {
 
     record BasicType(String name) implements Type { }
 
@@ -14,6 +15,8 @@ sealed public interface Type
         public record RecordFieldType(String fieldName, Type fieldType) { }
 
     }
+
+    record FuncType(List<Type> argTypes, Type returnType) implements Type { }
 
     record BoolType() implements Type { }
     record IntType() implements Type { }

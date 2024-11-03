@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+// TODO: parse custom type definitions
 public class Parser {
 
     private static final Set<Token.Kind> EXPRESSION_FIRST_SET  = new HashSet<>();
