@@ -24,6 +24,7 @@ import triangle.ast.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
+import triangle.contextualAnalyzer.SemanticAnalyzer;
 import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.SyntaxError;
@@ -76,6 +77,8 @@ public class Compiler {
 //                    System.out.println("programs/" + path);
 //                    compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
 //                }
+//
+//                System.in.read();
 //            }
 
             compiledOK = compileProgram(new FileInputStream(sourceName), objectName, showTree, false);
@@ -131,6 +134,13 @@ public class Compiler {
         // The AST representing the source program.
         Program theAST = parser.parseProgram(); // 1st pass
         System.out.println(new ASTPrinter().visit(null, theAST));
+        //noinspection ResultOfMethodCallIgnored
+        try {
+            new SemanticAnalyzer().visit(null, theAST);
+        } catch (SemanticAnalyzer.SemanticException e) {
+            System.err.println("Semantic error while compiling: " + e.getMessage());
+        }
+
         if (reporter.getNumErrors() == 0) {
 
             // TODO:
