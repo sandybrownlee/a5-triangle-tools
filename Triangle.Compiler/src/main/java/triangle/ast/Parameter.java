@@ -4,9 +4,23 @@ import java.util.List;
 
 sealed public interface Parameter permits Parameter.FuncParameter, Parameter.VarParameter {
 
-    record VarParameter(String name, Type type) implements Parameter { }
+    String getName();
 
-    record FuncParameter(String callable, List<Parameter> parameters, Type returnType) implements Parameter { }
+    record VarParameter(String name, Type type) implements Parameter {
+
+        @Override public String getName() {
+            return name;
+        }
+
+    }
+
+    record FuncParameter(String callable, List<Parameter> parameters, Type returnType) implements Parameter {
+
+        @Override public String getName() {
+            return callable;
+        }
+
+    }
 
     interface Visitor<ST,T,E extends Exception> {
         T visit(ST state, Parameter parameter) throws E;
