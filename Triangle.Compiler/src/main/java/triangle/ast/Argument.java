@@ -6,7 +6,7 @@ sealed public interface Argument permits Argument.FuncArgument, Argument.VarArgu
 
     record FuncArgument(Expression.Identifier func) implements Argument { }
 
-    interface Visitor<ST,T> {
-        T visit(ST state, Argument argument);
+    interface Visitor<ST,T,E extends Exception> {
+        T visit(ST state, Argument argument) throws E;
     }
 }

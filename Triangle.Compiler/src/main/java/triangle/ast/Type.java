@@ -20,7 +20,7 @@ sealed public interface Type
     record CharType() implements Type { }
     record VoidType() implements Type { }
 
-    interface Visitor<ST,T> {
-        T visit(ST state, Type type);
+    interface Visitor<ST,T, E extends Exception> {
+        T visit(ST state, Type type) throws E;
     }
 }

@@ -6,9 +6,9 @@ sealed public interface Declaration
         permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.TypeDeclaration,
                 Declaration.VarDeclaration {
 
-    interface Visitor<ST, T> {
+    interface Visitor<ST, T,E extends Exception> {
 
-        T visit(ST state, Declaration declaration);
+        T visit(ST state, Declaration declaration) throws E;
 
     }
 

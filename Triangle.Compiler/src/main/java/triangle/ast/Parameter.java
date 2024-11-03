@@ -8,7 +8,7 @@ sealed public interface Parameter permits Parameter.FuncParameter, Parameter.Var
 
     record FuncParameter(String callable, List<Parameter> parameters, Type returnType) implements Parameter { }
 
-    interface Visitor<ST,T> {
-        T visit(ST state, Parameter parameter);
+    interface Visitor<ST,T,E extends Exception> {
+        T visit(ST state, Parameter parameter) throws E;
     }
 }

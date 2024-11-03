@@ -9,7 +9,7 @@ import triangle.ast.Program;
 import triangle.ast.Statement;
 import triangle.ast.Type;
 
-public final class ASTPrinter implements AllVisitor<Void, String> {
+public final class ASTPrinter implements AllVisitor<Void, String, Exception> {
 
     @Override public String visit(final Void state, final Argument argument) {
         return switch (argument) {
@@ -162,6 +162,9 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
             );
             case Type.BasicType basicType -> basicType.name();
             case Type.VoidType _ -> "VOID";
+            case Type.BoolType boolType -> "BOOL";
+            case Type.CharType charType -> "CHAR";
+            case Type.IntType intType -> "INT";
         };
     }
 

@@ -7,9 +7,9 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
                                           Statement.LoopWhileStatement, Statement.RepeatUntilStatement,
                                           Statement.RepeatWhileStatement, Statement.StatementBlock, Statement.WhileStatement {
 
-    interface Visitor<ST, T> {
+    interface Visitor<ST, T,E extends Exception> {
 
-        T visit(ST state, Statement statement);
+        T visit(ST state, Statement statement) throws E;
 
     }
 

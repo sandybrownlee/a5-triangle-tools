@@ -16,8 +16,8 @@ sealed public interface Expression extends Statement, Argument
 
         record ArraySubscript(Identifier array, Expression subscript) implements Identifier { }
 
-        interface Visitor<ST, T> {
-            T visit(ST state, Identifier identifier);
+        interface Visitor<ST, T,E extends Exception> {
+            T visit(ST state, Identifier identifier) throws E;
         }
 
     }
@@ -42,7 +42,7 @@ sealed public interface Expression extends Statement, Argument
 
     record FunCall(Identifier callable, List<Argument> arguments) implements Expression { }
 
-    interface Visitor<ST,T> {
-        T visit(ST state, Expression expression);
+    interface Visitor<ST,T,E extends Exception> {
+        T visit(ST state, Expression expression) throws E;
     }
 }
