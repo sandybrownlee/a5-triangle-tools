@@ -14,7 +14,7 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
     @Override public String visit(final Void state, final Argument argument) {
         return switch (argument) {
             case Argument.FuncArgument funcArgument -> visit(state, funcArgument.func());
-            case Argument.VarArgument varArgument -> visit(state, varArgument.identifier());
+            case Argument.VarArgument varArgument -> visit(state, varArgument.var());
             case Expression expression -> visit(state, expression);
         };
     }
@@ -53,8 +53,8 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
             case Expression.BinaryOp binaryOp -> String.format(
                     "BINOP %s %s %s",
                     binaryOp.operator(),
-                    visit(state, binaryOp.loperand()),
-                    visit(state, binaryOp.roperand())
+                    visit(state, binaryOp.leftOperand()),
+                    visit(state, binaryOp.rightOperand())
             );
             case Expression.CallExpression callExpression -> String.format(
                     "FUNCALL %s (%s)",
@@ -75,13 +75,13 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
             );
             case Expression.LitArray litArray -> String.format(
                     "[%s]",
-                    litArray.values().stream().map(v -> visit(state, v) + ",").reduce("", String::concat)
+                    litArray.elements().stream().map(v -> visit(state, v) + ",").reduce("", String::concat)
             );
             case Expression.LitChar litChar -> Character.toString(litChar.value());
             case Expression.LitInt litInt -> Integer.toString(litInt.value());
             case Expression.LitRecord litRecord -> String.format(
                     "{%s}",
-                    litRecord.fieldValues().stream().map(v -> v.fieldName() + " = " + visit(state, v.value()) + ",")
+                    litRecord.fields().stream().map(v -> v.name() + " = " + visit(state, v.value()) + ",")
                              .reduce("", String::concat)
             );
             case Expression.UnaryOp unaryOp -> String.format(
@@ -129,18 +129,18 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
             );
             case Statement.LoopWhileStatement loopWhileStatement -> String.format(
                     "LOOP %s WHILE (%s) DO %s",
-                    visit(state, loopWhileStatement.statement1()),
+                    visit(state, loopWhileStatement.loopBody()),
                     visit(state, loopWhileStatement.condition()),
-                    visit(state, loopWhileStatement.statement2())
+                    visit(state, loopWhileStatement.doBody())
             );
             case Statement.RepeatUntilStatement repeatUntilStatement -> String.format(
                     "REPEAT %s UNTIL %s",
-                    visit(state, repeatUntilStatement.statement()),
+                    visit(state, repeatUntilStatement.body()),
                     visit(state, repeatUntilStatement.condition())
             );
             case Statement.RepeatWhileStatement repeatWhileStatement -> String.format(
                     "REPEAT %s UNTIL %s",
-                    visit(state, repeatWhileStatement.statement()),
+                    visit(state, repeatWhileStatement.body()),
                     visit(state, repeatWhileStatement.condition())
             );
             case Statement.StatementBlock statementBlock -> String.format(
@@ -164,7 +164,7 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
             );
             case Type.RecordType recordType -> String.format(
                     "RECORD {%s}",
-                    recordType.fieldTypes().stream().map(t -> t.fieldName() + " : " + visit(state, t.type()) + ",")
+                    recordType.fieldTypes().stream().map(t -> t.fieldName() + " : " + visit(state, t.fieldType()) + ",")
             );
             case Type.TypeIdentifier typeIdentifier -> typeIdentifier.name();
             case Type.VoidType _ -> "VOID";
@@ -178,7 +178,7 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
                     visit(state, arraySubscript.array()),
                     visit(state, arraySubscript.subscript())
             );
-            case Expression.Identifier.BasicIdentifier basicIdentifier -> basicIdentifier.identifier();
+            case Expression.Identifier.BasicIdentifier basicIdentifier -> basicIdentifier.name();
             case Expression.Identifier.RecordAccess recordAccess -> String.format(
                     "%s.%s",
                     visit(state, recordAccess.record()),

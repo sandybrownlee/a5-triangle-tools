@@ -10,7 +10,7 @@ sealed public interface Expression extends Statement, Argument
     sealed interface Identifier extends Expression permits Identifier.BasicIdentifier, Identifier.RecordAccess,
                                                            Identifier.ArraySubscript {
 
-        record BasicIdentifier(String identifier) implements Identifier { }
+        record BasicIdentifier(String name) implements Identifier { }
 
         record RecordAccess(Identifier record, Identifier field) implements Identifier { }
 
@@ -26,15 +26,15 @@ sealed public interface Expression extends Statement, Argument
 
     record LitChar(char value) implements Expression { }
 
-    record LitArray(List<Expression> values) implements Expression { }
+    record LitArray(List<Expression> elements) implements Expression { }
 
-    record LitRecord(List<RecordField> fieldValues) implements Expression {
-        public record RecordField(String fieldName, Expression value) { }
+    record LitRecord(List<RecordField> fields) implements Expression {
+        public record RecordField(String name, Expression value) { }
     }
 
     record UnaryOp(String operator, Expression operand) implements Expression { }
 
-    record BinaryOp(String operator, Expression loperand, Expression roperand) implements Expression { }
+    record BinaryOp(String operator, Expression leftOperand, Expression rightOperand) implements Expression { }
 
     record LetExpression(List<Declaration> declarations, Expression expression) implements Expression { }
 

@@ -2,7 +2,7 @@ package triangle.ast;
 
 sealed public interface Argument permits Argument.FuncArgument, Argument.VarArgument, Expression {
 
-    record VarArgument(Expression.Identifier identifier) implements Argument { }
+    record VarArgument(Expression.Identifier var) implements Argument { }
 
     record FuncArgument(Expression.Identifier func) implements Argument { }
 

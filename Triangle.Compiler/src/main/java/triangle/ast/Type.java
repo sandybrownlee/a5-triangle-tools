@@ -10,7 +10,7 @@ sealed public interface Type permits Type.ArrayType, Type.RecordType, Type.TypeI
 
     record RecordType(List<RecordFieldType> fieldTypes) implements Type {
 
-        public record RecordFieldType(String fieldName, Type type) { }
+        public record RecordFieldType(String fieldName, Type fieldType) { }
 
     }
 

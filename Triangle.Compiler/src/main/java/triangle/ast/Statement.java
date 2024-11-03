@@ -22,11 +22,11 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
 
     record WhileStatement(Expression condition, Statement body) implements Statement { }
 
-    record LoopWhileStatement(Expression condition, Statement statement1, Statement statement2) implements Statement { }
+    record LoopWhileStatement(Expression condition, Statement loopBody, Statement doBody) implements Statement { }
 
-    record RepeatWhileStatement(Expression condition, Statement statement) implements Statement { }
+    record RepeatWhileStatement(Expression condition, Statement body) implements Statement { }
 
-    record RepeatUntilStatement(Expression condition, Statement statement) implements Statement { }
+    record RepeatUntilStatement(Expression condition, Statement body) implements Statement { }
 
     record AssignStatement(Expression.Identifier identifier, Expression expression) implements Statement { }
 
