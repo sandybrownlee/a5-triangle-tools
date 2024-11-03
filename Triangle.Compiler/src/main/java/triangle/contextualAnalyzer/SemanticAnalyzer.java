@@ -115,7 +115,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
             case Argument.FuncArgument(Identifier func) -> {
                 Type argType = visit(state, func);
                 if (!(argType instanceof Type.FuncType)) {
-                    throw new SemanticException.TypeError(argType);
+                    throw new SemanticException.TypeError(argType, "function");
                 }
 
                 yield argType;
@@ -124,7 +124,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 Type argType = visit(state, var);
                 if (argType instanceof Type.FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC
-                    throw new SemanticException.TypeError(argType);
+                    throw new SemanticException.TypeError(argType, "not a function");
                 }
 
                 yield argType;
@@ -133,7 +133,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 Type argType = visit(state, expression);
                 if (argType instanceof Type.FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC
-                    throw new SemanticException.TypeError(argType);
+                    throw new SemanticException.TypeError(argType, "not a function");
                 }
 
                 yield argType;
@@ -191,7 +191,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
             case Identifier.ArraySubscript(Identifier array, Expression subscript) -> {
                 Type arrayType = visit(state, array);
                 if (!(arrayType instanceof ArrayType)) {
-                    throw new SemanticException.TypeError(arrayType);
+                    throw new SemanticException.TypeError(arrayType, "array");
                 }
 
                 Type subscriptType = visit(state, subscript);
@@ -212,7 +212,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
             case Identifier.RecordAccess(Identifier record, Identifier field) -> {
                 Type recordType = visit(state, record);
                 if (!(recordType instanceof RecordType)) {
-                    throw new SemanticException.TypeError(recordType);
+                    throw new SemanticException.TypeError(recordType, "record");
                 }
 
                 // record access has a new scope with the field names and types of the record available
@@ -265,7 +265,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 //  operations have their types set to null in the stdenv
 
                 if (!(opType.get() instanceof Type.FuncType(List<Type> argTypes, Type returnType))) {
-                    throw new SemanticException.TypeError(opType.get());
+                    throw new SemanticException.TypeError(opType.get(), "function");
                 }
 
                 if (argTypes.size() != 2) {
@@ -291,7 +291,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 Type funcType = visit(state, callable);
 
                 if (!(funcType instanceof Type.FuncType(List<Type> argTypes, Type returnType))) {
-                    throw new SemanticException.TypeError(funcType);
+                    throw new SemanticException.TypeError(funcType, "function");
                 }
 
                 if (argTypes.size() != arguments.size()) {
@@ -375,7 +375,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 }
 
                 if (!(opType.get() instanceof Type.FuncType(List<Type> argTypes, Type returnType))) {
-                    throw new SemanticException.TypeError(opType.get());
+                    throw new SemanticException.TypeError(opType.get(), "function");
                 }
 
                 if (argTypes.size() != 1) {
@@ -636,8 +636,8 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 super("Type mismatch: " + left + " got: " + right);
             }
 
-            private TypeError(Type type) {
-                super("Unexpected type: " + type);
+            private TypeError(Type type, String expected) {
+                super("Unexpected type: " + type + " expecting: " + expected);
             }
 
         }
