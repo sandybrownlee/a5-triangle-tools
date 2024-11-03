@@ -20,6 +20,18 @@ sealed public interface Expression extends Statement, Argument
             T visit(ST state, Identifier identifier) throws E;
         }
 
+        // this finds the "root" of a (possibly complex) identifer
+        // e.g., arr[i] -> root = arr
+        //       recx.recy.recz -> root = recx
+        // this is needed, for example, to check if a record is a constant or not
+        static BasicIdentifier getRoot(Identifier identifier) {
+            return switch (identifier) {
+                case ArraySubscript arraySubscript -> getRoot(arraySubscript.array());
+                case BasicIdentifier basicIdentifier -> basicIdentifier;
+                case RecordAccess recordAccess -> getRoot(recordAccess.record());
+            };
+        }
+
     }
 
     record LitBool(boolean value) implements Expression { }

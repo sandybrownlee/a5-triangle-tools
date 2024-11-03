@@ -42,14 +42,14 @@ import java.util.Optional;
 // TODO: annotate AST with source code positions
 public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAnalyzer.SemanticException> {
 
-    private static final Type binaryRelation =
+    private static final Type                                      binaryRelation =
             new Type.FuncType(List.of(Type.BOOL_TYPE, Type.BOOL_TYPE), Type.BOOL_TYPE);
-    private static final Type binaryIntRelation =
+    private static final Type                                      binaryIntRelation =
             new Type.FuncType(List.of(Type.INT_TYPE, Type.INT_TYPE), Type.BOOL_TYPE);
-    private static final Type binaryIntFunc =
+    private static final Type                                      binaryIntFunc =
             new Type.FuncType(List.of(Type.INT_TYPE, Type.INT_TYPE), Type.INT_TYPE);
-    private static final Map<BasicIdentifier, Type> STD_TERMS = new HashMap<>();
-    public static final SymbolTable.Env STD_ENV = new SymbolTable.Env(
+    private static final Map<BasicIdentifier, SymbolTable.Binding> STD_TERMS = new HashMap<>();
+    public static final  SymbolTable.Env                           STD_ENV = new SymbolTable.Env(
             Map.of(
                     new BasicType("Integer"), Type.INT_TYPE,
                     new BasicType("Char"), Type.CHAR_TYPE,
@@ -60,39 +60,51 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
 
     static {
         STD_TERMS.putAll(Map.of(
-                new BasicIdentifier("\\/"), binaryRelation,
-                new BasicIdentifier("/\\"), binaryRelation,
-                new BasicIdentifier("<="), binaryIntRelation,
-                new BasicIdentifier(">="), binaryIntRelation,
-                new BasicIdentifier(">"), binaryIntRelation,
-                new BasicIdentifier("<"), binaryIntRelation,
-                new BasicIdentifier("\\"), new Type.FuncType(List.of(Type.BOOL_TYPE), Type.BOOL_TYPE)
+                new BasicIdentifier("\\/"), new SymbolTable.Binding(binaryRelation, true),
+                new BasicIdentifier("/\\"), new SymbolTable.Binding(binaryRelation, true),
+                new BasicIdentifier("<="), new SymbolTable.Binding(binaryIntRelation, true),
+                new BasicIdentifier(">="), new SymbolTable.Binding(binaryIntRelation, true),
+                new BasicIdentifier(">"), new SymbolTable.Binding(binaryIntRelation, true),
+                new BasicIdentifier("<"), new SymbolTable.Binding(binaryIntRelation, true),
+                new BasicIdentifier("\\"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.BOOL_TYPE), Type.BOOL_TYPE), true)
         ));
         STD_TERMS.putAll(Map.of(
-                new BasicIdentifier("-"), binaryIntFunc,
-                new BasicIdentifier("+"), binaryIntFunc,
-                new BasicIdentifier("*"), binaryIntFunc,
-                new BasicIdentifier("/"), binaryIntFunc,
-                new BasicIdentifier("//"), binaryIntFunc,
-                new BasicIdentifier("|"), new Type.FuncType(List.of(Type.INT_TYPE), Type.INT_TYPE),
-                new BasicIdentifier("++"), new Type.FuncType(List.of(Type.INT_TYPE), Type.INT_TYPE)
+                new BasicIdentifier("-"), new SymbolTable.Binding(binaryIntFunc, true),
+                new BasicIdentifier("+"), new SymbolTable.Binding(binaryIntFunc, true),
+                new BasicIdentifier("*"), new SymbolTable.Binding(binaryIntFunc, true),
+                new BasicIdentifier("/"), new SymbolTable.Binding(binaryIntFunc, true),
+                new BasicIdentifier("//"), new SymbolTable.Binding(binaryIntFunc, true),
+                new BasicIdentifier("|"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.INT_TYPE), Type.INT_TYPE), true),
+                new BasicIdentifier("++"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.INT_TYPE), Type.INT_TYPE), true)
         ));
         // these are set to void just as dummy values so that we fail fast in case something tries to access their types since
         //  these are supposed to be special-cased in visit(Expression)
         STD_TERMS.putAll(Map.of(
-                new BasicIdentifier("="), Type.VOID_TYPE,
-                new BasicIdentifier("\\="), Type.VOID_TYPE
+                new BasicIdentifier("="), new SymbolTable.Binding(Type.VOID_TYPE, true),
+                new BasicIdentifier("\\="), new SymbolTable.Binding(Type.VOID_TYPE, true)
         ));
         STD_TERMS.putAll(Map.of(
-                new BasicIdentifier("get"), new Type.FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE),
-                new BasicIdentifier("getint"), new Type.FuncType(List.of(Type.INT_TYPE), Type.VOID_TYPE),
-                new BasicIdentifier("geteol"), new Type.FuncType(List.of(), Type.VOID_TYPE),
-                new BasicIdentifier("puteol"), new Type.FuncType(List.of(), Type.VOID_TYPE),
-                new BasicIdentifier("put"), new Type.FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE),
-                new BasicIdentifier("putint"), new Type.FuncType(List.of(Type.INT_TYPE), Type.VOID_TYPE),
-                new BasicIdentifier("chr"), new Type.FuncType(List.of(Type.INT_TYPE), Type.CHAR_TYPE),
-                new BasicIdentifier("eol"), new Type.FuncType(List.of(), Type.BOOL_TYPE),
-                new BasicIdentifier("ord"), new Type.FuncType(List.of(Type.CHAR_TYPE), Type.INT_TYPE)
+                new BasicIdentifier("get"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true),
+                new BasicIdentifier("getint"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.INT_TYPE), Type.VOID_TYPE), true),
+                new BasicIdentifier("geteol"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(), Type.VOID_TYPE), true),
+                new BasicIdentifier("puteol"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(), Type.VOID_TYPE), true),
+                new BasicIdentifier("put"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true),
+                new BasicIdentifier("putint"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.INT_TYPE), Type.VOID_TYPE), true),
+                new BasicIdentifier("chr"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.INT_TYPE), Type.CHAR_TYPE), true),
+                new BasicIdentifier("eol"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(), Type.BOOL_TYPE), true),
+                new BasicIdentifier("ord"),
+                new SymbolTable.Binding(new Type.FuncType(List.of(Type.CHAR_TYPE), Type.INT_TYPE), true)
         ));
     }
 
@@ -149,14 +161,15 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
 
                 // assign each parameter to a basic identifier with its resolved type
                 for (int i = 0; i < parameters.size(); i++) {
-                    symtab.add(new BasicIdentifier(parameters.get(i).getName()), resolvedParamTypes.get(i));
+                    Parameter p = parameters.get(i);
+                    symtab.add(new BasicIdentifier(p.getName()), resolvedParamTypes.get(i), p instanceof Parameter.ConstParameter);
                 }
 
                 Type resolvedReturnType = visit(state, returnType);
 
                 // (optimistically) assign the function its declared return type
                 Type funcType = new Type.FuncType(resolvedParamTypes, resolvedReturnType);
-                symtab.add(new BasicIdentifier(func), new Type.FuncType(resolvedParamTypes, resolvedReturnType));
+                symtab.add(new BasicIdentifier(func), new Type.FuncType(resolvedParamTypes, resolvedReturnType), true);
 
                 // then type check the function body
                 Type statementType = visit(state, statement);
@@ -209,7 +222,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 // record access has a new scope with the field names and types of the record available
                 symtab.enterNewScope();
                 for (RecordType.RecordFieldType fieldType : ((RecordType) recordType).fieldTypes()) {
-                    symtab.add(new BasicIdentifier(fieldType.fieldName()), visit(state, fieldType.fieldType()));
+                    symtab.add(new BasicIdentifier(fieldType.fieldName()), visit(state, fieldType.fieldType()), true);
                 }
                 Type fieldType = visit(state, field);
                 symtab.exitScope();
@@ -319,7 +332,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
 
                 for (Declaration declaration : declarations) {
                     Type type = visit(state, declaration);
-                    symtab.add(new BasicIdentifier(declaration.getName()), type);
+                    symtab.add(new BasicIdentifier(declaration.getName()), type, declaration instanceof ConstDeclaration);
                 }
                 Type exprType = visit(state, letExpression);
 
@@ -422,6 +435,10 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 if (!lType.equals(rType)) {
                     throw new SemanticException.TypeError(lType, rType);
                 }
+
+                if (symtab.isConstant(Identifier.getRoot(assignStatement.identifier()))) {
+                    throw new SemanticException.AssignmentToConstant(assignStatement.identifier());
+                }
             }
             case Statement.IfStatement ifStatement -> {
                 Type condType = visit(state, ifStatement.condition());
@@ -444,8 +461,9 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
                 for (Declaration declaration : declarations) {
                     switch (declaration) {
                         case TypeDeclaration _ -> symtab.add(new BasicType(declaration.getName()), visit(state, declaration));
-                        case ConstDeclaration _, Declaration.FuncDeclaration _, Declaration.VarDeclaration _ ->
-                                symtab.add(new BasicIdentifier(declaration.getName()), visit(state, declaration));
+                        case ConstDeclaration _, Declaration.FuncDeclaration _, Declaration.VarDeclaration _ -> symtab.add(
+                                new BasicIdentifier(declaration.getName()), visit(state, declaration),
+                                declaration instanceof ConstDeclaration);
                     }
                 }
 
@@ -545,6 +563,16 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
         private Optional<Type> lookup(BasicIdentifier identifier) {
             for (Env env : scopes) {
                 if (env.terms.containsKey(identifier)) {
+                    return Optional.of(env.terms.get(identifier).type);
+                }
+            }
+
+            return Optional.empty();
+        }
+
+        private Optional<Binding> lookupBinding(BasicIdentifier identifier) {
+            for (Env env : scopes) {
+                if (env.terms.containsKey(identifier)) {
                     return Optional.of(env.terms.get(identifier));
                 }
             }
@@ -562,12 +590,16 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
             return Optional.empty();
         }
 
-        private void add(BasicIdentifier identifier, Type type) {
-            scopes.peek().terms.put(identifier, type);
+        private void add(BasicIdentifier identifier, Type type, boolean constant) {
+            scopes.peek().terms.put(identifier, new Binding(type, constant));
         }
 
         private void add(BasicType basicType, Type type) {
             scopes.peek().types.put(basicType, type);
+        }
+
+        private boolean isConstant(BasicIdentifier identifier) {
+            return lookupBinding(identifier).get().constant;
         }
 
         private void enterNewScope() {
@@ -578,12 +610,13 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
             scopes.pop();
         }
 
-        private record Env(Map<BasicType, Type> types, Map<BasicIdentifier, Type> terms) { }
+        private record Binding(Type type, boolean constant) { }
+
+        public record Env(Map<BasicType, Type> types, Map<BasicIdentifier, Binding> terms) { }
 
     }
 
-    public static sealed abstract class SemanticException extends Exception
-            permits SemanticException.ArityMismatch, SemanticException.TypeError, SemanticException.UndeclaredUse {
+    public static abstract class SemanticException extends Exception {
 
         public SemanticException(final String s) {
             super(s);
@@ -604,7 +637,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
         private static final class TypeError extends SemanticException {
 
             private TypeError(Type left, Type right) {
-                super("Type mismatch expected: " + left + " got: " + right);
+                super("Type mismatch: " + left + " got: " + right);
             }
 
             private TypeError(Type type) {
@@ -616,8 +649,17 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
         private static final class ArityMismatch extends SemanticException {
 
             private ArityMismatch(Expression callExpression, int expectedArity, int arity) {
-                super("Arity mismatch: " + callExpression + " expected: " +  expectedArity + " got: " + arity);
+                super("Arity mismatch: " + callExpression + " expected: " + expectedArity + " got: " + arity);
             }
+
+        }
+
+        private static final class AssignmentToConstant extends SemanticException {
+
+            private AssignmentToConstant(final Identifier identifier) {
+                super("Assignment to constant: " + identifier);
+            }
+
         }
 
     }
