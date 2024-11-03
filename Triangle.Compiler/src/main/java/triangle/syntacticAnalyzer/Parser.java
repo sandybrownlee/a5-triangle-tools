@@ -292,7 +292,7 @@ public class Parser {
     private Type parseType() throws IOException, SyntaxError {
         return switch (lastToken.getKind()) {
             case IDENTIFIER -> {
-                TypeIdentifier type = new TypeIdentifier(((TextToken) lastToken).getText());
+                BasicType type = new BasicType(((TextToken) lastToken).getText());
                 shift(Token.Kind.IDENTIFIER);
                 yield type;
             }

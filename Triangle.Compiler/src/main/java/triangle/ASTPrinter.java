@@ -160,7 +160,7 @@ public final class ASTPrinter implements AllVisitor<Void, String> {
                     "RECORD {%s}",
                     recordType.fieldTypes().stream().map(t -> t.fieldName() + " : " + visit(state, t.fieldType()) + ",")
             );
-            case Type.TypeIdentifier typeIdentifier -> typeIdentifier.name();
+            case Type.BasicType basicType -> basicType.name();
             case Type.VoidType _ -> "VOID";
         };
     }

@@ -2,9 +2,9 @@ package triangle.ast;
 
 import java.util.List;
 
-sealed public interface Type permits Type.ArrayType, Type.RecordType, Type.TypeIdentifier, Type.VoidType {
+sealed public interface Type permits Type.ArrayType, Type.RecordType, Type.BasicType, Type.VoidType {
 
-    record TypeIdentifier(String name) implements Type { }
+    record BasicType(String name) implements Type { }
 
     record ArrayType(int size, Type elementType) implements Type { }
 
