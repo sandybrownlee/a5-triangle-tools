@@ -110,10 +110,6 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticAn
 
     private final SymbolTable symtab = new SymbolTable(STD_ENV);
 
-    public SemanticAnalyzer() {
-        symtab.scopes.add(STD_ENV);
-    }
-
     @Override public Type visit(final Void state, final Argument argument) throws SemanticException {
         return switch (argument) {
             case Argument.FuncArgument(Identifier func) -> {
