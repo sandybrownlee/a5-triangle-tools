@@ -19,13 +19,13 @@
 package triangle.abstractSyntaxTrees.actuals;
 
 import triangle.abstractSyntaxTrees.visitors.ActualParameterSequenceVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class SingleActualParameterSequence extends ActualParameterSequence {
 
     public final ActualParameter AP;
 
-    public SingleActualParameterSequence(ActualParameter apAST, SourcePosition position) {
+    public SingleActualParameterSequence(ActualParameter apAST, SourcePositionOld position) {
         super(position);
         AP = apAST;
     }

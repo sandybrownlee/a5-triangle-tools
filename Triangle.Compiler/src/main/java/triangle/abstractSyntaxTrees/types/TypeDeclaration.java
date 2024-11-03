@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.types;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class TypeDeclaration extends Declaration {
 
     public final Identifier  I;
     public       TypeDenoter T;
 
-    public TypeDeclaration(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
+    public TypeDeclaration(Identifier iAST, TypeDenoter tAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         T = tAST;

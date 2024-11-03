@@ -20,11 +20,11 @@ package triangle.abstractSyntaxTrees.types;
 
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class TypeDenoter extends AbstractSyntaxTree {
 
-    public TypeDenoter(SourcePosition position) {
+    public TypeDenoter(SourcePositionOld position) {
         super(position);
     }
 

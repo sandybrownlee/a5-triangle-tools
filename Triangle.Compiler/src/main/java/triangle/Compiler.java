@@ -25,6 +25,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.contextualAnalyzer.SemanticAnalyzer;
+import triangle.contextualAnalyzer.SemanticException;
 import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.SyntaxError;
@@ -75,6 +76,7 @@ public class Compiler {
             for (String path : new File("programs/").list()) {
                 System.out.println("programs/" + path);
                 compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
+                System.in.read();
             }
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
@@ -131,7 +133,7 @@ public class Compiler {
         //noinspection ResultOfMethodCallIgnored
         try {
             new SemanticAnalyzer().visit(null, theAST);
-        } catch (SemanticAnalyzer.SemanticException e) {
+        } catch (SemanticException e) {
             System.err.println("Semantic error while compiling: " + e.getMessage());
         }
 

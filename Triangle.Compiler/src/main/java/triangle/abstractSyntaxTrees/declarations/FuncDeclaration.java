@@ -23,7 +23,7 @@ import triangle.abstractSyntaxTrees.formals.FormalParameterSequence;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class FuncDeclaration extends Declaration implements FunctionDeclaration {
 
@@ -34,7 +34,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
     public FuncDeclaration(
             Identifier iAST, FormalParameterSequence fpsAST, TypeDenoter tAST, Expression eAST,
-            SourcePosition position
+            SourcePositionOld position
     ) {
         super(position);
         I = iAST;

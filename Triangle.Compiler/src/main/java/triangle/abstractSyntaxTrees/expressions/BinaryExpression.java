@@ -20,7 +20,7 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class BinaryExpression extends Expression {
 
@@ -28,7 +28,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
     public       Expression E1;
     public       Expression E2;
 
-    public BinaryExpression(Expression e1AST, Operator oAST, Expression e2AST, SourcePosition position) {
+    public BinaryExpression(Expression e1AST, Operator oAST, Expression e2AST, SourcePositionOld position) {
         super(position);
         O = oAST;
         E1 = e1AST;

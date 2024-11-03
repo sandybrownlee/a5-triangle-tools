@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.vnames;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 /**
  value (constant) or variable name
@@ -32,7 +32,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
     public int         offset;
     public TypeDenoter type;
 
-    public Vname(SourcePosition position) {
+    public Vname(SourcePositionOld position) {
         super(position);
         variable = false;
         type = null;

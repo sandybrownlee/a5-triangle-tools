@@ -20,7 +20,7 @@ package triangle.abstractSyntaxTrees.vnames;
 
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 /**
  a value or variable name with no sub parts and no array index
@@ -29,7 +29,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
     public final Identifier I;
 
-    public SimpleVname(Identifier iAST, SourcePosition position) {
+    public SimpleVname(Identifier iAST, SourcePositionOld position) {
         super(position);
         I = iAST;
     }

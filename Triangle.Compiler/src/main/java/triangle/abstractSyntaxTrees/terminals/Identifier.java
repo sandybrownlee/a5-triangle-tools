@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.terminals;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.IdentifierVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class Identifier extends Terminal {
 
     public final TypeDenoter        type;
     public       AbstractSyntaxTree decl; // Either a Declaration or a FieldTypeDenoter
 
-    public Identifier(String spelling, SourcePosition position) {
+    public Identifier(String spelling, SourcePositionOld position) {
         super(spelling, position);
         type = null;
         decl = null;

@@ -107,7 +107,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public final class Checker implements ActualParameterVisitor<FormalParameter, Void>,
                                       ActualParameterSequenceVisitor<FormalParameterSequence, Void>,
@@ -124,8 +124,8 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
     // Always returns null. Does not use the given object.
 
-    private static final SourcePosition      dummyPos = new SourcePosition();
-    private final static Identifier          dummyI   = new Identifier("", dummyPos);
+    private static final SourcePositionOld dummyPos = new SourcePositionOld();
+    private final static Identifier        dummyI   = new Identifier("", dummyPos);
     private final        IdentificationTable idTable;
     private final        ErrorReporter       reporter;
 
@@ -804,7 +804,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
         reporter.reportError(message, positionNode.getPosition());
     }
 
-    private void checkAndReportError(boolean condition, String message, String token, SourcePosition position) {
+    private void checkAndReportError(boolean condition, String message, String token, SourcePositionOld position) {
         if (!condition) {
             reporter.reportError(message, position);
         }

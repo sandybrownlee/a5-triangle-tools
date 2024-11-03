@@ -20,11 +20,11 @@ package triangle.abstractSyntaxTrees.types;
 
 import triangle.abstractMachine.Machine;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class BoolTypeDenoter extends TypeDenoter {
 
-    public BoolTypeDenoter(SourcePosition position) {
+    public BoolTypeDenoter(SourcePositionOld position) {
         super(position);
     }
 

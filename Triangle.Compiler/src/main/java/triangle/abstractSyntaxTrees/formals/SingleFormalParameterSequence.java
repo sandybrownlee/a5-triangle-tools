@@ -19,13 +19,13 @@
 package triangle.abstractSyntaxTrees.formals;
 
 import triangle.abstractSyntaxTrees.visitors.FormalParameterSequenceVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class SingleFormalParameterSequence extends FormalParameterSequence {
 
     public final FormalParameter FP;
 
-    public SingleFormalParameterSequence(FormalParameter fpAST, SourcePosition position) {
+    public SingleFormalParameterSequence(FormalParameter fpAST, SourcePositionOld position) {
         super(position);
         FP = fpAST;
     }

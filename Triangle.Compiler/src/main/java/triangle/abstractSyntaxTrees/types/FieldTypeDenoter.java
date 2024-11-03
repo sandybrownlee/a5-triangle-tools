@@ -18,11 +18,11 @@
 
 package triangle.abstractSyntaxTrees.types;
 
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class FieldTypeDenoter extends TypeDenoter {
 
-    public FieldTypeDenoter(SourcePosition position) {
+    public FieldTypeDenoter(SourcePositionOld position) {
         super(position);
     }
 

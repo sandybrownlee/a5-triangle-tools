@@ -20,7 +20,7 @@ package triangle.abstractSyntaxTrees.vnames;
 
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 /**
  Value (constant) or variable names including a sub-parts separated by dots.
@@ -31,7 +31,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
     public final Identifier I;
     public final Vname      V;
 
-    public DotVname(Vname vAST, Identifier iAST, SourcePosition position) {
+    public DotVname(Vname vAST, Identifier iAST, SourcePositionOld position) {
         super(position);
         V = vAST;
         I = iAST;

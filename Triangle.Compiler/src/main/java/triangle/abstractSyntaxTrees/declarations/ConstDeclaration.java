@@ -22,14 +22,14 @@ import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ConstDeclaration extends Declaration implements ConstantDeclaration {
 
     public final Identifier I;
     public       Expression E;
 
-    public ConstDeclaration(Identifier iAST, Expression eAST, SourcePosition position) {
+    public ConstDeclaration(Identifier iAST, Expression eAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         E = eAST;

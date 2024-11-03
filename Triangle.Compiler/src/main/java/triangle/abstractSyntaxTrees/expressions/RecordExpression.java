@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class RecordExpression extends Expression {
 
     public final RecordAggregate RA;
 
-    public RecordExpression(RecordAggregate raAST, SourcePosition position) {
+    public RecordExpression(RecordAggregate raAST, SourcePositionOld position) {
         super(position);
         RA = raAST;
     }

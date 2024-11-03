@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.declarations;
 
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class Declaration extends AbstractSyntaxTree {
 
     public boolean duplicated;
 
-    public Declaration(SourcePosition position) {
+    public Declaration(SourcePositionOld position) {
         super(position);
         duplicated = false;
     }

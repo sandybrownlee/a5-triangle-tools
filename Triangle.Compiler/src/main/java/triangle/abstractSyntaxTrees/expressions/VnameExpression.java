@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.abstractSyntaxTrees.vnames.Vname;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class VnameExpression extends Expression {
 
     public final Vname V;
 
-    public VnameExpression(Vname vAST, SourcePosition position) {
+    public VnameExpression(Vname vAST, SourcePositionOld position) {
         super(position);
         V = vAST;
     }

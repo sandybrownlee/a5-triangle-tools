@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.actuals;
 
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ConstActualParameter extends ActualParameter {
 
     public Expression E;
 
-    public ConstActualParameter(Expression eAST, SourcePosition position) {
+    public ConstActualParameter(Expression eAST, SourcePositionOld position) {
         super(position);
         E = eAST;
     }

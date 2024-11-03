@@ -21,13 +21,13 @@ package triangle.abstractSyntaxTrees.expressions;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class Expression extends AbstractSyntaxTree {
 
     public TypeDenoter type;
 
-    public Expression(SourcePosition position) {
+    public Expression(SourcePositionOld position) {
         super(position);
         type = null;
     }

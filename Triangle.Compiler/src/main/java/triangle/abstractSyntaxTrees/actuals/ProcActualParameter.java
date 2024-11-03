@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.actuals;
 
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ProcActualParameter extends ActualParameter {
 
     public final Identifier I;
 
-    public ProcActualParameter(Identifier iAST, SourcePosition position) {
+    public ProcActualParameter(Identifier iAST, SourcePositionOld position) {
         super(position);
         I = iAST;
     }

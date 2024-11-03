@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.expressions;
 import triangle.abstractSyntaxTrees.actuals.ActualParameterSequence;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class CallExpression extends Expression {
 
     public final Identifier              I;
     public final ActualParameterSequence APS;
 
-    public CallExpression(Identifier iAST, ActualParameterSequence apsAST, SourcePosition position) {
+    public CallExpression(Identifier iAST, ActualParameterSequence apsAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         APS = apsAST;

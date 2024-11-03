@@ -19,13 +19,13 @@
 package triangle.abstractSyntaxTrees.commands;
 
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class SequentialCommand extends Command {
 
     public final Command C1, C2;
 
-    public SequentialCommand(Command c1AST, Command c2AST, SourcePosition position) {
+    public SequentialCommand(Command c1AST, Command c2AST, SourcePositionOld position) {
         super(position);
         C1 = c1AST;
         C2 = c2AST;

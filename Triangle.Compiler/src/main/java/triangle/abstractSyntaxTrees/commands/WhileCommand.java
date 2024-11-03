@@ -20,14 +20,14 @@ package triangle.abstractSyntaxTrees.commands;
 
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class WhileCommand extends Command {
 
     public final Command    C;
     public       Expression E;
 
-    public WhileCommand(Expression eAST, Command cAST, SourcePosition position) {
+    public WhileCommand(Expression eAST, Command cAST, SourcePositionOld position) {
         super(position);
         E = eAST;
         C = cAST;

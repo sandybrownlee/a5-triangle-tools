@@ -19,11 +19,11 @@
 package triangle.abstractSyntaxTrees.types;
 
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ErrorTypeDenoter extends TypeDenoter {
 
-    public ErrorTypeDenoter(SourcePosition position) {
+    public ErrorTypeDenoter(SourcePositionOld position) {
         super(position);
     }
 

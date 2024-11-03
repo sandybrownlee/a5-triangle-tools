@@ -1,12 +1,19 @@
 package triangle.ast;
 
+import triangle.syntacticAnalyzer.SourcePosition;
+
 sealed public interface Argument permits Argument.FuncArgument, Argument.VarArgument, Expression {
 
-    record VarArgument(Expression.Identifier var) implements Argument { }
+    SourcePosition sourcePos();
 
-    record FuncArgument(Expression.Identifier func) implements Argument { }
+    interface Visitor<ST, T, E extends Exception> {
 
-    interface Visitor<ST,T,E extends Exception> {
         T visit(ST state, Argument argument) throws E;
+
     }
+
+    record VarArgument(SourcePosition sourcePos, Expression.Identifier var) implements Argument { }
+
+    record FuncArgument(SourcePosition sourcePos, Expression.Identifier func) implements Argument { }
+
 }

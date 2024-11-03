@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.aggregates;
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.RecordAggregateVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class MultipleRecordAggregate extends RecordAggregate {
 
@@ -29,7 +29,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
     public final RecordAggregate RA;
     public       Expression      E;
 
-    public MultipleRecordAggregate(Identifier iAST, Expression eAST, RecordAggregate raAST, SourcePosition position) {
+    public MultipleRecordAggregate(Identifier iAST, Expression eAST, RecordAggregate raAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         E = eAST;

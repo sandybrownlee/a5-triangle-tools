@@ -20,14 +20,14 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class LetExpression extends Expression {
 
     public final Declaration D;
     public       Expression  E;
 
-    public LetExpression(Declaration dAST, Expression eAST, SourcePosition position) {
+    public LetExpression(Declaration dAST, Expression eAST, SourcePositionOld position) {
         super(position);
         D = dAST;
         E = eAST;

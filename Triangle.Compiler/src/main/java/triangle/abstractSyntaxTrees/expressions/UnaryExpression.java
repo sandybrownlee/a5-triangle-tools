@@ -20,14 +20,14 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class UnaryExpression extends Expression {
 
     public final Operator   O;
     public       Expression E;
 
-    public UnaryExpression(Operator oAST, Expression eAST, SourcePosition position) {
+    public UnaryExpression(Operator oAST, Expression eAST, SourcePositionOld position) {
         super(position);
         O = oAST;
         E = eAST;

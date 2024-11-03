@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.declarations;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class VarDeclaration extends Declaration implements VariableDeclaration {
 
     public final Identifier  I;
     public       TypeDenoter T;
 
-    public VarDeclaration(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
+    public VarDeclaration(Identifier iAST, TypeDenoter tAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         T = tAST;

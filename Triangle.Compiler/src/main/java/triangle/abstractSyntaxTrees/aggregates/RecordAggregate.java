@@ -21,13 +21,13 @@ package triangle.abstractSyntaxTrees.aggregates;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.types.FieldTypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.RecordAggregateVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class RecordAggregate extends AbstractSyntaxTree {
 
     public FieldTypeDenoter type;
 
-    public RecordAggregate(SourcePosition position) {
+    public RecordAggregate(SourcePositionOld position) {
         super(position);
         type = null;
     }

@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees;
 
 import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.visitors.ProgramVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class Program extends AbstractSyntaxTree {
 
     public final Command C;
 
-    public Program(Command cAST, SourcePosition position) {
+    public Program(Command cAST, SourcePositionOld position) {
         super(position);
         C = cAST;
     }

@@ -19,7 +19,7 @@
 package triangle.abstractSyntaxTrees.actuals;
 
 import triangle.abstractSyntaxTrees.visitors.ActualParameterSequenceVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class MultipleActualParameterSequence extends ActualParameterSequence {
 
@@ -28,7 +28,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
     public MultipleActualParameterSequence(
             ActualParameter apAST, ActualParameterSequence apsAST,
-            SourcePosition position
+            SourcePositionOld position
     ) {
         super(position);
         AP = apAST;

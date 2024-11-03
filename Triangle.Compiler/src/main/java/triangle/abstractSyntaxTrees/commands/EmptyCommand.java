@@ -19,11 +19,11 @@
 package triangle.abstractSyntaxTrees.commands;
 
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class EmptyCommand extends Command {
 
-    public EmptyCommand(SourcePosition position) {
+    public EmptyCommand(SourcePositionOld position) {
         super(position);
     }
 

@@ -19,11 +19,11 @@
 package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class EmptyExpression extends Expression {
 
-    public EmptyExpression(SourcePosition position) {
+    public EmptyExpression(SourcePositionOld position) {
         super(position);
     }
 

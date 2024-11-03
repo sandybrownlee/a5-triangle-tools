@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.types;
 
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class SimpleTypeDenoter extends TypeDenoter {
 
     public final Identifier I;
 
-    public SimpleTypeDenoter(Identifier iAST, SourcePosition position) {
+    public SimpleTypeDenoter(Identifier iAST, SourcePositionOld position) {
         super(position);
         I = iAST;
     }

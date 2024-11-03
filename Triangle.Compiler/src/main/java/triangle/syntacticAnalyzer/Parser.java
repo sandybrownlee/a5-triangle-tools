@@ -92,20 +92,20 @@ public class Parser {
     private Statement parseStmt() throws IOException, SyntaxError {
         return switch (lastToken.getKind()) {
             case BEGIN -> {
-                shift(Token.Kind.BEGIN);
+                SourcePosition start = shift(Token.Kind.BEGIN);
                 List<Statement> statements = parseStmtSeq();
                 shift(Token.Kind.END);
-                yield new StatementBlock(statements);
+                yield new StatementBlock(start, statements);
             }
             case LET -> {
-                shift(Token.Kind.LET);
+                SourcePosition start = shift(Token.Kind.LET);
                 List<Declaration> declarations = parseDeclSeq();
                 shift(Token.Kind.IN);
                 Statement statement = parseStmt();
-                yield new LetStatement(declarations, statement);
+                yield new LetStatement(start, declarations, statement);
             }
             case IF -> {
-                shift(Token.Kind.IF);
+                SourcePosition start = shift(Token.Kind.IF);
                 Expression condition = parseExpression();
                 shift(Token.Kind.THEN);
 
@@ -124,35 +124,35 @@ public class Parser {
                     default -> Optional.empty();
                 };
 
-                yield new IfStatement(condition, consequent, alternative);
+                yield new IfStatement(start, condition, consequent, alternative);
             }
             case WHILE -> {
-                shift(Token.Kind.WHILE);
+                SourcePosition start = shift(Token.Kind.WHILE);
                 Expression condition = parseExpression();
                 shift(Token.Kind.DO);
                 Statement statement = parseStmt();
-                yield new WhileStatement(condition, statement);
+                yield new WhileStatement(start, condition, statement);
             }
             case LOOP -> {
-                shift(Token.Kind.LOOP);
+                SourcePosition start = shift(Token.Kind.LOOP);
                 Statement statement1 = parseStmt();
                 shift(Token.Kind.WHILE);
                 Expression condition = parseExpression();
                 shift(Token.Kind.DO);
                 Statement statement2 = parseStmt();
-                yield new LoopWhileStatement(condition, statement1, statement2);
+                yield new LoopWhileStatement(start, condition, statement1, statement2);
             }
             case REPEAT -> {
-                shift(Token.Kind.REPEAT);
+                SourcePosition start = shift(Token.Kind.REPEAT);
                 Statement statement = parseStmt();
                 if (lastToken.getKind() == Token.Kind.WHILE) {
                     shift(Token.Kind.WHILE);
                     Expression condition = parseExpression();
-                    yield new RepeatWhileStatement(condition, statement);
+                    yield new RepeatWhileStatement(start, condition, statement);
                 } else {
                     shift(Token.Kind.UNTIL);
                     Expression condition = parseExpression();
-                    yield new RepeatUntilStatement(condition, statement);
+                    yield new RepeatUntilStatement(start, condition, statement);
                 }
             }
             case IDENTIFIER -> {
@@ -160,20 +160,21 @@ public class Parser {
                 if (lastToken.getKind() == Token.Kind.BECOMES) {
                     shift(Token.Kind.BECOMES);
                     Expression expression = parseExpression();
-                    yield new AssignStatement(identifier, expression);
+                    yield new AssignStatement(identifier.sourcePos(), identifier, expression);
                 }
 
                 // check if the identifier leads into a side-effectful operation
                 if (lastToken.getKind() == Token.Kind.OPERATOR) {
-                    Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(((TextToken) lastToken).getText());
-                    shift(Token.Kind.OPERATOR);
+                    String operatorString = ((TextToken) lastToken).getText();
+                    SourcePosition start = shift(Token.Kind.OPERATOR);
+                    Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(start, operatorString);
 
                     if (EXPRESSION_FIRST_SET.contains(lastToken.getKind())) {
                         Expression secondExpression = parseExpression();
-                        yield new BinaryOp(operator, identifier, secondExpression);
+                        yield new BinaryOp(start, operator, identifier, secondExpression);
                     }
 
-                    yield new UnaryOp(operator, identifier);
+                    yield new UnaryOp(start, operator, identifier);
                 }
 
                 yield parseIfCall(identifier);
@@ -186,36 +187,36 @@ public class Parser {
     private Expression parseExpression() throws IOException, SyntaxError {
         Expression firstExpression = switch (lastToken.getKind()) {
             case TRUE -> {
-                shift(Token.Kind.TRUE);
-                yield new LitBool(true);
+                SourcePosition start = shift(Token.Kind.TRUE);
+                yield new LitBool(start, true);
             }
             case FALSE -> {
-                shift(Token.Kind.FALSE);
-                yield new LitBool(false);
+                SourcePosition start = shift(Token.Kind.FALSE);
+                yield new LitBool(start, false);
             }
             case INTLITERAL -> {
-                LitInt litInt = new LitInt(Integer.parseInt(((TextToken) lastToken).getText()));
-                shift(Token.Kind.INTLITERAL);
-                yield litInt;
+                int value = Integer.parseInt(((TextToken) lastToken).getText());
+                SourcePosition start = shift(Token.Kind.INTLITERAL);
+                yield new LitInt(start, value);
             }
             case CHARLITERAL -> {
-                LitChar litChar = new LitChar(((TextToken) lastToken).getText().charAt(0));
-                shift(Token.Kind.CHARLITERAL);
-                yield litChar;
+                char value = ((TextToken) lastToken).getText().charAt(0);
+                SourcePosition start = shift(Token.Kind.CHARLITERAL);
+                yield new LitChar(start, value);
             }
             case LBRACK -> {
-                shift(Token.Kind.LBRACK);
+                SourcePosition start = shift(Token.Kind.LBRACK);
                 @SuppressWarnings("unchecked") List<Expression> arrayValues =
                         (lastToken.getKind() == Token.Kind.RBRACK) ? Collections.EMPTY_LIST : parseArraySeq();
                 shift(Token.Kind.RBRACK);
-                yield new LitArray(arrayValues);
+                yield new LitArray(start, arrayValues);
             }
             case LBRACE -> {
-                shift(Token.Kind.LBRACE);
+                SourcePosition start = shift(Token.Kind.LBRACE);
                 @SuppressWarnings("unchecked") List<LitRecord.RecordField> fields =
                         (lastToken.getKind() == Token.Kind.RBRACE) ? Collections.EMPTY_LIST : parseFieldSeq();
                 shift(Token.Kind.RBRACE);
-                yield new LitRecord(fields);
+                yield new LitRecord(start, fields);
             }
             case LPAREN -> {
                 shift(Token.Kind.LPAREN);
@@ -224,62 +225,66 @@ public class Parser {
                 yield expression;
             }
             case LET -> {
-                shift(Token.Kind.LET);
+                SourcePosition start = shift(Token.Kind.LET);
                 List<Declaration> declarations = parseDeclSeq();
                 shift(Token.Kind.IN);
                 Expression expression = parseExpression();
-                yield new LetExpression(declarations, expression);
+                yield new LetExpression(start, declarations, expression);
             }
             case IF -> {
-                shift(Token.Kind.IF);
+                SourcePosition start = shift(Token.Kind.IF);
                 Expression condition = parseExpression();
                 shift(Token.Kind.THEN);
                 Expression consequent = parseExpression();
                 shift(Token.Kind.ELSE);
                 Expression alternative = parseExpression();
-                yield new IfExpression(condition, consequent, alternative);
+                yield new IfExpression(start, condition, consequent, alternative);
             }
             case IDENTIFIER -> parseIfCall(parseIdentifier());
             // unary prefix op
             case OPERATOR -> {
-                Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(((TextToken) lastToken).getText());
-                shift(Token.Kind.OPERATOR);
+                String operatorText = ((TextToken) lastToken).getText();
+                SourcePosition start = shift(Token.Kind.OPERATOR);
+                Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(start, operatorText);
                 Expression expression = parseExpression();
-                yield new UnaryOp(operator, expression);
+                yield new UnaryOp(start, operator, expression);
             }
 
             default -> throw new SyntaxError(lastToken);
         };
 
         if (lastToken.getKind() == Token.Kind.OPERATOR) {
-            Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(((TextToken) lastToken).getText());
-            shift(Token.Kind.OPERATOR);
+            String operatorText = ((TextToken) lastToken).getText();
+            SourcePosition start = shift(Token.Kind.OPERATOR);
+            Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(start, operatorText);
 
             if (EXPRESSION_FIRST_SET.contains(lastToken.getKind())) {
                 Expression secondExpression = parseExpression();
-                return new BinaryOp(operator, firstExpression, secondExpression);
+                return new BinaryOp(start, operator, firstExpression, secondExpression);
             }
 
-            return new UnaryOp(operator, firstExpression);
+            return new UnaryOp(start, operator, firstExpression);
         }
 
         return firstExpression;
     }
 
     private Identifier parseIdentifier() throws IOException, SyntaxError {
-        Identifier identifier = new Identifier.BasicIdentifier(((TextToken) lastToken).getText());
 
-        shift(Token.Kind.IDENTIFIER);
+        String identText = ((TextToken) lastToken).getText();
+        SourcePosition start = shift(Token.Kind.IDENTIFIER);
+        Identifier identifier = new Identifier.BasicIdentifier(start, identText);
+
         while (lastToken.getKind() == Token.Kind.DOT || lastToken.getKind() == Token.Kind.LBRACK) {
             if (lastToken.getKind() == Token.Kind.DOT) {
                 shift(Token.Kind.DOT);
                 Identifier recordField = parseIdentifier();
-                identifier = new Identifier.RecordAccess(identifier, recordField);
+                identifier = new Identifier.RecordAccess(start, identifier, recordField);
             } else if (lastToken.getKind() == Token.Kind.LBRACK) {
                 shift(Token.Kind.LBRACK);
                 Expression arraySubscript = parseExpression();
                 shift(Token.Kind.RBRACK);
-                identifier = new Identifier.ArraySubscript(identifier, arraySubscript);
+                identifier = new Identifier.ArraySubscript(start, identifier, arraySubscript);
             }
         }
 
@@ -288,11 +293,11 @@ public class Parser {
 
     private Expression parseIfCall(Identifier identifier) throws IOException, SyntaxError {
         if (lastToken.getKind() == Token.Kind.LPAREN) {
-            shift(Token.Kind.LPAREN);
+            SourcePosition start = shift(Token.Kind.LPAREN);
             @SuppressWarnings("unchecked") List<Argument> arguments =
                     (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseArgSeq();
             shift(Token.Kind.RPAREN);
-            return new FunCall(identifier, arguments);
+            return new FunCall(start, identifier, arguments);
         }
 
         return identifier;
@@ -341,13 +346,13 @@ public class Parser {
     private Argument parseArg() throws IOException, SyntaxError {
         return switch (lastToken.getKind()) {
             case PROC, FUNC -> {
-                shift(Token.Kind.PROC);
+                SourcePosition start = shift(Token.Kind.PROC);
                 Identifier callable = parseIdentifier();
-                yield new Argument.FuncArgument(callable);
+                yield new Argument.FuncArgument(start, callable);
             }
             case VAR -> {
-                shift(Token.Kind.VAR);
-                yield new Argument.VarArgument(parseIdentifier());
+                SourcePosition start = shift(Token.Kind.VAR);
+                yield new Argument.VarArgument(start, parseIdentifier());
             }
             case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> parseExpression();
             default -> throw new SyntaxError(lastToken);
@@ -429,23 +434,23 @@ public class Parser {
     private Declaration parseDecl() throws IOException, SyntaxError {
         return switch (lastToken.getKind()) {
             case CONST -> {
-                shift(Token.Kind.CONST);
+                SourcePosition start = shift(Token.Kind.CONST);
                 String constName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                yield new Declaration.ConstDeclaration(constName, expression);
+                yield new Declaration.ConstDeclaration(start, constName, expression);
             }
             case VAR -> {
-                shift(Token.Kind.VAR);
+                SourcePosition start = shift(Token.Kind.VAR);
                 String varName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 Type varType = parseType();
-                yield new Declaration.VarDeclaration(varName, varType);
+                yield new Declaration.VarDeclaration(start, varName, varType);
             }
             case PROC -> {
-                shift(Token.Kind.PROC);
+                SourcePosition start = shift(Token.Kind.PROC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
@@ -454,10 +459,10 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
-                yield new Declaration.FuncDeclaration(funcName, parameters, Type.VOID_TYPE, statement);
+                yield new Declaration.FuncDeclaration(start, funcName, parameters, Type.VOID_TYPE, statement);
             }
             case FUNC -> {
-                shift(Token.Kind.FUNC);
+                SourcePosition start = shift(Token.Kind.FUNC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
@@ -468,15 +473,15 @@ public class Parser {
                 Type type = parseType();
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                yield new Declaration.FuncDeclaration(funcName, parameters, type, expression);
+                yield new Declaration.FuncDeclaration(start, funcName, parameters, type, expression);
             }
             case TYPE -> {
-                shift(Token.Kind.TYPE);
+                SourcePosition start = shift(Token.Kind.TYPE);
                 String typeName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.IS);
                 Type type = parseType();
-                yield new Declaration.TypeDeclaration(typeName, type);
+                yield new Declaration.TypeDeclaration(start, typeName, type);
             }
             default -> throw new SyntaxError(lastToken);
         };
@@ -500,31 +505,31 @@ public class Parser {
         return switch (lastToken.getKind()) {
             case IDENTIFIER -> {
                 String varName = ((TextToken) lastToken).getText();
-                shift(Token.Kind.IDENTIFIER);
+                SourcePosition start = shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 Type varType = parseType();
-                yield new ConstParameter(varName, varType);
+                yield new ConstParameter(start, varName, varType);
             }
             case VAR -> {
-                shift(Token.Kind.VAR);
+                SourcePosition start = shift(Token.Kind.VAR);
                 String varName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 Type varType = parseType();
-                yield new VarParameter(varName, varType);
+                yield new VarParameter(start, varName, varType);
             }
             case PROC -> {
-                shift(Token.Kind.PROC);
+                SourcePosition start = shift(Token.Kind.PROC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
                 @SuppressWarnings("unchecked") List<Parameter> parameters =
                         (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseParamSeq();
                 shift(Token.Kind.RPAREN);
-                yield new FuncParameter(funcName, parameters, Type.VOID_TYPE);
+                yield new FuncParameter(start, funcName, parameters, Type.VOID_TYPE);
             }
             case FUNC -> {
-                shift(Token.Kind.FUNC);
+                SourcePosition start = shift(Token.Kind.FUNC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
@@ -533,17 +538,21 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.COLON);
                 Type funcType = parseType();
-                yield new FuncParameter(funcName, parameters, funcType);
+                yield new FuncParameter(start, funcName, parameters, funcType);
             }
             default -> throw new SyntaxError(lastToken);
         };
     }
 
-    private void shift(Token.Kind expectedKind) throws IOException, SyntaxError {
+    private SourcePosition shift(Token.Kind expectedKind) throws IOException, SyntaxError {
         if (lastToken.getKind() != expectedKind) {
             throw new SyntaxError(lastToken, expectedKind);
         }
+
+        SourcePosition sourcePosition = new SourcePosition(lastToken.getLine(), lastToken.getColumn());
         lastToken = lexer.nextToken();
+
+        return sourcePosition;
     }
 
 }

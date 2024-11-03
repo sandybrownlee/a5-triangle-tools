@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.aggregates;
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.RecordAggregateVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class SingleRecordAggregate extends RecordAggregate {
 
     public final Identifier I;
     public       Expression E;
 
-    public SingleRecordAggregate(Identifier iAST, Expression eAST, SourcePosition position) {
+    public SingleRecordAggregate(Identifier iAST, Expression eAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         E = eAST;

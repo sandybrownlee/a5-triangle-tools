@@ -1,5 +1,7 @@
 package triangle.ast;
 
+import triangle.syntacticAnalyzer.SourcePosition;
+
 import java.util.List;
 
 sealed public interface Declaration
@@ -8,13 +10,15 @@ sealed public interface Declaration
 
     String getName();
 
+    SourcePosition sourcePos();
+
     interface Visitor<ST, T, E extends Exception> {
 
         T visit(ST state, Declaration declaration) throws E;
 
     }
 
-    record ConstDeclaration(String name, Expression value) implements Declaration {
+    record ConstDeclaration(SourcePosition sourcePos, String name, Expression value) implements Declaration {
 
         @Override public String getName() {
             return name;
@@ -22,7 +26,7 @@ sealed public interface Declaration
 
     }
 
-    record VarDeclaration(String name, Type type) implements Declaration {
+    record VarDeclaration(SourcePosition sourcePos, String name, Type type) implements Declaration {
 
         @Override public String getName() {
             return name;
@@ -30,7 +34,8 @@ sealed public interface Declaration
 
     }
 
-    record FuncDeclaration(String func, List<Parameter> parameters, Type returnType, Statement expression)
+    record FuncDeclaration(SourcePosition sourcePos, String func, List<Parameter> parameters, Type returnType,
+                           Statement expression)
             implements Declaration {
 
         @Override public String getName() {
@@ -39,7 +44,7 @@ sealed public interface Declaration
 
     }
 
-    record TypeDeclaration(String name, Type type) implements Declaration {
+    record TypeDeclaration(SourcePosition sourcePos, String name, Type type) implements Declaration {
 
         @Override public String getName() {
             return name;

@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.declarations;
 import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class BinaryOperatorDeclaration extends Declaration {
 
@@ -30,7 +30,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
     public BinaryOperatorDeclaration(
             Operator oAST, TypeDenoter arg1AST, TypeDenoter arg2AST, TypeDenoter resultAST,
-            SourcePosition position
+            SourcePositionOld position
     ) {
         super(position);
         O = oAST;

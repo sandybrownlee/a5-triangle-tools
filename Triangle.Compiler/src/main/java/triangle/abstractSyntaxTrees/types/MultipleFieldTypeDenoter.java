@@ -20,7 +20,7 @@ package triangle.abstractSyntaxTrees.types;
 
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class MultipleFieldTypeDenoter extends FieldTypeDenoter {
 
@@ -30,7 +30,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
     public MultipleFieldTypeDenoter(
             Identifier iAST, TypeDenoter tAST, FieldTypeDenoter ftAST,
-            SourcePosition position
+            SourcePositionOld position
     ) {
         super(position);
         I = iAST;

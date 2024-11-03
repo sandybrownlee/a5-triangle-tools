@@ -18,7 +18,7 @@
 
 package triangle;
 
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ErrorReporter {
 
@@ -33,7 +33,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
         this.throwExceptions = throwExceptions;
     }
 
-    public void reportError(String message, SourcePosition pos) {
+    public void reportError(String message, SourcePositionOld pos) {
 
         numErrors++;
 

@@ -20,14 +20,14 @@ package triangle.abstractSyntaxTrees.types;
 
 import triangle.abstractSyntaxTrees.terminals.IntegerLiteral;
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ArrayTypeDenoter extends TypeDenoter {
 
     public final IntegerLiteral IL;
     public       TypeDenoter    T;
 
-    public ArrayTypeDenoter(IntegerLiteral ilAST, TypeDenoter tAST, SourcePosition position) {
+    public ArrayTypeDenoter(IntegerLiteral ilAST, TypeDenoter tAST, SourcePositionOld position) {
         super(position);
         IL = ilAST;
         T = tAST;

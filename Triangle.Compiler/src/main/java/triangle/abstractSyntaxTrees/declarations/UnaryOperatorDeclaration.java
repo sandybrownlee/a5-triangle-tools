@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.declarations;
 import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class UnaryOperatorDeclaration extends Declaration {
 
     public final Operator    O;
     public final TypeDenoter ARG, RES;
 
-    public UnaryOperatorDeclaration(Operator oAST, TypeDenoter argAST, TypeDenoter resultAST, SourcePosition position) {
+    public UnaryOperatorDeclaration(Operator oAST, TypeDenoter argAST, TypeDenoter resultAST, SourcePositionOld position) {
         super(position);
         O = oAST;
         ARG = argAST;

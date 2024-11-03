@@ -167,16 +167,16 @@ public final class ASTPrinter implements AllVisitor<Void, String, Exception> {
                     recordType.fieldTypes().stream().map(t -> t.fieldName() + " : " + visit(state, t.fieldType()) + ",")
             );
             case Type.BasicType basicType -> basicType.name();
-            case Type.VoidType _ -> "VOID";
-            case Type.BoolType boolType -> "BOOL";
-            case Type.CharType charType -> "CHAR";
+            case Type.PrimType.VoidType _ -> "VOID";
+            case Type.PrimType.BoolType boolType -> "BOOL";
+            case Type.PrimType.CharType charType -> "CHAR";
             // will be needed for custom function type definitions
-            case Type.FuncType funcType -> String.format(
+            case Type.PrimType.FuncType funcType -> String.format(
                     "FUNC (%s) : %s",
                     funcType.argTypes().stream().map(p -> visit(state, p) + ",").reduce("", String::concat),
                     funcType.returnType()
             );
-            case Type.IntType intType -> "INT";
+            case Type.PrimType.IntType intType -> "INT";
         };
     }
 

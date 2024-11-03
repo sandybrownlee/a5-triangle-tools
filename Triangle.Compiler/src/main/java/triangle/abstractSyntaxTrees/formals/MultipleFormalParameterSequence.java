@@ -19,7 +19,7 @@
 package triangle.abstractSyntaxTrees.formals;
 
 import triangle.abstractSyntaxTrees.visitors.FormalParameterSequenceVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class MultipleFormalParameterSequence extends FormalParameterSequence {
 
@@ -28,7 +28,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
     public MultipleFormalParameterSequence(
             FormalParameter fpAST, FormalParameterSequence fpsAST,
-            SourcePosition position
+            SourcePositionOld position
     ) {
         super(position);
         FP = fpAST;

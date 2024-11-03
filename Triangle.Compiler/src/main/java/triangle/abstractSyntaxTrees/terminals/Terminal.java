@@ -19,13 +19,13 @@
 package triangle.abstractSyntaxTrees.terminals;
 
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class Terminal extends AbstractSyntaxTree {
 
     public final String spelling;
 
-    public Terminal(String spelling, SourcePosition position) {
+    public Terminal(String spelling, SourcePositionOld position) {
         super(position);
         this.spelling = spelling;
     }

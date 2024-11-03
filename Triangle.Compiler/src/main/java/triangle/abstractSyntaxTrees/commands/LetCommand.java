@@ -20,14 +20,14 @@ package triangle.abstractSyntaxTrees.commands;
 
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class LetCommand extends Command {
 
     public final Declaration D;
     public final Command     C;
 
-    public LetCommand(Declaration dAST, Command cAST, SourcePosition position) {
+    public LetCommand(Declaration dAST, Command cAST, SourcePositionOld position) {
         super(position);
         D = dAST;
         C = cAST;

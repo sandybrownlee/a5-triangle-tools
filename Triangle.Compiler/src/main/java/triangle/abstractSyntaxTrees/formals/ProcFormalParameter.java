@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.formals;
 import triangle.abstractSyntaxTrees.declarations.ProcedureDeclaration;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ProcFormalParameter extends FormalParameter implements ProcedureDeclaration {
 
     public final Identifier              I;
     public final FormalParameterSequence FPS;
 
-    public ProcFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, SourcePosition position) {
+    public ProcFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         FPS = fpsAST;

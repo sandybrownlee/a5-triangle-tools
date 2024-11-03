@@ -20,14 +20,14 @@ package triangle.abstractSyntaxTrees.commands;
 
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class IfCommand extends Command {
 
     public final Command C1, C2;
     public Expression E;
 
-    public IfCommand(Expression eAST, Command c1AST, Command c2AST, SourcePosition position) {
+    public IfCommand(Expression eAST, Command c1AST, Command c2AST, SourcePositionOld position) {
         super(position);
         E = eAST;
         C1 = c1AST;

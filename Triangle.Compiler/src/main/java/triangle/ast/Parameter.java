@@ -1,12 +1,22 @@
 package triangle.ast;
 
+import triangle.syntacticAnalyzer.SourcePosition;
+
 import java.util.List;
 
 sealed public interface Parameter permits Parameter.ConstParameter, Parameter.FuncParameter, Parameter.VarParameter {
 
     String getName();
 
-    record ConstParameter(String name, Type type) implements Parameter {
+    SourcePosition sourcePos();
+
+    interface Visitor<ST, T, E extends Exception> {
+
+        T visit(ST state, Parameter parameter) throws E;
+
+    }
+
+    record ConstParameter(SourcePosition sourcePos, String name, Type type) implements Parameter {
 
         @Override public String getName() {
             return name;
@@ -14,7 +24,7 @@ sealed public interface Parameter permits Parameter.ConstParameter, Parameter.Fu
 
     }
 
-    record VarParameter(String name, Type type) implements Parameter {
+    record VarParameter(SourcePosition sourcePos, String name, Type type) implements Parameter {
 
         @Override public String getName() {
             return name;
@@ -22,7 +32,8 @@ sealed public interface Parameter permits Parameter.ConstParameter, Parameter.Fu
 
     }
 
-    record FuncParameter(String callable, List<Parameter> parameters, Type returnType) implements Parameter {
+    record FuncParameter(SourcePosition sourcePos, String callable, List<Parameter> parameters, Type returnType)
+            implements Parameter {
 
         @Override public String getName() {
             return callable;
@@ -30,7 +41,4 @@ sealed public interface Parameter permits Parameter.ConstParameter, Parameter.Fu
 
     }
 
-    interface Visitor<ST,T,E extends Exception> {
-        T visit(ST state, Parameter parameter) throws E;
-    }
 }

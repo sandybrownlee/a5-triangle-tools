@@ -19,19 +19,19 @@
 package triangle.abstractSyntaxTrees;
 
 import triangle.codeGenerator.entities.RuntimeEntity;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class AbstractSyntaxTree {
 
-    private final SourcePosition position;
-    public        RuntimeEntity  entity;
+    private final SourcePositionOld position;
+    public        RuntimeEntity     entity;
 
-    public AbstractSyntaxTree(SourcePosition position) {
+    public AbstractSyntaxTree(SourcePositionOld position) {
         this.position = position;
         entity = null;
     }
 
-    public SourcePosition getPosition() {
+    public SourcePositionOld getPosition() {
         return position;
     }
 

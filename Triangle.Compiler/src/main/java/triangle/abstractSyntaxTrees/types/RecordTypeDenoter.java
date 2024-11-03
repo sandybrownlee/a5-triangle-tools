@@ -19,13 +19,13 @@
 package triangle.abstractSyntaxTrees.types;
 
 import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class RecordTypeDenoter extends TypeDenoter {
 
     public FieldTypeDenoter FT;
 
-    public RecordTypeDenoter(FieldTypeDenoter ftAST, SourcePosition position) {
+    public RecordTypeDenoter(FieldTypeDenoter ftAST, SourcePositionOld position) {
         super(position);
         FT = ftAST;
     }

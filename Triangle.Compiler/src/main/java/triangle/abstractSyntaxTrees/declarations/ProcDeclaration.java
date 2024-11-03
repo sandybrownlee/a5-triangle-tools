@@ -22,7 +22,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.formals.FormalParameterSequence;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ProcDeclaration extends Declaration implements ProcedureDeclaration {
 
@@ -30,7 +30,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
     public final FormalParameterSequence FPS;
     public final Command                 C;
 
-    public ProcDeclaration(Identifier iAST, FormalParameterSequence fpsAST, Command cAST, SourcePosition position) {
+    public ProcDeclaration(Identifier iAST, FormalParameterSequence fpsAST, Command cAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         FPS = fpsAST;

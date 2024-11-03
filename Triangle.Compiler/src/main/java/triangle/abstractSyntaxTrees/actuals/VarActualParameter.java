@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.actuals;
 
 import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
 import triangle.abstractSyntaxTrees.vnames.Vname;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class VarActualParameter extends ActualParameter {
 
     public final Vname V;
 
-    public VarActualParameter(Vname vAST, SourcePosition position) {
+    public VarActualParameter(Vname vAST, SourcePositionOld position) {
         super(position);
         V = vAST;
     }

@@ -19,11 +19,11 @@
 package triangle.abstractSyntaxTrees.terminals;
 
 import triangle.abstractSyntaxTrees.visitors.LiteralVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class CharacterLiteral extends Terminal {
 
-    public CharacterLiteral(String spelling, SourcePosition position) {
+    public CharacterLiteral(String spelling, SourcePositionOld position) {
         super(spelling, position);
     }
 

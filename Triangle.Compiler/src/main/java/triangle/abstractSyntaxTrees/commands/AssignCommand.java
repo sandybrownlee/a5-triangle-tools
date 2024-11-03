@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.commands;
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.abstractSyntaxTrees.vnames.Vname;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class AssignCommand extends Command {
 
     public final Vname      V;
     public       Expression E;
 
-    public AssignCommand(Vname vAST, Expression eAST, SourcePosition position) {
+    public AssignCommand(Vname vAST, Expression eAST, SourcePositionOld position) {
         super(position);
         V = vAST;
         E = eAST;

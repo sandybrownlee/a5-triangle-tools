@@ -20,14 +20,14 @@ package triangle.abstractSyntaxTrees.aggregates;
 
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.ArrayAggregateVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class MultipleArrayAggregate extends ArrayAggregate {
 
     public final ArrayAggregate AA;
     public       Expression     E;
 
-    public MultipleArrayAggregate(Expression eAST, ArrayAggregate aaAST, SourcePosition position) {
+    public MultipleArrayAggregate(Expression eAST, ArrayAggregate aaAST, SourcePositionOld position) {
         super(position);
         E = eAST;
         AA = aaAST;

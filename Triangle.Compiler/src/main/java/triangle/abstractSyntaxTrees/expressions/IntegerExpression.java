@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.terminals.IntegerLiteral;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class IntegerExpression extends Expression {
 
     public final IntegerLiteral IL;
 
-    public IntegerExpression(IntegerLiteral ilAST, SourcePosition position) {
+    public IntegerExpression(IntegerLiteral ilAST, SourcePositionOld position) {
         super(position);
         IL = ilAST;
     }

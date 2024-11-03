@@ -19,7 +19,7 @@
 package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class IfExpression extends Expression {
 
@@ -27,7 +27,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
     public Expression E2;
     public Expression E3;
 
-    public IfExpression(Expression e1AST, Expression e2AST, Expression e3AST, SourcePosition position) {
+    public IfExpression(Expression e1AST, Expression e2AST, Expression e3AST, SourcePositionOld position) {
         super(position);
         E1 = e1AST;
         E2 = e2AST;

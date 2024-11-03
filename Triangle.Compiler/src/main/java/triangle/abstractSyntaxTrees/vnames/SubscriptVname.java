@@ -20,7 +20,7 @@ package triangle.abstractSyntaxTrees.vnames;
 
 import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 /**
  a value-or-variable name for an array, with an index, e.g. a[4]  (a is the vAST, 4 is the eAST)
@@ -30,7 +30,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
     public final Vname      V;
     public       Expression E;
 
-    public SubscriptVname(Vname vAST, Expression eAST, SourcePosition position) {
+    public SubscriptVname(Vname vAST, Expression eAST, SourcePositionOld position) {
         super(position);
         V = vAST;
         E = eAST;

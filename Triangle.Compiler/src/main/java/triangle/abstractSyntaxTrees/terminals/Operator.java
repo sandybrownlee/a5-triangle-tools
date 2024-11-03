@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.terminals;
 
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.visitors.OperatorVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class Operator extends Terminal {
 
     public Declaration decl;
 
-    public Operator(String spelling, SourcePosition position) {
+    public Operator(String spelling, SourcePositionOld position) {
         super(spelling, position);
         decl = null;
     }

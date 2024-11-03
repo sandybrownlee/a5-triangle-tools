@@ -20,11 +20,11 @@ package triangle.abstractSyntaxTrees.formals;
 
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class FormalParameter extends Declaration {
 
-    public FormalParameter(SourcePosition position) {
+    public FormalParameter(SourcePositionOld position) {
         super(position);
     }
 

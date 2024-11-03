@@ -19,13 +19,13 @@
 package triangle.abstractSyntaxTrees.declarations;
 
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class SequentialDeclaration extends Declaration {
 
     public final Declaration D1, D2;
 
-    public SequentialDeclaration(Declaration d1AST, Declaration d2AST, SourcePosition position) {
+    public SequentialDeclaration(Declaration d1AST, Declaration d2AST, SourcePositionOld position) {
         super(position);
         D1 = d1AST;
         D2 = d2AST;

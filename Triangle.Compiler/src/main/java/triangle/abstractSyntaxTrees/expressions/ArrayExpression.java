@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.aggregates.ArrayAggregate;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class ArrayExpression extends Expression {
 
     public final ArrayAggregate AA;
 
-    public ArrayExpression(ArrayAggregate aaAST, SourcePosition position) {
+    public ArrayExpression(ArrayAggregate aaAST, SourcePositionOld position) {
         super(position);
         AA = aaAST;
     }

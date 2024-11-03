@@ -20,11 +20,11 @@ package triangle.abstractSyntaxTrees.actuals;
 
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.ActualParameterSequenceVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class ActualParameterSequence extends AbstractSyntaxTree {
 
-    public ActualParameterSequence(SourcePosition position) {
+    public ActualParameterSequence(SourcePositionOld position) {
         super(position);
     }
 

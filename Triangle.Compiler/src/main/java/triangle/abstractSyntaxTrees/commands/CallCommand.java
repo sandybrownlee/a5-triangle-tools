@@ -21,14 +21,14 @@ package triangle.abstractSyntaxTrees.commands;
 import triangle.abstractSyntaxTrees.actuals.ActualParameterSequence;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class CallCommand extends Command {
 
     public final Identifier              I;
     public final ActualParameterSequence APS;
 
-    public CallCommand(Identifier iAST, ActualParameterSequence apsAST, SourcePosition position) {
+    public CallCommand(Identifier iAST, ActualParameterSequence apsAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         APS = apsAST;

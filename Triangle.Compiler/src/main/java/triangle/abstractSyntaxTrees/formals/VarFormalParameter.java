@@ -22,14 +22,14 @@ import triangle.abstractSyntaxTrees.declarations.VariableDeclaration;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class VarFormalParameter extends FormalParameter implements VariableDeclaration {
 
     public final Identifier  I;
     public       TypeDenoter T;
 
-    public VarFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
+    public VarFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePositionOld position) {
         super(position);
         I = iAST;
         T = tAST;

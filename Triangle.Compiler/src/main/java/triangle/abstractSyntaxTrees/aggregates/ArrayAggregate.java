@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.aggregates;
 
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.ArrayAggregateVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public abstract class ArrayAggregate extends AbstractSyntaxTree {
 
     public int elemCount;
 
-    public ArrayAggregate(SourcePosition position) {
+    public ArrayAggregate(SourcePositionOld position) {
         super(position);
         elemCount = 0;
     }

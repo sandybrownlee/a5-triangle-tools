@@ -20,13 +20,13 @@ package triangle.abstractSyntaxTrees.expressions;
 
 import triangle.abstractSyntaxTrees.terminals.CharacterLiteral;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.syntacticAnalyzer.SourcePositionOld;
 
 @Deprecated public class CharacterExpression extends Expression {
 
     public final CharacterLiteral CL;
 
-    public CharacterExpression(CharacterLiteral clAST, SourcePosition position) {
+    public CharacterExpression(CharacterLiteral clAST, SourcePositionOld position) {
         super(position);
         CL = clAST;
     }
