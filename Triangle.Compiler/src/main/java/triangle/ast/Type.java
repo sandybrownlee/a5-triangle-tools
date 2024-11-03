@@ -23,6 +23,12 @@ sealed public interface Type
     record CharType() implements Type { }
     record VoidType() implements Type { }
 
+    // static instances of primitive types for convenience
+    Type BOOL_TYPE = new BoolType();
+    Type INT_TYPE = new IntType();
+    Type CHAR_TYPE = new CharType();
+    Type VOID_TYPE = new VoidType();
+
     interface Visitor<ST,T, E extends Exception> {
         T visit(ST state, Type type) throws E;
     }

@@ -446,7 +446,7 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
-                yield new Declaration.FuncDeclaration(funcName, parameters, new VoidType(), statement);
+                yield new Declaration.FuncDeclaration(funcName, parameters, Type.VOID_TYPE, statement);
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
@@ -513,7 +513,7 @@ public class Parser {
                 @SuppressWarnings("unchecked") List<Parameter> parameters =
                         (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseParamSeq();
                 shift(Token.Kind.RPAREN);
-                yield new FuncParameter(funcName, parameters, new VoidType());
+                yield new FuncParameter(funcName, parameters, Type.VOID_TYPE);
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
