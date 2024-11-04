@@ -41,9 +41,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-// Statefully checks that all uses of indentifiers and types are valid. Uses exceptions for control flow
-// TODO: try to accumulate errors instead of failing at the first one
-// TODO: refactor to actually use ST typevar of visitors
 public final class SemanticAnalyzer implements AllVisitor<Type, SemanticException> {
 
     private static final Type                                      binaryRelation =

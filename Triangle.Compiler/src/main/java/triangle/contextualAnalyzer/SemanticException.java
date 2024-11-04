@@ -14,7 +14,7 @@ public abstract class SemanticException extends Exception {
     }
 
     public SemanticException(final SourcePosition sourcePos, final String s) {
-        super(s + "at" + sourcePos.lineNo() + ":" + sourcePos.colNo());
+        super(s + " at " + sourcePos.lineNo() + ":" + sourcePos.colNo());
     }
 
     static final class UndeclaredUse extends SemanticException {
