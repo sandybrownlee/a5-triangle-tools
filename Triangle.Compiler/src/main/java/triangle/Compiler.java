@@ -129,9 +129,9 @@ public class Compiler {
 
         // The AST representing the source program.
         Program theAST = parser.parseProgram(); // 1st pass
-        System.out.println(new ASTPrinter().visit(theAST));
+        System.out.println(new ASTPrinter().prettyPrint(theAST));
         try {
-            new SemanticAnalyzer().visit(theAST);
+            new SemanticAnalyzer().analyze(theAST);
         } catch (SemanticException e) {
             System.err.println("Semantic error while compiling: " + e.getMessage());
         }

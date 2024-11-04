@@ -22,12 +22,6 @@ sealed public interface Expression extends Statement, Argument
 
         SourcePosition sourcePos();
 
-        interface Visitor<T, E extends Exception> {
-
-            T visit(Identifier identifier) throws E;
-
-        }
-
         record BasicIdentifier(SourcePosition sourcePos, String name) implements Identifier {
 
             @Override public BasicIdentifier root() {
@@ -51,12 +45,6 @@ sealed public interface Expression extends Statement, Argument
             }
 
         }
-
-    }
-
-    interface Visitor<T, E extends Exception> {
-
-        T visit(Expression expression) throws E;
 
     }
 

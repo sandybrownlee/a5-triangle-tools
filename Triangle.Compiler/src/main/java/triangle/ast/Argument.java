@@ -6,12 +6,6 @@ sealed public interface Argument permits Argument.FuncArgument, Argument.VarArgu
 
     SourcePosition sourcePos();
 
-    interface Visitor<T, E extends Exception> {
-
-        T visit(Argument argument) throws E;
-
-    }
-
     record VarArgument(SourcePosition sourcePos, Expression.Identifier var) implements Argument { }
 
     record FuncArgument(SourcePosition sourcePos, Expression.Identifier func) implements Argument { }

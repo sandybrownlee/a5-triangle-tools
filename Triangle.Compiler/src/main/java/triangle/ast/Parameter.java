@@ -10,12 +10,6 @@ sealed public interface Parameter permits Parameter.ConstParameter, Parameter.Fu
 
     SourcePosition sourcePos();
 
-    interface Visitor<T, E extends Exception> {
-
-        T visit(Parameter parameter) throws E;
-
-    }
-
     record ConstParameter(SourcePosition sourcePos, String name, Type type) implements Parameter {
 
         @Override public String getName() {

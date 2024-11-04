@@ -9,12 +9,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
                                           Statement.LoopWhileStatement, Statement.RepeatUntilStatement,
                                           Statement.RepeatWhileStatement, Statement.StatementBlock, Statement.WhileStatement {
 
-    interface Visitor<T, E extends Exception> {
-
-        T visit(Statement statement) throws E;
-
-    }
-
     record StatementBlock(SourcePosition sourcePos, List<Statement> statements) implements Statement { }
 
     record LetStatement(SourcePosition sourcePos, List<Declaration> declarations, Statement statement) implements Statement { }

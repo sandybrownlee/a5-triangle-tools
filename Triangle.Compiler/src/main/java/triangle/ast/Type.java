@@ -25,12 +25,6 @@ sealed public interface Type permits Type.ArrayType, Type.BasicType, Type.PrimTy
 
     }
 
-    interface Visitor<T, E extends Exception> {
-
-        T visit(Type type) throws E;
-
-    }
-
     record BasicType(String name) implements Type { }
 
     record ArrayType(int size, Type elementType) implements Type { }

@@ -12,12 +12,6 @@ sealed public interface Declaration
 
     SourcePosition sourcePos();
 
-    interface Visitor<T, E extends Exception> {
-
-        T visit(Declaration declaration) throws E;
-
-    }
-
     record ConstDeclaration(SourcePosition sourcePos, String name, Expression value) implements Declaration {
 
         @Override public String getName() {
