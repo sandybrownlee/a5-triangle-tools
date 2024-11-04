@@ -108,11 +108,10 @@ public final class SemanticAnalyzer {
 
     private final SymbolTable symtab = new SymbolTable(STD_TYPES, STD_TERMS);
 
-    public Type analyze(final Program program) throws SemanticException {
+    public void analyze(final Program program) throws SemanticException {
         for (final Statement statement : program.statements()) {
             analyze(statement);
         }
-        return Type.VOID_TYPE;
     }
 
     private Type analyze(final Argument argument) throws SemanticException {
