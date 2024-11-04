@@ -44,7 +44,7 @@ import java.util.Set;
 // Statefully checks that all uses of indentifiers and types are valid. Uses exceptions for control flow
 // TODO: try to accumulate errors instead of failing at the first one
 // TODO: refactor to actually use ST typevar of visitors
-public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticException> {
+public final class SemanticAnalyzer implements AllVisitor<Type, SemanticException> {
 
     private static final Type                                      binaryRelation =
             new FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
@@ -112,10 +112,10 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
 
     private final SymbolTable symtab = new SymbolTable(STD_TYPES, STD_TERMS);
 
-    @Override public Type visit(final Void state, final Argument argument) throws SemanticException {
+    @Override public Type visit(final Argument argument) throws SemanticException {
         return switch (argument) {
             case Argument.FuncArgument(_, Identifier func) -> {
-                Type argType = visit(state, func);
+                Type argType = visit(func);
                 if (!(argType instanceof FuncType)) {
                     throw new SemanticException.TypeError(argType, "function");
                 }
@@ -123,7 +123,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 yield argType;
             }
             case Argument.VarArgument(_, Identifier var) -> {
-                Type argType = visit(state, var);
+                Type argType = visit(var);
                 if (argType instanceof FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC
                     throw new SemanticException.TypeError(argType, "not a function");
@@ -132,7 +132,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 yield argType;
             }
             case Expression expression -> {
-                Type argType = visit(state, expression);
+                Type argType = visit(expression);
                 if (argType instanceof FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC
                     throw new SemanticException.TypeError(argType, "not a function");
@@ -143,11 +143,12 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
         };
     }
 
-    @Override public Type visit(final Void state, final Declaration declaration) throws SemanticException {
+    // needs to rethrow DuplicateRecordTypeField after annotating it with sourcePos info
+    @Override public Type visit(final Declaration declaration) throws SemanticException {
         return switch (declaration) {
             case ConstDeclaration(SourcePosition sourcePos, String _, Expression value) -> {
                 try {
-                    yield visit(state, value);
+                    yield visit(value);
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(sourcePos, e.getFieldType());
@@ -170,7 +171,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 // resolve the types of the parameters in the current env
                 List<Type> resolvedParamTypes = new ArrayList<>();
                 for (Parameter parameter : parameters) {
-                    Type paramType = visit(state, parameter);
+                    Type paramType = visit(parameter);
                     resolvedParamTypes.add(paramType);
                 }
 
@@ -187,7 +188,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
 
                 Type resolvedReturnType;
                 try {
-                    resolvedReturnType = visit(state, returnType);
+                    resolvedReturnType = visit(returnType);
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(sourcePos, e.getFieldType());
@@ -200,7 +201,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 );
 
                 // then type check the function body
-                Type statementType = visit(state, statement);
+                Type statementType = visit(statement);
 
                 symtab.exitScope();
                 // outside the function
@@ -215,7 +216,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
             }
             case TypeDeclaration typeDeclaration -> {
                 try {
-                    yield visit(state, typeDeclaration.type());
+                    yield visit(typeDeclaration.type());
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(typeDeclaration.sourcePos(), e.getFieldType());
@@ -223,7 +224,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
             }
             case Declaration.VarDeclaration varDeclaration -> {
                 try {
-                    yield visit(state, varDeclaration.type());
+                    yield visit(varDeclaration.type());
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(varDeclaration.sourcePos(), e.getFieldType());
@@ -232,15 +233,15 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
         };
     }
 
-    @Override public Type visit(final Void state, final Identifier identifier) throws SemanticException {
+    @Override public Type visit(final Identifier identifier) throws SemanticException {
         return switch (identifier) {
             case Identifier.ArraySubscript(_, Identifier array, Expression subscript) -> {
-                Type arrayType = visit(state, array);
+                Type arrayType = visit(array);
                 if (!(arrayType instanceof ArrayType)) {
                     throw new SemanticException.TypeError(arrayType, "array");
                 }
 
-                Type subscriptType = visit(state, subscript);
+                Type subscriptType = visit(subscript);
                 if (!(subscriptType instanceof Type.PrimType.IntType)) {
                     throw new SemanticException.TypeError(subscriptType, INT_TYPE);
                 }
@@ -256,7 +257,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 yield binding.get().type();
             }
             case Identifier.RecordAccess(_, Identifier record, Identifier field) -> {
-                Type recordType = visit(state, record);
+                Type recordType = visit(record);
                 if (!(recordType instanceof RecordType)) {
                     throw new SemanticException.TypeError(recordType, "record");
                 }
@@ -264,12 +265,9 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 // record access has a new scope with the field names and types of the record available
                 symtab.enterNewScope();
                 for (RecordType.RecordFieldType fieldType : ((RecordType) recordType).fieldTypes()) {
-                    symtab.add(new BasicIdentifier(null, fieldType.fieldName()), visit(
-                            state,
-                            fieldType.fieldType()
-                    ), true);
+                    symtab.add(new BasicIdentifier(null, fieldType.fieldName()), visit(fieldType.fieldType()), true);
                 }
-                Type fieldType = visit(state, field);
+                Type fieldType = visit(field);
                 symtab.exitScope();
 
                 yield fieldType;
@@ -277,7 +275,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
         };
     }
 
-    @Override public Type visit(final Void state, final Expression expression) throws SemanticException {
+    @Override public Type visit(final Expression expression) throws SemanticException {
         return switch (expression) {
             case BinaryOp(
                     SourcePosition sourcePos, BasicIdentifier operator, Expression leftOperand, Expression rightOperand
@@ -292,8 +290,8 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 // I special-case the equality operations because they are the ONLY polymorphic function and I do not have enough
                 //  time to implement full polymorphism
                 if (operator.name().equals("=")) {
-                    Type lOperandType = visit(state, leftOperand);
-                    Type rOperandType = visit(state, rightOperand);
+                    Type lOperandType = visit(leftOperand);
+                    Type rOperandType = visit(rightOperand);
 
                     // just make sure that left and right operands are the same type
                     if (!lOperandType.equals(rOperandType)) {
@@ -303,8 +301,8 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                     yield BOOL_TYPE;
                 }
                 if (operator.name().equals("\\=")) {
-                    Type lOperandType = visit(state, leftOperand);
-                    Type rOperandType = visit(state, rightOperand);
+                    Type lOperandType = visit(leftOperand);
+                    Type rOperandType = visit(rightOperand);
 
                     // just make sure that left and right operands are the same type
                     if (!lOperandType.equals(rOperandType)) {
@@ -325,13 +323,13 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                     throw new SemanticException.ArityMismatch(sourcePos, operator, 2, argTypes.size());
                 }
 
-                Type lOperandType = visit(state, leftOperand);
+                Type lOperandType = visit(leftOperand);
                 Type lOperandExpected = argTypes.get(0);
                 if (!lOperandType.equals(lOperandExpected)) {
                     throw new SemanticException.TypeError(lOperandExpected, lOperandType);
                 }
 
-                Type rOperandType = visit(state, rightOperand);
+                Type rOperandType = visit(rightOperand);
                 Type rOperandExpected = argTypes.get(1);
                 if (!rOperandType.equals(rOperandExpected)) {
                     throw new SemanticException.TypeError(rOperandExpected, rOperandType);
@@ -340,7 +338,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 yield returnType;
             }
             case FunCall(SourcePosition sourcePos, Identifier callable, List<Argument> arguments) -> {
-                Type funcType = visit(state, callable);
+                Type funcType = visit(callable);
 
                 if (!(funcType instanceof FuncType(List<Type> argTypes, Type returnType))) {
                     throw new SemanticException.TypeError(funcType, "function");
@@ -351,8 +349,8 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 }
 
                 for (int i = 0; i < argTypes.size(); i++) {
-                    Type argType = visit(state, arguments.get(i));
-                    Type expectedType = visit(state, argTypes.get(i));
+                    Type argType = visit(arguments.get(i));
+                    Type expectedType = visit(argTypes.get(i));
                     if (!(argType.equals(expectedType))) {
                         throw new SemanticException.TypeError(argType, expectedType);
                     }
@@ -360,15 +358,15 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
 
                 yield returnType;
             }
-            case Identifier identifier -> visit(state, identifier);
+            case Identifier identifier -> visit(identifier);
             case IfExpression(_, Expression condition, Expression consequent, Expression alternative) -> {
-                Type condType = visit(state, condition);
+                Type condType = visit(condition);
                 if (!(condType instanceof Type.PrimType.BoolType)) {
                     throw new SemanticException.TypeError(condType, BOOL_TYPE);
                 }
 
-                Type consequentType = visit(state, consequent);
-                Type alternativeType = visit(state, alternative);
+                Type consequentType = visit(consequent);
+                Type alternativeType = visit(alternative);
                 if (!(consequentType.equals(alternativeType))) {
                     throw new SemanticException.TypeError(consequentType, alternativeType);
                 }
@@ -379,12 +377,12 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 symtab.enterNewScope();
 
                 for (Declaration declaration : declarations) {
-                    Type type = visit(state, declaration);
+                    Type type = visit(declaration);
                     symtab.add(new BasicIdentifier(declaration.sourcePos(), declaration.getName()), type,
                                declaration instanceof ConstDeclaration
                     );
                 }
-                Type exprType = visit(state, letExpression);
+                Type exprType = visit(letExpression);
 
                 symtab.exitScope();
                 yield exprType;
@@ -395,9 +393,9 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                     throw new UnsupportedOperationException();
                 }
 
-                Type expectedType = visit(state, values.getFirst());
+                Type expectedType = visit(values.getFirst());
                 for (Expression value : values) {
-                    Type elementType = visit(state, value);
+                    Type elementType = visit(value);
                     if (!elementType.equals(expectedType)) {
                         throw new SemanticException.TypeError(expectedType, elementType);
                     }
@@ -407,7 +405,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
             }
             case LitChar _ -> Type.CHAR_TYPE;
             case LitInt _ -> INT_TYPE;
-            case LitRecord(_, List<LitRecord.RecordField> fields) -> {
+            case LitRecord(SourcePosition sourcePos, List<LitRecord.RecordField> fields) -> {
                 if (fields.isEmpty()) {
                     // implementing this sensibly will take row-poly types which is too hard so we just treat all empty records
                     // as belonging to a single type
@@ -421,7 +419,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                         throw new SemanticException.DuplicateRecordField(sourcePos, field);
                     }
                     seenFieldNames.add(field.name());
-                    fieldTypes.add(new RecordType.RecordFieldType(field.name(), visit(state, field.value())));
+                    fieldTypes.add(new RecordType.RecordFieldType(field.name(), visit(field.value())));
                 }
 
                 yield new RecordType(fieldTypes);
@@ -443,7 +441,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                     throw new SemanticException.ArityMismatch(sourcePos, operator, 1, argTypes.size());
                 }
 
-                Type operandType = visit(state, operand);
+                Type operandType = visit(operand);
                 Type operandExpected = argTypes.getFirst();
                 if (!operandType.equals(operandExpected)) {
                     throw new SemanticException.TypeError(operandExpected, operandType);
@@ -455,38 +453,38 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
         };
     }
 
-    @Override public Type visit(final Void state, final Parameter parameter) throws SemanticException {
+    @Override public Type visit(final Parameter parameter) throws SemanticException {
         return switch (parameter) {
             case Parameter.FuncParameter(_, String _, List<Parameter> parameters, Type returnType) -> {
                 List<Type> paramTypes = new ArrayList<>();
                 for (Parameter p : parameters) {
-                    paramTypes.add(visit(state, p));
+                    paramTypes.add(visit(p));
                 }
 
-                yield new FuncType(paramTypes, visit(state, returnType));
+                yield new FuncType(paramTypes, visit(returnType));
             }
 
-            case Parameter.VarParameter(_, String _, Type type) -> visit(state, type);
-            case Parameter.ConstParameter(_, String _, Type type) -> visit(state, type);
+            case Parameter.VarParameter(_, String _, Type type) -> visit(type);
+            case Parameter.ConstParameter(_, String _, Type type) -> visit(type);
         };
     }
 
-    @Override public Type visit(final Void state, final Program program) throws SemanticException {
+    @Override public Type visit(final Program program) throws SemanticException {
         for (final Statement statement : program.statements()) {
-            visit(state, statement);
+            visit(statement);
         }
         return Type.VOID_TYPE;
     }
 
-    @Override public Type visit(final Void state, final Statement statement) throws SemanticException {
+    @Override public Type visit(final Statement statement) throws SemanticException {
         switch (statement) {
             case Expression expression -> {
                 // Expressions are the only statements that have a non-void type
-                return visit(state, expression);
+                return visit(expression);
             }
             case Statement.AssignStatement(SourcePosition sourcePos, Identifier lvalue, Expression rvalue) -> {
-                Type lType = visit(state, lvalue);
-                Type rType = visit(state, rvalue);
+                Type lType = visit(lvalue);
+                Type rType = visit(rvalue);
 
                 if (!lType.equals(rType)) {
                     throw new SemanticException.TypeError(lType, rType);
@@ -497,18 +495,18 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 }
             }
             case Statement.IfStatement ifStatement -> {
-                Type condType = visit(state, ifStatement.condition());
+                Type condType = visit(ifStatement.condition());
 
                 if (!(condType instanceof Type.PrimType.BoolType)) {
                     throw new SemanticException.TypeError(condType, BOOL_TYPE);
                 }
 
                 if (ifStatement.consequent().isPresent()) {
-                    visit(state, ifStatement.consequent().get());
+                    visit(ifStatement.consequent().get());
                 }
 
                 if (ifStatement.alternative().isPresent()) {
-                    visit(state, ifStatement.alternative().get());
+                    visit(ifStatement.alternative().get());
                 }
             }
             case Statement.LetStatement(_, List<Declaration> declarations, Statement letStatement) -> {
@@ -516,61 +514,55 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
 
                 for (Declaration declaration : declarations) {
                     switch (declaration) {
-                        case TypeDeclaration _ -> symtab.add(
-                                new BasicType(declaration.getName()),
-                                visit(
-                                        state,
-                                        declaration
-                                )
-                        );
+                        case TypeDeclaration _ -> symtab.add(new BasicType(declaration.getName()), visit(declaration));
                         case ConstDeclaration _, Declaration.FuncDeclaration _, Declaration.VarDeclaration _ -> symtab.add(
-                                new BasicIdentifier(declaration.sourcePos(), declaration.getName()), visit(state, declaration),
+                                new BasicIdentifier(declaration.sourcePos(), declaration.getName()), visit(declaration),
                                 declaration instanceof ConstDeclaration
                         );
                     }
                 }
 
-                visit(state, letStatement);
+                visit(letStatement);
                 symtab.exitScope();
             }
             case Statement.LoopWhileStatement(_, Expression condition, Statement loopBody, Statement doBody) -> {
-                Type condType = visit(state, condition);
+                Type condType = visit(condition);
 
                 if (!(condType instanceof Type.PrimType.BoolType)) {
                     throw new SemanticException.TypeError(condType, BOOL_TYPE);
                 }
 
-                visit(state, loopBody);
-                visit(state, doBody);
+                visit(loopBody);
+                visit(doBody);
             }
             case Statement.RepeatUntilStatement(_, Expression condition, Statement body) -> {
-                Type condType = visit(state, condition);
+                Type condType = visit(condition);
                 if (!(condType instanceof Type.PrimType.BoolType)) {
                     throw new SemanticException.TypeError(condType, BOOL_TYPE);
                 }
 
-                visit(state, body);
+                visit(body);
             }
             case Statement.RepeatWhileStatement(_, Expression condition, Statement body) -> {
-                Type condType = visit(state, condition);
+                Type condType = visit(condition);
                 if (!(condType instanceof Type.PrimType.BoolType)) {
                     throw new SemanticException.TypeError(condType, BOOL_TYPE);
                 }
 
-                visit(state, body);
+                visit(body);
             }
             case Statement.StatementBlock(_, List<Statement> statements) -> {
                 for (Statement stmt : statements) {
-                    visit(state, stmt);
+                    visit(stmt);
                 }
             }
             case Statement.WhileStatement(_, Expression condition, Statement body) -> {
-                Type condType = visit(state, condition);
+                Type condType = visit(condition);
                 if (!(condType instanceof Type.PrimType.BoolType)) {
                     throw new SemanticException.TypeError(condType, BOOL_TYPE);
                 }
 
-                visit(state, body);
+                visit(body);
             }
         }
 
@@ -578,9 +570,9 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
         return Type.VOID_TYPE;
     }
 
-    @Override public Type visit(final Void state, final Type type) throws SemanticException {
+    @Override public Type visit(final Type type) throws SemanticException {
         return switch (type) {
-            case ArrayType(int size, Type elementType) -> new ArrayType(size, visit(state, elementType));
+            case ArrayType(int size, Type elementType) -> new ArrayType(size, visit(elementType));
             case RecordType recordType -> {
                 // check for duplicate fields in the record type definition
                 Set<String> seenFieldNames = new HashSet<>();
@@ -595,7 +587,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 List<RecordType.RecordFieldType> resolvedFieldTypes = new ArrayList<>();
                 for (RecordType.RecordFieldType fieldType : recordType.fieldTypes()) {
                     resolvedFieldTypes.add(
-                            new RecordType.RecordFieldType(fieldType.fieldName(), visit(state, fieldType.fieldType())));
+                            new RecordType.RecordFieldType(fieldType.fieldName(), visit(fieldType.fieldType())));
                 }
 
                 yield new RecordType(resolvedFieldTypes);
@@ -607,7 +599,7 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                     throw new SemanticException.UndeclaredUse(basicType);
                 }
 
-                yield visit(state, typeLookup.get());
+                yield visit(typeLookup.get());
             }
             case VoidType voidType -> voidType;
             case Type.PrimType.BoolType boolType -> boolType;
@@ -616,10 +608,10 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
             case FuncType(List<Type> argTypes, Type returnType) -> {
                 List<Type> resolvedArgTypes = new ArrayList<>();
                 for (Type argType : argTypes) {
-                    resolvedArgTypes.add(visit(state, argType));
+                    resolvedArgTypes.add(visit(argType));
                 }
 
-                yield new FuncType(resolvedArgTypes, visit(state, returnType));
+                yield new FuncType(resolvedArgTypes, visit(returnType));
             }
         };
     }

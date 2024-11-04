@@ -6,9 +6,9 @@ sealed public interface Argument permits Argument.FuncArgument, Argument.VarArgu
 
     SourcePosition sourcePos();
 
-    interface Visitor<ST, T, E extends Exception> {
+    interface Visitor<T, E extends Exception> {
 
-        T visit(ST state, Argument argument) throws E;
+        T visit(Argument argument) throws E;
 
     }
 

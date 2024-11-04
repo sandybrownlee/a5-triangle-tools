@@ -10,9 +10,9 @@ sealed public interface Parameter permits Parameter.ConstParameter, Parameter.Fu
 
     SourcePosition sourcePos();
 
-    interface Visitor<ST, T, E extends Exception> {
+    interface Visitor<T, E extends Exception> {
 
-        T visit(ST state, Parameter parameter) throws E;
+        T visit(Parameter parameter) throws E;
 
     }
 

@@ -12,9 +12,9 @@ sealed public interface Declaration
 
     SourcePosition sourcePos();
 
-    interface Visitor<ST, T, E extends Exception> {
+    interface Visitor<T, E extends Exception> {
 
-        T visit(ST state, Declaration declaration) throws E;
+        T visit(Declaration declaration) throws E;
 
     }
 

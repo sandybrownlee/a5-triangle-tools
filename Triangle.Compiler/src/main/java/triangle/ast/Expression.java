@@ -22,9 +22,9 @@ sealed public interface Expression extends Statement, Argument
 
         SourcePosition sourcePos();
 
-        interface Visitor<ST, T, E extends Exception> {
+        interface Visitor<T, E extends Exception> {
 
-            T visit(ST state, Identifier identifier) throws E;
+            T visit(Identifier identifier) throws E;
 
         }
 
@@ -54,9 +54,9 @@ sealed public interface Expression extends Statement, Argument
 
     }
 
-    interface Visitor<ST, T, E extends Exception> {
+    interface Visitor<T, E extends Exception> {
 
-        T visit(ST state, Expression expression) throws E;
+        T visit(Expression expression) throws E;
 
     }
 

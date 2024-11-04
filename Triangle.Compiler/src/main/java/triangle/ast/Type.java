@@ -25,9 +25,9 @@ sealed public interface Type permits Type.ArrayType, Type.BasicType, Type.PrimTy
 
     }
 
-    interface Visitor<ST, T, E extends Exception> {
+    interface Visitor<T, E extends Exception> {
 
-        T visit(ST state, Type type) throws E;
+        T visit(Type type) throws E;
 
     }
 
