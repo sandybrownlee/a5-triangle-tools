@@ -1,6 +1,9 @@
 package triangle.contextualAnalyzer;
 
 import triangle.ast.Expression;
+import triangle.ast.Expression.Identifier;
+import triangle.ast.Expression.LitRecord.RecordField;
+import triangle.ast.Parameter;
 import triangle.ast.Type;
 import triangle.syntacticAnalyzer.SourcePosition;
 
@@ -16,12 +19,8 @@ public abstract class SemanticException extends Exception {
 
     static final class UndeclaredUse extends SemanticException {
 
-        UndeclaredUse(final SourcePosition sourcePos, Expression.Identifier identifier) {
+        UndeclaredUse(final SourcePosition sourcePos, Identifier identifier) {
             super(sourcePos, "Undeclared use of identifier: " + identifier);
-        }
-
-        UndeclaredUse(final SourcePosition sourcePos, Type type) {
-            super(sourcePos, "Undeclared use of type: " + type);
         }
 
         UndeclaredUse(Type type) {
@@ -52,10 +51,46 @@ public abstract class SemanticException extends Exception {
 
     static final class AssignmentToConstant extends SemanticException {
 
-        AssignmentToConstant(final SourcePosition sourcePos, final Expression.Identifier identifier) {
+        AssignmentToConstant(final SourcePosition sourcePos, final Identifier identifier) {
             super(sourcePos, "Assignment to constant: " + identifier);
         }
 
     }
 
+    static class DuplicateRecordField extends SemanticException {
+
+        DuplicateRecordField(final SourcePosition sourcePos, final RecordField field) {
+            super(sourcePos, "Duplicate record field: " + field);
+        }
+
+    }
+
+    static final class DuplicateRecordTypeField extends SemanticException {
+
+        private final Type.RecordType.RecordFieldType fieldType;
+
+        DuplicateRecordTypeField(final SourcePosition sourcePos, final Type.RecordType.RecordFieldType fieldType) {
+            this.fieldType = fieldType;
+            super(sourcePos, "Duplicate field in record type: " + fieldType.fieldName());
+        }
+
+        // we may not always have source positions; e.g, when checking a record field type
+        DuplicateRecordTypeField(final Type.RecordType.RecordFieldType fieldType) {
+            this.fieldType = fieldType;
+            super("Duplicate field in record type: " + fieldType.fieldName());
+        }
+
+        Type.RecordType.RecordFieldType getFieldType() {
+            return fieldType;
+        }
+
+    }
+
+    static final class DuplicateParameter extends SemanticException {
+
+        DuplicateParameter(final SourcePosition sourcePos, final Parameter parameter) {
+            super(sourcePos, "Duplicate parameter: " + parameter);
+        }
+
+    }
 }

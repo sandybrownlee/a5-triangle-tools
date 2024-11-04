@@ -35,9 +35,11 @@ import triangle.syntacticAnalyzer.SourcePosition;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 // Statefully checks that all uses of indentifiers and types are valid. Uses exceptions for control flow
 // TODO: try to accumulate errors instead of failing at the first one
@@ -143,11 +145,28 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
 
     @Override public Type visit(final Void state, final Declaration declaration) throws SemanticException {
         return switch (declaration) {
-            case ConstDeclaration(_, String _, Expression value) -> visit(state, value);
+            case ConstDeclaration(SourcePosition sourcePos, String _, Expression value) -> {
+                try {
+                    yield visit(state, value);
+                } catch (SemanticException.DuplicateRecordTypeField e) {
+                    // rethrow duplicate record fields with added source position info
+                    throw new SemanticException.DuplicateRecordTypeField(sourcePos, e.getFieldType());
+                }
+            }
             case Declaration.FuncDeclaration(
                     SourcePosition sourcePos, String func, List<Parameter> parameters, Type returnType,
                     Statement statement
             ) -> {
+                // check for duplicate parameter
+                Set<String> seenParameters = new HashSet<>();
+                for (Parameter param : parameters) {
+                    if (seenParameters.contains(param.getName())) {
+                        throw new SemanticException.DuplicateParameter(sourcePos, param);
+                    }
+
+                    seenParameters.add(param.getName());
+                }
+
                 // resolve the types of the parameters in the current env
                 List<Type> resolvedParamTypes = new ArrayList<>();
                 for (Parameter parameter : parameters) {
@@ -166,7 +185,13 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                     );
                 }
 
-                Type resolvedReturnType = visit(state, returnType);
+                Type resolvedReturnType;
+                try {
+                    resolvedReturnType = visit(state, returnType);
+                } catch (SemanticException.DuplicateRecordTypeField e) {
+                    // rethrow duplicate record fields with added source position info
+                    throw new SemanticException.DuplicateRecordTypeField(sourcePos, e.getFieldType());
+                }
 
                 // (optimistically) assign the function its declared return type
                 Type funcType = new FuncType(resolvedParamTypes, resolvedReturnType);
@@ -188,8 +213,22 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 // else our optimistic assumption was right and we can return funcType
                 yield funcType;
             }
-            case TypeDeclaration typeDeclaration -> visit(state, typeDeclaration.type());
-            case Declaration.VarDeclaration varDeclaration -> visit(state, varDeclaration.type());
+            case TypeDeclaration typeDeclaration -> {
+                try {
+                    yield visit(state, typeDeclaration.type());
+                } catch (SemanticException.DuplicateRecordTypeField e) {
+                    // rethrow duplicate record fields with added source position info
+                    throw new SemanticException.DuplicateRecordTypeField(typeDeclaration.sourcePos(), e.getFieldType());
+                }
+            }
+            case Declaration.VarDeclaration varDeclaration -> {
+                try {
+                    yield visit(state, varDeclaration.type());
+                } catch (SemanticException.DuplicateRecordTypeField e) {
+                    // rethrow duplicate record fields with added source position info
+                    throw new SemanticException.DuplicateRecordTypeField(varDeclaration.sourcePos(), e.getFieldType());
+                }
+            }
         };
     }
 
@@ -376,7 +415,12 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
                 }
 
                 List<RecordType.RecordFieldType> fieldTypes = new ArrayList<>(fields.size());
+                Set<String> seenFieldNames = new HashSet<>();
                 for (LitRecord.RecordField field : fields) {
+                    if (seenFieldNames.contains(field.name())) {
+                        throw new SemanticException.DuplicateRecordField(sourcePos, field);
+                    }
+                    seenFieldNames.add(field.name());
                     fieldTypes.add(new RecordType.RecordFieldType(field.name(), visit(state, field.value())));
                 }
 
@@ -538,6 +582,16 @@ public final class SemanticAnalyzer implements AllVisitor<Void, Type, SemanticEx
         return switch (type) {
             case ArrayType(int size, Type elementType) -> new ArrayType(size, visit(state, elementType));
             case RecordType recordType -> {
+                // check for duplicate fields in the record type definition
+                Set<String> seenFieldNames = new HashSet<>();
+                for (RecordType.RecordFieldType field : recordType.fieldTypes()) {
+                    if (seenFieldNames.contains(field.fieldName())) {
+                        throw new SemanticException.DuplicateRecordTypeField(field);
+                    }
+
+                    seenFieldNames.add(field.fieldName());
+                }
+
                 List<RecordType.RecordFieldType> resolvedFieldTypes = new ArrayList<>();
                 for (RecordType.RecordFieldType fieldType : recordType.fieldTypes()) {
                     resolvedFieldTypes.add(
