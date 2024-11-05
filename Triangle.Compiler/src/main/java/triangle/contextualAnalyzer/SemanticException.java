@@ -30,15 +30,13 @@ public abstract class SemanticException extends Exception {
     }
 
     static final class TypeError extends SemanticException {
-
-        TypeError(Type left, Type right) {
-            super("Type mismatch: " + left + " got: " + right);
+        TypeError(SourcePosition sourcePos, Type left, Type right) {
+            super(sourcePos, "Type mismatch: " + left + " and " + right);
         }
 
-        TypeError(Type type, String expected) {
-            super("Unexpected type: " + type + " expecting: " + expected);
+        TypeError(SourcePosition sourcePos, Type type, String expected) {
+            super(sourcePos, "Unexpected type: " + type + " expecting: " + expected);
         }
-
     }
 
     static final class ArityMismatch extends SemanticException {
