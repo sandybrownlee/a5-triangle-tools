@@ -78,12 +78,13 @@ public class Parser {
         statements.add(parseStmt());
 
 
-        if (lastToken.getKind() == Token.Kind.SEMICOLON) {
+        while (lastToken.getKind() == Token.Kind.SEMICOLON) {
             shift(Token.Kind.SEMICOLON);
-        }
 
-        if (STATEMENT_FIRST_SET.contains(lastToken.getKind())) {
-            statements.addAll(parseStmtSeq());
+            if (STATEMENT_FIRST_SET.contains(lastToken.getKind())) {
+                statements.add(parseStmt());
+            }
+
         }
 
         return statements;
@@ -115,10 +116,7 @@ public class Parser {
 
                 // else branches are allowed to end in SEMICOLON, another statement, or nothing at all
                 Optional<Statement> alternative = switch (lastToken.getKind()) {
-                    case SEMICOLON -> {
-                        shift(Token.Kind.SEMICOLON);
-                        yield Optional.empty();
-                    }
+                    case SEMICOLON -> Optional.empty();
                     case Token.Kind k when STATEMENT_FIRST_SET.contains(k) -> Optional.of(parseStmt());
                     // anything that can't start a statement is assumed to be a skipped else branch
                     default -> Optional.empty();
@@ -420,12 +418,12 @@ public class Parser {
         List<Declaration> declarations = new ArrayList<>();
         declarations.add(parseDecl());
 
-        if (lastToken.getKind() == Token.Kind.SEMICOLON) {
+        while (lastToken.getKind() == Token.Kind.SEMICOLON) {
             shift(Token.Kind.SEMICOLON);
-        }
 
-        if (DECLARATION_FIRST_SET.contains(lastToken.getKind())) {
-            declarations.addAll(parseDeclSeq());
+            if (DECLARATION_FIRST_SET.contains(lastToken.getKind())) {
+                declarations.add(parseDecl());
+            }
         }
 
         return declarations;
