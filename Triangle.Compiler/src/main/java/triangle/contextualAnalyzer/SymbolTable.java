@@ -1,8 +1,8 @@
 package triangle.contextualAnalyzer;
 
 import triangle.ast.Expression.Identifier.BasicIdentifier;
-import triangle.ast.Type;
-import triangle.ast.Type.BasicType;
+import triangle.types.Type;
+import triangle.types.Type.BasicType;
 
 import java.util.ArrayDeque;
 import java.util.Deque;

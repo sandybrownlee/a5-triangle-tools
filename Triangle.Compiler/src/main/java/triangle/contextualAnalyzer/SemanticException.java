@@ -4,7 +4,7 @@ import triangle.ast.Expression;
 import triangle.ast.Expression.Identifier;
 import triangle.ast.Expression.LitRecord.RecordField;
 import triangle.ast.Parameter;
-import triangle.ast.Type;
+import triangle.types.Type;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class SemanticException extends Exception {

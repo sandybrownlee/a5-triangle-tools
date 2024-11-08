@@ -17,15 +17,14 @@ import triangle.ast.Expression.LitInt;
 import triangle.ast.Expression.LitRecord;
 import triangle.ast.Expression.UnaryOp;
 import triangle.ast.Parameter;
-import triangle.ast.Program;
 import triangle.ast.Statement;
-import triangle.ast.Type;
-import triangle.ast.Type.ArrayType;
-import triangle.ast.Type.BasicType;
-import triangle.ast.Type.RecordType;
-import triangle.ast.Type.PrimType.VoidType;
+import triangle.types.Type;
+import triangle.types.Type.ArrayType;
+import triangle.types.Type.BasicType;
+import triangle.types.Type.RecordType;
+import triangle.types.Type.PrimType.VoidType;
 
-import triangle.ast.Type.PrimType.FuncType;
+import triangle.types.Type.PrimType.FuncType;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import static triangle.ast.Type.*;
+import static triangle.types.Type.*;
 
 public final class SemanticAnalyzer {
 
@@ -108,11 +107,8 @@ public final class SemanticAnalyzer {
     private final SymbolTable symtab = new SymbolTable(STD_TYPES, STD_TERMS);
     private final List<SemanticException> errors = new ArrayList<>();
 
-    public List<SemanticException> analyze(final Program program) {
-        for (final Statement statement : program.statements()) {
-            analyze(statement);
-        }
-
+    public List<SemanticException> check(final Statement program) {
+        analyze(program);
         return errors;
     }
 

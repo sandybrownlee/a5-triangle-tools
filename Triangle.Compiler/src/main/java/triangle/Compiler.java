@@ -20,12 +20,11 @@ package triangle;
 
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
-import triangle.ast.Program;
+import triangle.ast.Statement;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.contextualAnalyzer.SemanticAnalyzer;
-import triangle.contextualAnalyzer.SemanticException;
 import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.SyntaxError;
@@ -128,9 +127,9 @@ public class Compiler {
 //        lexer.dump();
 
         // The AST representing the source program.
-        Program theAST = parser.parseProgram(); // 1st pass
+        Statement theAST = parser.parseProgram(); // 1st pass
         System.out.println(new ASTPrinter().prettyPrint(theAST));
-        new SemanticAnalyzer().analyze(theAST).forEach(System.err::println);
+        new SemanticAnalyzer().check(theAST).forEach(e -> System.err.println(e.getMessage()));
 
         if (reporter.getNumErrors() == 0) {
 

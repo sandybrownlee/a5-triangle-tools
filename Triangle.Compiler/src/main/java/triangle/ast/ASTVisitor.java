@@ -1,11 +1,10 @@
 package triangle.ast;
 
+import triangle.types.Type;
+
 // visitor pattern is not actually needed because I am using sealed interfaces to emulate ADTs;
 // this is a perfunctory implementation to complete Task 3
 public interface ASTVisitor<T, E extends Exception> {
-    // Program
-    T visit(Program program) throws E;
-
     // Argument
     T visit(Argument.VarArgument varArgument) throws E;
     T visit(Argument.FuncArgument funcArgument) throws E;

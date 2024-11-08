@@ -4,14 +4,56 @@ import triangle.ast.Argument;
 import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Parameter;
-import triangle.ast.Program;
 import triangle.ast.Statement;
-import triangle.ast.Type;
+import triangle.types.Type;
 
 public final class ASTPrinter {
 
-    public String prettyPrint(final Program program) {
-        return program.statements().stream().map(s -> prettyPrint(s) + ",").reduce("", String::concat);
+    public String prettyPrint(final Statement statement) {
+        return switch (statement) {
+            case Expression expression -> prettyPrint(expression);
+            case Statement.AssignStatement assignStatement -> String.format(
+                    "%s := %s",
+                    prettyPrint(assignStatement.identifier()),
+                    prettyPrint(assignStatement.expression())
+            );
+            case Statement.IfStatement ifStatement -> String.format(
+                    "IF %s THEN %s ELSE %s",
+                    prettyPrint(ifStatement.condition()),
+                    ifStatement.consequent().map(x -> prettyPrint(x)),
+                    ifStatement.alternative().map(x -> prettyPrint(x))
+            );
+            case Statement.LetStatement letStatement -> String.format(
+                    "LET {%s} IN %s",
+                    letStatement.declarations().stream().map(d -> prettyPrint(d) + ",").reduce("", String::concat),
+                    prettyPrint(letStatement.statement())
+            );
+            case Statement.LoopWhileStatement loopWhileStatement -> String.format(
+                    "LOOP %s WHILE (%s) DO %s",
+                    prettyPrint(loopWhileStatement.loopBody()),
+                    prettyPrint(loopWhileStatement.condition()),
+                    prettyPrint(loopWhileStatement.doBody())
+            );
+            case Statement.RepeatUntilStatement repeatUntilStatement -> String.format(
+                    "REPEAT %s UNTIL %s",
+                    prettyPrint(repeatUntilStatement.body()),
+                    prettyPrint(repeatUntilStatement.condition())
+            );
+            case Statement.RepeatWhileStatement repeatWhileStatement -> String.format(
+                    "REPEAT %s UNTIL %s",
+                    prettyPrint(repeatWhileStatement.body()),
+                    prettyPrint(repeatWhileStatement.condition())
+            );
+            case Statement.StatementBlock statementBlock -> String.format(
+                    "BEGIN {%s} END",
+                    statementBlock.statements().stream().map(s -> prettyPrint(s) + ",").reduce("", String::concat)
+            );
+            case Statement.WhileStatement whileStatement -> String.format(
+                    "WHILE %s DO %s",
+                    prettyPrint(whileStatement.condition()),
+                    prettyPrint(whileStatement.body())
+            );
+        };
     }
 
     private String prettyPrint(final Argument argument) {
@@ -103,53 +145,6 @@ public final class ASTPrinter {
                     "CONST %s : %s",
                     constParameter.getName(),
                     prettyPrint(constParameter.type())
-            );
-        };
-    }
-
-    private String prettyPrint(final Statement statement) {
-        return switch (statement) {
-            case Expression expression -> prettyPrint(expression);
-            case Statement.AssignStatement assignStatement -> String.format(
-                    "%s := %s",
-                    prettyPrint(assignStatement.identifier()),
-                    prettyPrint(assignStatement.expression())
-            );
-            case Statement.IfStatement ifStatement -> String.format(
-                    "IF %s THEN %s ELSE %s",
-                    prettyPrint(ifStatement.condition()),
-                    ifStatement.consequent().map(x -> prettyPrint(x)),
-                    ifStatement.alternative().map(x -> prettyPrint(x))
-            );
-            case Statement.LetStatement letStatement -> String.format(
-                    "LET {%s} IN %s",
-                    letStatement.declarations().stream().map(d -> prettyPrint(d) + ",").reduce("", String::concat),
-                    prettyPrint(letStatement.statement())
-            );
-            case Statement.LoopWhileStatement loopWhileStatement -> String.format(
-                    "LOOP %s WHILE (%s) DO %s",
-                    prettyPrint(loopWhileStatement.loopBody()),
-                    prettyPrint(loopWhileStatement.condition()),
-                    prettyPrint(loopWhileStatement.doBody())
-            );
-            case Statement.RepeatUntilStatement repeatUntilStatement -> String.format(
-                    "REPEAT %s UNTIL %s",
-                    prettyPrint(repeatUntilStatement.body()),
-                    prettyPrint(repeatUntilStatement.condition())
-            );
-            case Statement.RepeatWhileStatement repeatWhileStatement -> String.format(
-                    "REPEAT %s UNTIL %s",
-                    prettyPrint(repeatWhileStatement.body()),
-                    prettyPrint(repeatWhileStatement.condition())
-            );
-            case Statement.StatementBlock statementBlock -> String.format(
-                    "BEGIN {%s} END",
-                    statementBlock.statements().stream().map(s -> prettyPrint(s) + ",").reduce("", String::concat)
-            );
-            case Statement.WhileStatement whileStatement -> String.format(
-                    "WHILE %s DO %s",
-                    prettyPrint(whileStatement.condition()),
-                    prettyPrint(whileStatement.body())
             );
         };
     }

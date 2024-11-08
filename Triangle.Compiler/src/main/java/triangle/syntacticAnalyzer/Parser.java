@@ -19,7 +19,6 @@
 
 package triangle.syntacticAnalyzer;
 
-import triangle.ast.Program;
 import triangle.ast.Argument;
 import triangle.ast.Declaration;
 import triangle.ast.Expression;
@@ -28,8 +27,8 @@ import triangle.ast.Parameter;
 import triangle.ast.Parameter.*;
 import triangle.ast.Statement;
 import triangle.ast.Statement.*;
-import triangle.ast.Type;
-import triangle.ast.Type.*;
+import triangle.types.Type;
+import triangle.types.Type.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,9 +67,9 @@ public class Parser {
         this.lexer = lexer;
     }
 
-    public Program parseProgram() throws IOException, SyntaxError {
+    public Statement parseProgram() throws IOException, SyntaxError {
         lastToken = lexer.nextToken();
-        return new Program(parseStmtSeq());
+        return parseStmt();
     }
 
     private List<Statement> parseStmtSeq() throws SyntaxError, IOException {
