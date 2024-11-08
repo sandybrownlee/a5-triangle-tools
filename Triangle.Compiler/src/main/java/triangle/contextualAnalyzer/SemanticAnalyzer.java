@@ -380,7 +380,7 @@ public final class SemanticAnalyzer {
 
                 for (Declaration declaration : declarations) {
                     Type type = analyze(declaration);
-                    symtab.add(new BasicIdentifier(declaration.sourcePos(), declaration.getName()), type,
+                    symtab.add(new BasicIdentifier(declaration.sourcePos(), declaration.name()), type,
                                declaration instanceof ConstDeclaration
                     );
                 }
@@ -531,9 +531,9 @@ public final class SemanticAnalyzer {
                         declType = VOID_TYPE;
                     }
                     switch (declaration) {
-                        case TypeDeclaration _ -> symtab.add(new BasicType(declaration.getName()), declType);
+                        case TypeDeclaration _ -> symtab.add(new BasicType(declaration.name()), declType);
                         case ConstDeclaration _, Declaration.FuncDeclaration _, Declaration.VarDeclaration _ -> symtab.add(
-                                new BasicIdentifier(declaration.sourcePos(), declaration.getName()), declType,
+                                new BasicIdentifier(declaration.sourcePos(), declaration.name()), declType,
                                 declaration instanceof ConstDeclaration
                         );
                     }

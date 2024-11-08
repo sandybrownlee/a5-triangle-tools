@@ -9,8 +9,6 @@ sealed public interface Expression extends Statement, Argument
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.UnaryOp {
 
-    SourcePosition sourcePos();
-
     sealed interface Identifier extends Expression permits Identifier.BasicIdentifier, Identifier.RecordAccess,
                                                            Identifier.ArraySubscript {
 
@@ -19,8 +17,6 @@ sealed public interface Expression extends Statement, Argument
         //       recx.recy.recz -> root = recx
         // this is needed, for example, to check if a record is a constant or not
         BasicIdentifier root();
-
-        SourcePosition sourcePos();
 
         record BasicIdentifier(SourcePosition sourcePos, String name) implements Identifier {
 

@@ -73,7 +73,7 @@ public final class ASTPrinter {
             );
             case Declaration.FuncDeclaration funcDeclaration -> String.format(
                     "CALLABLE %s (%s) {%s} %s ",
-                    funcDeclaration.func(),
+                    funcDeclaration.name(),
                     funcDeclaration.parameters().stream().map(p -> prettyPrint(p) + ",").reduce("", String::concat),
                     prettyPrint(funcDeclaration.expression()),
                     prettyPrint(funcDeclaration.returnType())
