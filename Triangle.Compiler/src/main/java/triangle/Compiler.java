@@ -42,7 +42,7 @@ import java.io.InputStream;
  @author Deryck F. Brown
  @version 2.1 7 Oct 2003 */
 // TODO: replace ErrorReporter with robust logging
-// TODO: debugging mode
+// TODO: showStats cmdline option
 public class Compiler {
 
     /** The filename for the object program, normally obj.tam. */
@@ -72,11 +72,12 @@ public class Compiler {
 
         boolean compiledOK = false;
         try {
-            for (String path : new File("programs/").list()) {
-                System.out.println("programs/" + path);
-                compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
-                System.in.read();
-            }
+//            for (String path : new File("programs/").list()) {
+//                System.out.println("programs/" + path);
+//                compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
+//                System.in.read();
+//            }
+            compileProgram(new FileInputStream("programs/test.tri"), objectName, showTree, false);
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             System.exit(1);
