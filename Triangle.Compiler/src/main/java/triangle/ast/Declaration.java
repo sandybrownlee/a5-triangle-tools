@@ -63,8 +63,8 @@ sealed public interface Declaration
     final class VarDeclaration implements Declaration {
 
         private final SourcePosition sourcePos;
-        private final String name;
-        private final Type   type;
+        private final String         name;
+        private       Type           type;
 
         public VarDeclaration(SourcePosition sourcePos, String name, Type type) {
             this.sourcePos = sourcePos;
@@ -82,6 +82,10 @@ sealed public interface Declaration
 
         public Type type() {
             return type;
+        }
+
+        public void setType(Type type) {
+            this.type = type;
         }
 
         @Override public int hashCode() {

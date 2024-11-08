@@ -25,20 +25,22 @@ sealed public interface Expression extends Statement, Argument
             private final SourcePosition sourcePos;
             private final String         name;
             private       Type           type;
+            private       Declaration    declaration;
 
-            private BasicIdentifier(SourcePosition sourcePos, String name, Type type) {
+            private BasicIdentifier(SourcePosition sourcePos, String name, Type type, Declaration declaration) {
                 this.sourcePos = sourcePos;
                 this.name = name;
                 this.type = type;
+                this.declaration = declaration;
             }
 
             public BasicIdentifier(SourcePosition sourcePos, String name) {
-                this(sourcePos, name, null);
+                this(sourcePos, name, null, null);
             }
 
             // needed when setting up stdenv
             public BasicIdentifier(String name, Type type) {
-                this(null, name, type);
+                this(null, name, type, null);
             }
 
             @Override public BasicIdentifier root() {
@@ -70,6 +72,10 @@ sealed public interface Expression extends Statement, Argument
 
             @Override public String toString() {
                 return "BasicIdentifier[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ']';
+            }
+
+            public void setDeclaration(Declaration declaration) {
+                this.declaration = declaration;
             }
 
             public void setType(Type type) {

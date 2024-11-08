@@ -1,8 +1,7 @@
 package triangle.contextualAnalyzer;
 
-import triangle.ast.Expression.Identifier.BasicIdentifier;
+import triangle.ast.Declaration;
 import triangle.types.Type;
-import triangle.types.Type.BasicType;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
@@ -14,23 +13,16 @@ final class SymbolTable {
 
     private final Deque<Env> scopes;
 
-    SymbolTable(Map<BasicType, Type> stdTypes, Map<BasicIdentifier, Binding> stdTerms) {
+    SymbolTable(Map<String, Type> stdTypes, Map<String, Binding> stdTerms) {
         scopes = new ArrayDeque<>();
 
-        Map<BasicIdentifierKey, Binding> stdTermsWrapped = new HashMap<>();
-        for (Map.Entry<BasicIdentifier, Binding> entry : stdTerms.entrySet()) {
-            stdTermsWrapped.put(new BasicIdentifierKey(entry.getKey().name()), entry.getValue());
-        }
+        Map<String, Binding> stdTermsWrapped = new HashMap<>(stdTerms);
 
         scopes.push(new Env(stdTypes, stdTermsWrapped));
     }
 
-    void add(BasicIdentifier identifier, Type type, boolean constant) {
-        add(new BasicIdentifierKey(identifier), type, constant);
-    }
-
-    Optional<Binding> lookup(BasicIdentifier identifier) {
-        return lookup(new BasicIdentifierKey(identifier));
+    void addTerm(String name, Type type, boolean constant, Declaration declaration) {
+        scopes.peek().terms.put(name, new Binding(type, constant, declaration));
     }
 
     void enterNewScope() {
@@ -41,49 +33,32 @@ final class SymbolTable {
         scopes.pop();
     }
 
-    boolean isConstant(BasicIdentifier identifier) {
-        return lookup(new BasicIdentifierKey(identifier)).get().constant();
+    void addType(String typeName, Type type) {
+        scopes.peek().types.put(typeName, type);
     }
 
-    void add(BasicType basicType, Type type) {
-        scopes.peek().types.put(basicType, type);
-    }
-
-    Optional<Type> lookup(BasicType type) {
+    Optional<Type> lookupType(String typeName) {
         for (Env env : scopes) {
-            if (env.types.containsKey(type)) {
-                return Optional.of(env.types.get(type));
+            if (env.types.containsKey(typeName)) {
+                return Optional.of(env.types.get(typeName));
             }
         }
 
         return Optional.empty();
     }
 
-    private Optional<Binding> lookup(BasicIdentifierKey identifier) {
+    Optional<Binding> lookupTerm(String name) {
         for (Env env : scopes) {
-            if (env.terms.containsKey(identifier)) {
-                return Optional.of(env.terms.get(identifier));
+            if (env.terms.containsKey(name)) {
+                return Optional.of(env.terms.get(name));
             }
         }
 
         return Optional.empty();
     }
 
-    private void add(BasicIdentifierKey identifier, Type type, boolean constant) {
-        scopes.peek().terms.put(identifier, new Binding(type, constant));
-    }
+    record Binding(Type type, boolean constant, Declaration declaration) { }
 
-    record Binding(Type type, boolean constant) { }
-
-    // wrapper so we that we only compare identifiers on their names
-    private record BasicIdentifierKey(String name) {
-
-        BasicIdentifierKey(BasicIdentifier identifier) {
-            this(identifier.name());
-        }
-
-    }
-
-    private record Env(Map<BasicType, Type> types, Map<BasicIdentifierKey, Binding> terms) { }
+    private record Env(Map<String, Type> types, Map<String, Binding> terms) { }
 
 }

@@ -18,7 +18,6 @@ import triangle.ast.Expression.LitRecord;
 import triangle.ast.Expression.UnaryOp;
 import triangle.ast.Parameter;
 import triangle.ast.Statement;
-import triangle.ast.Typeable;
 import triangle.types.Type;
 import triangle.types.Type.ArrayType;
 import triangle.types.Type.BasicType;
@@ -41,77 +40,53 @@ import static triangle.types.Type.*;
 
 public final class SemanticAnalyzer {
 
-    private static final Type                                      binaryRelation =
-            new FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
-    private static final Type                                      binaryIntRelation =
-            new FuncType(List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
-    private static final Type                                      binaryIntFunc =
-            new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
-    private static final Map<BasicIdentifier, SymbolTable.Binding> STD_TERMS = new HashMap<>();
-    private static final Map<BasicType, Type>                      STD_TYPES = Map.of(
-            new BasicType("Integer"), INT_TYPE,
-            new BasicType("Char"), Type.CHAR_TYPE,
-            new BasicType("Boolean"), BOOL_TYPE
+    private static final Type                             binaryRelation    = new FuncType(
+            List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
+    private static final Type                             binaryIntRelation = new FuncType(
+            List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
+    private static final Type                             binaryIntFunc     = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
+    private static final Map<String, SymbolTable.Binding> STD_TERMS         = new HashMap<>();
+    private static final Map<String, Type>                STD_TYPES         = Map.of("Integer", INT_TYPE, "Char", Type.CHAR_TYPE,
+                                                                                     "Boolean", BOOL_TYPE
     );
 
     // stdenv values have null as annotation
     static {
-        // TODO: this is very hackish and ugly: SymbolTable should get a new addAll() method
-        STD_TERMS.putAll(Map.of(
-                new BasicIdentifier("\\/", binaryRelation), new SymbolTable.Binding(binaryRelation, true),
-                new BasicIdentifier("/\\", binaryRelation), new SymbolTable.Binding(binaryRelation, true),
-                new BasicIdentifier("<=", binaryIntRelation), new SymbolTable.Binding(binaryIntRelation, true),
-                new BasicIdentifier(">=", binaryIntRelation), new SymbolTable.Binding(binaryIntRelation, true),
-                new BasicIdentifier(">", binaryIntRelation), new SymbolTable.Binding(binaryIntRelation, true),
-                new BasicIdentifier("<", binaryIntRelation), new SymbolTable.Binding(binaryIntRelation, true),
-                new BasicIdentifier("\\", new FuncType(List.of(BOOL_TYPE), BOOL_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true)
+        // TODO: this is very hackish and ugly
+        STD_TERMS.putAll(Map.of("\\/", new SymbolTable.Binding(binaryRelation, true, null), "/\\",
+                                new SymbolTable.Binding(binaryRelation, true, null), "<=",
+                                new SymbolTable.Binding(binaryIntRelation, true, null), ">=",
+                                new SymbolTable.Binding(binaryIntRelation, true, null), ">",
+                                new SymbolTable.Binding(binaryIntRelation, true, null), "<",
+                                new SymbolTable.Binding(binaryIntRelation, true, null), "\\",
+                                new SymbolTable.Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)
         ));
-        STD_TERMS.putAll(Map.of(
-                new BasicIdentifier("-", binaryIntFunc), new SymbolTable.Binding(binaryIntFunc, true),
-                new BasicIdentifier("+", binaryIntFunc), new SymbolTable.Binding(binaryIntFunc, true),
-                new BasicIdentifier("*", binaryIntFunc), new SymbolTable.Binding(binaryIntFunc, true),
-                new BasicIdentifier("/", binaryIntFunc), new SymbolTable.Binding(binaryIntFunc, true),
-                new BasicIdentifier("//", binaryIntFunc), new SymbolTable.Binding(binaryIntFunc, true),
-                new BasicIdentifier("|", new FuncType(List.of(INT_TYPE), INT_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true),
-                new BasicIdentifier("++", new FuncType(List.of(INT_TYPE), INT_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true)
+        STD_TERMS.putAll(Map.of("-", new SymbolTable.Binding(binaryIntFunc, true, null), "+",
+                                new SymbolTable.Binding(binaryIntFunc, true, null), "*",
+                                new SymbolTable.Binding(binaryIntFunc, true, null), "/",
+                                new SymbolTable.Binding(binaryIntFunc, true, null), "//",
+                                new SymbolTable.Binding(binaryIntFunc, true, null), "|",
+                                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null), "++",
+                                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)
         ));
         // these are set to void just as dummy values so that we fail fast in case something tries to access their types since
         //  these are supposed to be special-cased in analyze(Expression)
-        STD_TERMS.putAll(Map.of(
-                // set these terms' types to null so we fail fast incase something tries to actually access their types since
-                //  these should be special cased
-                new BasicIdentifier("=", null), new SymbolTable.Binding(Type.VOID_TYPE, true),
-                new BasicIdentifier("\\=", null), new SymbolTable.Binding(Type.VOID_TYPE, true)
+        STD_TERMS.putAll(Map.of("=", new SymbolTable.Binding(Type.VOID_TYPE, true, null), "\\=",
+                                new SymbolTable.Binding(Type.VOID_TYPE, true, null)
         ));
-        STD_TERMS.putAll(Map.of(
-                new BasicIdentifier("get", new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true),
-                new BasicIdentifier("getint", new FuncType(List.of(INT_TYPE), Type.VOID_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true),
-                new BasicIdentifier("geteol", new FuncType(List.of(), Type.VOID_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(), Type.VOID_TYPE), true),
-                new BasicIdentifier("puteol", new FuncType(List.of(), Type.VOID_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(), Type.VOID_TYPE), true),
-                new BasicIdentifier("put", new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true),
-                new BasicIdentifier("putint", new FuncType(List.of(INT_TYPE), Type.VOID_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true),
-                new BasicIdentifier("chr", new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE), true),
-                new BasicIdentifier("eol", new FuncType(List.of(), BOOL_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(), BOOL_TYPE), true),
-                new BasicIdentifier("ord",new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE)),
-                new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE), true)
+        STD_TERMS.putAll(Map.of("get", new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
+                                "getint", new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
+                                "geteol", new SymbolTable.Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "puteol",
+                                new SymbolTable.Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "put",
+                                new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
+                                "putint", new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
+                                "chr", new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE), true, null),
+                                "eol", new SymbolTable.Binding(new FuncType(List.of(), BOOL_TYPE), true, null), "ord",
+                                new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE), true, null)
         ));
-
-        // hack-job cause
-        STD_TERMS.forEach((i,b) -> i.setType(b.type()));
     }
 
-    private final SymbolTable symtab = new SymbolTable(STD_TYPES, STD_TERMS);
+    private final SymbolTable             symtab = new SymbolTable(STD_TYPES, STD_TERMS);
     private final List<SemanticException> errors = new ArrayList<>();
 
     public List<SemanticException> check(final Statement program) {
@@ -159,11 +134,7 @@ public final class SemanticAnalyzer {
             case ConstDeclaration constDeclaration -> {
                 try {
                     analyze(constDeclaration.value());
-                    symtab.add(
-                            new BasicIdentifier(constDeclaration.sourcePos(), constDeclaration.name()),
-                            constDeclaration.value().getType(),
-                            true
-                    );
+                    symtab.addTerm(constDeclaration.name(), constDeclaration.value().getType(), true, constDeclaration);
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(constDeclaration.sourcePos(), e.getFieldType());
@@ -192,20 +163,16 @@ public final class SemanticAnalyzer {
                     // assign each parameter to a basic identifier with its resolved type
                     for (int i = 0; i < funcDeclaration.parameters().size(); i++) {
                         Parameter p = funcDeclaration.parameters().get(i);
-                        symtab.add(
-                                new BasicIdentifier(p.sourcePos(), p.getName()), p.getType(),
-                                p instanceof Parameter.ConstParameter
-                        );
+                        // parameters dont have a declaration
+                        symtab.addTerm(p.getName(), p.getType(), p instanceof Parameter.ConstParameter, null);
                     }
 
                     Type resolvedReturnType = resolveType(funcDeclaration.returnType());
 
                     // (optimistically) assign the function its declared return type
                     funcType = new FuncType(resolvedParamTypes, resolvedReturnType);
-                    symtab.add(new BasicIdentifier(funcDeclaration.sourcePos(), funcDeclaration.name()),
-                               new FuncType(resolvedParamTypes, resolvedReturnType),
-                               true // func is constant in the body of the function
-                    );
+                    // func is constant in the body of the function,
+                    symtab.addTerm(funcDeclaration.name(), funcType, true, funcDeclaration);
 
                     // then type check the function body
                     analyze(funcDeclaration.expression());
@@ -218,7 +185,7 @@ public final class SemanticAnalyzer {
                         }
                     } else {
                         // otherwise, the statement must be declared to return void type
-                        if (! resolvedReturnType.equals(VOID_TYPE)) {
+                        if (!resolvedReturnType.equals(VOID_TYPE)) {
                             throw new SemanticException.TypeError(sourcePos, resolvedReturnType, VOID_TYPE);
                         }
                     }
@@ -232,13 +199,13 @@ public final class SemanticAnalyzer {
 
                 // we add the function declaration to symbol table AFTER we exit the scope
                 // functions are always constant since we dont support HOF
-                symtab.add(new BasicIdentifier(funcDeclaration.sourcePos(), funcDeclaration.name()), funcType, true);
+                symtab.addTerm(funcDeclaration.name(), funcType, true, funcDeclaration);
             }
             case TypeDeclaration typeDeclaration -> {
                 try {
                     // resolve the type and add it to the symbol table
                     Type resolvedType = resolveType(typeDeclaration.type());
-                    symtab.add(new BasicType(typeDeclaration.name()), resolvedType);
+                    symtab.addType(typeDeclaration.name(), resolvedType);
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(typeDeclaration.sourcePos(), e.getFieldType());
@@ -246,9 +213,10 @@ public final class SemanticAnalyzer {
             }
             case Declaration.VarDeclaration varDeclaration -> {
                 try {
-                    // resolve the type and add a binding to the symbol table
+                    // resolve the type, set the declarations new type to the resolved type, and add a binding to the symbol table
                     Type vType = resolveType(varDeclaration.type());
-                    symtab.add(new BasicIdentifier(varDeclaration.sourcePos(), varDeclaration.name()), vType, false);
+                    varDeclaration.setType(vType);
+                    symtab.addTerm(varDeclaration.name(), vType, false, varDeclaration);
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(varDeclaration.sourcePos(), e.getFieldType());
@@ -258,7 +226,7 @@ public final class SemanticAnalyzer {
     }
 
     private void analyze(final Identifier identifier) throws SemanticException {
-    switch (identifier) {
+        switch (identifier) {
             case Identifier.ArraySubscript arraySubscript -> {
                 Identifier array = arraySubscript.array();
                 Expression subscript = arraySubscript.subscript();
@@ -278,6 +246,7 @@ public final class SemanticAnalyzer {
             case BasicIdentifier basicIdentifier -> {
                 SymbolTable.Binding binding = lookup(basicIdentifier);
                 basicIdentifier.setType(binding.type());
+                basicIdentifier.setDeclaration(binding.declaration());
             }
             case Identifier.RecordAccess recordAccess -> {
                 Identifier record = recordAccess.record();
@@ -294,7 +263,8 @@ public final class SemanticAnalyzer {
                 for (RecordType.RecordFieldType fieldType : recordType.fieldTypes()) {
                     Type resolvedFieldType = resolveType(fieldType.fieldType());
                     resolvedFieldTypes.add(new RecordType.RecordFieldType(fieldType.fieldName(), resolvedFieldType));
-                    symtab.add(new BasicIdentifier(record.sourcePos(), fieldType.fieldName()), resolvedFieldType, true);
+                    // record fields dont have a declaration
+                    symtab.addTerm(fieldType.fieldName(), resolvedFieldType, true, null);
                 }
                 analyze(field);
                 symtab.exitScope();
@@ -306,7 +276,7 @@ public final class SemanticAnalyzer {
     }
 
     private SymbolTable.Binding lookup(final BasicIdentifier basicIdentifier) throws SemanticException {
-        Optional<SymbolTable.Binding> binding = symtab.lookup(basicIdentifier);
+        Optional<SymbolTable.Binding> binding = symtab.lookupTerm(basicIdentifier.name());
         if (binding.isEmpty()) {
             throw new SemanticException.UndeclaredUse(basicIdentifier.sourcePos(), basicIdentifier);
         }
@@ -316,8 +286,7 @@ public final class SemanticAnalyzer {
 
     // analyze(Expression) needs to throw SemanticException; since an expression may be part of a larger declaration and it
     // wont know where to rewind to
-    private void
-    analyze(final Expression expression) throws SemanticException {
+    private void analyze(final Expression expression) throws SemanticException {
         switch (expression) {
             case BinaryOp binop -> {
                 BasicIdentifier operator = binop.operator();
@@ -389,7 +358,8 @@ public final class SemanticAnalyzer {
                 // for each argument
                 for (int i = 0; i < argTypes.size(); i++) {
                     Argument arg = arguments.get(i);
-                    // we dont have to resolveType() the types in function arg list since it should have been done at declaration time
+                    // we dont have to resolveType() the types in function arg list since it should have been done at
+                    // declaration time
                     Type expectedType = argTypes.get(i);
 
                     // analyze it
@@ -547,7 +517,7 @@ public final class SemanticAnalyzer {
                 Expression rvalue = assignStatement.expression();
 
                 try {
-                    if (symtab.isConstant(lvalue.root())) {
+                    if (lookup(lvalue.root()).constant()) {
                         errors.add(new SemanticException.AssignmentToConstant(assignStatement.sourcePos(), lvalue));
                     }
 
@@ -695,7 +665,7 @@ public final class SemanticAnalyzer {
                 yield new RecordType(resolvedFieldTypes);
             }
             case BasicType basicType -> {
-                Optional<Type> typeLookup = symtab.lookup(basicType);
+                Optional<Type> typeLookup = symtab.lookupType(basicType.name());
 
                 if (typeLookup.isEmpty()) {
                     throw new SemanticException.UndeclaredUse(basicType);
