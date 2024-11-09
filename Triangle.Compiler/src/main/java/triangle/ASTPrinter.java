@@ -103,7 +103,7 @@ public final class ASTPrinter {
             );
             case Expression.FunCall funCall -> String.format(
                     "FUNCALL %s (%s)",
-                    prettyPrint(funCall.callable()),
+                    prettyPrint(funCall.func()),
                     funCall.arguments().stream().map(a -> prettyPrint(a) + ",").reduce("", String::concat)
             );
             case Expression.Identifier identifier -> prettyPrint(identifier);

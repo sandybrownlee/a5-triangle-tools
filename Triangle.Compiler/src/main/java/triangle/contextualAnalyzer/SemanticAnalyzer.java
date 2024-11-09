@@ -399,7 +399,7 @@ public final class SemanticAnalyzer {
                 binop.setType(returnType);
             }
             case FunCall funCall -> {
-                Identifier callable = funCall.callable();
+                Identifier callable = funCall.func();
                 List<Argument> arguments = funCall.arguments();
 
                 visit(callable);

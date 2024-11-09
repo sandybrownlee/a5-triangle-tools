@@ -295,11 +295,17 @@ public class Parser {
 
     private Expression parseIfCall(Identifier identifier) throws IOException, SyntaxError {
         if (lastToken.getKind() == Token.Kind.LPAREN) {
-            SourcePosition start = shift(Token.Kind.LPAREN);
-            @SuppressWarnings("unchecked") List<Argument> arguments = (lastToken.getKind() == Token.Kind.RPAREN) ?
-                    Collections.EMPTY_LIST : parseArgSeq();
-            shift(Token.Kind.RPAREN);
-            return new FunCall(start, identifier, arguments);
+            if (identifier instanceof Identifier.BasicIdentifier basicIdentifier) {
+
+                SourcePosition start = shift(Token.Kind.LPAREN);
+                @SuppressWarnings("unchecked") List<Argument> arguments = (lastToken.getKind() == Token.Kind.RPAREN) ?
+                        Collections.EMPTY_LIST : parseArgSeq();
+                shift(Token.Kind.RPAREN);
+
+                return new FunCall(start, basicIdentifier, arguments);
+            }
+
+            throw new RuntimeException("HOF is currently unsupported, so function call must be a simple vaariable name");
         }
 
         return identifier;

@@ -502,14 +502,14 @@ sealed public interface Expression extends Argument, Typeable
 
     final class FunCall implements Expression, Typeable {
 
-        private final SourcePosition sourcePos;
-        private final Identifier     callable;
-        private final List<Argument> arguments;
-        private       RuntimeType    type;
+        private final SourcePosition             sourcePos;
+        private final Identifier.BasicIdentifier func;
+        private final List<Argument>             arguments;
+        private       RuntimeType                type;
 
-        public FunCall(SourcePosition sourcePos, Identifier callable, List<Argument> arguments) {
+        public FunCall(SourcePosition sourcePos, Identifier.BasicIdentifier func, List<Argument> arguments) {
             this.sourcePos = sourcePos;
-            this.callable = callable;
+            this.func = func;
             this.arguments = arguments;
         }
 
@@ -517,8 +517,8 @@ sealed public interface Expression extends Argument, Typeable
             return sourcePos;
         }
 
-        public Identifier callable() {
-            return callable;
+        public Identifier.BasicIdentifier func() {
+            return func;
         }
 
         public List<Argument> arguments() {
@@ -526,7 +526,7 @@ sealed public interface Expression extends Argument, Typeable
         }
 
         @Override public String toString() {
-            return "FunCall[" + "sourcePos=" + sourcePos + ", " + "callable=" + callable + ", " + "arguments=" + arguments + ']';
+            return "FunCall[" + "sourcePos=" + sourcePos + ", " + "callable=" + func + ", " + "arguments=" + arguments + ']';
         }
 
         @Override public RuntimeType getType() {
