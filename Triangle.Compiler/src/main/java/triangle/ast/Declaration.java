@@ -1,7 +1,7 @@
 package triangle.ast;
 
 import triangle.syntacticAnalyzer.SourcePosition;
-import triangle.types.Type;
+import triangle.types.RuntimeType;
 
 import java.util.List;
 import java.util.Objects;
@@ -64,12 +64,13 @@ sealed public interface Declaration
 
         private final SourcePosition sourcePos;
         private final String         name;
-        private       Type           type;
+        private final Type           declaredType;
+        private       RuntimeType    runtimeType;
 
-        public VarDeclaration(SourcePosition sourcePos, String name, Type type) {
+        public VarDeclaration(SourcePosition sourcePos, String name, Type declaredType) {
             this.sourcePos = sourcePos;
             this.name = name;
-            this.type = type;
+            this.declaredType = declaredType;
         }
 
         @Override public String name() {
@@ -80,16 +81,18 @@ sealed public interface Declaration
             return sourcePos;
         }
 
-        public Type type() {
-            return type;
+        public Type declaredType() { return this.declaredType; }
+
+        public RuntimeType runtimeType() {
+            return runtimeType;
         }
 
-        public void setType(Type type) {
-            this.type = type;
+        public void setRuntimeType(RuntimeType type) {
+            this.runtimeType = type;
         }
 
         @Override public int hashCode() {
-            return Objects.hash(sourcePos, name, type);
+            return Objects.hash(sourcePos, name, declaredType);
         }
 
         @Override public boolean equals(Object obj) {
@@ -101,11 +104,11 @@ sealed public interface Declaration
             }
             var that = (VarDeclaration) obj;
             return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.name, that.name) && Objects.equals(
-                    this.type, that.type);
+                    this.declaredType, that.declaredType);
         }
 
         @Override public String toString() {
-            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "type=" + type + ']';
+            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "type=" + declaredType + ']';
         }
 
     }
@@ -116,15 +119,16 @@ sealed public interface Declaration
         private final String          name;
         private final List<Parameter> parameters;
         private final Statement       expression;
-        private final Type            returnType;
+        private final Type            declaredReturnType;
+        private       RuntimeType     returnType;
 
         public FuncDeclaration(
-                SourcePosition sourcePos, String name, List<Parameter> parameters, Type returnType, Statement expression
+                SourcePosition sourcePos, String name, List<Parameter> parameters, Type declaredReturnType, Statement expression
         ) {
             this.sourcePos = sourcePos;
             this.name = name;
             this.parameters = parameters;
-            this.returnType = returnType;
+            this.declaredReturnType = declaredReturnType;
             this.expression = expression;
         }
 
@@ -140,8 +144,8 @@ sealed public interface Declaration
             return parameters;
         }
 
-        public Type returnType() {
-            return returnType;
+        public Type declaredReturnType() {
+            return declaredReturnType;
         }
 
         public Statement expression() {
@@ -149,7 +153,7 @@ sealed public interface Declaration
         }
 
         @Override public int hashCode() {
-            return Objects.hash(sourcePos, name, parameters, returnType, expression);
+            return Objects.hash(sourcePos, name, parameters, declaredReturnType, expression);
         }
 
         @Override public boolean equals(Object obj) {
@@ -161,13 +165,21 @@ sealed public interface Declaration
             }
             var that = (FuncDeclaration) obj;
             return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.name, that.name) && Objects.equals(
-                    this.parameters, that.parameters) && Objects.equals(this.returnType, that.returnType) && Objects.equals(
-                    this.expression, that.expression);
+                    this.parameters, that.parameters) && Objects.equals(this.declaredReturnType, that.declaredReturnType) &&
+                   Objects.equals(this.expression, that.expression);
         }
 
         @Override public String toString() {
             return "FuncDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "parameters=" + parameters +
-                   ", " + "returnType=" + returnType + ", " + "expression=" + expression + ']';
+                   ", " + "returnType=" + declaredReturnType + ", " + "expression=" + expression + ']';
+        }
+
+        public RuntimeType runtimeReturnType() {
+            return returnType;
+        }
+
+        private void setReturnType(final RuntimeType returnType) {
+            this.returnType = returnType;
         }
 
     }

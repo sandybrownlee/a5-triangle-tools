@@ -4,7 +4,8 @@ import triangle.ast.Expression;
 import triangle.ast.Expression.Identifier;
 import triangle.ast.Expression.LitRecord.RecordField;
 import triangle.ast.Parameter;
-import triangle.types.Type;
+import triangle.ast.Type;
+import triangle.types.RuntimeType;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class SemanticException extends Exception {
@@ -30,11 +31,11 @@ public abstract class SemanticException extends Exception {
     }
 
     static final class TypeError extends SemanticException {
-        TypeError(SourcePosition sourcePos, Type left, Type right) {
+        TypeError(SourcePosition sourcePos, RuntimeType left, RuntimeType right) {
             super(sourcePos, "Type mismatch: " + left + " and " + right);
         }
 
-        TypeError(SourcePosition sourcePos, Type type, String expected) {
+        TypeError(SourcePosition sourcePos, RuntimeType type, String expected) {
             super(sourcePos, "Unexpected type: " + type + " expecting: " + expected);
         }
     }
@@ -65,20 +66,20 @@ public abstract class SemanticException extends Exception {
 
     static final class DuplicateRecordTypeField extends SemanticException {
 
-        private final Type.RecordType.RecordFieldType fieldType;
+        private final Type.RecordType.FieldType fieldType;
 
-        DuplicateRecordTypeField(final SourcePosition sourcePos, final Type.RecordType.RecordFieldType fieldType) {
+        DuplicateRecordTypeField(final SourcePosition sourcePos, final Type.RecordType.FieldType fieldType) {
             this.fieldType = fieldType;
             super(sourcePos, "Duplicate field in record type: " + fieldType.fieldName());
         }
 
         // we may not always have source positions; e.g, when checking a record field type
-        DuplicateRecordTypeField(final Type.RecordType.RecordFieldType fieldType) {
+        DuplicateRecordTypeField(final Type.RecordType.FieldType fieldType) {
             this.fieldType = fieldType;
             super("Duplicate field in record type: " + fieldType.fieldName());
         }
 
-        Type.RecordType.RecordFieldType getFieldType() {
+        Type.RecordType.FieldType getFieldType() {
             return fieldType;
         }
 

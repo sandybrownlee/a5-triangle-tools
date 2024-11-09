@@ -1,12 +1,13 @@
 package triangle.ast;
 
 import triangle.syntacticAnalyzer.SourcePosition;
-import triangle.types.Type;
+import triangle.types.RuntimeType;
 
 import java.util.List;
 import java.util.Objects;
 
-sealed public interface Parameter extends Typeable permits Parameter.ConstParameter, Parameter.FuncParameter, Parameter.VarParameter {
+sealed public interface Parameter extends Typeable
+        permits Parameter.ConstParameter, Parameter.FuncParameter, Parameter.VarParameter {
 
     String getName();
 
@@ -16,12 +17,13 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
 
         private final SourcePosition sourcePos;
         private final String         name;
-        private       Type           type;
+        private       Type           declaredType;
+        private       RuntimeType    type;
 
-        public ConstParameter(SourcePosition sourcePos, String name, Type type) {
+        public ConstParameter(SourcePosition sourcePos, String name, Type declaredType) {
             this.sourcePos = sourcePos;
             this.name = name;
-            this.type = type;
+            this.declaredType = declaredType;
         }
 
         @Override public String getName() {
@@ -36,12 +38,12 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
             return name;
         }
 
-        public Type type() {
-            return type;
+        public Type declaredType() {
+            return declaredType;
         }
 
         @Override public int hashCode() {
-            return Objects.hash(sourcePos, name, type);
+            return Objects.hash(sourcePos, name, declaredType);
         }
 
         @Override public boolean equals(Object obj) {
@@ -53,19 +55,19 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
             }
             var that = (ConstParameter) obj;
             return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.name, that.name) && Objects.equals(
-                    this.type, that.type);
+                    this.declaredType, that.declaredType);
         }
 
         @Override public String toString() {
-            return "ConstParameter[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "type=" + type + ']';
+            return "ConstParameter[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "type=" + declaredType + ']';
         }
 
-        @Override public Type getType() {
+        @Override public RuntimeType getType() {
             return type;
         }
 
 
-        @Override public void setType(Type type) {
+        @Override public void setType(RuntimeType type) {
             this.type = type;
         }
 
@@ -75,12 +77,13 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
 
         private final SourcePosition sourcePos;
         private final String         name;
-        private       Type           type;
+        private final Type           declaredType;
+        private       RuntimeType    type;
 
-        public VarParameter(SourcePosition sourcePos, String name, Type type) {
+        public VarParameter(SourcePosition sourcePos, String name, Type declaredType) {
             this.sourcePos = sourcePos;
             this.name = name;
-            this.type = type;
+            this.declaredType = declaredType;
         }
 
         @Override public String getName() {
@@ -95,7 +98,7 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
             return name;
         }
 
-        public Type type() {
+        public RuntimeType type() {
             return type;
         }
 
@@ -119,12 +122,16 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
             return "VarParameter[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "type=" + type + ']';
         }
 
-        @Override public Type getType() {
+        public Type declaredType() {
+            return declaredType;
+        }
+
+        @Override public RuntimeType getType() {
             return type;
         }
 
 
-        @Override public void setType(Type type) {
+        @Override public void setType(RuntimeType type) {
             this.type = type;
         }
 
@@ -135,14 +142,17 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
         private final SourcePosition  sourcePos;
         private final String          callable;
         private final List<Parameter> parameters;
-        private final Type            returnType;
-        private       Type            type;
+        private final Type            declaredReturnType;
+        private       RuntimeType     returnType;
 
-        public FuncParameter(SourcePosition sourcePos, String callable, List<Parameter> parameters, Type returnType) {
+        public FuncParameter(
+                SourcePosition sourcePos, String callable, List<Parameter> parameters,
+                triangle.ast.Type declaredReturnType
+        ) {
             this.sourcePos = sourcePos;
             this.callable = callable;
             this.parameters = parameters;
-            this.returnType = returnType;
+            this.declaredReturnType = declaredReturnType;
         }
 
         @Override public String getName() {
@@ -161,12 +171,12 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
             return parameters;
         }
 
-        public Type returnType() {
-            return returnType;
+        public Type declaredReturnType() {
+            return declaredReturnType;
         }
 
         @Override public int hashCode() {
-            return Objects.hash(sourcePos, callable, parameters, returnType);
+            return Objects.hash(sourcePos, callable, parameters, declaredReturnType);
         }
 
         @Override public boolean equals(Object obj) {
@@ -186,13 +196,13 @@ sealed public interface Parameter extends Typeable permits Parameter.ConstParame
                    parameters + ", " + "returnType=" + returnType + ']';
         }
 
-        @Override public Type getType() {
-            return type;
+        @Override public RuntimeType getType() {
+            return returnType;
         }
 
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public void setType(RuntimeType returnType) {
+            this.returnType = returnType;
         }
 
     }

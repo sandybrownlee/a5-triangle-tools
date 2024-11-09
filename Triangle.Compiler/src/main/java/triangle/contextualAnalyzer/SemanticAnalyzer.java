@@ -18,13 +18,12 @@ import triangle.ast.Expression.LitRecord;
 import triangle.ast.Expression.UnaryOp;
 import triangle.ast.Parameter;
 import triangle.ast.Statement;
-import triangle.types.Type;
-import triangle.types.Type.ArrayType;
-import triangle.types.Type.BasicType;
-import triangle.types.Type.RecordType;
-import triangle.types.Type.PrimType.VoidType;
+import triangle.ast.Type;
+import triangle.types.RuntimeType;
+import triangle.types.RuntimeType.ArrayType;
+import triangle.types.RuntimeType.RecordType;
 
-import triangle.types.Type.PrimType.FuncType;
+import triangle.types.RuntimeType.PrimType.FuncType;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 import java.util.ArrayList;
@@ -37,7 +36,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-import static triangle.types.Type.*;
+import static triangle.ast.Type.BasicType;
+import static triangle.types.RuntimeType.*;
 
 // semantic analysis does several things:
 //      it checks that all uses of an identifier are in a scope with a corresponding declaration
@@ -49,14 +49,14 @@ import static triangle.types.Type.*;
 public final class SemanticAnalyzer {
 
     //@formatter:off
-    private static final Type                 binaryRelation = new FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
-    private static final Type                 binaryIntRelation = new FuncType(List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
-    private static final Type                 binaryIntFunc = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
-    private static final Map<String, Binding> STD_TERMS = new HashMap<>();
-    private static final Map<String, Type>    STD_TYPES =
+    private static final RuntimeType          binaryRelation    = new FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
+    private static final RuntimeType          binaryIntRelation = new FuncType(List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
+    private static final RuntimeType          binaryIntFunc     = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
+    private static final Map<String, Binding> STD_TERMS         = new HashMap<>();
+    private static final Map<String, RuntimeType>    STD_TYPES =
             Map.of(
                     "Integer", INT_TYPE,
-                    "Char", Type.CHAR_TYPE,
+                    "Char", CHAR_TYPE,
                     "Boolean",BOOL_TYPE);
 
     // stdenv values have null as annotation
@@ -86,33 +86,28 @@ public final class SemanticAnalyzer {
         //  these are supposed to be special-cased in analyze(Expression)
         STD_TERMS.putAll(
                 Map.of(
-                        "=", new Binding(Type.VOID_TYPE, true, null),
-                        "\\=", new Binding(Type.VOID_TYPE, true, null)));
+                        "=", new Binding(VOID_TYPE, true, null),
+                        "\\=", new Binding(VOID_TYPE, true, null)));
 
         STD_TERMS.putAll(
                 Map.of(
-                        "get", new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
-                        "getint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
-                        "geteol", new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null),
-                        "puteol", new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null),
-                        "put", new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
-                        "putint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
-                        "chr", new Binding(new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE), true, null),
+                        "get", new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
+                        "getint", new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
+                        "geteol", new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
+                        "puteol", new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
+                        "put", new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
+                        "putint", new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
+                        "chr", new Binding(new FuncType(List.of(INT_TYPE), CHAR_TYPE), true, null),
                         "eol", new Binding(new FuncType(List.of(), BOOL_TYPE), true, null),
-                        "ord", new Binding(new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE), true, null)));
+                        "ord", new Binding(new FuncType(List.of(CHAR_TYPE), INT_TYPE), true, null)));
     }
-    //@formatter:off
+    //@formatter:on
 
     // stores a binding for each term
     private final SymbolTable<Binding>    terms  = new SymbolTable<>(STD_TERMS);
 
-    // stores the "resolved" type of each type; i.e.:
-    //      type P ~ record x : Integer end
-    //      type R ~ record x : P, y : P end
-    // is resolved into
-    //      type P ~ record x : Integer end
-    //      type R ~ record x : (record x : Integer), y : (record x : Integer) end
-    private final SymbolTable<Type>       types  = new SymbolTable<>(STD_TYPES);
+    // stores the "resolved" type of each type
+    private final SymbolTable<RuntimeType>       types  = new SymbolTable<>(STD_TYPES);
     private final List<SemanticException> errors = new ArrayList<>();
 
     public List<SemanticException> check(final Statement program) {
@@ -171,7 +166,7 @@ public final class SemanticAnalyzer {
             case Declaration.FuncDeclaration funcDeclaration -> {
                 // check for duplicate parameter
                 Set<String> seenParameters = new HashSet<>();
-                List<Type> resolvedParamTypes = new ArrayList<>();
+                List<RuntimeType> resolvedParamTypes = new ArrayList<>();
 
                 for (Parameter param : funcDeclaration.parameters()) {
                     if (seenParameters.contains(param.getName())) {
@@ -184,7 +179,7 @@ public final class SemanticAnalyzer {
                     resolvedParamTypes.add(param.getType());
                 }
 
-                Type funcType;
+                RuntimeType funcType;
                 // inside the function body
                 types.enterNewScope();
                 try {
@@ -195,7 +190,7 @@ public final class SemanticAnalyzer {
                         terms.add(p.getName(), new Binding(p.getType(), p instanceof Parameter.ConstParameter, null));
                     }
 
-                    Type resolvedReturnType = resolveType(funcDeclaration.returnType());
+                    RuntimeType resolvedReturnType = resolveType(funcDeclaration.declaredReturnType());
 
                     // (optimistically) assign the function its declared return type
                     funcType = new FuncType(resolvedParamTypes, resolvedReturnType);
@@ -228,11 +223,12 @@ public final class SemanticAnalyzer {
                 // we add the function declaration to symbol table AFTER we exit the scope
                 // functions are always constant since we dont support HOF
                 terms.add(funcDeclaration.name(), new Binding(funcType, true, funcDeclaration));
+                funcDeclaration.setRuntimeReturnType(funcType);
             }
             case TypeDeclaration typeDeclaration -> {
                 try {
                     // resolve the type and add it to the symbol table
-                    Type resolvedType = resolveType(typeDeclaration.type());
+                    RuntimeType resolvedType = resolveType(typeDeclaration.type());
                     types.add(typeDeclaration.name(), resolvedType);
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
@@ -242,9 +238,9 @@ public final class SemanticAnalyzer {
             case Declaration.VarDeclaration varDeclaration -> {
                 try {
                     // resolve the type, set the declarations new type to the resolved type, and add a binding to the symbol table
-                    Type vType = resolveType(varDeclaration.type());
-                    varDeclaration.setType(vType);
-                    terms.add(varDeclaration.name(), new Binding(vType, false, varDeclaration));
+                    RuntimeType rType = resolveType(varDeclaration.declaredType());
+                    varDeclaration.setRuntimeType(rType);
+                    terms.add(varDeclaration.name(), new Binding(rType, false, varDeclaration));
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(varDeclaration.sourcePos(), e.getFieldType());
@@ -265,7 +261,7 @@ public final class SemanticAnalyzer {
                 }
 
                 visit(subscript);
-                if (!(subscript.getType() instanceof Type.PrimType.IntType)) {
+                if (!(subscript.getType() instanceof PrimType.IntType)) {
                     throw new SemanticException.TypeError(arraySubscript.sourcePos(), subscript.getType(), INT_TYPE);
                 }
 
@@ -287,9 +283,9 @@ public final class SemanticAnalyzer {
 
                 // record access has a new scope with the field names and types of the record available
                 types.enterNewScope();
-                for (RecordType.RecordFieldType fieldType : recordType.fieldTypes()) {
+                for (RecordType.FieldType fieldType : recordType.fieldTypes()) {
                     // record fields dont have a declaration
-                    terms.add(fieldType.fieldName(), new Binding(resolveType(fieldType.fieldType()), true, null));
+                    terms.add(fieldType.fieldName(), new Binding(fieldType.fieldType(), true, null));
                 }
                 visit(field);
                 types.exitScope();
@@ -345,7 +341,7 @@ public final class SemanticAnalyzer {
                 // make sure the above special-case block precedes any attempt to access opType's value, since the equality
                 //  operations have their types set to null in the stdenv
 
-                if (!(opBinding.type() instanceof FuncType(List<Type> argTypes, Type returnType))) {
+                if (!(opBinding.type() instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
                     throw new SemanticException.TypeError(binop.sourcePos(), opBinding.type(), "function");
                 }
 
@@ -370,7 +366,7 @@ public final class SemanticAnalyzer {
 
                 visit(callable);
 
-                if (!(callable.getType() instanceof FuncType(List<Type> argTypes, Type returnType))) {
+                if (!(callable.getType() instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
                     throw new SemanticException.TypeError(funCall.sourcePos(), callable.getType(), "function");
                 }
 
@@ -383,7 +379,7 @@ public final class SemanticAnalyzer {
                     Argument arg = arguments.get(i);
                     // we dont have to resolveType() the types in function arg list since it should have been done at
                     // declaration time
-                    Type expectedType = argTypes.get(i);
+                    RuntimeType expectedType = argTypes.get(i);
 
                     // analyze it
                     visit(arg);
@@ -402,7 +398,7 @@ public final class SemanticAnalyzer {
                 Expression alternative = ifExpression.alternative();
 
                 visit(condition);
-                if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
+                if (!(condition.getType() instanceof PrimType.BoolType)) {
                     throw new SemanticException.TypeError(ifExpression.sourcePos(), condition.getType(), BOOL_TYPE);
                 }
 
@@ -441,7 +437,7 @@ public final class SemanticAnalyzer {
                 }
 
                 visit(values.getFirst());
-                Type expectedType = values.getFirst().getType();
+                RuntimeType expectedType = values.getFirst().getType();
                 for (Expression value : values) {
                     visit(value);
                     if (!value.getType().equals(expectedType)) {
@@ -465,7 +461,7 @@ public final class SemanticAnalyzer {
                     return;
                 }
 
-                List<RecordType.RecordFieldType> fieldTypes = new ArrayList<>(fields.size());
+                List<RecordType.FieldType> fieldTypes = new ArrayList<>(fields.size());
                 Set<String> seenFieldNames = new HashSet<>();
                 for (LitRecord.RecordField field : fields) {
                     if (seenFieldNames.contains(field.name())) {
@@ -473,7 +469,7 @@ public final class SemanticAnalyzer {
                     }
                     seenFieldNames.add(field.name());
                     visit(field.value());
-                    fieldTypes.add(new RecordType.RecordFieldType(field.name(), field.value().getType()));
+                    fieldTypes.add(new RecordType.FieldType(field.name(), field.value().getType()));
                 }
 
                 litRecord.setType(new RecordType(fieldTypes));
@@ -484,7 +480,7 @@ public final class SemanticAnalyzer {
 
                 // throw exception early if we cant find the operator
                 Binding opBinding = lookup(operator);
-                if (!(opBinding.type() instanceof FuncType(List<Type> argTypes, Type returnType))) {
+                if (!(opBinding.type() instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
                     throw new SemanticException.TypeError(unaryOp.sourcePos(), opBinding.type(), "function");
                 }
 
@@ -494,14 +490,14 @@ public final class SemanticAnalyzer {
                 }
 
                 visit(operand);
-                Type expectedType = argTypes.getFirst();
+                RuntimeType expectedType = argTypes.getFirst();
                 if (!operand.getType().equals(expectedType)) {
                     throw new SemanticException.TypeError(unaryOp.sourcePos(), expectedType, operand.getType());
                 }
 
                 unaryOp.setType(returnType);
             }
-            case Expression.LitBool _ -> { }
+            case LitBool _ -> { }
         }
     }
 
@@ -509,9 +505,9 @@ public final class SemanticAnalyzer {
         switch (parameter) {
             case Parameter.FuncParameter funcParameter -> {
                 List<Parameter> parameters = funcParameter.parameters();
-                Type returnType = funcParameter.returnType();
+                Type returnType = funcParameter.declaredReturnType();
 
-                List<Type> paramTypes = new ArrayList<>();
+                List<RuntimeType> paramTypes = new ArrayList<>();
                 for (Parameter p : parameters) {
                     visit(p);
                     paramTypes.add(p.getType());
@@ -521,8 +517,8 @@ public final class SemanticAnalyzer {
             }
 
             // resolve parameter type in current environment and set params type to resolved version
-            case Parameter.VarParameter varParameter -> parameter.setType(resolveType(varParameter.type()));
-            case Parameter.ConstParameter constParameter -> parameter.setType(resolveType(constParameter.type()));
+            case Parameter.VarParameter varParameter -> parameter.setType(resolveType(varParameter.declaredType()));
+            case Parameter.ConstParameter constParameter -> parameter.setType(resolveType(constParameter.declaredType()));
         }
     }
 
@@ -561,7 +557,7 @@ public final class SemanticAnalyzer {
 
                 try {
                     visit(condition);
-                    if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
+                    if (!(condition.getType() instanceof PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(ifStatement.sourcePos(), condition.getType(), BOOL_TYPE));
                     }
                 } catch (SemanticException e) {
@@ -597,7 +593,7 @@ public final class SemanticAnalyzer {
 
                 try {
                     visit(condition);
-                    if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
+                    if (!(condition.getType() instanceof PrimType.BoolType)) {
                         errors.add(
                                 new SemanticException.TypeError(loopWhileStatement.sourcePos(), condition.getType(), BOOL_TYPE));
                     }
@@ -614,7 +610,7 @@ public final class SemanticAnalyzer {
 
                 try {
                     visit(condition);
-                    if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
+                    if (!(condition.getType() instanceof PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(repeatUntilStatement.sourcePos(), condition.getType(),
                                                                    BOOL_TYPE
                         ));
@@ -631,7 +627,7 @@ public final class SemanticAnalyzer {
 
                 try {
                     visit(condition);
-                    if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
+                    if (!(condition.getType() instanceof PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(repeatWhileStatement.sourcePos(), condition.getType(),
                                                                    BOOL_TYPE
                         ));
@@ -653,7 +649,7 @@ public final class SemanticAnalyzer {
 
                 try {
                     visit(condition);
-                    if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
+                    if (!(condition.getType() instanceof PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(whileStatement.sourcePos(), condition.getType(), BOOL_TYPE));
                     }
                 } catch (SemanticException e) {
@@ -665,45 +661,33 @@ public final class SemanticAnalyzer {
         }
     }
 
-    private Type resolveType(final Type type) throws SemanticException {
+    // all syntactic types, i.e., syntactic phrases used as types in the source code must resolve to an "actual" type -
+    //  RuntimeType
+    private RuntimeType resolveType(final Type type) throws SemanticException {
         return switch (type) {
-            case ArrayType(int size, Type elementType) -> new ArrayType(size, resolveType(elementType));
-            case RecordType recordType -> {
-                // check for duplicate fields in the record type definition
+            case Type.ArrayType(int size, Type elementType) -> new ArrayType(size, resolveType(elementType));
+            case Type.RecordType recordType -> {
                 Set<String> seenFieldNames = new HashSet<>();
-                for (RecordType.RecordFieldType field : recordType.fieldTypes()) {
+                List<RecordType.FieldType> resolvedFieldTypes = new ArrayList<>();
+                for (Type.RecordType.FieldType field : recordType.fieldTypes()) {
+                    // check for duplicate fields in the record type definition
                     if (seenFieldNames.contains(field.fieldName())) {
                         throw new SemanticException.DuplicateRecordTypeField(field);
                     }
 
+                    RecordType.FieldType resolvedField = new RecordType.FieldType(field.fieldName(), resolveType(field.fieldType()));
+                    resolvedFieldTypes.add(resolvedField);
                     seenFieldNames.add(field.fieldName());
-                }
-
-                List<RecordType.RecordFieldType> resolvedFieldTypes = new ArrayList<>();
-                for (RecordType.RecordFieldType fieldType : recordType.fieldTypes()) {
-                    resolvedFieldTypes.add(
-                            new RecordType.RecordFieldType(fieldType.fieldName(), resolveType(fieldType.fieldType())));
                 }
 
                 yield new RecordType(resolvedFieldTypes);
             }
-            case BasicType basicType -> resolveType(lookup(basicType));
-            case VoidType voidType -> voidType;
-            case Type.PrimType.BoolType boolType -> boolType;
-            case Type.PrimType.CharType charType -> charType;
-            case Type.PrimType.IntType intType -> intType;
-            case FuncType(List<Type> argTypes, Type returnType) -> {
-                List<Type> resolvedArgTypes = new ArrayList<>();
-                for (Type argType : argTypes) {
-                    resolvedArgTypes.add(resolveType(argType));
-                }
-
-                yield new FuncType(resolvedArgTypes, resolveType(returnType));
-            }
+            case BasicType basicType -> lookup(basicType);
+            case Type.Void _ -> VOID_TYPE;
         };
     }
 
-    private Type lookup(final BasicType basicType) throws SemanticException {
+    private RuntimeType lookup(final BasicType basicType) throws SemanticException {
         try {
             return types.lookup(basicType.name());
         } catch (NoSuchElementException e) {
@@ -712,6 +696,6 @@ public final class SemanticAnalyzer {
     }
 
     // each identifier is bound to its type, whether or not its constant, and the place where it was declared
-    record Binding(Type type, boolean constant, Declaration declaration) { }
+    record Binding(RuntimeType type, boolean constant, Declaration declaration) { }
 
 }

@@ -1,12 +1,12 @@
 package triangle.ast;
 
 import triangle.syntacticAnalyzer.SourcePosition;
-import triangle.types.Type;
+import triangle.types.RuntimeType;
 
 import java.util.List;
 import java.util.Objects;
 
-sealed public interface Expression extends Statement, Argument
+sealed public interface Expression extends Statement, Argument, Typeable
         permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.UnaryOp {
@@ -24,10 +24,10 @@ sealed public interface Expression extends Statement, Argument
 
             private final SourcePosition sourcePos;
             private final String         name;
-            private       Type           type;
+            private       RuntimeType    type;
             private       Declaration    declaration;
 
-            private BasicIdentifier(SourcePosition sourcePos, String name, Type type, Declaration declaration) {
+            private BasicIdentifier(SourcePosition sourcePos, String name, RuntimeType type, Declaration declaration) {
                 this.sourcePos = sourcePos;
                 this.name = name;
                 this.type = type;
@@ -39,7 +39,7 @@ sealed public interface Expression extends Statement, Argument
             }
 
             // needed when setting up stdenv
-            public BasicIdentifier(String name, Type type) {
+            public BasicIdentifier(String name, RuntimeType type) {
                 this(null, name, type, null);
             }
 
@@ -78,12 +78,12 @@ sealed public interface Expression extends Statement, Argument
                 this.declaration = declaration;
             }
 
-            public void setType(Type type) {
+            @Override public void setType(RuntimeType type) {
                 this.type = type;
             }
 
 
-            @Override public Type getType() {
+            @Override public RuntimeType getType() {
                 return type;
             }
 
@@ -94,7 +94,7 @@ sealed public interface Expression extends Statement, Argument
             private final SourcePosition sourcePos;
             private final Identifier     record;
             private final Identifier     field;
-            private       Type           type;
+            private       RuntimeType    type;
 
             public RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) {
                 this.sourcePos = sourcePos;
@@ -138,12 +138,12 @@ sealed public interface Expression extends Statement, Argument
                 return "RecordAccess[" + "sourcePos=" + sourcePos + ", " + "record=" + record + ", " + "field=" + field + ']';
             }
 
-            public void setType(Type type) {
+            public void setType(RuntimeType type) {
                 this.type = type;
             }
 
 
-            @Override public Type getType() {
+            @Override public RuntimeType getType() {
                 return type;
             }
 
@@ -154,7 +154,7 @@ sealed public interface Expression extends Statement, Argument
             private final SourcePosition sourcePos;
             private final Identifier     array;
             private final Expression     subscript;
-            private       Type           type;
+            private       RuntimeType    type;
 
             public ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) {
                 this.sourcePos = sourcePos;
@@ -199,12 +199,11 @@ sealed public interface Expression extends Statement, Argument
                        ']';
             }
 
-            public void setType(Type type) {
+            public void setType(RuntimeType type) {
                 this.type = type;
             }
 
-
-            @Override public Type getType() {
+            @Override public RuntimeType getType() {
                 return type;
             }
 
@@ -249,11 +248,11 @@ sealed public interface Expression extends Statement, Argument
             return "LitBool[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
         }
 
-        @Override public Type getType() {
-            return Type.BOOL_TYPE;
+        @Override public RuntimeType getType() {
+            return RuntimeType.BOOL_TYPE;
         }
 
-        @Override public void setType(final Type type) {
+        @Override public void setType(final RuntimeType type) {
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
@@ -296,11 +295,11 @@ sealed public interface Expression extends Statement, Argument
             return "LitInt[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
         }
 
-        @Override public Type getType() {
-            return Type.INT_TYPE;
+        @Override public RuntimeType getType() {
+            return RuntimeType.INT_TYPE;
         }
 
-        @Override public void setType(final Type type) {
+        @Override public void setType(final RuntimeType type) {
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
@@ -343,11 +342,11 @@ sealed public interface Expression extends Statement, Argument
             return "LitChar[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
         }
 
-        @Override public Type getType() {
-            return Type.CHAR_TYPE;
+        @Override public RuntimeType getType() {
+            return RuntimeType.CHAR_TYPE;
         }
 
-        @Override public void setType(final Type type) {
+        @Override public void setType(final RuntimeType type) {
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
@@ -357,7 +356,7 @@ sealed public interface Expression extends Statement, Argument
 
         private final SourcePosition   sourcePos;
         private final List<Expression> elements;
-        private       Type             type;
+        private       RuntimeType      type;
 
         public LitArray(SourcePosition sourcePos, List<Expression> elements) {
             this.sourcePos = sourcePos;
@@ -391,13 +390,12 @@ sealed public interface Expression extends Statement, Argument
             return "LitArray[" + "sourcePos=" + sourcePos + ", " + "elements=" + elements + ']';
         }
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public RuntimeType getType() {
+            return type;
         }
 
-
-        @Override public Type getType() {
-            return type;
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
         }
 
     }
@@ -406,7 +404,7 @@ sealed public interface Expression extends Statement, Argument
 
         private final SourcePosition    sourcePos;
         private final List<RecordField> fields;
-        private       Type              type;
+        private       RuntimeType       type;
 
         public LitRecord(SourcePosition sourcePos, List<RecordField> fields) {
             this.sourcePos = sourcePos;
@@ -442,13 +440,12 @@ sealed public interface Expression extends Statement, Argument
 
         public record RecordField(String name, Expression value) { }
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public RuntimeType getType() {
+            return type;
         }
 
-
-        @Override public Type getType() {
-            return type;
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
         }
 
     }
@@ -458,7 +455,7 @@ sealed public interface Expression extends Statement, Argument
         private final SourcePosition             sourcePos;
         private final Identifier.BasicIdentifier operator;
         private final Expression                 operand;
-        private       Type                       type;
+        private       RuntimeType                type;
 
         public UnaryOp(SourcePosition sourcePos, Identifier.BasicIdentifier operator, Expression operand) {
             this.sourcePos = sourcePos;
@@ -498,13 +495,12 @@ sealed public interface Expression extends Statement, Argument
             return "UnaryOp[" + "sourcePos=" + sourcePos + ", " + "operator=" + operator + ", " + "operand=" + operand + ']';
         }
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public RuntimeType getType() {
+            return type;
         }
 
-
-        @Override public Type getType() {
-            return type;
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
         }
 
     }
@@ -515,7 +511,7 @@ sealed public interface Expression extends Statement, Argument
         private final Identifier.BasicIdentifier operator;
         private final Expression                 leftOperand;
         private final Expression                 rightOperand;
-        private       Type                       type;
+        private       RuntimeType                type;
 
         public BinaryOp(
                 SourcePosition sourcePos, Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand
@@ -563,13 +559,12 @@ sealed public interface Expression extends Statement, Argument
                    ", " + "rightOperand=" + rightOperand + ']';
         }
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public RuntimeType getType() {
+            return type;
         }
 
-
-        @Override public Type getType() {
-            return type;
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
         }
 
     }
@@ -579,7 +574,7 @@ sealed public interface Expression extends Statement, Argument
         private final SourcePosition    sourcePos;
         private final List<Declaration> declarations;
         private final Expression        expression;
-        private       Type              type;
+        private       RuntimeType       type;
 
         public LetExpression(SourcePosition sourcePos, List<Declaration> declarations, Expression expression) {
             this.sourcePos = sourcePos;
@@ -620,13 +615,12 @@ sealed public interface Expression extends Statement, Argument
                    expression + ']';
         }
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public RuntimeType getType() {
+            return type;
         }
 
-
-        @Override public Type getType() {
-            return type;
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
         }
 
     }
@@ -637,7 +631,7 @@ sealed public interface Expression extends Statement, Argument
         private final Expression     condition;
         private final Expression     consequent;
         private final Expression     alternative;
-        private       Type           type;
+        private       RuntimeType    type;
 
         public IfExpression(SourcePosition sourcePos, Expression condition, Expression consequent, Expression alternative) {
             this.sourcePos = sourcePos;
@@ -683,13 +677,12 @@ sealed public interface Expression extends Statement, Argument
                    consequent + ", " + "alternative=" + alternative + ']';
         }
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public RuntimeType getType() {
+            return type;
         }
 
-
-        @Override public Type getType() {
-            return type;
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
         }
 
     }
@@ -699,7 +692,7 @@ sealed public interface Expression extends Statement, Argument
         private final SourcePosition sourcePos;
         private final Identifier     callable;
         private final List<Argument> arguments;
-        private       Type           type;
+        private       RuntimeType    type;
 
         public FunCall(SourcePosition sourcePos, Identifier callable, List<Argument> arguments) {
             this.sourcePos = sourcePos;
@@ -739,13 +732,12 @@ sealed public interface Expression extends Statement, Argument
             return "FunCall[" + "sourcePos=" + sourcePos + ", " + "callable=" + callable + ", " + "arguments=" + arguments + ']';
         }
 
-        @Override public void setType(Type type) {
-            this.type = type;
+        @Override public RuntimeType getType() {
+            return type;
         }
 
-
-        @Override public Type getType() {
-            return type;
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
         }
 
     }

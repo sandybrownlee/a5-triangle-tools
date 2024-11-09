@@ -5,7 +5,7 @@ import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Statement;
-import triangle.types.Type;
+import triangle.ast.Type;
 
 public final class ASTPrinter {
 
@@ -20,8 +20,8 @@ public final class ASTPrinter {
             case Statement.IfStatement ifStatement -> String.format(
                     "IF %s THEN %s ELSE %s",
                     prettyPrint(ifStatement.condition()),
-                    ifStatement.consequent().map(x -> prettyPrint(x)),
-                    ifStatement.alternative().map(x -> prettyPrint(x))
+                    ifStatement.consequent().map(this::prettyPrint),
+                    ifStatement.alternative().map(this::prettyPrint)
             );
             case Statement.LetStatement letStatement -> String.format(
                     "LET {%s} IN %s",
@@ -76,7 +76,7 @@ public final class ASTPrinter {
                     funcDeclaration.name(),
                     funcDeclaration.parameters().stream().map(p -> prettyPrint(p) + ",").reduce("", String::concat),
                     prettyPrint(funcDeclaration.expression()),
-                    prettyPrint(funcDeclaration.returnType())
+                    prettyPrint(funcDeclaration.declaredReturnType())
             );
             case Declaration.TypeDeclaration typeDeclaration -> String.format(
                     "%s : %s",
@@ -138,13 +138,13 @@ public final class ASTPrinter {
                     "CALLABLE %s (%s) : %s",
                     funcParameter.callable(),
                     funcParameter.parameters().stream().map(p -> prettyPrint(p) + ",").reduce("", String::concat),
-                    prettyPrint(funcParameter.returnType())
+                    prettyPrint(funcParameter.declaredReturnType())
             );
-            case Parameter.VarParameter varParameter -> varParameter.name() + ":" + prettyPrint(varParameter.type());
+            case Parameter.VarParameter varParameter -> varParameter.name() + ":" + prettyPrint(varParameter.declaredType());
             case Parameter.ConstParameter constParameter -> String.format(
                     "CONST %s : %s",
                     constParameter.getName(),
-                    prettyPrint(constParameter.type())
+                    prettyPrint(constParameter.declaredType())
             );
         };
     }
@@ -154,23 +154,14 @@ public final class ASTPrinter {
             case Type.ArrayType arrayType -> String.format(
                     "%s[%d]",
                     prettyPrint(arrayType.elementType()),
-                    arrayType.size()
+                    arrayType.arraySize()
             );
             case Type.RecordType recordType -> String.format(
                     "RECORD {%s}",
                     recordType.fieldTypes().stream().map(t -> t.fieldName() + " : " + prettyPrint(t.fieldType()) + ",")
             );
             case Type.BasicType basicType -> basicType.name();
-            case Type.PrimType.VoidType _ -> "VOID";
-            case Type.PrimType.BoolType boolType -> "BOOL";
-            case Type.PrimType.CharType charType -> "CHAR";
-            // will be needed for custom function type definitions
-            case Type.PrimType.FuncType funcType -> String.format(
-                    "FUNC (%s) : %s",
-                    funcType.argTypes().stream().map(p -> prettyPrint(p) + ",").reduce("", String::concat),
-                    funcType.returnType()
-            );
-            case Type.PrimType.IntType intType -> "INT";
+            case Type.Void _ -> "VOID";
         };
     }
 

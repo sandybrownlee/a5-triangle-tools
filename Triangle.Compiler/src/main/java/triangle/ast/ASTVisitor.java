@@ -1,7 +1,5 @@
 package triangle.ast;
 
-import triangle.types.Type;
-
 // visitor pattern is not actually needed because I am using sealed interfaces to emulate ADTs;
 // this is a perfunctory implementation to complete Task 3
 public interface ASTVisitor<T, E extends Exception> {
@@ -50,11 +48,4 @@ public interface ASTVisitor<T, E extends Exception> {
     T visit(Type.BasicType basicType) throws E;
     T visit(Type.ArrayType arrayType) throws E;
     T visit(Type.RecordType recordType) throws E;
-
-    // Type.PrimType
-    T visit(Type.PrimType.FuncType funcType) throws E;
-    T visit(Type.PrimType.BoolType boolType) throws E;
-    T visit(Type.PrimType.IntType intType) throws E;
-    T visit(Type.PrimType.CharType charType) throws E;
-    T visit(Type.PrimType.VoidType voidType) throws E;
 }

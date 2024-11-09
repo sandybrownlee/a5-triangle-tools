@@ -1,8 +1,9 @@
 package triangle.ast;
 
-import triangle.types.Type;
+
+import triangle.types.RuntimeType;
 
 public interface Typeable {
-    void setType(Type type);
-    Type getType();
+    void setType(RuntimeType type);
+    RuntimeType getType();
 }

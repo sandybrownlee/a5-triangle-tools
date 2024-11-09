@@ -1,7 +1,7 @@
 package triangle.ast;
 
 import triangle.syntacticAnalyzer.SourcePosition;
-import triangle.types.Type;
+import triangle.types.RuntimeType;
 
 import java.util.Objects;
 
@@ -11,9 +11,9 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
 
     final class VarArgument implements Argument {
 
-        private final SourcePosition sourcePos;
+        private final SourcePosition        sourcePos;
         private final Expression.Identifier var;
-        private       Type                  type;
+        private       RuntimeType           type;
 
         public VarArgument(SourcePosition sourcePos, Expression.Identifier var) {
             this.sourcePos = sourcePos;
@@ -24,20 +24,15 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return sourcePos;
         }
 
-        public void setType(final Type type) {
-            this.type = type;
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
         public Expression.Identifier var() {
             return var;
         }
 
-        @Override
-        public boolean equals(Object obj) {
+        @Override public int hashCode() {
+            return Objects.hash(sourcePos, var);
+        }
+
+        @Override public boolean equals(Object obj) {
             if (obj == this) {
                 return true;
             }
@@ -45,20 +40,20 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
                 return false;
             }
             var that = (VarArgument) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.var, that.var);
+            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.var, that.var);
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, var);
+        @Override public String toString() {
+            return "VarArgument[" + "sourcePos=" + sourcePos + ", " + "var=" + var + ']';
         }
 
-        @Override
-        public String toString() {
-            return "VarArgument[" +
-                   "sourcePos=" + sourcePos + ", " +
-                   "var=" + var + ']';
+        public void setType(final RuntimeType type) {
+            this.type = type;
+        }
+
+
+        @Override public RuntimeType getType() {
+            return type;
         }
 
     }
@@ -67,7 +62,7 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
 
         private final SourcePosition        sourcePos;
         private final Expression.Identifier func;
-        private       Type                  type;
+        private       RuntimeType      type;
 
         public FuncArgument(SourcePosition sourcePos, Expression.Identifier func) {
             this.sourcePos = sourcePos;
@@ -78,20 +73,15 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return sourcePos;
         }
 
-        public void setType(final Type type) {
-            this.type = type;
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
         public Expression.Identifier func() {
             return func;
         }
 
-        @Override
-        public boolean equals(Object obj) {
+        @Override public int hashCode() {
+            return Objects.hash(sourcePos, func);
+        }
+
+        @Override public boolean equals(Object obj) {
             if (obj == this) {
                 return true;
             }
@@ -99,20 +89,20 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
                 return false;
             }
             var that = (FuncArgument) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.func, that.func);
+            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.func, that.func);
         }
 
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, func);
+        @Override public String toString() {
+            return "FuncArgument[" + "sourcePos=" + sourcePos + ", " + "func=" + func + ']';
         }
 
-        @Override
-        public String toString() {
-            return "FuncArgument[" +
-                   "sourcePos=" + sourcePos + ", " +
-                   "func=" + func + ']';
+        public void setType(final RuntimeType type) {
+            this.type = type;
+        }
+
+
+        @Override public RuntimeType getType() {
+            return type;
         }
 
     }

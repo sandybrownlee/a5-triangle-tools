@@ -27,8 +27,8 @@ import triangle.ast.Parameter;
 import triangle.ast.Parameter.*;
 import triangle.ast.Statement;
 import triangle.ast.Statement.*;
-import triangle.types.Type;
-import triangle.types.Type.*;
+import triangle.ast.Type;
+import triangle.ast.Type.*;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -317,7 +317,7 @@ public class Parser {
             }
             case RECORD -> {
                 shift(Token.Kind.RECORD);
-                @SuppressWarnings("unchecked") List<RecordType.RecordFieldType> fieldTypes =
+                @SuppressWarnings("unchecked") List<RecordType.FieldType> fieldTypes =
                         (lastToken.getKind() == Token.Kind.END) ? Collections.EMPTY_LIST : parseFieldTypeSeq();
                 shift(Token.Kind.END);
                 yield new RecordType(fieldTypes);
@@ -391,26 +391,26 @@ public class Parser {
         return new LitRecord.RecordField(fieldName, parseExpression());
     }
 
-    private List<RecordType.RecordFieldType> parseFieldTypeSeq() throws IOException, SyntaxError {
-        List<RecordType.RecordFieldType> recordFieldTypes = new ArrayList<>();
-        recordFieldTypes.add(parseFieldType());
+    private List<RecordType.FieldType> parseFieldTypeSeq() throws IOException, SyntaxError {
+        List<RecordType.FieldType> fieldTypes = new ArrayList<>();
+        fieldTypes.add(parseFieldType());
 
         if (lastToken.getKind() == Token.Kind.COMMA) {
             do {
                 shift(Token.Kind.COMMA);
-                recordFieldTypes.add(parseFieldType());
+                fieldTypes.add(parseFieldType());
             } while (lastToken.getKind() == Token.Kind.COMMA);
         }
 
-        return recordFieldTypes;
+        return fieldTypes;
     }
 
-    private RecordType.RecordFieldType parseFieldType() throws IOException, SyntaxError {
+    private RecordType.FieldType parseFieldType() throws IOException, SyntaxError {
         String fieldName = ((TextToken) lastToken).getText();
         shift(Token.Kind.IDENTIFIER);
         shift(Token.Kind.COLON);
         Type fieldType = parseType();
-        return new RecordType.RecordFieldType(fieldName, fieldType);
+        return new RecordType.FieldType(fieldName, fieldType);
     }
 
     private List<Declaration> parseDeclSeq() throws IOException, SyntaxError {
@@ -456,7 +456,7 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
-                yield new Declaration.FuncDeclaration(start, funcName, parameters, Type.VOID_TYPE, statement);
+                yield new Declaration.FuncDeclaration(start, funcName, parameters, new Type.Void(), statement);
             }
             case FUNC -> {
                 SourcePosition start = shift(Token.Kind.FUNC);
@@ -523,7 +523,7 @@ public class Parser {
                 @SuppressWarnings("unchecked") List<Parameter> parameters =
                         (lastToken.getKind() == Token.Kind.RPAREN) ? Collections.EMPTY_LIST : parseParamSeq();
                 shift(Token.Kind.RPAREN);
-                yield new FuncParameter(start, funcName, parameters, Type.VOID_TYPE);
+                yield new FuncParameter(start, funcName, parameters, new Type.Void());
             }
             case FUNC -> {
                 SourcePosition start = shift(Token.Kind.FUNC);
