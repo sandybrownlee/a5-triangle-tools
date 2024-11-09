@@ -2,7 +2,7 @@ package triangle.codeGenerator.entities;
 
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.FrameOld;
 
 @Deprecated public abstract class AddressableEntity extends RuntimeEntity implements FetchableEntity {
 
@@ -13,7 +13,7 @@ import triangle.codeGenerator.Frame;
         address = new ObjectAddress(level, displacement);
     }
 
-    protected AddressableEntity(int size, Frame frame) {
+    protected AddressableEntity(int size, FrameOld frame) {
         this(size, frame.getLevel(), frame.getSize());
     }
 
@@ -21,10 +21,10 @@ import triangle.codeGenerator.Frame;
         return address;
     }
 
-    public abstract void encodeStore(Emitter emitter, Frame frame, int size, Vname vname);
+    public abstract void encodeStore(Emitter emitter, FrameOld frame, int size, Vname vname);
 
-    public abstract void encodeFetchAddress(Emitter emitter, Frame frame, Vname vname);
+    public abstract void encodeFetchAddress(Emitter emitter, FrameOld frame, Vname vname);
 
-    public abstract void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname);
+    public abstract void encodeFetch(Emitter emitter, FrameOld frame, int size, Vname vname);
 
 }

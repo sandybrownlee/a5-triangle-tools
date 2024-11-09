@@ -21,7 +21,7 @@ package triangle.codeGenerator.entities;
 import triangle.abstractMachine.OpCode;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.FrameOld;
 
 @Deprecated public class KnownValue extends RuntimeEntity implements FetchableEntity {
 
@@ -36,7 +36,7 @@ import triangle.codeGenerator.Frame;
         return value;
     }
 
-    public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
+    public void encodeFetch(Emitter emitter, FrameOld frame, int size, Vname vname) {
         // presumably offset = 0 and indexed = false
         emitter.emit(OpCode.LOADL, 0, value);
     }

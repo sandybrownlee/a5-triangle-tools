@@ -21,7 +21,7 @@ package triangle.codeGenerator.entities;
 import triangle.abstractMachine.OpCode;
 import triangle.abstractMachine.Register;
 import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.FrameOld;
 
 @Deprecated public class KnownRoutine extends RuntimeEntity implements RoutineEntity {
 
@@ -36,11 +36,11 @@ import triangle.codeGenerator.Frame;
         return address;
     }
 
-    public void encodeCall(Emitter emitter, Frame frame) {
+    public void encodeCall(Emitter emitter, FrameOld frame) {
         emitter.emit(OpCode.CALL, frame.getDisplayRegister(address), Register.CB, address.displacement());
     }
 
-    public void encodeFetch(Emitter emitter, Frame frame) {
+    public void encodeFetch(Emitter emitter, FrameOld frame) {
         emitter.emit(OpCode.LOADA, frame.getDisplayRegister(address), 0);
         emitter.emit(OpCode.LOADA, Register.CB, address.displacement());
     }

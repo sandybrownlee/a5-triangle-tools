@@ -1,12 +1,12 @@
 package triangle.codeGenerator.entities;
 
 import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.FrameOld;
 
 @Deprecated public interface RoutineEntity {
 
-    void encodeCall(Emitter emitter, Frame frame);
+    void encodeCall(Emitter emitter, FrameOld frame);
 
-    void encodeFetch(Emitter emitter, Frame frame);
+    void encodeFetch(Emitter emitter, FrameOld frame);
 
 }

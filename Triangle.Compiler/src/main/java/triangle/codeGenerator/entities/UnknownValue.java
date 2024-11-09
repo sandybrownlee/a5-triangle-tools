@@ -23,7 +23,7 @@ import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.FrameOld;
 
 @Deprecated public class UnknownValue extends RuntimeEntity implements FetchableEntity {
 
@@ -34,7 +34,7 @@ import triangle.codeGenerator.Frame;
         address = new ObjectAddress(level, displacement);
     }
 
-    public UnknownValue(int size, Frame frame) {
+    public UnknownValue(int size, FrameOld frame) {
         this(size, frame.getLevel(), frame.getSize());
     }
 
@@ -42,7 +42,7 @@ import triangle.codeGenerator.Frame;
         return address;
     }
 
-    public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
+    public void encodeFetch(Emitter emitter, FrameOld frame, int size, Vname vname) {
         if (vname.indexed) {
             emitter.emit(OpCode.LOADA, 0, frame.getDisplayRegister(address), address.displacement() + vname.offset);
             emitter.emit(OpCode.CALL, Register.PB, Primitive.ADD);

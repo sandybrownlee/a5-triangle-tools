@@ -22,7 +22,7 @@ import triangle.abstractMachine.OpCode;
 import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.FrameOld;
 
 @Deprecated public class PrimitiveRoutine extends RuntimeEntity implements RoutineEntity {
 
@@ -37,13 +37,13 @@ import triangle.codeGenerator.Frame;
         return primitive;
     }
 
-    public void encodeCall(Emitter emitter, Frame frame) {
+    public void encodeCall(Emitter emitter, FrameOld frame) {
         if (primitive != Primitive.ID) {
             emitter.emit(OpCode.CALL, Register.PB, primitive);
         }
     }
 
-    public void encodeFetch(Emitter emitter, Frame frame) {
+    public void encodeFetch(Emitter emitter, FrameOld frame) {
         emitter.emit(OpCode.LOADA, 0, Register.SB, 0);
         emitter.emit(OpCode.LOADA, Register.PB, primitive);
     }

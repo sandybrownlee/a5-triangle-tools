@@ -24,7 +24,7 @@ import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.FrameOld;
 
 @Deprecated public class UnknownAddress extends AddressableEntity {
 
@@ -32,7 +32,7 @@ import triangle.codeGenerator.Frame;
         super(size, level, displacement);
     }
 
-    public void encodeStore(Emitter emitter, Frame frame, int size, Vname vname) {
+    public void encodeStore(Emitter emitter, FrameOld frame, int size, Vname vname) {
 
         emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.displacement());
         if (vname.indexed) {
@@ -47,7 +47,7 @@ import triangle.codeGenerator.Frame;
         emitter.emit(OpCode.STOREI, size, 0);
     }
 
-    public void encodeFetchAddress(Emitter emitter, Frame frame, Vname vname) {
+    public void encodeFetchAddress(Emitter emitter, FrameOld frame, Vname vname) {
 
         emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.displacement());
         if (vname.indexed) {
@@ -61,7 +61,7 @@ import triangle.codeGenerator.Frame;
         }
     }
 
-    public void encodeFetch(Emitter emitter, Frame frame, int size, Vname vname) {
+    public void encodeFetch(Emitter emitter, FrameOld frame, int size, Vname vname) {
         emitter.emit(OpCode.LOAD, Machine.addressSize, frame.getDisplayRegister(address), address.displacement());
 
         if (vname.indexed) {

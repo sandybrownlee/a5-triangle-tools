@@ -118,15 +118,15 @@ import triangle.codeGenerator.entities.UnknownAddress;
 import triangle.codeGenerator.entities.UnknownRoutine;
 import triangle.codeGenerator.entities.UnknownValue;
 
-@Deprecated public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
-                                      ActualParameterSequenceVisitor<Frame, Integer>, ArrayAggregateVisitor<Frame, Integer>,
-                                      CommandVisitor<Frame, Void>, DeclarationVisitor<Frame, Integer>,
-                                      ExpressionVisitor<Frame, Integer>,
-                                      FormalParameterSequenceVisitor<Frame, Integer>, IdentifierVisitor<Frame, Void>,
-                                      LiteralVisitor<Void, Void>,
-                                      OperatorVisitor<Frame, Void>, ProgramVisitor<Frame, Void>,
-                                      RecordAggregateVisitor<Frame, Integer>,
-                                      TypeDenoterVisitor<Frame, Integer>, VnameVisitor<Frame, RuntimeEntity> {
+@Deprecated public final class Encoder implements ActualParameterVisitor<FrameOld, Integer>,
+                                                  ActualParameterSequenceVisitor<FrameOld, Integer>, ArrayAggregateVisitor<FrameOld, Integer>,
+                                                  CommandVisitor<FrameOld, Void>, DeclarationVisitor<FrameOld, Integer>,
+                                                  ExpressionVisitor<FrameOld, Integer>,
+                                                  FormalParameterSequenceVisitor<FrameOld, Integer>, IdentifierVisitor<FrameOld, Void>,
+                                                  LiteralVisitor<Void, Void>,
+                                                  OperatorVisitor<FrameOld, Void>, ProgramVisitor<FrameOld, Void>,
+                                                  RecordAggregateVisitor<FrameOld, Integer>,
+                                                  TypeDenoterVisitor<FrameOld, Integer>, VnameVisitor<FrameOld, RuntimeEntity> {
 
     private final Emitter       emitter;
     private final ErrorReporter reporter;
@@ -148,26 +148,26 @@ import triangle.codeGenerator.entities.UnknownValue;
 
     // Commands
     @Override
-    public Void visitAssignCommand(AssignCommand ast, Frame frame) {
+    public Void visitAssignCommand(AssignCommand ast, FrameOld frame) {
         var valSize = ast.E.visit(this, frame);
         encodeStore(ast.V, frame.expand(valSize), valSize);
         return null;
     }
 
     @Override
-    public Void visitCallCommand(CallCommand ast, Frame frame) {
+    public Void visitCallCommand(CallCommand ast, FrameOld frame) {
         var argsSize = ast.APS.visit(this, frame);
         ast.I.visit(this, frame.replace(argsSize));
         return null;
     }
 
     @Override
-    public Void visitEmptyCommand(EmptyCommand ast, Frame frame) {
+    public Void visitEmptyCommand(EmptyCommand ast, FrameOld frame) {
         return null;
     }
 
     @Override
-    public Void visitIfCommand(IfCommand ast, Frame frame) {
+    public Void visitIfCommand(IfCommand ast, FrameOld frame) {
         ast.E.visit(this, frame);
         var jumpifAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
         ast.C1.visit(this, frame);
@@ -179,7 +179,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Void visitLetCommand(LetCommand ast, Frame frame) {
+    public Void visitLetCommand(LetCommand ast, FrameOld frame) {
         var extraSize = ast.D.visit(this, frame);
         ast.C.visit(this, frame.expand(extraSize));
         if (extraSize > 0) {
@@ -189,14 +189,14 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Void visitSequentialCommand(SequentialCommand ast, Frame frame) {
+    public Void visitSequentialCommand(SequentialCommand ast, FrameOld frame) {
         ast.C1.visit(this, frame);
         ast.C2.visit(this, frame);
         return null;
     }
 
     @Override
-    public Void visitWhileCommand(WhileCommand ast, Frame frame) {
+    public Void visitWhileCommand(WhileCommand ast, FrameOld frame) {
         var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
         var loopAddr = emitter.getNextInstrAddr();
         ast.C.visit(this, frame);
@@ -208,13 +208,13 @@ import triangle.codeGenerator.entities.UnknownValue;
 
     // Expressions
     @Override
-    public Integer visitArrayExpression(ArrayExpression ast, Frame frame) {
+    public Integer visitArrayExpression(ArrayExpression ast, FrameOld frame) {
         ast.type.visit(this, frame);
         return ast.AA.visit(this, frame);
     }
 
     @Override
-    public Integer visitBinaryExpression(BinaryExpression ast, Frame frame) {
+    public Integer visitBinaryExpression(BinaryExpression ast, FrameOld frame) {
         var valSize = ast.type.visit(this);
         var valSize1 = ast.E1.visit(this, frame);
         var frame1 = frame.expand(valSize1);
@@ -225,7 +225,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitCallExpression(CallExpression ast, Frame frame) {
+    public Integer visitCallExpression(CallExpression ast, FrameOld frame) {
         var valSize = ast.type.visit(this);
         var argsSize = ast.APS.visit(this, frame);
         ast.I.visit(this, frame.replace(argsSize));
@@ -233,19 +233,19 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitCharacterExpression(CharacterExpression ast, Frame frame) {
+    public Integer visitCharacterExpression(CharacterExpression ast, FrameOld frame) {
         var valSize = ast.type.visit(this);
         emitter.emit(OpCode.LOADL, ast.CL.getValue());
         return valSize;
     }
 
     @Override
-    public Integer visitEmptyExpression(EmptyExpression ast, Frame frame) {
+    public Integer visitEmptyExpression(EmptyExpression ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitIfExpression(IfExpression ast, Frame frame) {
+    public Integer visitIfExpression(IfExpression ast, FrameOld frame) {
         ast.type.visit(this);
         ast.E1.visit(this, frame);
         var jumpifAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
@@ -258,14 +258,14 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitIntegerExpression(IntegerExpression ast, Frame frame) {
+    public Integer visitIntegerExpression(IntegerExpression ast, FrameOld frame) {
         var valSize = ast.type.visit(this);
         emitter.emit(OpCode.LOADL, ast.IL.getValue());
         return valSize;
     }
 
     @Override
-    public Integer visitLetExpression(LetExpression ast, Frame frame) {
+    public Integer visitLetExpression(LetExpression ast, FrameOld frame) {
         ast.type.visit(this);
         var extraSize = ast.D.visit(this, frame);
         var frame1 = frame.expand(extraSize);
@@ -277,13 +277,13 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitRecordExpression(RecordExpression ast, Frame frame) {
+    public Integer visitRecordExpression(RecordExpression ast, FrameOld frame) {
         ast.type.visit(this);
         return ast.RA.visit(this, frame);
     }
 
     @Override
-    public Integer visitUnaryExpression(UnaryExpression ast, Frame frame) {
+    public Integer visitUnaryExpression(UnaryExpression ast, FrameOld frame) {
         var valSize = ast.type.visit(this);
         ast.E.visit(this, frame);
         ast.O.visit(this, frame.replace(valSize));
@@ -291,7 +291,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitVnameExpression(VnameExpression ast, Frame frame) {
+    public Integer visitVnameExpression(VnameExpression ast, FrameOld frame) {
         var valSize = ast.type.visit(this);
         encodeFetch(ast.V, frame, valSize);
         return valSize;
@@ -299,12 +299,12 @@ import triangle.codeGenerator.entities.UnknownValue;
 
     // Declarations
     @Override
-    public Integer visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, Frame frame) {
+    public Integer visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitConstDeclaration(ConstDeclaration ast, Frame frame) {
+    public Integer visitConstDeclaration(ConstDeclaration ast, FrameOld frame) {
         var extraSize = 0;
         if (ast.E.isLiteral()) {
             ast.entity = new KnownValue(ast.E.type.getSize(), ast.E.getValue());
@@ -318,7 +318,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitFuncDeclaration(FuncDeclaration ast, Frame frame) {
+    public Integer visitFuncDeclaration(FuncDeclaration ast, FrameOld frame) {
         var argsSize = 0;
         var valSize = 0;
 
@@ -339,7 +339,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitProcDeclaration(ProcDeclaration ast, Frame frame) {
+    public Integer visitProcDeclaration(ProcDeclaration ast, FrameOld frame) {
         var argsSize = 0;
         var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
         ast.entity = new KnownRoutine(Machine.closureSize, frame.getLevel(), emitter.getNextInstrAddr());
@@ -358,7 +358,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitSequentialDeclaration(SequentialDeclaration ast, Frame frame) {
+    public Integer visitSequentialDeclaration(SequentialDeclaration ast, FrameOld frame) {
         var extraSize1 = ast.D1.visit(this, frame);
         var frame1 = frame.expand(extraSize1);
         var extraSize2 = ast.D2.visit(this, frame1);
@@ -366,19 +366,19 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitTypeDeclaration(TypeDeclaration ast, Frame frame) {
+    public Integer visitTypeDeclaration(TypeDeclaration ast, FrameOld frame) {
         // just to ensure the type's representation is decided
         ast.T.visit(this);
         return 0;
     }
 
     @Override
-    public Integer visitUnaryOperatorDeclaration(UnaryOperatorDeclaration ast, Frame frame) {
+    public Integer visitUnaryOperatorDeclaration(UnaryOperatorDeclaration ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitVarDeclaration(VarDeclaration ast, Frame frame) {
+    public Integer visitVarDeclaration(VarDeclaration ast, FrameOld frame) {
         var extraSize = ast.T.visit(this);
         emitter.emit(OpCode.PUSH, extraSize);
         ast.entity = new KnownAddress(Machine.addressSize, frame);
@@ -388,7 +388,7 @@ import triangle.codeGenerator.entities.UnknownValue;
 
     // Array Aggregates
     @Override
-    public Integer visitMultipleArrayAggregate(MultipleArrayAggregate ast, Frame frame) {
+    public Integer visitMultipleArrayAggregate(MultipleArrayAggregate ast, FrameOld frame) {
         var elemSize = ast.E.visit(this, frame);
         var frame1 = frame.expand(elemSize);
         var arraySize = ast.AA.visit(this, frame1);
@@ -396,13 +396,13 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitSingleArrayAggregate(SingleArrayAggregate ast, Frame frame) {
+    public Integer visitSingleArrayAggregate(SingleArrayAggregate ast, FrameOld frame) {
         return ast.E.visit(this, frame);
     }
 
     // Record Aggregates
     @Override
-    public Integer visitMultipleRecordAggregate(MultipleRecordAggregate ast, Frame frame) {
+    public Integer visitMultipleRecordAggregate(MultipleRecordAggregate ast, FrameOld frame) {
         var fieldSize = ast.E.visit(this, frame);
         var frame1 = frame.expand(fieldSize);
         var recordSize = ast.RA.visit(this, frame1);
@@ -410,13 +410,13 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitSingleRecordAggregate(SingleRecordAggregate ast, Frame frame) {
+    public Integer visitSingleRecordAggregate(SingleRecordAggregate ast, FrameOld frame) {
         return ast.E.visit(this, frame);
     }
 
     // Formal Parameters
     @Override
-    public Integer visitConstFormalParameter(ConstFormalParameter ast, Frame frame) {
+    public Integer visitConstFormalParameter(ConstFormalParameter ast, FrameOld frame) {
         var valSize = ast.T.visit(this);
         ast.entity = new UnknownValue(valSize, frame.getLevel(), -frame.getSize() - valSize);
         writeTableDetails(ast);
@@ -424,7 +424,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitFuncFormalParameter(FuncFormalParameter ast, Frame frame) {
+    public Integer visitFuncFormalParameter(FuncFormalParameter ast, FrameOld frame) {
         var argsSize = Machine.closureSize;
         ast.entity = new UnknownRoutine(Machine.closureSize, frame.getLevel(), -frame.getSize() - argsSize);
         writeTableDetails(ast);
@@ -432,7 +432,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitProcFormalParameter(ProcFormalParameter ast, Frame frame) {
+    public Integer visitProcFormalParameter(ProcFormalParameter ast, FrameOld frame) {
         var argsSize = Machine.closureSize;
         ast.entity = new UnknownRoutine(Machine.closureSize, frame.getLevel(), -frame.getSize() - argsSize);
         writeTableDetails(ast);
@@ -440,7 +440,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitVarFormalParameter(VarFormalParameter ast, Frame frame) {
+    public Integer visitVarFormalParameter(VarFormalParameter ast, FrameOld frame) {
         ast.T.visit(this);
         ast.entity = new UnknownAddress(Machine.addressSize, frame.getLevel(), -frame.getSize() - Machine.addressSize);
         writeTableDetails(ast);
@@ -448,12 +448,12 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitEmptyFormalParameterSequence(EmptyFormalParameterSequence ast, Frame frame) {
+    public Integer visitEmptyFormalParameterSequence(EmptyFormalParameterSequence ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitMultipleFormalParameterSequence(MultipleFormalParameterSequence ast, Frame frame) {
+    public Integer visitMultipleFormalParameterSequence(MultipleFormalParameterSequence ast, FrameOld frame) {
         var argsSize1 = ast.FPS.visit(this, frame);
         var frame1 = frame.expand(argsSize1);
         var argsSize2 = ast.FP.visit(this, frame1);
@@ -461,43 +461,43 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitSingleFormalParameterSequence(SingleFormalParameterSequence ast, Frame frame) {
+    public Integer visitSingleFormalParameterSequence(SingleFormalParameterSequence ast, FrameOld frame) {
         return ast.FP.visit(this, frame);
     }
 
     // Actual Parameters
     @Override
-    public Integer visitConstActualParameter(ConstActualParameter ast, Frame frame) {
+    public Integer visitConstActualParameter(ConstActualParameter ast, FrameOld frame) {
         return ast.E.visit(this, frame);
     }
 
     @Override
-    public Integer visitFuncActualParameter(FuncActualParameter ast, Frame frame) {
+    public Integer visitFuncActualParameter(FuncActualParameter ast, FrameOld frame) {
         var routineEntity = (RoutineEntity) ast.I.decl.entity;
         routineEntity.encodeFetch(emitter, frame);
         return Machine.closureSize;
     }
 
     @Override
-    public Integer visitProcActualParameter(ProcActualParameter ast, Frame frame) {
+    public Integer visitProcActualParameter(ProcActualParameter ast, FrameOld frame) {
         var routineEntity = (RoutineEntity) ast.I.decl.entity;
         routineEntity.encodeFetch(emitter, frame);
         return Machine.closureSize;
     }
 
     @Override
-    public Integer visitVarActualParameter(VarActualParameter ast, Frame frame) {
+    public Integer visitVarActualParameter(VarActualParameter ast, FrameOld frame) {
         encodeFetchAddress(ast.V, frame);
         return Machine.addressSize;
     }
 
     @Override
-    public Integer visitEmptyActualParameterSequence(EmptyActualParameterSequence ast, Frame frame) {
+    public Integer visitEmptyActualParameterSequence(EmptyActualParameterSequence ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitMultipleActualParameterSequence(MultipleActualParameterSequence ast, Frame frame) {
+    public Integer visitMultipleActualParameterSequence(MultipleActualParameterSequence ast, FrameOld frame) {
         var argsSize1 = ast.AP.visit(this, frame);
         var frame1 = frame.expand(argsSize1);
         var argsSize2 = ast.APS.visit(this, frame1);
@@ -505,18 +505,18 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitSingleActualParameterSequence(SingleActualParameterSequence ast, Frame frame) {
+    public Integer visitSingleActualParameterSequence(SingleActualParameterSequence ast, FrameOld frame) {
         return ast.AP.visit(this, frame);
     }
 
     // Type Denoters
     @Override
-    public Integer visitAnyTypeDenoter(AnyTypeDenoter ast, Frame frame) {
+    public Integer visitAnyTypeDenoter(AnyTypeDenoter ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitArrayTypeDenoter(ArrayTypeDenoter ast, Frame frame) {
+    public Integer visitArrayTypeDenoter(ArrayTypeDenoter ast, FrameOld frame) {
         int typeSize;
         if (ast.entity == null) {
             var elemSize = ast.T.visit(this);
@@ -530,7 +530,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitBoolTypeDenoter(BoolTypeDenoter ast, Frame frame) {
+    public Integer visitBoolTypeDenoter(BoolTypeDenoter ast, FrameOld frame) {
         if (ast.entity == null) {
             ast.entity = new TypeRepresentation(Machine.booleanSize);
             writeTableDetails(ast);
@@ -539,7 +539,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitCharTypeDenoter(CharTypeDenoter ast, Frame frame) {
+    public Integer visitCharTypeDenoter(CharTypeDenoter ast, FrameOld frame) {
         if (ast.entity == null) {
             ast.entity = new TypeRepresentation(Machine.characterSize);
             writeTableDetails(ast);
@@ -548,17 +548,17 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitErrorTypeDenoter(ErrorTypeDenoter ast, Frame frame) {
+    public Integer visitErrorTypeDenoter(ErrorTypeDenoter ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitSimpleTypeDenoter(SimpleTypeDenoter ast, Frame frame) {
+    public Integer visitSimpleTypeDenoter(SimpleTypeDenoter ast, FrameOld frame) {
         return 0;
     }
 
     @Override
-    public Integer visitIntTypeDenoter(IntTypeDenoter ast, Frame frame) {
+    public Integer visitIntTypeDenoter(IntTypeDenoter ast, FrameOld frame) {
         if (ast.entity == null) {
             ast.entity = new TypeRepresentation(Machine.integerSize);
             writeTableDetails(ast);
@@ -567,7 +567,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitRecordTypeDenoter(RecordTypeDenoter ast, Frame frame) {
+    public Integer visitRecordTypeDenoter(RecordTypeDenoter ast, FrameOld frame) {
         int typeSize;
         if (ast.entity == null) {
             typeSize = ast.FT.visit(this, frame);
@@ -580,9 +580,9 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitMultipleFieldTypeDenoter(MultipleFieldTypeDenoter ast, Frame frame) {
-        if (frame == null) { // in this case, we're just using the frame to wrap up the size
-            frame = Frame.Initial;
+    public Integer visitMultipleFieldTypeDenoter(MultipleFieldTypeDenoter ast, FrameOld frame) {
+        if (frame == null) { // in this case, we're just using the frame to wrap up the arraySize
+            frame = FrameOld.Initial;
         }
 
         var offset = frame.getSize();
@@ -601,7 +601,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Integer visitSingleFieldTypeDenoter(SingleFieldTypeDenoter ast, Frame frame) {
+    public Integer visitSingleFieldTypeDenoter(SingleFieldTypeDenoter ast, FrameOld frame) {
         var offset = frame.getSize();
         int fieldSize;
         if (ast.entity == null) {
@@ -627,14 +627,14 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public Void visitIdentifier(Identifier ast, Frame frame) {
+    public Void visitIdentifier(Identifier ast, FrameOld frame) {
         var routineEntity = (RoutineEntity) ast.decl.entity;
         routineEntity.encodeCall(emitter, frame);
         return null;
     }
 
     @Override
-    public Void visitOperator(Operator ast, Frame frame) {
+    public Void visitOperator(Operator ast, FrameOld frame) {
         var routineEntity = (RoutineEntity) ast.decl.entity;
         routineEntity.encodeCall(emitter, frame);
         return null;
@@ -642,7 +642,7 @@ import triangle.codeGenerator.entities.UnknownValue;
 
     // Value-or-variable names
     @Override
-    public RuntimeEntity visitDotVname(DotVname ast, Frame frame) {
+    public RuntimeEntity visitDotVname(DotVname ast, FrameOld frame) {
         var baseObject = ast.V.visit(this, frame);
         ast.offset = ast.V.offset + ((Field) ast.I.decl.entity).getFieldOffset();
         // I.decl points to the appropriate record field
@@ -651,14 +651,14 @@ import triangle.codeGenerator.entities.UnknownValue;
     }
 
     @Override
-    public RuntimeEntity visitSimpleVname(SimpleVname ast, Frame frame) {
+    public RuntimeEntity visitSimpleVname(SimpleVname ast, FrameOld frame) {
         ast.offset = 0;
         ast.indexed = false;
         return ast.I.decl.entity;
     }
 
     @Override
-    public RuntimeEntity visitSubscriptVname(SubscriptVname ast, Frame frame) {
+    public RuntimeEntity visitSubscriptVname(SubscriptVname ast, FrameOld frame) {
         var baseObject = ast.V.visit(this, frame);
         ast.offset = ast.V.offset;
         ast.indexed = ast.V.indexed;
@@ -686,7 +686,7 @@ import triangle.codeGenerator.entities.UnknownValue;
 
     // Programs
     @Override
-    public Void visitProgram(Program ast, Frame frame) {
+    public Void visitProgram(Program ast, FrameOld frame) {
         return ast.C.visit(this, frame);
     }
 
@@ -696,7 +696,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     public void encodeRun(Program program, boolean showingTable) {
         tableDetailsReqd = showingTable;
         // startCodeGeneration();
-        program.visit(this, Frame.Initial);
+        program.visit(this, FrameOld.Initial);
         emitter.emit(OpCode.HALT);
     }
 
@@ -763,7 +763,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     // the constant or variable is fetched at run-time.
     // valSize is the size of the constant or variable's value.
 
-    private void encodeStore(Vname V, Frame frame, int valSize) {
+    private void encodeStore(Vname V, FrameOld frame, int valSize) {
 
         var baseObject = (AddressableEntity) V.visit(this, frame);
         // If indexed = true, code will have been generated to load an index value.
@@ -782,7 +782,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     // the constant or variable is fetched at run-time.
     // valSize is the size of the constant or variable's value.
 
-    private void encodeFetch(Vname V, Frame frame, int valSize) {
+    private void encodeFetch(Vname V, FrameOld frame, int valSize) {
 
         var baseObject = (FetchableEntity) V.visit(this, frame);
         // If indexed = true, code will have been generated to load an index value.
@@ -800,7 +800,7 @@ import triangle.codeGenerator.entities.UnknownValue;
     // frameSize is the anticipated size of the local stack frame when
     // the variable is addressed at run-time.
 
-    private void encodeFetchAddress(Vname V, Frame frame) {
+    private void encodeFetchAddress(Vname V, FrameOld frame) {
 
         var baseObject = (AddressableEntity) V.visit(this, frame);
         baseObject.encodeFetchAddress(emitter, frame, V);
