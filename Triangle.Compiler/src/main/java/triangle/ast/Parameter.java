@@ -6,21 +6,21 @@ import triangle.types.RuntimeType;
 import java.util.List;
 
 sealed public interface Parameter extends Typeable
-        permits Parameter.ConstParameter, Parameter.FuncParameter, Parameter.VarParameter {
+        permits Parameter.ValueParameter, Parameter.FuncParameter, Parameter.VarParameter {
 
     String getName();
 
     // TODO: remove
     SourcePosition sourcePos();
 
-    final class ConstParameter implements Parameter {
+    final class ValueParameter implements Parameter {
 
         private final SourcePosition sourcePos;
         private final String         name;
         private       Type           declaredType;
         private       RuntimeType    type;
 
-        public ConstParameter(SourcePosition sourcePos, String name, Type declaredType) {
+        public ValueParameter(SourcePosition sourcePos, String name, Type declaredType) {
             this.sourcePos = sourcePos;
             this.name = name;
             this.declaredType = declaredType;
@@ -43,7 +43,7 @@ sealed public interface Parameter extends Typeable
         }
 
         @Override public String toString() {
-            return "ConstParameter[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "type=" + declaredType + ']';
+            return "ValueParameter[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "type=" + declaredType + ']';
         }
 
         @Override public RuntimeType getType() {

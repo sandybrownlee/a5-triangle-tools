@@ -147,10 +147,10 @@ public final class ASTPrinter {
                     prettyPrint(funcParameter.declaredReturnType())
             );
             case Parameter.VarParameter varParameter -> varParameter.name() + ":" + prettyPrint(varParameter.declaredType());
-            case Parameter.ConstParameter constParameter -> String.format(
-                    "CONST %s : %s",
-                    constParameter.getName(),
-                    prettyPrint(constParameter.declaredType())
+            case Parameter.ValueParameter valueParameter -> String.format(
+                    "%s : %s",
+                    valueParameter.getName(),
+                    prettyPrint(valueParameter.declaredType())
             );
         };
     }

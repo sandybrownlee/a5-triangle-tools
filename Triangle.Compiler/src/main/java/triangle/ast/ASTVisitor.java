@@ -30,7 +30,7 @@ public interface ASTVisitor<T, E extends Exception> {
     T visit(Expression.Identifier.ArraySubscript arraySubscript) throws E;
 
     // Parameter
-    T visit(Parameter.ConstParameter constParameter) throws E;
+    T visit(Parameter.ValueParameter valueParameter) throws E;
     T visit(Parameter.VarParameter varParameter) throws E;
     T visit(Parameter.FuncParameter funcParameter) throws E;
 

@@ -520,7 +520,7 @@ public class Parser {
                 SourcePosition start = shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 Type varType = parseType();
-                yield new ConstParameter(start, varName, varType);
+                yield new ValueParameter(start, varName, varType);
             }
             case VAR -> {
                 SourcePosition start = shift(Token.Kind.VAR);

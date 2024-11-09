@@ -190,7 +190,7 @@ public final class SemanticAnalyzer {
                     for (int i = 0; i < funcDeclaration.parameters().size(); i++) {
                         Parameter p = funcDeclaration.parameters().get(i);
                         // parameters dont have a declaration
-                        terms.add(p.getName(), new Binding(p.getType(), p instanceof Parameter.ConstParameter, null));
+                        terms.add(p.getName(), new Binding(p.getType(), false, null));
                     }
 
                     RuntimeType resolvedReturnType = resolveType(funcDeclaration.declaredReturnType());
@@ -270,7 +270,7 @@ public final class SemanticAnalyzer {
                     for (int i = 0; i < procDeclaration.parameters().size(); i++) {
                         Parameter p = procDeclaration.parameters().get(i);
                         // parameters dont have a declaration
-                        terms.add(p.getName(), new Binding(p.getType(), p instanceof Parameter.ConstParameter, null));
+                        terms.add(p.getName(), new Binding(p.getType(), false, null));
                     }
 
                     // (optimistically) assign the function its declared return type
@@ -568,7 +568,7 @@ public final class SemanticAnalyzer {
 
             // resolve parameter type in current environment and set params type to resolved version
             case Parameter.VarParameter varParameter -> parameter.setType(resolveType(varParameter.declaredType()));
-            case Parameter.ConstParameter constParameter -> parameter.setType(resolveType(constParameter.declaredType()));
+            case Parameter.ValueParameter valueParameter -> parameter.setType(resolveType(valueParameter.declaredType()));
         }
     }
 
