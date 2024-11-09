@@ -1,6 +1,5 @@
 package triangle.ast;
 
-import triangle.codeGenerator.Address;
 import triangle.syntacticAnalyzer.SourcePosition;
 import triangle.types.RuntimeType;
 
@@ -91,7 +90,6 @@ sealed public interface Declaration
         private final Statement       expression;
         private final Type            declaredReturnType;
         private RuntimeType runtimeReturnType;
-        private Address     codeAddress;
 
         public FuncDeclaration(
                 SourcePosition sourcePos, String name, List<Parameter> parameters, Type declaredReturnType, Statement expression
@@ -134,14 +132,6 @@ sealed public interface Declaration
 
         public void setRuntimeReturnType(final RuntimeType runtimeReturnType) {
             this.runtimeReturnType = runtimeReturnType;
-        }
-
-        public Address getCodeAddress() {
-            return codeAddress;
-        }
-
-        public void setCodeAddress(final Address codeAddress) {
-            this.codeAddress = codeAddress;
         }
 
     }
