@@ -1,15 +1,30 @@
 package triangle.codeGenerator;
 
+import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 
 public sealed interface Instruction
-        permits Instruction.CALL, Instruction.HALT, Instruction.JUMP, Instruction.JUMPIF, Instruction.LABEL, Instruction.LOAD,
-                Instruction.LOADA, Instruction.LOADA_LABEL, Instruction.LOADL, Instruction.POP, Instruction.PUSH,
-                Instruction.RETURN, Instruction.STORE {
+        permits Instruction.CALL, Instruction.CALL_PRIM, Instruction.HALT, Instruction.JUMP, Instruction.JUMPIF,
+                Instruction.LABEL, Instruction.LOAD, Instruction.LOADA, Instruction.LOADA_LABEL, Instruction.LOADI,
+                Instruction.LOADL, Instruction.POP, Instruction.PUSH, Instruction.RETURN, Instruction.STORE, Instruction.STOREI {
 
-    record PUSH(int words) implements Instruction { }
+    record PUSH(int words) implements Instruction {
+
+        @Override public String toString() {
+            return "\tPUSH " + words;
+        }
+
+    }
 
     record STORE(int words, Address address) implements Instruction { }
+
+    record STOREI(int size) implements Instruction {
+
+        @Override public String toString() {
+            return "\tSTOREI " + size;
+        }
+
+    }
 
     record LOAD(int words, Address address) implements Instruction {
 
@@ -19,7 +34,13 @@ public sealed interface Instruction
 
     }
 
-    record LOADA(Address address) implements Instruction { }
+    record LOADA(Address address) implements Instruction {
+
+        @Override public String toString() {
+            return "\tLOADA " + address.d() + " [" + address.r() + "]";
+        }
+
+    }
 
     record LOADA_LABEL(LABEL address) implements Instruction { }
 
@@ -27,6 +48,22 @@ public sealed interface Instruction
 
         @Override public String toString() {
             return "\tLOADL " + value;
+        }
+
+    }
+
+    record LOADI(int size) implements Instruction {
+
+        @Override public String toString() {
+            return "\tLOADI " + size;
+        }
+
+    }
+
+    record CALL_PRIM(Primitive primitive) implements Instruction {
+
+        @Override public String toString() {
+            return "\tCALL_PRIM " + primitive;
         }
 
     }
