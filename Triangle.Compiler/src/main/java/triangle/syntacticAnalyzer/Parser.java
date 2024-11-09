@@ -356,7 +356,11 @@ public class Parser {
             case PROC, FUNC -> {
                 SourcePosition start = shift(Token.Kind.PROC);
                 Identifier callable = parseIdentifier();
-                yield new Argument.FuncArgument(start, callable);
+                if (callable instanceof Identifier.BasicIdentifier basicIdentifier) {
+                    yield new Argument.FuncArgument(start, basicIdentifier);
+                }
+
+                throw new RuntimeException("HOF is currently unsupported, so function call must be a simple variable name");
             }
             case VAR -> {
                 SourcePosition start = shift(Token.Kind.VAR);
