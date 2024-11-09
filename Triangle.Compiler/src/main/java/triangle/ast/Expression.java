@@ -5,7 +5,7 @@ import triangle.types.RuntimeType;
 
 import java.util.List;
 
-sealed public interface Expression extends Statement, Argument, Typeable
+sealed public interface Expression extends Argument, Typeable
         permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.UnaryOp {

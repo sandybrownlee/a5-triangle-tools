@@ -6,8 +6,8 @@ import triangle.types.RuntimeType;
 import java.util.List;
 
 sealed public interface Declaration
-        permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.TypeDeclaration,
-                Declaration.VarDeclaration {
+        permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.ProcDeclaration,
+                Declaration.TypeDeclaration, Declaration.VarDeclaration {
 
     String name();
 
@@ -65,8 +65,8 @@ sealed public interface Declaration
         }
 
         public Type declaredType() {
-                                       return this.declaredType;
-                                   }
+            return this.declaredType;
+        }
 
         public RuntimeType runtimeType() {
             return runtimeType;
@@ -87,12 +87,11 @@ sealed public interface Declaration
         private final SourcePosition  sourcePos;
         private final String          name;
         private final List<Parameter> parameters;
-        private final Statement       expression;
+        private final Expression      expression;
         private final Type            declaredReturnType;
-        private RuntimeType runtimeReturnType;
 
         public FuncDeclaration(
-                SourcePosition sourcePos, String name, List<Parameter> parameters, Type declaredReturnType, Statement expression
+                SourcePosition sourcePos, String name, List<Parameter> parameters, Type declaredReturnType, Expression expression
         ) {
             this.sourcePos = sourcePos;
             this.name = name;
@@ -117,7 +116,7 @@ sealed public interface Declaration
             return declaredReturnType;
         }
 
-        public Statement expression() {
+        public Expression expression() {
             return expression;
         }
 
@@ -126,12 +125,43 @@ sealed public interface Declaration
                    ", " + "returnType=" + declaredReturnType + ", " + "expression=" + expression + ']';
         }
 
-        public RuntimeType runtimeReturnType() {
-            return runtimeReturnType;
+    }
+
+    final class ProcDeclaration implements Declaration {
+
+        private final SourcePosition  sourcePos;
+        private final String          name;
+        private final List<Parameter> parameters;
+        private final Statement       statement;
+
+        public ProcDeclaration(
+                SourcePosition sourcePos, String name, List<Parameter> parameters, Statement statement
+        ) {
+            this.sourcePos = sourcePos;
+            this.name = name;
+            this.parameters = parameters;
+            this.statement = statement;
         }
 
-        public void setRuntimeReturnType(final RuntimeType runtimeReturnType) {
-            this.runtimeReturnType = runtimeReturnType;
+        @Override public String name() {
+            return name;
+        }
+
+        @Override public SourcePosition sourcePos() {
+            return sourcePos;
+        }
+
+        public List<Parameter> parameters() {
+            return parameters;
+        }
+
+        public Statement statement() {
+            return statement;
+        }
+
+        @Override public String toString() {
+            return "FuncDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "parameters=" + parameters +
+                   ", " + "expression=" + statement + ']';
         }
 
     }

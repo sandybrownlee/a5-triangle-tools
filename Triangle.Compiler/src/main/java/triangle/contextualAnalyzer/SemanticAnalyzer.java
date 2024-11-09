@@ -104,11 +104,11 @@ public final class SemanticAnalyzer {
     //@formatter:on
 
     // stores a binding for each term
-    private final SymbolTable<Binding>    terms  = new SymbolTable<>(STD_TERMS);
+    private final SymbolTable<Binding> terms = new SymbolTable<>(STD_TERMS);
 
     // stores the "resolved" type of each type
-    private final SymbolTable<RuntimeType>       types  = new SymbolTable<>(STD_TYPES);
-    private final List<SemanticException> errors = new ArrayList<>();
+    private final SymbolTable<RuntimeType> types = new SymbolTable<>(STD_TYPES);
+    private final List<SemanticException>  errors = new ArrayList<>();
 
     public List<SemanticException> check(final Statement program) {
         visit(program);
@@ -202,20 +202,10 @@ public final class SemanticAnalyzer {
 
                     SourcePosition sourcePos = funcDeclaration.sourcePos();
 
-                    // TODO: cleanup
-                    // if the function has void type (proc), then it doesnt matter what its body evaluated to
-                    if (! funcDeclaration.declaredReturnType().equals(new Type.Void())) {
-                        if (funcDeclaration.expression() instanceof Expression funcExpression) {
-                            // if final inferred type is different from declared return type, error
-                            if (!funcExpression.getType().equals(resolvedReturnType)) {
-                                throw new SemanticException.TypeError(sourcePos, resolvedReturnType, funcExpression.getType());
-                            }
-                        } else {
-                            // otherwise, the body must evaluate to void type
-                            if (!resolvedReturnType.equals(VOID_TYPE)) {
-                                throw new SemanticException.TypeError(sourcePos, resolvedReturnType, VOID_TYPE);
-                            }
-                        }
+                    // if final inferred type is different from declared return type, error
+                    if (!funcDeclaration.expression().getType().equals(resolvedReturnType)) {
+                        throw new SemanticException.TypeError(
+                                sourcePos, resolvedReturnType, funcDeclaration.expression().getType());
                     }
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
@@ -225,10 +215,9 @@ public final class SemanticAnalyzer {
                     types.exitScope();
                 }
 
-                // we add the function declaration to symbol table AFTER we exit the scope
+                // add the newly declared function to this scopes terms
                 // functions are always constant since we dont support HOF
                 terms.add(funcDeclaration.name(), new Binding(funcType, true, funcDeclaration));
-                funcDeclaration.setRuntimeReturnType(funcType);
             }
             case TypeDeclaration typeDeclaration -> {
                 try {
@@ -250,6 +239,50 @@ public final class SemanticAnalyzer {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(varDeclaration.sourcePos(), e.getFieldType());
                 }
+            }
+            // this is very similar to the funcDeclaration case, just no return type
+            case Declaration.ProcDeclaration procDeclaration -> {
+                // check for duplicate parameter
+                Set<String> seenParameters = new HashSet<>();
+                List<RuntimeType> resolvedParamTypes = new ArrayList<>();
+
+                for (Parameter param : procDeclaration.parameters()) {
+                    if (seenParameters.contains(param.getName())) {
+                        throw new SemanticException.DuplicateParameter(procDeclaration.sourcePos(), param);
+                    }
+
+                    // resolve the type of the parameter in the current env
+                    visit(param);
+                    seenParameters.add(param.getName());
+                    resolvedParamTypes.add(param.getType());
+                }
+
+                RuntimeType funcType;
+                // inside the function body
+                types.enterNewScope();
+                try {
+                    // assign each parameter to a basic identifier with its resolved type
+                    for (int i = 0; i < procDeclaration.parameters().size(); i++) {
+                        Parameter p = procDeclaration.parameters().get(i);
+                        // parameters dont have a declaration
+                        terms.add(p.getName(), new Binding(p.getType(), p instanceof Parameter.ConstParameter, null));
+                    }
+
+                    // (optimistically) assign the function its declared return type
+                    funcType = new FuncType(resolvedParamTypes, VOID_TYPE);
+                    // func is constant in the body of the function,
+                    terms.add(procDeclaration.name(), new Binding(funcType, true, procDeclaration));
+
+                    // then type check the function body
+                    visit(procDeclaration.statement());
+                } finally {
+                    // remember to exit the newly created scope even if analysis fails
+                    types.exitScope();
+                }
+
+                // add the newly declared function to this scopes terms
+                // functions are always constant since we dont support HOF
+                terms.add(procDeclaration.name(), new Binding(funcType, true, procDeclaration));
             }
         }
     }
@@ -529,9 +562,9 @@ public final class SemanticAnalyzer {
 
     private void visit(final Statement statement) {
         switch (statement) {
-            case Expression expression -> {
+            case Statement.ExpressionStatement expressionStatement -> {
                 try {
-                    visit(expression);
+                    visit(expressionStatement.expression());
                 } catch (SemanticException e) {
                     errors.add(e);
                 }
@@ -680,7 +713,8 @@ public final class SemanticAnalyzer {
                         throw new SemanticException.DuplicateRecordTypeField(field);
                     }
 
-                    RecordType.FieldType resolvedField = new RecordType.FieldType(field.fieldName(), resolveType(field.fieldType()));
+                    RecordType.FieldType resolvedField = new RecordType.FieldType(
+                            field.fieldName(), resolveType(field.fieldType()));
                     resolvedFieldTypes.add(resolvedField);
                     seenFieldNames.add(field.fieldName());
                 }

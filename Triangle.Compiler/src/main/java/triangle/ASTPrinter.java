@@ -11,7 +11,7 @@ public final class ASTPrinter {
 
     public String prettyPrint(final Statement statement) {
         return switch (statement) {
-            case Expression expression -> prettyPrint(expression);
+            case Statement.ExpressionStatement expression -> prettyPrint(expression.expression());
             case Statement.AssignStatement assignStatement -> String.format(
                     "%s := %s",
                     prettyPrint(assignStatement.identifier()),
@@ -72,7 +72,7 @@ public final class ASTPrinter {
                     prettyPrint(constDeclaration.value())
             );
             case Declaration.FuncDeclaration funcDeclaration -> String.format(
-                    "CALLABLE %s (%s) {%s} %s ",
+                    "FUNC %s (%s) {%s} %s ",
                     funcDeclaration.name(),
                     funcDeclaration.parameters().stream().map(p -> prettyPrint(p) + ",").reduce("", String::concat),
                     prettyPrint(funcDeclaration.expression()),
@@ -84,6 +84,12 @@ public final class ASTPrinter {
                     prettyPrint(typeDeclaration.type())
             );
             case Declaration.VarDeclaration varDeclaration -> String.format("VAR %s", varDeclaration.name());
+            case Declaration.ProcDeclaration procDeclaration -> String.format(
+                    "PROC %s (%s) {%s}",
+                    procDeclaration.name(),
+                    procDeclaration.parameters().stream().map(p -> prettyPrint(p) + ",").reduce("", String::concat),
+                    prettyPrint(procDeclaration.statement())
+            );
         };
     }
 
