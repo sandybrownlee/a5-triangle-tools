@@ -104,10 +104,10 @@ public final class SemanticAnalyzer {
     //@formatter:on
 
     // stores a binding for each term
-    private final SymbolTable<Binding> terms = new SymbolTable<>(STD_TERMS);
+    private final SymbolTable<Binding, Void> terms = new SymbolTable<>(STD_TERMS, null);
 
     // stores the "resolved" type of each type
-    private final SymbolTable<RuntimeType> types = new SymbolTable<>(STD_TYPES);
+    private final SymbolTable<RuntimeType, Void> types = new SymbolTable<>(STD_TYPES, null);
     private final List<SemanticException>  errors = new ArrayList<>();
 
     public List<SemanticException> check(final Statement program) {
@@ -181,8 +181,8 @@ public final class SemanticAnalyzer {
 
                 RuntimeType funcType;
                 // inside the function body
-                types.enterNewScope();
-                terms.enterNewScope();
+                types.enterNewScope(null);
+                terms.enterNewScope(null);
 
                 try {
                     // assign each parameter to a basic identifier with its resolved type
@@ -262,8 +262,8 @@ public final class SemanticAnalyzer {
 
                 RuntimeType funcType;
                 // inside the function body
-                types.enterNewScope();
-                terms.enterNewScope();
+                types.enterNewScope(null);
+                terms.enterNewScope(null);
                 try {
                     // assign each parameter to a basic identifier with its resolved type
                     for (int i = 0; i < procDeclaration.parameters().size(); i++) {
@@ -325,7 +325,7 @@ public final class SemanticAnalyzer {
                 }
 
                 // record access has a new scope with the field names and types of the record available
-                types.enterNewScope();
+                types.enterNewScope(null);
                 for (RecordType.FieldType fieldType : recordType.fieldTypes()) {
                     // record fields dont have a declaration
                     terms.add(fieldType.fieldName(), new Binding(fieldType.fieldType(), true, null));
@@ -457,7 +457,7 @@ public final class SemanticAnalyzer {
                 List<Declaration> declarations = letExpression.declarations();
                 Expression expr = letExpression.expression();
 
-                types.enterNewScope();
+                types.enterNewScope(null);
 
                 // the new scope has all the declared identifiers bound to their types
                 for (Declaration declaration : declarations) {
@@ -614,8 +614,8 @@ public final class SemanticAnalyzer {
                 List<Declaration> declarations = letStatement.declarations();
                 Statement stmt = letStatement.statement();
 
-                terms.enterNewScope();
-                types.enterNewScope();
+                terms.enterNewScope(null);
+                types.enterNewScope(null);
 
                 // declared identifiers get bound in symtab in analyze(Declaration)
                 for (Declaration declaration : declarations) {
