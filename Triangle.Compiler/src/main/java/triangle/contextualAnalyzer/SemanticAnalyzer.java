@@ -33,6 +33,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
@@ -40,53 +41,61 @@ import static triangle.types.Type.*;
 
 public final class SemanticAnalyzer {
 
-    private static final Type                             binaryRelation    = new FuncType(
+    private static final Type                 binaryRelation    = new FuncType(
             List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
-    private static final Type                             binaryIntRelation = new FuncType(
+    private static final Type                 binaryIntRelation = new FuncType(
             List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
-    private static final Type                             binaryIntFunc     = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
-    private static final Map<String, SymbolTable.Binding> STD_TERMS         = new HashMap<>();
-    private static final Map<String, Type>                STD_TYPES         = Map.of("Integer", INT_TYPE, "Char", Type.CHAR_TYPE,
-                                                                                     "Boolean", BOOL_TYPE
+    private static final Type                 binaryIntFunc     = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
+    private static final Map<String, Binding> STD_TERMS         = new HashMap<>();
+    private static final Map<String, Type>    STD_TYPES         = Map.of("Integer", INT_TYPE, "Char", Type.CHAR_TYPE,
+                                                                         "Boolean", BOOL_TYPE
     );
 
     // stdenv values have null as annotation
     static {
         // TODO: this is very hackish and ugly
-        STD_TERMS.putAll(Map.of("\\/", new SymbolTable.Binding(binaryRelation, true, null), "/\\",
-                                new SymbolTable.Binding(binaryRelation, true, null), "<=",
-                                new SymbolTable.Binding(binaryIntRelation, true, null), ">=",
-                                new SymbolTable.Binding(binaryIntRelation, true, null), ">",
-                                new SymbolTable.Binding(binaryIntRelation, true, null), "<",
-                                new SymbolTable.Binding(binaryIntRelation, true, null), "\\",
-                                new SymbolTable.Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)
+        STD_TERMS.putAll(Map.of("\\/", new Binding(binaryRelation, true, null), "/\\",
+                                new Binding(binaryRelation, true, null), "<=",
+                                new Binding(binaryIntRelation, true, null), ">=",
+                                new Binding(binaryIntRelation, true, null), ">",
+                                new Binding(binaryIntRelation, true, null), "<",
+                                new Binding(binaryIntRelation, true, null), "\\",
+                                new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)
         ));
-        STD_TERMS.putAll(Map.of("-", new SymbolTable.Binding(binaryIntFunc, true, null), "+",
-                                new SymbolTable.Binding(binaryIntFunc, true, null), "*",
-                                new SymbolTable.Binding(binaryIntFunc, true, null), "/",
-                                new SymbolTable.Binding(binaryIntFunc, true, null), "//",
-                                new SymbolTable.Binding(binaryIntFunc, true, null), "|",
-                                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null), "++",
-                                new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)
+        STD_TERMS.putAll(Map.of("-", new Binding(binaryIntFunc, true, null), "+",
+                                new Binding(binaryIntFunc, true, null), "*",
+                                new Binding(binaryIntFunc, true, null), "/",
+                                new Binding(binaryIntFunc, true, null), "//",
+                                new Binding(binaryIntFunc, true, null), "|",
+                                new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null), "++",
+                                new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)
         ));
         // these are set to void just as dummy values so that we fail fast in case something tries to access their types since
         //  these are supposed to be special-cased in analyze(Expression)
-        STD_TERMS.putAll(Map.of("=", new SymbolTable.Binding(Type.VOID_TYPE, true, null), "\\=",
-                                new SymbolTable.Binding(Type.VOID_TYPE, true, null)
+        STD_TERMS.putAll(Map.of("=", new Binding(Type.VOID_TYPE, true, null), "\\=",
+                                new Binding(Type.VOID_TYPE, true, null)
         ));
-        STD_TERMS.putAll(Map.of("get", new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
-                                "getint", new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
-                                "geteol", new SymbolTable.Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "puteol",
-                                new SymbolTable.Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "put",
-                                new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
-                                "putint", new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
-                                "chr", new SymbolTable.Binding(new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE), true, null),
-                                "eol", new SymbolTable.Binding(new FuncType(List.of(), BOOL_TYPE), true, null), "ord",
-                                new SymbolTable.Binding(new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE), true, null)
+        STD_TERMS.putAll(Map.of("get", new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
+                                "getint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
+                                "geteol", new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "puteol",
+                                new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "put",
+                                new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
+                                "putint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
+                                "chr", new Binding(new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE), true, null),
+                                "eol", new Binding(new FuncType(List.of(), BOOL_TYPE), true, null), "ord",
+                                new Binding(new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE), true, null)
         ));
     }
 
-    private final SymbolTable             symtab = new SymbolTable(STD_TYPES, STD_TERMS);
+    // stores a binding for each term
+    private final SymbolTable<Binding>    terms  = new SymbolTable<>(STD_TERMS);
+    // stores the "resolved" type of each type; i.e.:
+    //      type P ~ record x : Integer end
+    //      type R ~ record x : P, y : P end
+    // is resolved into
+    //      type P ~ record x : Integer end
+    //      type R ~ record x : (record x : Integer), y : (record x : Integer) end
+    private final SymbolTable<Type>       types  = new SymbolTable<>(STD_TYPES);
     private final List<SemanticException> errors = new ArrayList<>();
 
     public List<SemanticException> check(final Statement program) {
@@ -134,7 +143,7 @@ public final class SemanticAnalyzer {
             case ConstDeclaration constDeclaration -> {
                 try {
                     analyze(constDeclaration.value());
-                    symtab.addTerm(constDeclaration.name(), constDeclaration.value().getType(), true, constDeclaration);
+                    terms.add(constDeclaration.name(), new Binding(constDeclaration.value().getType(), true, constDeclaration));
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(constDeclaration.sourcePos(), e.getFieldType());
@@ -158,13 +167,13 @@ public final class SemanticAnalyzer {
 
                 Type funcType;
                 // inside the function body
-                symtab.enterNewScope();
+                types.enterNewScope();
                 try {
                     // assign each parameter to a basic identifier with its resolved type
                     for (int i = 0; i < funcDeclaration.parameters().size(); i++) {
                         Parameter p = funcDeclaration.parameters().get(i);
                         // parameters dont have a declaration
-                        symtab.addTerm(p.getName(), p.getType(), p instanceof Parameter.ConstParameter, null);
+                        terms.add(p.getName(), new Binding(p.getType(), p instanceof Parameter.ConstParameter, null));
                     }
 
                     Type resolvedReturnType = resolveType(funcDeclaration.returnType());
@@ -172,7 +181,7 @@ public final class SemanticAnalyzer {
                     // (optimistically) assign the function its declared return type
                     funcType = new FuncType(resolvedParamTypes, resolvedReturnType);
                     // func is constant in the body of the function,
-                    symtab.addTerm(funcDeclaration.name(), funcType, true, funcDeclaration);
+                    terms.add(funcDeclaration.name(), new Binding(funcType, true, funcDeclaration));
 
                     // then type check the function body
                     analyze(funcDeclaration.expression());
@@ -194,18 +203,18 @@ public final class SemanticAnalyzer {
                     throw new SemanticException.DuplicateRecordTypeField(funcDeclaration.sourcePos(), e.getFieldType());
                 } finally {
                     // remember to exit the newly created scope even if analysis fails
-                    symtab.exitScope();
+                    types.exitScope();
                 }
 
                 // we add the function declaration to symbol table AFTER we exit the scope
                 // functions are always constant since we dont support HOF
-                symtab.addTerm(funcDeclaration.name(), funcType, true, funcDeclaration);
+                terms.add(funcDeclaration.name(), new Binding(funcType, true, funcDeclaration));
             }
             case TypeDeclaration typeDeclaration -> {
                 try {
                     // resolve the type and add it to the symbol table
                     Type resolvedType = resolveType(typeDeclaration.type());
-                    symtab.addType(typeDeclaration.name(), resolvedType);
+                    types.add(typeDeclaration.name(), resolvedType);
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(typeDeclaration.sourcePos(), e.getFieldType());
@@ -216,7 +225,7 @@ public final class SemanticAnalyzer {
                     // resolve the type, set the declarations new type to the resolved type, and add a binding to the symbol table
                     Type vType = resolveType(varDeclaration.type());
                     varDeclaration.setType(vType);
-                    symtab.addTerm(varDeclaration.name(), vType, false, varDeclaration);
+                    terms.add(varDeclaration.name(), new Binding(vType, false, varDeclaration));
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
                     throw new SemanticException.DuplicateRecordTypeField(varDeclaration.sourcePos(), e.getFieldType());
@@ -244,7 +253,7 @@ public final class SemanticAnalyzer {
                 arraySubscript.setType(arrayType.elementType());
             }
             case BasicIdentifier basicIdentifier -> {
-                SymbolTable.Binding binding = lookup(basicIdentifier);
+                Binding binding = lookup(basicIdentifier);
                 basicIdentifier.setType(binding.type());
                 basicIdentifier.setDeclaration(binding.declaration());
             }
@@ -258,16 +267,13 @@ public final class SemanticAnalyzer {
                 }
 
                 // record access has a new scope with the field names and types of the record available
-                symtab.enterNewScope();
-                List<RecordType.RecordFieldType> resolvedFieldTypes = new ArrayList<>();
+                types.enterNewScope();
                 for (RecordType.RecordFieldType fieldType : recordType.fieldTypes()) {
-                    Type resolvedFieldType = resolveType(fieldType.fieldType());
-                    resolvedFieldTypes.add(new RecordType.RecordFieldType(fieldType.fieldName(), resolvedFieldType));
                     // record fields dont have a declaration
-                    symtab.addTerm(fieldType.fieldName(), resolvedFieldType, true, null);
+                    terms.add(fieldType.fieldName(), new Binding(resolveType(fieldType.fieldType()), true, null));
                 }
                 analyze(field);
-                symtab.exitScope();
+                types.exitScope();
 
                 // TODO:
                 recordAccess.setType(field.getType());
@@ -275,13 +281,12 @@ public final class SemanticAnalyzer {
         }
     }
 
-    private SymbolTable.Binding lookup(final BasicIdentifier basicIdentifier) throws SemanticException {
-        Optional<SymbolTable.Binding> binding = symtab.lookupTerm(basicIdentifier.name());
-        if (binding.isEmpty()) {
+    private Binding lookup(final BasicIdentifier basicIdentifier) throws SemanticException {
+        try {
+            return terms.lookup(basicIdentifier.name());
+        } catch (NoSuchElementException e) {
             throw new SemanticException.UndeclaredUse(basicIdentifier.sourcePos(), basicIdentifier);
         }
-
-        return binding.get();
     }
 
     // analyze(Expression) needs to throw SemanticException; since an expression may be part of a larger declaration and it
@@ -294,7 +299,7 @@ public final class SemanticAnalyzer {
                 Expression rightOperand = binop.rightOperand();
 
                 // throw exception early if we cant find the operator
-                SymbolTable.Binding opBinding = lookup(operator);
+                Binding opBinding = lookup(operator);
                 analyze(leftOperand);
                 analyze(rightOperand);
 
@@ -354,7 +359,6 @@ public final class SemanticAnalyzer {
                     throw new SemanticException.ArityMismatch(funCall.sourcePos(), callable, argTypes.size(), arguments.size());
                 }
 
-                List<Type> resolvedArgTypes = new ArrayList<>();
                 // for each argument
                 for (int i = 0; i < argTypes.size(); i++) {
                     Argument arg = arguments.get(i);
@@ -395,7 +399,7 @@ public final class SemanticAnalyzer {
                 List<Declaration> declarations = letExpression.declarations();
                 Expression expr = letExpression.expression();
 
-                symtab.enterNewScope();
+                types.enterNewScope();
 
                 // the new scope has all the declared identifiers bound to their types
                 for (Declaration declaration : declarations) {
@@ -404,7 +408,7 @@ public final class SemanticAnalyzer {
                 // the expression is evaluated in the new environment
                 analyze(expr);
 
-                symtab.exitScope();
+                types.exitScope();
 
                 letExpression.setType(expr.getType());
             }
@@ -460,7 +464,7 @@ public final class SemanticAnalyzer {
                 Expression operand = unaryOp.operand();
 
                 // throw exception early if we cant find the operator
-                SymbolTable.Binding opBinding = lookup(operator);
+                Binding opBinding = lookup(operator);
                 if (!(opBinding.type() instanceof FuncType(List<Type> argTypes, Type returnType))) {
                     throw new SemanticException.TypeError(unaryOp.sourcePos(), opBinding.type(), "function");
                 }
@@ -552,7 +556,7 @@ public final class SemanticAnalyzer {
                 List<Declaration> declarations = letStatement.declarations();
                 Statement stmt = letStatement.statement();
 
-                symtab.enterNewScope();
+                types.enterNewScope();
 
                 // declared identifiers get bound in symtab in analyze(Declaration)
                 for (Declaration declaration : declarations) {
@@ -565,7 +569,7 @@ public final class SemanticAnalyzer {
 
                 // analyze the statement in the new environment
                 analyze(stmt);
-                symtab.exitScope();
+                types.exitScope();
             }
             case Statement.LoopWhileStatement loopWhileStatement -> {
                 Expression condition = loopWhileStatement.condition();
@@ -664,15 +668,7 @@ public final class SemanticAnalyzer {
 
                 yield new RecordType(resolvedFieldTypes);
             }
-            case BasicType basicType -> {
-                Optional<Type> typeLookup = symtab.lookupType(basicType.name());
-
-                if (typeLookup.isEmpty()) {
-                    throw new SemanticException.UndeclaredUse(basicType);
-                }
-
-                yield resolveType(typeLookup.get());
-            }
+            case BasicType basicType -> resolveType(lookup(basicType));
             case VoidType voidType -> voidType;
             case Type.PrimType.BoolType boolType -> boolType;
             case Type.PrimType.CharType charType -> charType;
@@ -687,5 +683,16 @@ public final class SemanticAnalyzer {
             }
         };
     }
+
+    private Type lookup(final BasicType basicType) throws SemanticException {
+        try {
+            return types.lookup(basicType.name());
+        } catch (NoSuchElementException e) {
+            throw new SemanticException.UndeclaredUse(basicType);
+        }
+    }
+
+    // each identifier is bound to its type, whether or not its constant, and the place where it was declared
+    record Binding(Type type, boolean constant, Declaration declaration) { }
 
 }
