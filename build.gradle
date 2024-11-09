@@ -6,6 +6,10 @@ subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+
+// this is a test
+
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     
