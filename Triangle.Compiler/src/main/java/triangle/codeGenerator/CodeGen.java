@@ -1,12 +1,15 @@
 package triangle.codeGenerator;
 
+import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 import triangle.ast.Argument;
 import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Statement;
+import triangle.ast.Type;
 import triangle.contextualAnalyzer.SymbolTable;
+import triangle.types.RuntimeType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,11 +65,8 @@ public class CodeGen {
             }
             case Statement.AssignStatement assignStatement -> {
                 block.addAll(generate(assignStatement.expression()));
-
-                Address varAddress = resolveLocalVar(assignStatement.identifier());
-                int varSize = assignStatement.expression().getType().size();
-
-                block.add(new Instruction.STORE(varSize, varAddress));
+                block.addAll(evaluateAddress(assignStatement.identifier()));
+                block.add(new Instruction.STOREI(assignStatement.expression().getType().size()));
                 return block;
             }
             case Statement.IfStatement ifStatement -> {
@@ -130,7 +130,7 @@ public class CodeGen {
                             block.add(new Instruction.LOADA_LABEL(lookup.t()));
                         }
                         // load address of var argument
-                        case Argument.VarArgument varArgument -> block.add(new Instruction.LOADA(resolveLocalVar(varArgument.var())));
+                        case Argument.VarArgument varArgument -> block.addAll(evaluateAddress(varArgument.var()));
                         // just evaluate expr and leave it on stack
                         case Expression expressionArg -> generate(expressionArg);
                     }
@@ -142,8 +142,8 @@ public class CodeGen {
                 return block;
             }
             case Expression.Identifier identifier -> {
-                Address varAddress = resolveLocalVar(identifier);
-                block.add(new Instruction.LOAD(identifier.getType().size(), varAddress));
+                block.addAll(evaluateAddress(identifier));
+                block.add(new Instruction.LOADI(identifier.getType().size()));
                 return block;
             }
             case Expression.IfExpression ifExpression -> throw new RuntimeException();
@@ -274,30 +274,48 @@ public class CodeGen {
         return stackOffset;
     }
 
-    private Address resolveLocalVar(Expression.Identifier identifier) {
-        return switch (identifier) {
-            case Expression.Identifier.ArraySubscript arraySubscript -> throw new RuntimeException();
-            case Expression.Identifier.BasicIdentifier basicIdentifier -> {
-                SymbolTable<Integer, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                yield new Address(getDisplayRegister(lookup.depth()), lookup.t());
-            }
-            case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
-        };
-    }
-
     // a list of instructions that, when evaluated, leaves the local address of the identifier, as the top  element in the stack;
     // leaves the stack otherwise unchanged
-    private List<Instruction> fetch(Expression.Identifier identifier) {
-        return switch (identifier) {
+    private List<Instruction> evaluateAddress(Expression.Identifier identifier) {
+        List<Instruction> block = new ArrayList<>();
+        switch (identifier) {
             case Expression.Identifier.ArraySubscript arraySubscript -> {
-                Address arrayBase = resolveLocalVar(arraySubscript.root());
+                // push address of array base on stack
+                block.addAll(evaluateAddress(arraySubscript.array()));
+                // evaluate subscript and leaves its result on stack
+                block.addAll(generate(arraySubscript.subscript()));
+                // push array element type size on stack
+                int elemSize = ((RuntimeType.ArrayType) arraySubscript.array().getType()).elementType().size();
+                block.add(new Instruction.LOADL(elemSize));
+                // multiply top two, to get offset
+                block.add(new Instruction.CALL_PRIM(Primitive.MULT));
+                // add top two, to get final address
+                block.add(new Instruction.CALL_PRIM(Primitive.ADD));
+                return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 SymbolTable<Integer, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                yield new Address(getDisplayRegister(lookup.depth()), lookup.t());
+                block.add(new Instruction.LOADA(new Address(getDisplayRegister(lookup.depth()), lookup.t())));
+                return block;
             }
-            case Expression.Identifier.RecordAccess recordAccess -> { }
-        };
+            case Expression.Identifier.RecordAccess recordAccess -> {
+                // calculate the offset of the accessed field from the base address of the record
+                int offset = 0;
+                for (RuntimeType.RecordType.FieldType fieldType : ((RuntimeType.RecordType) recordAccess.record().getType()).fieldTypes()) {
+                    if (fieldType.fieldName().equals(recordAccess.field().root().name())) {
+                        break;
+                    }
+                    offset += fieldType.fieldType().size();
+                }
+                // evaluate base address of record and leave on stack
+                block.addAll(evaluateAddress(recordAccess.record()));
+                // load offset literal onto stack
+                block.add(new Instruction.LOADL(offset));
+                // call primitive add
+                block.add(new Instruction.CALL_PRIM(Primitive.ADD));
+                return block;
+            }
+        }
     }
 
 }
