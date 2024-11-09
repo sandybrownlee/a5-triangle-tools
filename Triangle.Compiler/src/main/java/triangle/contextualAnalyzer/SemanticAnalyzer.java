@@ -39,56 +39,73 @@ import java.util.Set;
 
 import static triangle.types.Type.*;
 
+// semantic analysis does several things:
+//      it checks that all uses of an identifier are in a scope with a corresponding declaration
+//      it updates the AST to annotated all uses of an identifier with its corresponding declaration
+//      it checks that all expressions have the correct type for how they are being used
+//      it updates the AST to annotated all Typeable nodes with their types; i.e., it produces an explicitly-typed AST
+
+// WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 public final class SemanticAnalyzer {
 
-    private static final Type                 binaryRelation    = new FuncType(
-            List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
-    private static final Type                 binaryIntRelation = new FuncType(
-            List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
-    private static final Type                 binaryIntFunc     = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
-    private static final Map<String, Binding> STD_TERMS         = new HashMap<>();
-    private static final Map<String, Type>    STD_TYPES         = Map.of("Integer", INT_TYPE, "Char", Type.CHAR_TYPE,
-                                                                         "Boolean", BOOL_TYPE
-    );
+    //@formatter:off
+    private static final Type                 binaryRelation = new FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
+    private static final Type                 binaryIntRelation = new FuncType(List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
+    private static final Type                 binaryIntFunc = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
+    private static final Map<String, Binding> STD_TERMS = new HashMap<>();
+    private static final Map<String, Type>    STD_TYPES =
+            Map.of(
+                    "Integer", INT_TYPE,
+                    "Char", Type.CHAR_TYPE,
+                    "Boolean",BOOL_TYPE);
 
     // stdenv values have null as annotation
     static {
         // TODO: this is very hackish and ugly
-        STD_TERMS.putAll(Map.of("\\/", new Binding(binaryRelation, true, null), "/\\",
-                                new Binding(binaryRelation, true, null), "<=",
-                                new Binding(binaryIntRelation, true, null), ">=",
-                                new Binding(binaryIntRelation, true, null), ">",
-                                new Binding(binaryIntRelation, true, null), "<",
-                                new Binding(binaryIntRelation, true, null), "\\",
-                                new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)
-        ));
-        STD_TERMS.putAll(Map.of("-", new Binding(binaryIntFunc, true, null), "+",
-                                new Binding(binaryIntFunc, true, null), "*",
-                                new Binding(binaryIntFunc, true, null), "/",
-                                new Binding(binaryIntFunc, true, null), "//",
-                                new Binding(binaryIntFunc, true, null), "|",
-                                new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null), "++",
-                                new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)
-        ));
+        STD_TERMS.putAll(
+                Map.of(
+                    "\\/", new Binding(binaryRelation, true, null),
+                    "/\\", new Binding(binaryRelation, true, null),
+                    "<=", new Binding(binaryIntRelation, true, null),
+                    ">=", new Binding(binaryIntRelation, true, null),
+                    ">", new Binding(binaryIntRelation, true, null),
+                    "<", new Binding(binaryIntRelation, true, null),
+                    "\\", new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)));
+
+        STD_TERMS.putAll(
+                Map.of(
+                    "-", new Binding(binaryIntFunc, true, null),
+                    "+", new Binding(binaryIntFunc, true, null),
+                    "*", new Binding(binaryIntFunc, true, null),
+                    "/", new Binding(binaryIntFunc, true, null),
+                    "//", new Binding(binaryIntFunc, true, null),
+                    "|", new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null),
+                    "++", new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)));
+
         // these are set to void just as dummy values so that we fail fast in case something tries to access their types since
         //  these are supposed to be special-cased in analyze(Expression)
-        STD_TERMS.putAll(Map.of("=", new Binding(Type.VOID_TYPE, true, null), "\\=",
-                                new Binding(Type.VOID_TYPE, true, null)
-        ));
-        STD_TERMS.putAll(Map.of("get", new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
-                                "getint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
-                                "geteol", new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "puteol",
-                                new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null), "put",
-                                new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
-                                "putint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
-                                "chr", new Binding(new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE), true, null),
-                                "eol", new Binding(new FuncType(List.of(), BOOL_TYPE), true, null), "ord",
-                                new Binding(new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE), true, null)
-        ));
+        STD_TERMS.putAll(
+                Map.of(
+                        "=", new Binding(Type.VOID_TYPE, true, null),
+                        "\\=", new Binding(Type.VOID_TYPE, true, null)));
+
+        STD_TERMS.putAll(
+                Map.of(
+                        "get", new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
+                        "getint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
+                        "geteol", new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null),
+                        "puteol", new Binding(new FuncType(List.of(), Type.VOID_TYPE), true, null),
+                        "put", new Binding(new FuncType(List.of(Type.CHAR_TYPE), Type.VOID_TYPE), true, null),
+                        "putint", new Binding(new FuncType(List.of(INT_TYPE), Type.VOID_TYPE), true, null),
+                        "chr", new Binding(new FuncType(List.of(INT_TYPE), Type.CHAR_TYPE), true, null),
+                        "eol", new Binding(new FuncType(List.of(), BOOL_TYPE), true, null),
+                        "ord", new Binding(new FuncType(List.of(Type.CHAR_TYPE), INT_TYPE), true, null)));
     }
+    //@formatter:off
 
     // stores a binding for each term
     private final SymbolTable<Binding>    terms  = new SymbolTable<>(STD_TERMS);
+
     // stores the "resolved" type of each type; i.e.:
     //      type P ~ record x : Integer end
     //      type R ~ record x : P, y : P end
@@ -99,16 +116,18 @@ public final class SemanticAnalyzer {
     private final List<SemanticException> errors = new ArrayList<>();
 
     public List<SemanticException> check(final Statement program) {
-        analyze(program);
+        visit(program);
         return errors;
     }
 
-    private void analyze(final Argument argument) throws SemanticException {
+    // the methods are named visit() to help readers familiar with the visitor-pattern understand this code
+
+    private void visit(final Argument argument) throws SemanticException {
         switch (argument) {
             case Argument.FuncArgument funcArgument -> {
                 Identifier func = funcArgument.func();
 
-                analyze(func);
+                visit(func);
                 if (!(func.getType() instanceof FuncType funcType)) {
                     throw new SemanticException.TypeError(funcArgument.sourcePos(), func.getType(), "function");
                 }
@@ -118,7 +137,7 @@ public final class SemanticAnalyzer {
             case Argument.VarArgument varArgument -> {
                 Identifier var = varArgument.var();
 
-                analyze(var);
+                visit(var);
                 if (var.getType() instanceof FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC
                     throw new SemanticException.TypeError(varArgument.sourcePos(), var.getType(), "not a function");
@@ -127,22 +146,22 @@ public final class SemanticAnalyzer {
                 varArgument.setType(var.getType());
             }
             case Expression expression -> {
-                analyze(expression);
+                visit(expression);
                 if (expression.getType() instanceof FuncType) {
-                    // arguments are not allowed to be function types if they are not declared FUNC
+                    // arguments are not allowed to be function types if they are not declared FUNC/PROC
                     throw new SemanticException.TypeError(expression.sourcePos(), expression.getType(), "not a function");
                 }
             }
         }
     }
 
-    // analyze(Declaration) needs to throw SemanticException instead of merely adding them to the list, because it does not
+    // analyze(Declaration) needs to throw SemanticException instead of merely adding errors to the list, because it does not
     // know to what point to "rewind" to to continue analysis
-    private void analyze(final Declaration declaration) throws SemanticException {
+    private void visit(final Declaration declaration) throws SemanticException {
         switch (declaration) {
             case ConstDeclaration constDeclaration -> {
                 try {
-                    analyze(constDeclaration.value());
+                    visit(constDeclaration.value());
                     terms.add(constDeclaration.name(), new Binding(constDeclaration.value().getType(), true, constDeclaration));
                 } catch (SemanticException.DuplicateRecordTypeField e) {
                     // rethrow duplicate record fields with added source position info
@@ -160,7 +179,7 @@ public final class SemanticAnalyzer {
                     }
 
                     // resolve the type of the parameter in the current env
-                    analyze(param);
+                    visit(param);
                     seenParameters.add(param.getName());
                     resolvedParamTypes.add(param.getType());
                 }
@@ -184,7 +203,7 @@ public final class SemanticAnalyzer {
                     terms.add(funcDeclaration.name(), new Binding(funcType, true, funcDeclaration));
 
                     // then type check the function body
-                    analyze(funcDeclaration.expression());
+                    visit(funcDeclaration.expression());
 
                     SourcePosition sourcePos = funcDeclaration.sourcePos();
                     if (funcDeclaration.expression() instanceof Expression funcExpression) {
@@ -234,18 +253,18 @@ public final class SemanticAnalyzer {
         }
     }
 
-    private void analyze(final Identifier identifier) throws SemanticException {
+    private void visit(final Identifier identifier) throws SemanticException {
         switch (identifier) {
             case Identifier.ArraySubscript arraySubscript -> {
                 Identifier array = arraySubscript.array();
                 Expression subscript = arraySubscript.subscript();
 
-                analyze(array);
+                visit(array);
                 if (!(array.getType() instanceof ArrayType arrayType)) {
                     throw new SemanticException.TypeError(arraySubscript.sourcePos(), array.getType(), "array");
                 }
 
-                analyze(subscript);
+                visit(subscript);
                 if (!(subscript.getType() instanceof Type.PrimType.IntType)) {
                     throw new SemanticException.TypeError(arraySubscript.sourcePos(), subscript.getType(), INT_TYPE);
                 }
@@ -261,7 +280,7 @@ public final class SemanticAnalyzer {
                 Identifier record = recordAccess.record();
                 Identifier field = recordAccess.field();
 
-                analyze(record);
+                visit(record);
                 if (!(record.getType() instanceof RecordType recordType)) {
                     throw new SemanticException.TypeError(recordAccess.sourcePos(), record.getType(), "record");
                 }
@@ -272,7 +291,7 @@ public final class SemanticAnalyzer {
                     // record fields dont have a declaration
                     terms.add(fieldType.fieldName(), new Binding(resolveType(fieldType.fieldType()), true, null));
                 }
-                analyze(field);
+                visit(field);
                 types.exitScope();
 
                 // TODO:
@@ -291,7 +310,7 @@ public final class SemanticAnalyzer {
 
     // analyze(Expression) needs to throw SemanticException; since an expression may be part of a larger declaration and it
     // wont know where to rewind to
-    private void analyze(final Expression expression) throws SemanticException {
+    private void visit(final Expression expression) throws SemanticException {
         switch (expression) {
             case BinaryOp binop -> {
                 BasicIdentifier operator = binop.operator();
@@ -300,8 +319,8 @@ public final class SemanticAnalyzer {
 
                 // throw exception early if we cant find the operator
                 Binding opBinding = lookup(operator);
-                analyze(leftOperand);
-                analyze(rightOperand);
+                visit(leftOperand);
+                visit(rightOperand);
 
                 // I special-case the equality operations because they are the ONLY polymorphic function and I do not have enough
                 //  time to implement full polymorphism
@@ -349,7 +368,7 @@ public final class SemanticAnalyzer {
                 Identifier callable = funCall.callable();
                 List<Argument> arguments = funCall.arguments();
 
-                analyze(callable);
+                visit(callable);
 
                 if (!(callable.getType() instanceof FuncType(List<Type> argTypes, Type returnType))) {
                     throw new SemanticException.TypeError(funCall.sourcePos(), callable.getType(), "function");
@@ -367,7 +386,7 @@ public final class SemanticAnalyzer {
                     Type expectedType = argTypes.get(i);
 
                     // analyze it
-                    analyze(arg);
+                    visit(arg);
 
                     if (!(arg.getType().equals(expectedType))) {
                         throw new SemanticException.TypeError(funCall.sourcePos(), arg.getType(), expectedType);
@@ -376,19 +395,19 @@ public final class SemanticAnalyzer {
 
                 funCall.setType(returnType);
             }
-            case Identifier identifier -> analyze(identifier);
+            case Identifier identifier -> visit(identifier);
             case IfExpression ifExpression -> {
                 Expression condition = ifExpression.condition();
                 Expression consequent = ifExpression.consequent();
                 Expression alternative = ifExpression.alternative();
 
-                analyze(condition);
+                visit(condition);
                 if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
                     throw new SemanticException.TypeError(ifExpression.sourcePos(), condition.getType(), BOOL_TYPE);
                 }
 
-                analyze(consequent);
-                analyze(alternative);
+                visit(consequent);
+                visit(alternative);
                 if (!(consequent.getType().equals(alternative.getType()))) {
                     throw new SemanticException.TypeError(ifExpression.sourcePos(), consequent.getType(), alternative.getType());
                 }
@@ -403,10 +422,10 @@ public final class SemanticAnalyzer {
 
                 // the new scope has all the declared identifiers bound to their types
                 for (Declaration declaration : declarations) {
-                    analyze(declaration);
+                    visit(declaration);
                 }
                 // the expression is evaluated in the new environment
-                analyze(expr);
+                visit(expr);
 
                 types.exitScope();
 
@@ -421,10 +440,10 @@ public final class SemanticAnalyzer {
                     throw new UnsupportedOperationException();
                 }
 
-                analyze(values.getFirst());
+                visit(values.getFirst());
                 Type expectedType = values.getFirst().getType();
                 for (Expression value : values) {
-                    analyze(value);
+                    visit(value);
                     if (!value.getType().equals(expectedType)) {
                         throw new SemanticException.TypeError(sourcePos, expectedType, value.getType());
                     }
@@ -453,7 +472,7 @@ public final class SemanticAnalyzer {
                         throw new SemanticException.DuplicateRecordField(sourcePos, field);
                     }
                     seenFieldNames.add(field.name());
-                    analyze(field.value());
+                    visit(field.value());
                     fieldTypes.add(new RecordType.RecordFieldType(field.name(), field.value().getType()));
                 }
 
@@ -474,7 +493,7 @@ public final class SemanticAnalyzer {
                     throw new SemanticException.ArityMismatch(unaryOp.sourcePos(), operator, 1, argTypes.size());
                 }
 
-                analyze(operand);
+                visit(operand);
                 Type expectedType = argTypes.getFirst();
                 if (!operand.getType().equals(expectedType)) {
                     throw new SemanticException.TypeError(unaryOp.sourcePos(), expectedType, operand.getType());
@@ -486,7 +505,7 @@ public final class SemanticAnalyzer {
         }
     }
 
-    private void analyze(final Parameter parameter) throws SemanticException {
+    private void visit(final Parameter parameter) throws SemanticException {
         switch (parameter) {
             case Parameter.FuncParameter funcParameter -> {
                 List<Parameter> parameters = funcParameter.parameters();
@@ -494,7 +513,7 @@ public final class SemanticAnalyzer {
 
                 List<Type> paramTypes = new ArrayList<>();
                 for (Parameter p : parameters) {
-                    analyze(p);
+                    visit(p);
                     paramTypes.add(p.getType());
                 }
 
@@ -507,11 +526,11 @@ public final class SemanticAnalyzer {
         }
     }
 
-    private void analyze(final Statement statement) {
+    private void visit(final Statement statement) {
         switch (statement) {
             case Expression expression -> {
                 try {
-                    analyze(expression);
+                    visit(expression);
                 } catch (SemanticException e) {
                     errors.add(e);
                 }
@@ -525,8 +544,8 @@ public final class SemanticAnalyzer {
                         errors.add(new SemanticException.AssignmentToConstant(assignStatement.sourcePos(), lvalue));
                     }
 
-                    analyze(rvalue);
-                    analyze(lvalue);
+                    visit(rvalue);
+                    visit(lvalue);
                     if (!lvalue.getType().equals(rvalue.getType())) {
                         errors.add(
                                 new SemanticException.TypeError(assignStatement.sourcePos(), lvalue.getType(), rvalue.getType()));
@@ -541,7 +560,7 @@ public final class SemanticAnalyzer {
                 Optional<Statement> alternative = ifStatement.alternative();
 
                 try {
-                    analyze(condition);
+                    visit(condition);
                     if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(ifStatement.sourcePos(), condition.getType(), BOOL_TYPE));
                     }
@@ -549,8 +568,8 @@ public final class SemanticAnalyzer {
                     errors.add(e);
                 }
 
-                consequent.ifPresent(this::analyze);
-                alternative.ifPresent(this::analyze);
+                consequent.ifPresent(this::visit);
+                alternative.ifPresent(this::visit);
             }
             case Statement.LetStatement letStatement -> {
                 List<Declaration> declarations = letStatement.declarations();
@@ -561,14 +580,14 @@ public final class SemanticAnalyzer {
                 // declared identifiers get bound in symtab in analyze(Declaration)
                 for (Declaration declaration : declarations) {
                     try {
-                        analyze(declaration);
+                        visit(declaration);
                     } catch (SemanticException e) {
                         errors.add(e);
                     }
                 }
 
                 // analyze the statement in the new environment
-                analyze(stmt);
+                visit(stmt);
                 types.exitScope();
             }
             case Statement.LoopWhileStatement loopWhileStatement -> {
@@ -577,7 +596,7 @@ public final class SemanticAnalyzer {
                 Statement doBody = loopWhileStatement.doBody();
 
                 try {
-                    analyze(condition);
+                    visit(condition);
                     if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
                         errors.add(
                                 new SemanticException.TypeError(loopWhileStatement.sourcePos(), condition.getType(), BOOL_TYPE));
@@ -586,15 +605,15 @@ public final class SemanticAnalyzer {
                     errors.add(e);
                 }
 
-                analyze(loopBody);
-                analyze(doBody);
+                visit(loopBody);
+                visit(doBody);
             }
             case Statement.RepeatUntilStatement repeatUntilStatement -> {
                 Expression condition = repeatUntilStatement.condition();
                 Statement body = repeatUntilStatement.body();
 
                 try {
-                    analyze(condition);
+                    visit(condition);
                     if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(repeatUntilStatement.sourcePos(), condition.getType(),
                                                                    BOOL_TYPE
@@ -604,14 +623,14 @@ public final class SemanticAnalyzer {
                     errors.add(e);
                 }
 
-                analyze(body);
+                visit(body);
             }
             case Statement.RepeatWhileStatement repeatWhileStatement -> {
                 Expression condition = repeatWhileStatement.condition();
                 Statement body = repeatWhileStatement.body();
 
                 try {
-                    analyze(condition);
+                    visit(condition);
                     if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(repeatWhileStatement.sourcePos(), condition.getType(),
                                                                    BOOL_TYPE
@@ -621,11 +640,11 @@ public final class SemanticAnalyzer {
                     errors.add(e);
                 }
 
-                analyze(body);
+                visit(body);
             }
             case Statement.StatementBlock statementBlock -> {
                 for (Statement stmt : statementBlock.statements()) {
-                    analyze(stmt);
+                    visit(stmt);
                 }
             }
             case Statement.WhileStatement whileStatement -> {
@@ -633,7 +652,7 @@ public final class SemanticAnalyzer {
                 Statement body = whileStatement.body();
 
                 try {
-                    analyze(condition);
+                    visit(condition);
                     if (!(condition.getType() instanceof Type.PrimType.BoolType)) {
                         errors.add(new SemanticException.TypeError(whileStatement.sourcePos(), condition.getType(), BOOL_TYPE));
                     }
@@ -641,7 +660,7 @@ public final class SemanticAnalyzer {
                     errors.add(e);
                 }
 
-                analyze(body);
+                visit(body);
             }
         }
     }
