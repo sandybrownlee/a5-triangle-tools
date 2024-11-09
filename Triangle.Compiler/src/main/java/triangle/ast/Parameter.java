@@ -10,6 +10,7 @@ sealed public interface Parameter extends Typeable
 
     String getName();
 
+    // TODO: remove
     SourcePosition sourcePos();
 
     final class ConstParameter implements Parameter {
