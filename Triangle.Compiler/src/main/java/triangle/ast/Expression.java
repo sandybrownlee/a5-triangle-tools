@@ -4,7 +4,6 @@ import triangle.syntacticAnalyzer.SourcePosition;
 import triangle.types.RuntimeType;
 
 import java.util.List;
-import java.util.Objects;
 
 sealed public interface Expression extends Statement, Argument, Typeable
         permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
@@ -55,21 +54,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
                 return name;
             }
 
-            @Override public int hashCode() {
-                return Objects.hash(sourcePos, name);
-            }
-
-            @Override public boolean equals(Object obj) {
-                if (obj == this) {
-                    return true;
-                }
-                if (obj == null || obj.getClass() != this.getClass()) {
-                    return false;
-                }
-                var that = (BasicIdentifier) obj;
-                return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.name, that.name);
-            }
-
             @Override public String toString() {
                 return "BasicIdentifier[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ']';
             }
@@ -118,22 +102,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
                 return field;
             }
 
-            @Override public int hashCode() {
-                return Objects.hash(sourcePos, record, field);
-            }
-
-            @Override public boolean equals(Object obj) {
-                if (obj == this) {
-                    return true;
-                }
-                if (obj == null || obj.getClass() != this.getClass()) {
-                    return false;
-                }
-                var that = (RecordAccess) obj;
-                return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.record, that.record) &&
-                       Objects.equals(this.field, that.field);
-            }
-
             @Override public String toString() {
                 return "RecordAccess[" + "sourcePos=" + sourcePos + ", " + "record=" + record + ", " + "field=" + field + ']';
             }
@@ -178,22 +146,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
                 return subscript;
             }
 
-            @Override public int hashCode() {
-                return Objects.hash(sourcePos, array, subscript);
-            }
-
-            @Override public boolean equals(Object obj) {
-                if (obj == this) {
-                    return true;
-                }
-                if (obj == null || obj.getClass() != this.getClass()) {
-                    return false;
-                }
-                var that = (ArraySubscript) obj;
-                return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.array, that.array) && Objects.equals(
-                        this.subscript, that.subscript);
-            }
-
             @Override public String toString() {
                 return "ArraySubscript[" + "sourcePos=" + sourcePos + ", " + "array=" + array + ", " + "subscript=" + subscript +
                        ']';
@@ -229,21 +181,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
             return value;
         }
 
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, value);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LitBool) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && this.value == that.value;
-        }
-
         @Override public String toString() {
             return "LitBool[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
         }
@@ -276,21 +213,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
             return value;
         }
 
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, value);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LitInt) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && this.value == that.value;
-        }
-
         @Override public String toString() {
             return "LitInt[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
         }
@@ -321,21 +243,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
 
         public char value() {
             return value;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, value);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LitChar) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && this.value == that.value;
         }
 
         @Override public String toString() {
@@ -371,21 +278,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
             return elements;
         }
 
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, elements);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LitArray) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.elements, that.elements);
-        }
-
         @Override public String toString() {
             return "LitArray[" + "sourcePos=" + sourcePos + ", " + "elements=" + elements + ']';
         }
@@ -417,21 +309,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
 
         public List<RecordField> fields() {
             return fields;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, fields);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LitRecord) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.fields, that.fields);
         }
 
         @Override public String toString() {
@@ -473,22 +350,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
 
         public Expression operand() {
             return operand;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, operator, operand);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (UnaryOp) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.operator, that.operator) &&
-                   Objects.equals(this.operand, that.operand);
         }
 
         @Override public String toString() {
@@ -538,22 +399,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
             return rightOperand;
         }
 
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, operator, leftOperand, rightOperand);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (BinaryOp) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.operator, that.operator) &&
-                   Objects.equals(this.leftOperand, that.leftOperand) && Objects.equals(this.rightOperand, that.rightOperand);
-        }
-
         @Override public String toString() {
             return "BinaryOp[" + "sourcePos=" + sourcePos + ", " + "operator=" + operator + ", " + "leftOperand=" + leftOperand +
                    ", " + "rightOperand=" + rightOperand + ']';
@@ -592,22 +437,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
 
         public Expression expression() {
             return expression;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, declarations, expression);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LetExpression) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.declarations, that.declarations) &&
-                   Objects.equals(this.expression, that.expression);
         }
 
         @Override public String toString() {
@@ -656,22 +485,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
             return alternative;
         }
 
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, condition, consequent, alternative);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (IfExpression) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.condition, that.condition) &&
-                   Objects.equals(this.consequent, that.consequent) && Objects.equals(this.alternative, that.alternative);
-        }
-
         @Override public String toString() {
             return "IfExpression[" + "sourcePos=" + sourcePos + ", " + "condition=" + condition + ", " + "consequent=" +
                    consequent + ", " + "alternative=" + alternative + ']';
@@ -710,22 +523,6 @@ sealed public interface Expression extends Statement, Argument, Typeable
 
         public List<Argument> arguments() {
             return arguments;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, callable, arguments);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (FunCall) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.callable, that.callable) &&
-                   Objects.equals(this.arguments, that.arguments);
         }
 
         @Override public String toString() {

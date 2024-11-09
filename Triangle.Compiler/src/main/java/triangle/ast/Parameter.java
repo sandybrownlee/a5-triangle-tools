@@ -4,7 +4,6 @@ import triangle.syntacticAnalyzer.SourcePosition;
 import triangle.types.RuntimeType;
 
 import java.util.List;
-import java.util.Objects;
 
 sealed public interface Parameter extends Typeable
         permits Parameter.ConstParameter, Parameter.FuncParameter, Parameter.VarParameter {
@@ -40,22 +39,6 @@ sealed public interface Parameter extends Typeable
 
         public Type declaredType() {
             return declaredType;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, name, declaredType);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (ConstParameter) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.name, that.name) && Objects.equals(
-                    this.declaredType, that.declaredType);
         }
 
         @Override public String toString() {
@@ -100,22 +83,6 @@ sealed public interface Parameter extends Typeable
 
         public RuntimeType type() {
             return type;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, name, type);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (VarParameter) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.name, that.name) && Objects.equals(
-                    this.type, that.type);
         }
 
         @Override public String toString() {
@@ -173,22 +140,6 @@ sealed public interface Parameter extends Typeable
 
         public Type declaredReturnType() {
             return declaredReturnType;
-        }
-
-        @Override public int hashCode() {
-            return Objects.hash(sourcePos, callable, parameters, declaredReturnType);
-        }
-
-        @Override public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (FuncParameter) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) && Objects.equals(this.callable, that.callable) &&
-                   Objects.equals(this.parameters, that.parameters) && Objects.equals(this.returnType, that.returnType);
         }
 
         @Override public String toString() {

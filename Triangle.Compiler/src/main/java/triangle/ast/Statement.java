@@ -3,7 +3,6 @@ package triangle.ast;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 sealed public interface Statement permits Expression, Statement.AssignStatement, Statement.IfStatement, Statement.LetStatement,
@@ -28,24 +27,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
 
         public List<Statement> statements() {
             return statements;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, statements);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (StatementBlock) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.statements, that.statements);
         }
 
         @Override
@@ -79,25 +60,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
 
         public Statement statement() {
             return statement;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, declarations, statement);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LetStatement) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.declarations, that.declarations) &&
-                   Objects.equals(this.statement, that.statement);
         }
 
         @Override
@@ -145,26 +107,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, condition, consequent, alternative);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (IfStatement) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.condition, that.condition) &&
-                   Objects.equals(this.consequent, that.consequent) &&
-                   Objects.equals(this.alternative, that.alternative);
-        }
-
-        @Override
         public String toString() {
             return "IfStatement[" +
                    "sourcePos=" + sourcePos + ", " +
@@ -197,25 +139,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
 
         public Statement body() {
             return body;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, condition, body);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (WhileStatement) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.condition, that.condition) &&
-                   Objects.equals(this.body, that.body);
         }
 
         @Override
@@ -260,26 +183,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, condition, loopBody, doBody);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (LoopWhileStatement) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.condition, that.condition) &&
-                   Objects.equals(this.loopBody, that.loopBody) &&
-                   Objects.equals(this.doBody, that.doBody);
-        }
-
-        @Override
         public String toString() {
             return "LoopWhileStatement[" +
                    "sourcePos=" + sourcePos + ", " +
@@ -312,25 +215,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
 
         public Statement body() {
             return body;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, condition, body);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (RepeatWhileStatement) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.condition, that.condition) &&
-                   Objects.equals(this.body, that.body);
         }
 
         @Override
@@ -368,25 +252,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
         }
 
         @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, condition, body);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (RepeatUntilStatement) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.condition, that.condition) &&
-                   Objects.equals(this.body, that.body);
-        }
-
-        @Override
         public String toString() {
             return "RepeatUntilStatement[" +
                    "sourcePos=" + sourcePos + ", " +
@@ -419,25 +284,6 @@ sealed public interface Statement permits Expression, Statement.AssignStatement,
 
         public Expression expression() {
             return expression;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(sourcePos, identifier, expression);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj == this) {
-                return true;
-            }
-            if (obj == null || obj.getClass() != this.getClass()) {
-                return false;
-            }
-            var that = (AssignStatement) obj;
-            return Objects.equals(this.sourcePos, that.sourcePos) &&
-                   Objects.equals(this.identifier, that.identifier) &&
-                   Objects.equals(this.expression, that.expression);
         }
 
         @Override
