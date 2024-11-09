@@ -31,6 +31,7 @@ public abstract class SemanticException extends Exception {
     }
 
     static final class TypeError extends SemanticException {
+
         TypeError(SourcePosition sourcePos, RuntimeType left, RuntimeType right) {
             super(sourcePos, "Type mismatch: " + left + " and " + right);
         }
@@ -38,6 +39,7 @@ public abstract class SemanticException extends Exception {
         TypeError(SourcePosition sourcePos, RuntimeType type, String expected) {
             super(sourcePos, "Unexpected type: " + type + " expecting: " + expected);
         }
+
     }
 
     static final class ArityMismatch extends SemanticException {
@@ -92,4 +94,13 @@ public abstract class SemanticException extends Exception {
         }
 
     }
+
+    static final class FunctionResult extends SemanticException {
+
+        FunctionResult(final SourcePosition sourcePos, final Identifier identifier) {
+            super(sourcePos, "Attempted to use a function/procedure as an expression result: " + identifier);
+        }
+
+    }
+
 }

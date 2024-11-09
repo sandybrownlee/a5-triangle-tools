@@ -44,6 +44,7 @@ import static triangle.types.RuntimeType.*;
 //      it updates the AST to annotated all uses of an identifier with its corresponding declaration
 //      it checks that all expressions have the correct type for how they are being used
 //      it updates the AST to annotated all Typeable nodes with their types; i.e., it produces an explicitly-typed AST
+//      it ensures that the program does not attempt to return a function/procedure as a value, as HOF are not supported
 
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 public final class SemanticAnalyzer {
@@ -434,7 +435,13 @@ public final class SemanticAnalyzer {
 
                 funCall.setType(returnType);
             }
-            case Identifier identifier -> visit(identifier);
+            case Identifier identifier -> {
+                visit(identifier);
+                // cannot evaluate a function as a result since we dont support HOF
+                if (identifier.getType() instanceof FuncType) {
+                    throw new SemanticException.FunctionResult(identifier.sourcePos(), identifier);
+                }
+            }
             case IfExpression ifExpression -> {
                 Expression condition = ifExpression.condition();
                 Expression consequent = ifExpression.consequent();
