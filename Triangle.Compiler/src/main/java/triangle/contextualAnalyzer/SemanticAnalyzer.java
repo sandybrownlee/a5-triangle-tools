@@ -173,15 +173,17 @@ public final class SemanticAnalyzer {
                         throw new SemanticException.DuplicateParameter(funcDeclaration.sourcePos(), param);
                     }
 
+                    seenParameters.add(param.getName());
                     // resolve the type of the parameter in the current env
                     visit(param);
-                    seenParameters.add(param.getName());
                     resolvedParamTypes.add(param.getType());
                 }
 
                 RuntimeType funcType;
                 // inside the function body
                 types.enterNewScope();
+                terms.enterNewScope();
+
                 try {
                     // assign each parameter to a basic identifier with its resolved type
                     for (int i = 0; i < funcDeclaration.parameters().size(); i++) {
@@ -213,6 +215,7 @@ public final class SemanticAnalyzer {
                 } finally {
                     // remember to exit the newly created scope even if analysis fails
                     types.exitScope();
+                    terms.exitScope();
                 }
 
                 // add the newly declared function to this scopes terms
@@ -260,6 +263,7 @@ public final class SemanticAnalyzer {
                 RuntimeType funcType;
                 // inside the function body
                 types.enterNewScope();
+                terms.enterNewScope();
                 try {
                     // assign each parameter to a basic identifier with its resolved type
                     for (int i = 0; i < procDeclaration.parameters().size(); i++) {
@@ -278,6 +282,7 @@ public final class SemanticAnalyzer {
                 } finally {
                     // remember to exit the newly created scope even if analysis fails
                     types.exitScope();
+                    terms.exitScope();
                 }
 
                 // add the newly declared function to this scopes terms
@@ -609,6 +614,7 @@ public final class SemanticAnalyzer {
                 List<Declaration> declarations = letStatement.declarations();
                 Statement stmt = letStatement.statement();
 
+                terms.enterNewScope();
                 types.enterNewScope();
 
                 // declared identifiers get bound in symtab in analyze(Declaration)
@@ -622,6 +628,7 @@ public final class SemanticAnalyzer {
 
                 // analyze the statement in the new environment
                 visit(stmt);
+                terms.exitScope();
                 types.exitScope();
             }
             case Statement.LoopWhileStatement loopWhileStatement -> {
