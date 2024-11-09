@@ -38,16 +38,16 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 	// the cli parser library lets us make instance variables with annotations like this
 		// that specify command line arguments for the program
-	    @Argument(alias = "s", description = "Statistic to compute for the values", required = false)
+	    @Argument(alias = "s", description = "Visual Representation of the abstract syntax tree", required = false)
 	    static boolean showTree = false;
 	    
-	    @Argument(alias = "f", description = "Comma separated (no spaces) list of values", required = false)
+	    @Argument(alias = "f", description = "Allow folding the optimize", required = false)
 		static boolean folding = false;
 	    
-	    @Argument(alias = "o", description = "Comma separated (no spaces) list of values", required = false)
+	    @Argument(alias = "o", description = "Assign the output name for the tam file", required = false)
 	    static String objectName = "obj.tam";
 	    
-	    @Argument(alias = "sa", description = "Statistic to compute for the values", required = false)
+	    @Argument(alias = "sa", description = "Show the tree after optimisations have been applied", required = false)
 	    static boolean showTreeAfter = false;
 
 	

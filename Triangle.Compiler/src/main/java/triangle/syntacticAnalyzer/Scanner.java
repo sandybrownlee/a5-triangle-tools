@@ -38,7 +38,7 @@ public final class Scanner {
 	// isOperator returns true iff the given character is an operator character.
 
 	public static boolean isOperator(char c) {
-		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
+		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' ||  c == '<' || c == '>' || c == '\\'
 				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
 	}
 
@@ -164,7 +164,6 @@ public final class Scanner {
 			while (isDigit(currentChar))
 				takeIt();
 			return Token.Kind.INTLITERAL;
-
 		case '+':
 		case '-':
 		case '*':
@@ -203,7 +202,6 @@ public final class Scanner {
 				return Token.Kind.BECOMES;
 			} else
 				return Token.Kind.COLON;
-
 		case ';':
 			takeIt();
 			return Token.Kind.SEMICOLON;

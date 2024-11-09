@@ -250,8 +250,7 @@ public class Parser {
 	//
 	// COMMANDS
 	//
-	///////////////////////////////////////////////////////////////////////////////
-
+	//////////////////////////////////////////////////////////////////////////////
 	// parseCommand parses the command, and constructs an AST
 	// to represent its phrase structure.
 
@@ -259,7 +258,6 @@ public class Parser {
 		Command commandAST = null; // in case there's a syntactic error
 
 		SourcePosition commandPos = new SourcePosition();
-
 		start(commandPos);
 		commandAST = parseSingleCommand();
 		while (currentToken.kind == Token.Kind.SEMICOLON) {
@@ -273,12 +271,9 @@ public class Parser {
 
 	Command parseSingleCommand() throws SyntaxError {
 		Command commandAST = null; // in case there's a syntactic error
-
 		SourcePosition commandPos = new SourcePosition();
 		start(commandPos);
-
 		switch (currentToken.kind) {
-
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
 			if (currentToken.kind == Token.Kind.LPAREN) {
@@ -287,18 +282,27 @@ public class Parser {
 				accept(Token.Kind.RPAREN);
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
-
 			} else {
-
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				if (currentToken.kind == Token.Kind.OPERATOR &&
+						currentToken.spelling.equals("**")) {
+					acceptIt();
+					/*
+					 * Create a new AST for the square operation, creates a binary expressions,
+					 * with the operator being the square operator and the two vname expression,
+					 * being the variable and the variable again.
+					 */
+					Expression squareAST = new BinaryExpression(
+							new VnameExpression(vAST, commandPos),
+							new Operator("*", commandPos),
+							new VnameExpression(vAST, commandPos), commandPos);
+					finish(commandPos);
+					// Create a new assign command with the variable and the SquareAST Expression
+					commandAST = new AssignCommand(vAST, squareAST, commandPos);
+				}
 			}
 		}
 			break;
-
 		case BEGIN:
 			acceptIt();
 			commandAST = parseCommand();
@@ -314,6 +318,7 @@ public class Parser {
 			commandAST = new LetCommand(dAST, cAST, commandPos);
 		}
 			break;
+
 
 		case IF: {
 			acceptIt();

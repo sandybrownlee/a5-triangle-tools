@@ -59,13 +59,16 @@ public class TestScanner {
 	public void testHiNewComment() {
 		compileExpectFailure("/hi-newcomment.tri");
 	}
-	
 
 	@Test
 	public void testHiNewComment2() {
 		compileExpectFailure("/hi-newcomment2.tri");
 	}
-	
+
+	@Test
+	public void testSquareDemo() {
+		compileExpectSuccess("/square.tri");
+	}
 
 	@Test
 	public void testBarDemo() {
