@@ -201,15 +201,20 @@ public final class SemanticAnalyzer {
                     visit(funcDeclaration.expression());
 
                     SourcePosition sourcePos = funcDeclaration.sourcePos();
-                    if (funcDeclaration.expression() instanceof Expression funcExpression) {
-                        // if final inferred type is different from declared return type, error
-                        if (!funcExpression.getType().equals(resolvedReturnType)) {
-                            throw new SemanticException.TypeError(sourcePos, resolvedReturnType, funcExpression.getType());
-                        }
-                    } else {
-                        // otherwise, the statement must be declared to return void type
-                        if (!resolvedReturnType.equals(VOID_TYPE)) {
-                            throw new SemanticException.TypeError(sourcePos, resolvedReturnType, VOID_TYPE);
+
+                    // TODO: cleanup
+                    // if the function has void type (proc), then it doesnt matter what its body evaluated to
+                    if (! funcDeclaration.declaredReturnType().equals(new Type.Void())) {
+                        if (funcDeclaration.expression() instanceof Expression funcExpression) {
+                            // if final inferred type is different from declared return type, error
+                            if (!funcExpression.getType().equals(resolvedReturnType)) {
+                                throw new SemanticException.TypeError(sourcePos, resolvedReturnType, funcExpression.getType());
+                            }
+                        } else {
+                            // otherwise, the body must evaluate to void type
+                            if (!resolvedReturnType.equals(VOID_TYPE)) {
+                                throw new SemanticException.TypeError(sourcePos, resolvedReturnType, VOID_TYPE);
+                            }
                         }
                     }
                 } catch (SemanticException.DuplicateRecordTypeField e) {
