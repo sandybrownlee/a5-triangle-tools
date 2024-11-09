@@ -43,11 +43,11 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
 
     final class FuncArgument implements Argument {
 
-        private final SourcePosition        sourcePos;
-        private final Expression.Identifier func;
-        private       RuntimeType      type;
+        private final SourcePosition                        sourcePos;
+        private final Expression.Identifier.BasicIdentifier func;
+        private       RuntimeType                           type;
 
-        public FuncArgument(SourcePosition sourcePos, Expression.Identifier func) {
+        public FuncArgument(SourcePosition sourcePos, Expression.Identifier.BasicIdentifier func) {
             this.sourcePos = sourcePos;
             this.func = func;
         }
@@ -56,7 +56,7 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return sourcePos;
         }
 
-        public Expression.Identifier func() {
+        public Expression.Identifier.BasicIdentifier func() {
             return func;
         }
 
