@@ -21,6 +21,7 @@ package triangle;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 import triangle.ast.Statement;
+import triangle.codeGenerator.CodeGen;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
@@ -61,6 +62,7 @@ public class Compiler {
     @Argument(description = "Whether or not to show the tree after folding")
     private static boolean showTreeAfterFolding;
 
+
     /**
      Triangle compiler main program.
 
@@ -77,7 +79,7 @@ public class Compiler {
 //                compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
 //                System.in.read();
 //            }
-            compileProgram(new FileInputStream("programs/test.tri"), objectName, showTree, false);
+            compileProgram(new FileInputStream("programs/test2.tri"), objectName, showTree, false);
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             System.exit(1);
@@ -131,6 +133,7 @@ public class Compiler {
         Statement theAST = parser.parseProgram(); // 1st pass
         System.out.println(new ASTPrinter().prettyPrint(theAST));
         new SemanticAnalyzer().check(theAST).forEach(e -> System.err.println(e.getMessage()));
+		new CodeGen().compile(theAST).forEach(System.out::println);
 
         if (reporter.getNumErrors() == 0) {
 
