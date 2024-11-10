@@ -17,7 +17,7 @@
  * of the authors.
  */
 
-package triangle.syntacticAnalyzer;
+package triangle.parsing;
 
 import triangle.ast.Argument;
 import triangle.ast.Declaration;

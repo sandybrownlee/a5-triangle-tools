@@ -1,4 +1,4 @@
-package triangle.syntacticAnalyzer;
+package triangle.parsing;
 
 final class TextToken extends Token {
 

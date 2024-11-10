@@ -17,7 +17,7 @@
  * of the authors.
  */
 
-package triangle.syntacticAnalyzer;
+package triangle.parsing;
 
 import java.io.IOException;
 import java.io.InputStream;

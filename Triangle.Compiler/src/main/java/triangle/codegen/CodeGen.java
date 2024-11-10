@@ -1,4 +1,4 @@
-package triangle.codeGenerator;
+package triangle.codegen;
 
 import triangle.abstractMachine.Machine;
 import triangle.abstractMachine.Primitive;

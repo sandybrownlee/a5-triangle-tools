@@ -17,7 +17,7 @@
  * of the authors.
  */
 
-package triangle.syntacticAnalyzer;
+package triangle.parsing;
 
 public class SyntaxError extends Exception {
 

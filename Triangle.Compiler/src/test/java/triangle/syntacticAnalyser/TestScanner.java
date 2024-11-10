@@ -2,9 +2,9 @@ package triangle.syntacticAnalyser;
 
 import junit.framework.AssertionFailedError;
 import org.junit.Test;
-import triangle.syntacticAnalyzer.Lexer;
-import triangle.syntacticAnalyzer.Parser;
-import triangle.syntacticAnalyzer.SyntaxError;
+import triangle.parsing.Lexer;
+import triangle.parsing.Parser;
+import triangle.parsing.SyntaxError;
 
 import java.io.IOException;
 

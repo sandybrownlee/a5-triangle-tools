@@ -1,4 +1,4 @@
-package triangle.syntacticAnalyzer;
+package triangle.parsing;
 
 class Token {
 

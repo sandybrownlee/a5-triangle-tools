@@ -22,13 +22,12 @@ package triangle;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 import triangle.ast.Statement;
-import triangle.codeGenerator.CodeGen;
-import triangle.contextualAnalyzer.SemanticAnalyzer;
-import triangle.syntacticAnalyzer.Lexer;
-import triangle.syntacticAnalyzer.Parser;
-import triangle.syntacticAnalyzer.SyntaxError;
+import triangle.codegen.CodeGen;
+import triangle.analysis.SemanticAnalyzer;
+import triangle.parsing.Lexer;
+import triangle.parsing.Parser;
+import triangle.parsing.SyntaxError;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;

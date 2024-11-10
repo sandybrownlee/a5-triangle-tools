@@ -1,4 +1,4 @@
-package triangle.contextualAnalyzer;
+package triangle.analysis;
 
 import triangle.abstractMachine.Machine;
 import triangle.ast.Argument;
