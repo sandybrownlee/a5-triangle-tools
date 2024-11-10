@@ -1,9 +1,11 @@
 package triangle.contextualAnalyzer;
 
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -47,6 +49,18 @@ public final class SymbolTable<T,S> {
         }
 
         throw new NoSuchElementException();
+    }
+
+    public List<T> lookupAll(String name) {
+        List<T> list = new ArrayList<>();
+
+        for (Map<String, T> scope : scopes) {
+            if (scope.containsKey(name)) {
+                list.add(scope.get(name));
+            }
+        }
+
+        return list;
     }
 
     public DepthLookup lookupWithDepth(String name) throws NoSuchElementException {
