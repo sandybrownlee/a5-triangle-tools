@@ -6,26 +6,23 @@ import triangle.ast.Argument;
 import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Parameter;
+import triangle.ast.Parameter.VarParameter;
 import triangle.ast.Statement;
-import triangle.ast.Type;
 import triangle.contextualAnalyzer.SymbolTable;
 import triangle.types.RuntimeType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+// TODO: verify if var arguments/parameters are handled correctly; does passing a const as a var break things?
+// TODO: verify func/proc arguments/parameters are handled correctly;
+// TODO: verify static links work as expected
 public class CodeGen {
-
-    // two types of symbolic references:
-    //      code address - for func params, func decls, if-statement branches, while-statement branches
-    //      data address - reference into stack
-
     private final SymbolTable<Instruction.LABEL, Void> funcAddresses = new SymbolTable<>(null);
-    // localAddresses needs to store (depth,offset) and keep track of current offset since scopes of localAddresses do not
-    //      correspond exactly with order of our function calls
-    private final SymbolTable<Integer, Integer>        localVars     = new SymbolTable<>(0);
-    private final Supplier<Instruction.LABEL>          labelSupplier = new Supplier<>() {
+    private final SymbolTable<VarState, Integer> localVars     = new SymbolTable<>(0);
+    private final Supplier<Instruction.LABEL>    labelSupplier = new Supplier<>() {
         private int i = 0;
 
         @Override public Instruction.LABEL get() {
@@ -60,12 +57,19 @@ public class CodeGen {
             case Statement.ExpressionStatement expressionStatement -> {
                 block.addAll(generate(expressionStatement.expression()));
                 // discard results of ExpressionStatements, since they are intended to be used only for side-effects
-                block.add(new Instruction.POP(0, expressionStatement.expression().getType().size()));
+                int resultSize = expressionStatement.expression().getType().size();
+                if (resultSize > 0) {
+                    block.add(new Instruction.POP(0, resultSize));
+                }
                 return block;
             }
             case Statement.AssignStatement assignStatement -> {
+                VarState lookup = localVars.lookup(assignStatement.identifier().root().name());
+                // evaluate expression
                 block.addAll(generate(assignStatement.expression()));
+                // evaluate address of identifier and put on stack
                 block.addAll(evaluateAddress(assignStatement.identifier()));
+                // STOREI
                 block.add(new Instruction.STOREI(assignStatement.expression().getType().size()));
                 return block;
             }
@@ -124,21 +128,43 @@ public class CodeGen {
                     switch (argument) {
                         // put a closure - static link + code address - onto the stack
                         case Argument.FuncArgument funcArgument -> {
-                            SymbolTable<Instruction.LABEL, Void>.DepthLookup lookup = funcAddresses.lookupWithDepth(funcArgument.func().name());
-                            // TODO: is this right?
+                            SymbolTable<Instruction.LABEL, Void>.DepthLookup lookup =
+                                    funcAddresses.lookupWithDepth(funcArgument.func().name());
                             block.add(new Instruction.LOADA(new Address(getDisplayRegister(lookup.depth()), 0)));
                             block.add(new Instruction.LOADA_LABEL(lookup.t()));
                         }
                         // load address of var argument
                         case Argument.VarArgument varArgument -> block.addAll(evaluateAddress(varArgument.var()));
                         // just evaluate expr and leave it on stack
-                        case Expression expressionArg -> generate(expressionArg);
+                        case Expression expressionArg -> block.addAll(generate(expressionArg));
                     }
                 }
 
-                SymbolTable<Instruction.LABEL, Void>.DepthLookup lookup = funcAddresses.lookupWithDepth(funCall.func().name());
-                // TODO: verify static links work as expected
-                block.add(new Instruction.CALL(getDisplayRegister(lookup.depth()), lookup.t()));
+                try {
+                    SymbolTable<VarState, Integer>.DepthLookup lookup =  localVars.lookupWithDepth(funCall.func().name());
+                    if (lookup.t().isFunc()) {
+                        // the frame and offset that the local local func is found in
+                        Register thisFrame = getDisplayRegister(lookup.depth());
+                        int closureStackOffset = lookup.t().stackOffset();
+
+                        // TODO: make sure static-link and code address are loaded in the correct order
+                        // static link is a 1-word value ...
+                        block.add(new Instruction.LOAD(1, new Address(thisFrame, closureStackOffset)));
+                        // ... immediately followed by the code address
+                        block.add(new Instruction.LOAD(1, new Address(thisFrame, closureStackOffset + 1)));
+                        // then just call the closure
+                        block.add(new Instruction.CALLI());
+                        return block;
+                    }
+                    // false alarm; this means we just have a local parameter with the same name as the function we want to
+                    // call
+                } catch (NoSuchElementException _) {
+                }
+                // if we are here, this means that the function must be found statically in our lexical scope
+                SymbolTable<Instruction.LABEL, Void>.DepthLookup funcLabel = funcAddresses.lookupWithDepth(funCall.func().name());
+                // then just make a standard call; we can figure out the static link just by the nesting depth of the
+                //  funcAddress lookup
+                block.add(new Instruction.CALL(getDisplayRegister(funcLabel.depth()), funcLabel.t()));
                 return block;
             }
             case Expression.Identifier identifier -> {
@@ -163,7 +189,13 @@ public class CodeGen {
 
                 return block;
             }
-            case Expression.LitArray litArray -> throw new RuntimeException();
+            case Expression.LitArray litArray -> {
+                // just generate all the values and leave them on the stack contigously
+                for (Expression e : litArray.elements()) {
+                    block.addAll(generate(e));
+                }
+                return block;
+            }
             case Expression.LitBool litBool -> throw new RuntimeException();
             case Expression.LitChar litChar -> throw new RuntimeException();
             case Expression.LitInt litInt -> {
@@ -182,7 +214,7 @@ public class CodeGen {
             switch (declaration) {
                 case Declaration.ConstDeclaration constDeclaration -> {
                     block.addAll(generate(constDeclaration.value()));
-                    localVars.add(constDeclaration.name(), stackOffset);
+                    localVars.add(constDeclaration.name(), new VarState(stackOffset));
                     stackOffset += constDeclaration.value().getType().size();
                 }
                 case Declaration.FuncDeclaration funcDeclaration -> {
@@ -206,13 +238,7 @@ public class CodeGen {
                     funcAddresses.enterNewScope(null);
 
                     // add each param, offset by the appropriate amount, to local addresses
-                    int paramOffset = 0;
-                    for (Parameter parameter : funcDeclaration.parameters()) {
-                        // add param to localAddress
-                        // TODO: need to actually handle the different parameter types
-                        localVars.add(parameter.getName(), paramOffset);
-                        paramOffset += parameter.getType().size();
-                    }
+                    int paramOffset = allocateParameters(funcDeclaration.parameters());
 
                     // the function currently being declared must be visible in its own definition, to allow recursion
                     funcAddresses.add(funcDeclaration.name(), funcLabel);
@@ -232,7 +258,7 @@ public class CodeGen {
                 case Declaration.TypeDeclaration _ -> { }
                 case Declaration.VarDeclaration varDeclaration -> {
                     block.add(new Instruction.PUSH(varDeclaration.runtimeType().size()));
-                    localVars.add(varDeclaration.name(), stackOffset);
+                    localVars.add(varDeclaration.name(), new VarState(stackOffset));
                     stackOffset += varDeclaration.runtimeType().size();
                 }
                 case Declaration.ProcDeclaration procDeclaration -> {
@@ -250,21 +276,22 @@ public class CodeGen {
 
                     // create a new local address scope where the parameters are going to be visible
                     localVars.enterNewScope(0);
+                    funcAddresses.enterNewScope(null);
 
                     // add each param, offset by the appropriate amount, to local addresses
-                    int paramOffset = 0;
-                    for (Parameter parameter : procDeclaration.parameters()) {
-                        // add param to localAddress
-                        localVars.add(parameter.getName(), paramOffset);
-                        paramOffset += parameter.getType().size();
-                    }
+                    int paramOffset = allocateParameters(procDeclaration.parameters());
 
                     // add the function currently being declared to funcAddresses
                     funcAddresses.add(procDeclaration.name(), funcLabel);
 
                     // generate code for the body of the function in the new scope
                     block.addAll(generate(procDeclaration.statement()));
+
+                    // a proc has no return value
+                    block.add(new Instruction.RETURN(0, paramOffset));
+
                     localVars.exitScope();
+                    funcAddresses.exitScope();
 
                     block.add(skipLabel);
                 }
@@ -274,7 +301,27 @@ public class CodeGen {
         return stackOffset;
     }
 
-    // a list of instructions that, when evaluated, leaves the local address of the identifier, as the top  element in the stack;
+    // associates each parameter with its location relative to current frame, returns total words allocated for parameter
+    private int allocateParameters(List<Parameter> parameters) {
+        int paramOffset = -1;
+        for (Parameter parameter : parameters.reversed()) {
+            switch (parameter) {
+                // static link and code address to be on stack
+                case Parameter.FuncParameter funcParameter ->
+                        localVars.add(funcParameter.getName(), new VarState(paramOffset, false, true));
+                case Parameter.ValueParameter valueParameter ->
+                        localVars.add(valueParameter.getName(), new VarState(paramOffset, false, false));
+                case VarParameter varParameter ->
+                        localVars.add(varParameter.getName(), new VarState(paramOffset, true, false));
+            }
+            paramOffset -= parameter.getType().size();
+        }
+
+        // the total size allocated for parameters is the abs value of paramOffset, minus one because paramOffset starts at -1
+        return (paramOffset * -1) - 1;
+    }
+
+    // a list of instructions that, when evaluated, leaves the address of the identifier, as the top  element in the stack
     // leaves the stack otherwise unchanged
     private List<Instruction> evaluateAddress(Expression.Identifier identifier) {
         List<Instruction> block = new ArrayList<>();
@@ -294,14 +341,19 @@ public class CodeGen {
                 return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
-                SymbolTable<Integer, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                block.add(new Instruction.LOADA(new Address(getDisplayRegister(lookup.depth()), lookup.t())));
+                SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
+                block.add(new Instruction.LOADA(new Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset)));
+                if (lookup.t().isReference()) {
+                    // if its a reference then we want to dereference it
+                    block.add(new Instruction.LOADI(basicIdentifier.getType().size()));
+                }
                 return block;
             }
             case Expression.Identifier.RecordAccess recordAccess -> {
                 // calculate the offset of the accessed field from the base address of the record
                 int offset = 0;
-                for (RuntimeType.RecordType.FieldType fieldType : ((RuntimeType.RecordType) recordAccess.record().getType()).fieldTypes()) {
+                for (RuntimeType.RecordType.FieldType fieldType : ((RuntimeType.RecordType) recordAccess.record()
+                                                                                                        .getType()).fieldTypes()) {
                     if (fieldType.fieldName().equals(recordAccess.field().root().name())) {
                         break;
                     }
@@ -315,6 +367,15 @@ public class CodeGen {
                 block.add(new Instruction.CALL_PRIM(Primitive.ADD));
                 return block;
             }
+        }
+    }
+
+    // localAddresses needs to store (depth,offset) and keep track of current offset since scopes of localAddresses do not
+    //      correspond with order of our function calls
+    record VarState(int stackOffset, boolean isReference, boolean isFunc) {
+        // for the common case of adding a plain variable
+        VarState(int stackOffset) {
+            this(stackOffset, false, false);
         }
     }
 

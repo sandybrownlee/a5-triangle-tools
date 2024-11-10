@@ -4,9 +4,10 @@ import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 
 public sealed interface Instruction
-        permits Instruction.CALL, Instruction.CALL_PRIM, Instruction.HALT, Instruction.JUMP, Instruction.JUMPIF,
-                Instruction.LABEL, Instruction.LOAD, Instruction.LOADA, Instruction.LOADA_LABEL, Instruction.LOADI,
-                Instruction.LOADL, Instruction.POP, Instruction.PUSH, Instruction.RETURN, Instruction.STORE, Instruction.STOREI {
+        permits Instruction.CALL, Instruction.CALLI, Instruction.CALL_PRIM, Instruction.HALT, Instruction.JUMP,
+                Instruction.JUMPIF, Instruction.LABEL, Instruction.LOAD, Instruction.LOADA, Instruction.LOADA_LABEL,
+                Instruction.LOADI, Instruction.LOADL, Instruction.POP, Instruction.PUSH, Instruction.RETURN, Instruction.STORE,
+                Instruction.STOREI {
 
     record PUSH(int words) implements Instruction {
 
@@ -42,7 +43,13 @@ public sealed interface Instruction
 
     }
 
-    record LOADA_LABEL(LABEL address) implements Instruction { }
+    record LOADA_LABEL(LABEL address) implements Instruction {
+
+        @Override public String toString() {
+            return "\tLOADA @" + address.labelNo;
+        }
+
+    }
 
     record LOADL(int value) implements Instruction {
 
@@ -71,7 +78,7 @@ public sealed interface Instruction
     record CALL(Register staticLink, LABEL address) implements Instruction {
 
         @Override public String toString() {
-            return "\tCALL (" + staticLink + ") " + address.labelNo;
+            return "\tCALL (" + staticLink + ") @" + address.labelNo;
         }
 
     }
@@ -95,7 +102,7 @@ public sealed interface Instruction
     record JUMP(LABEL label) implements Instruction {
 
         @Override public String toString() {
-            return "\tJUMP " + label.labelNo;
+            return "\tJUMP @" + label.labelNo;
         }
 
     }
@@ -114,6 +121,14 @@ public sealed interface Instruction
 
         @Override public String toString() {
             return labelNo + ":";
+        }
+
+    }
+
+    record CALLI() implements Instruction {
+
+        @Override public String toString() {
+            return "\tCALLI";
         }
 
     }
