@@ -12,7 +12,7 @@ sealed public interface Expression extends Argument, Typeable
     sealed interface Identifier extends Expression, Typeable
             permits Identifier.BasicIdentifier, Identifier.RecordAccess, Identifier.ArraySubscript {
 
-        // this finds the "root" of a (possibly complex) identifer
+        // this finds the "root" of a (possibly complex) identifier
         // e.g., arr[i] -> root = arr
         //       recx.recy.recz -> root = recx
         // this is needed, for example, to check if a record is a constant or not
@@ -150,27 +150,7 @@ sealed public interface Expression extends Argument, Typeable
 
     }
 
-    final class LitBool implements Expression {
-
-        private final SourcePosition sourcePos;
-        private final boolean        value;
-
-        public LitBool(SourcePosition sourcePos, boolean value) {
-            this.sourcePos = sourcePos;
-            this.value = value;
-        }
-
-        @Override public SourcePosition sourcePos() {
-            return sourcePos;
-        }
-
-        public boolean value() {
-            return value;
-        }
-
-        @Override public String toString() {
-            return "LitBool[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
-        }
+    record LitBool(SourcePosition sourcePos, boolean value) implements Expression {
 
         @Override public RuntimeType getType() {
             return RuntimeType.BOOL_TYPE;
@@ -182,27 +162,7 @@ sealed public interface Expression extends Argument, Typeable
 
     }
 
-    final class LitInt implements Expression {
-
-        private final SourcePosition sourcePos;
-        private final int            value;
-
-        public LitInt(SourcePosition sourcePos, int value) {
-            this.sourcePos = sourcePos;
-            this.value = value;
-        }
-
-        @Override public SourcePosition sourcePos() {
-            return sourcePos;
-        }
-
-        public int value() {
-            return value;
-        }
-
-        @Override public String toString() {
-            return "LitInt[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
-        }
+    record LitInt(SourcePosition sourcePos, int value) implements Expression {
 
         @Override public RuntimeType getType() {
             return RuntimeType.INT_TYPE;
@@ -214,27 +174,7 @@ sealed public interface Expression extends Argument, Typeable
 
     }
 
-    final class LitChar implements Expression {
-
-        private final SourcePosition sourcePos;
-        private final char           value;
-
-        public LitChar(SourcePosition sourcePos, char value) {
-            this.sourcePos = sourcePos;
-            this.value = value;
-        }
-
-        @Override public SourcePosition sourcePos() {
-            return sourcePos;
-        }
-
-        public char value() {
-            return value;
-        }
-
-        @Override public String toString() {
-            return "LitChar[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
-        }
+    record LitChar(SourcePosition sourcePos, char value) implements Expression {
 
         @Override public RuntimeType getType() {
             return RuntimeType.CHAR_TYPE;
