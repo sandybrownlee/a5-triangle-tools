@@ -1,6 +1,7 @@
 /*
  * @(#)Compiler.java
  *
+ * Revisions and updates (c) 2024 Zaraksh Rahman. zar00024@students.stir.ac.uk
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  *
  * Original release:
@@ -26,105 +27,64 @@ import triangle.contextualAnalyzer.SemanticAnalyzer;
 import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.SyntaxError;
-import triangle.util.ASTPrinter;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- The main driver class for the Triangle compiler.
-
- @author Deryck F. Brown
- @version 2.1 7 Oct 2003 */
 // TODO: replace ErrorReporter with robust logging
 // TODO: showStats cmdline option
 public class Compiler {
 
     /** The filename for the object program, normally obj.tam. */
-    @Argument(description = "The name of the file to store the object code into")
-    static String objectName = "obj.tam";
+    @Argument(description = "The name of the file to store the object code into") static String objectName = "obj.tam";
 
-    @Argument(description = "The name of the source file to compile", required = true)
-    private static String sourceName;
+    @Argument(description = "The name of the source file to compile", required = true) private static String sourceName;
 
-    @Argument(description = "Whether or not to show the tree")
-    private static boolean showTree;
+    @Argument(description = "Whether or not to show the tree") private static boolean showTree;
 
-    @Argument(description = "Whether or not to turn on constant folding")
-    private static boolean folding;
-
-    @Argument(description = "Whether or not to show the tree after folding")
-    private static boolean showTreeAfterFolding;
-
-
-    /**
-     Triangle compiler main program.
-
-     @param args the only command-line argument to the program specifies the
-     source filename.
-     */
     public static void main(String[] args) {
         Args.parseOrExit(Compiler.class, args);
 
-        boolean compiledOK = false;
         try {
 //            for (String path : new File("programs/").list()) {
 //                System.out.println("programs/" + path);
-//                compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
+//                compileProgram(new FileInputStream("programs/" + path));
 //                System.in.read();
 //            }
-            compileProgram(new FileInputStream("programs/test.tri"), objectName, showTree, false);
+            compileProgram(new FileInputStream("programs/test.tri"));
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
-            System.exit(1);
-        } catch (IOException e) {
-            System.err.println("IOException while compiling");
             e.printStackTrace();
             System.exit(1);
+        } catch (IOException e) {
+            System.err.println("IOException while compiling: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+
         } catch (SyntaxError e) {
             System.err.println("SyntaxError while compiling: " + e.getMessage());
+            e.printStackTrace();
             System.exit(1);
-        }
-
-        if (!showTree) {
-            System.exit(compiledOK ? 0 : 1);
         }
     }
 
-    /**
-     Compile the source program to TAM machine code.
-
-     @param inputStream   an {@link InputStream} from which to read the source code
-     @param objectName   the name of the file containing the object program.
-     @param showingAST   true iff the AST is to be displayed after contextual
-     analysis
-     @param showingTable true iff the object description details are to be
-     displayed during code generation (not currently
-     implemented).
-
-     @return true iff the source program is free of compile-time errors, otherwise
-     false.
-     */
-    static void compileProgram(InputStream inputStream, String objectName, boolean showingAST, boolean showingTable)
-            throws IOException, SyntaxError {
-
-        System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
-
-        System.out.println("Syntactic Analysis ...");
-
+    static void compileProgram(InputStream inputStream) throws IOException, SyntaxError {
         Lexer lexer = new Lexer(inputStream);
         Parser parser = new Parser(lexer);
 
-        // lexer.enableDebugging();
-//        lexer.dump();
+        Statement ast = parser.parseProgram();
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(ast);
+        semanticAnalyzer.check();
+        semanticAnalyzer.getErrors().forEach(System.err::println);
+        if (!semanticAnalyzer.getErrors().isEmpty()) {
+            return;
+        }
 
-        // The AST representing the source program.
-        Statement theAST = parser.parseProgram(); // 1st pass
-        System.out.println(new ASTPrinter().prettyPrint(theAST));
-        new SemanticAnalyzer().check(theAST).forEach(e -> System.err.println(e.getMessage()));
-		new CodeGen().compile(theAST);
+        CodeGen codeGen = new CodeGen();
+        codeGen.compile(ast);
     }
 
 }
