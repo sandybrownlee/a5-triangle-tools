@@ -419,8 +419,22 @@ public final class SemanticAnalyzer {
                 }
 
                 // for each argument
+                Declaration.FuncDeclaration decl = (Declaration.FuncDeclaration) lookup(funCall.func()).declaration();
+
                 for (int i = 0; i < argTypes.size(); i++) {
                     Argument arg = arguments.get(i);
+                    Parameter param = decl.parameters().get(i);
+
+                    // if the corresponding parameter was declared var, the argument must be too
+                    if (param instanceof Parameter.VarParameter && !(arg instanceof Argument.VarArgument)) {
+                        throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.VarParameter.class);
+                    }
+
+                    // if the corresponding parameter was declared func, the argument must be too
+                    if (param instanceof Parameter.FuncParameter && !(arg instanceof Argument.FuncArgument)) {
+                        throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.FuncParameter.class);
+                    }
+
                     // we dont have to resolveType() the types in function arg list since it should have been done at
                     // declaration time
                     RuntimeType expectedType = argTypes.get(i);

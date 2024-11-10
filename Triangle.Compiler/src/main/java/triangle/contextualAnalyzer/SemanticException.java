@@ -1,5 +1,7 @@
 package triangle.contextualAnalyzer;
 
+import triangle.ast.Argument;
+import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Expression.Identifier;
 import triangle.ast.Expression.LitRecord.RecordField;
@@ -99,6 +101,14 @@ public abstract class SemanticException extends Exception {
 
         FunctionResult(final SourcePosition sourcePos, final Identifier identifier) {
             super(sourcePos, "Attempted to use a function/procedure as an expression result: " + identifier);
+        }
+
+    }
+
+    static final class InvalidArgument extends SemanticException {
+
+        InvalidArgument(final SourcePosition sourcePos, final Argument argument, Class<? extends Parameter> expectedClass) {
+            super(sourcePos, "Expected argument " + argument + " to be of type " + expectedClass);
         }
 
     }
