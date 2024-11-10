@@ -4,15 +4,15 @@ import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 
 public sealed interface Instruction
-        permits Instruction.CALL, Instruction.CALLI, Instruction.CALL_PRIM, Instruction.HALT, Instruction.JUMP,
-                Instruction.JUMPIF, Instruction.LABEL, Instruction.LOAD, Instruction.LOADA, Instruction.LOADA_LABEL,
-                Instruction.LOADI, Instruction.LOADL, Instruction.POP, Instruction.PUSH, Instruction.RETURN, Instruction.STORE,
-                Instruction.STOREI {
+        permits Instruction.CALL, Instruction.CALLI, Instruction.CALL_LABEL, Instruction.CALL_PRIM, Instruction.HALT,
+                Instruction.JUMP, Instruction.JUMPIF, Instruction.JUMPIF_LABEL, Instruction.JUMP_LABEL, Instruction.LABEL,
+                Instruction.LOAD, Instruction.LOADA, Instruction.LOADA_LABEL, Instruction.LOADI, Instruction.LOADL,
+                Instruction.POP, Instruction.PUSH, Instruction.RETURN, Instruction.STORE, Instruction.STOREI {
 
     record PUSH(int words) implements Instruction {
 
         @Override public String toString() {
-            return "\tPUSH " + words;
+            return "PUSH " + words;
         }
 
     }
@@ -22,7 +22,7 @@ public sealed interface Instruction
     record STOREI(int size) implements Instruction {
 
         @Override public String toString() {
-            return "\tSTOREI " + size;
+            return "STOREI " + size;
         }
 
     }
@@ -30,7 +30,7 @@ public sealed interface Instruction
     record LOAD(int words, Address address) implements Instruction {
 
         @Override public String toString() {
-            return "\tLOAD (" + words + ") " + address;
+            return "LOAD (" + words + ") " + address;
         }
 
     }
@@ -38,15 +38,7 @@ public sealed interface Instruction
     record LOADA(Address address) implements Instruction {
 
         @Override public String toString() {
-            return "\tLOADA " + address.d() + " [" + address.r() + "]";
-        }
-
-    }
-
-    record LOADA_LABEL(LABEL address) implements Instruction {
-
-        @Override public String toString() {
-            return "\tLOADA @" + address.labelNo;
+            return "LOADA " + address.d() + " [" + address.r() + "]";
         }
 
     }
@@ -54,7 +46,7 @@ public sealed interface Instruction
     record LOADL(int value) implements Instruction {
 
         @Override public String toString() {
-            return "\tLOADL " + value;
+            return "LOADL " + value;
         }
 
     }
@@ -62,23 +54,15 @@ public sealed interface Instruction
     record LOADI(int size) implements Instruction {
 
         @Override public String toString() {
-            return "\tLOADI " + size;
+            return "LOADI " + size;
         }
 
     }
 
-    record CALL_PRIM(Primitive primitive) implements Instruction {
+    record CALL(Register staticLink, Address address) implements Instruction {
 
         @Override public String toString() {
-            return "\tCALL_PRIM " + primitive;
-        }
-
-    }
-
-    record CALL(Register staticLink, LABEL address) implements Instruction {
-
-        @Override public String toString() {
-            return "\tCALL (" + staticLink + ") @" + address.labelNo;
+            return "CALL (" + staticLink + ")" + address;
         }
 
     }
@@ -86,7 +70,7 @@ public sealed interface Instruction
     record RETURN(int resultSize, int argsSize) implements Instruction {
 
         @Override public String toString() {
-            return "\tRETURN (" + resultSize + ") " + argsSize;
+            return "RETURN (" + resultSize + ") " + argsSize;
         }
 
     }
@@ -94,28 +78,48 @@ public sealed interface Instruction
     record POP(int resultWords, int popCount) implements Instruction {
 
         @Override public String toString() {
-            return "\tPOP (" + resultWords + ") " + popCount;
+            return "POP (" + resultWords + ") " + popCount;
         }
 
     }
 
-    record JUMP(LABEL label) implements Instruction {
+    record JUMP(Address address) implements Instruction {
 
         @Override public String toString() {
-            return "\tJUMP @" + label.labelNo;
+            return "JUMP " + address;
         }
 
     }
 
-    record JUMPIF(int value, LABEL label) implements Instruction { }
+    record JUMPIF(int value, Address address) implements Instruction { }
+
+    record CALLI() implements Instruction {
+
+        @Override public String toString() {
+            return "CALLI";
+        }
+
+    }
 
     record HALT() implements Instruction {
 
         @Override public String toString() {
-            return "\tHALT";
+            return "HALT";
         }
 
     }
+
+    // pseudo-instruction, to be converted to primitive calls later
+    // TODO: CALL_PRIM can probably be removed
+    record CALL_PRIM(Primitive primitive) implements Instruction {
+
+        @Override public String toString() {
+            return "CALL_PRIM " + primitive;
+        }
+
+    }
+
+    // psuedo-instructions corresponding to symbolic addresses
 
     record LABEL(int labelNo) implements Instruction {
 
@@ -125,10 +129,28 @@ public sealed interface Instruction
 
     }
 
-    record CALLI() implements Instruction {
+    record LOADA_LABEL(LABEL label) implements Instruction {
 
         @Override public String toString() {
-            return "\tCALLI";
+            return "LOADA @" + label.labelNo;
+        }
+
+    }
+
+    record JUMP_LABEL(LABEL label) implements Instruction {
+
+        @Override public String toString() {
+            return "JUMP_LABEL @" + label.labelNo;
+        }
+
+    }
+
+    record JUMPIF_LABEL(int value, LABEL label) implements Instruction { }
+
+    record CALL_LABEL(Register staticLink, LABEL label) implements Instruction {
+
+        @Override public String toString() {
+            return "CALL_LABEL (" + staticLink + ") @" + label.labelNo;
         }
 
     }
