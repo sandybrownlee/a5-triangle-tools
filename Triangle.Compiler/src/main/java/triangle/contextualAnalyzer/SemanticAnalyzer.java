@@ -52,68 +52,69 @@ import static triangle.types.RuntimeType.*;
 public final class SemanticAnalyzer {
 
     //@formatter:off
-    private static final RuntimeType          binaryRelation    = new FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
-    private static final RuntimeType          binaryIntRelation = new FuncType(List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
-    private static final RuntimeType          binaryIntFunc     = new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
-    private static final Map<String, Binding> STD_TERMS         = new HashMap<>();
-    private static final Map<String, RuntimeType>    STD_TYPES =
+    private static final RuntimeType              binaryRelation    =
+            new FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
+    private static final RuntimeType              binaryIntRelation =
+            new FuncType(List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
+    private static final RuntimeType              binaryIntFunc     =
+            new FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
+    private static final Map<String, Binding>     STD_TERMS         =
+            new HashMap<>();
+    private static final Map<String, RuntimeType> STD_TYPES         =
             Map.of(
                     "Integer", INT_TYPE,
                     "Char", CHAR_TYPE,
-                    "Boolean",BOOL_TYPE);
+                    "Boolean",BOOL_TYPE
+            );
 
     // stdenv values have null as annotation
     static {
         // TODO: this is very hackish and ugly
         STD_TERMS.putAll(
                 Map.of(
-                    "\\/", new Binding(binaryRelation, true, null),
-                    "/\\", new Binding(binaryRelation, true, null),
-                    "<=", new Binding(binaryIntRelation, true, null),
-                    ">=", new Binding(binaryIntRelation, true, null),
-                    ">", new Binding(binaryIntRelation, true, null),
-                    "<", new Binding(binaryIntRelation, true, null),
-                    "\\", new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)));
+                        "\\/", new Binding(binaryRelation, true, null),
+                        "/\\", new Binding(binaryRelation, true, null),
+                        "<=",  new Binding(binaryIntRelation, true, null),
+                        ">=",  new Binding(binaryIntRelation, true, null),
+                        ">",   new Binding(binaryIntRelation, true, null),
+                        "<",   new Binding(binaryIntRelation, true, null),
+                        "\\",  new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)
+                ));
 
         STD_TERMS.putAll(
                 Map.of(
-                    "-", new Binding(binaryIntFunc, true, null),
-                    "+", new Binding(binaryIntFunc, true, null),
-                    "*", new Binding(binaryIntFunc, true, null),
-                    "/", new Binding(binaryIntFunc, true, null),
-                    "//", new Binding(binaryIntFunc, true, null),
-                    "|", new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null),
-                    "++", new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)));
+                        "-",  new Binding(binaryIntFunc, true, null),
+                        "+",  new Binding(binaryIntFunc, true, null),
+                        "*",  new Binding(binaryIntFunc, true, null),
+                        "/",  new Binding(binaryIntFunc, true, null),
+                        "//", new Binding(binaryIntFunc, true, null),
+                        "|",  new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null),
+                        "++", new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)
+        ));
 
         // these are set to void just as dummy values so that we fail fast in case something tries to access their types since
         //  these are supposed to be special-cased in analyze(Expression)
         STD_TERMS.putAll(
                 Map.of(
                         "=", new Binding(VOID_TYPE, true, null),
-                        "\\=", new Binding(VOID_TYPE, true, null)));
+                        "\\=", new Binding(VOID_TYPE, true, null)
+                ));
 
         STD_TERMS.putAll(
                 Map.of(
-                        "get", new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
-                        "getint", new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
-                        "geteol", new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
-                        "puteol", new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
-                        "put", new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
-                        "putint", new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
-                        "chr", new Binding(new FuncType(List.of(INT_TYPE), CHAR_TYPE), true, null),
-                        "eol", new Binding(new FuncType(List.of(), BOOL_TYPE), true, null),
-                        "ord", new Binding(new FuncType(List.of(CHAR_TYPE), INT_TYPE), true, null)));
+                        "get",      new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
+                        "getint",   new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
+                        "geteol",   new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
+                        "puteol",   new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
+                        "put",      new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
+                        "putint",   new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
+                        "chr",      new Binding(new FuncType(List.of(INT_TYPE), CHAR_TYPE), true, null),
+                        "eol",      new Binding(new FuncType(List.of(), BOOL_TYPE), true, null),
+                        "ord",      new Binding(new FuncType(List.of(CHAR_TYPE), INT_TYPE), true, null)
+                ));
     }
     //@formatter:on
 
-    // stores a binding for each term
-    private final SymbolTable<Binding, Void> terms = new SymbolTable<>(STD_TERMS, null);
-
-    // stores the "resolved" type of each type
-    private final SymbolTable<RuntimeType, Void> types = new SymbolTable<>(STD_TYPES, null);
-    private final List<SemanticException>        errors = new ArrayList<>();
-
-    // checks if an argument list
     private static void checkArgumentTypes(final List<Argument> arguments, final List<Parameter> declaredParams)
             throws SemanticException {
         for (int i = 0; i < arguments.size(); i++) {
@@ -136,11 +137,21 @@ public final class SemanticAnalyzer {
         }
     }
 
-    // the methods are named visit() to help readers familiar with the visitor-pattern understand this code
+    private final SymbolTable<Binding, Void>     terms  = new SymbolTable<>(STD_TERMS, null);
+    private final SymbolTable<RuntimeType, Void> types  = new SymbolTable<>(STD_TYPES, null);
+    private final List<SemanticException>        errors = new ArrayList<>();
+    private final Statement                      program;
 
-    public List<SemanticException> check(final Statement program) {
-        visit(program);
+    public SemanticAnalyzer(final Statement program) {
+        this.program = program;
+    }
+
+    public List<SemanticException> getErrors() {
         return errors;
+    }
+
+    public void check() {
+        visit(program);
     }
 
     private void visit(final Argument argument) throws SemanticException {
