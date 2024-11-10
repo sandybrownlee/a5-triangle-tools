@@ -306,7 +306,7 @@ public class Parser {
                 return new FunCall(start, basicIdentifier, arguments);
             }
 
-            throw new RuntimeException("HOF is currently unsupported, so function call must be a simple vaariable name");
+            throw new RuntimeException("HOF is currently unsupported, so function call must be a simple variable name");
         }
 
         return identifier;
@@ -475,10 +475,7 @@ public class Parser {
                 SourcePosition start = shift(Token.Kind.PROC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
-                shift(Token.Kind.LPAREN);
-                @SuppressWarnings("unchecked") List<Parameter> parameters = (lastToken.getKind() == Token.Kind.RPAREN) ?
-                        Collections.EMPTY_LIST : parseParamSeq();
-                shift(Token.Kind.RPAREN);
+                List<Parameter> parameters = parseParamSeq();
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
                 yield new Declaration.ProcDeclaration(start, funcName, parameters, statement);
@@ -487,10 +484,7 @@ public class Parser {
                 SourcePosition start = shift(Token.Kind.FUNC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
-                shift(Token.Kind.LPAREN);
-                @SuppressWarnings("unchecked") List<Parameter> parameters = (lastToken.getKind() == Token.Kind.RPAREN) ?
-                        Collections.EMPTY_LIST : parseParamSeq();
-                shift(Token.Kind.RPAREN);
+                List<Parameter> parameters = parseParamSeq();
                 shift(Token.Kind.COLON);
                 Type type = parseType();
                 shift(Token.Kind.IS);
@@ -510,16 +504,23 @@ public class Parser {
     }
 
     private List<Parameter> parseParamSeq() throws IOException, SyntaxError {
-        List<Parameter> parameters = new ArrayList<>();
-        parameters.add(parseParam());
+        shift(Token.Kind.LPAREN);
+        List<Parameter> parameters;
+        if (lastToken.getKind() == Token.Kind.RPAREN) {
+            //noinspection unchecked
+            parameters = Collections.EMPTY_LIST;
+        } else {
+            parameters = new ArrayList<>();
+            parameters.add(parseParam());
 
-        if (lastToken.getKind() == Token.Kind.COMMA) {
-            do {
-                shift(Token.Kind.COMMA);
-                parameters.add(parseParam());
-            } while (lastToken.getKind() == Token.Kind.COMMA);
+            if (lastToken.getKind() == Token.Kind.COMMA) {
+                do {
+                    shift(Token.Kind.COMMA);
+                    parameters.add(parseParam());
+                } while (lastToken.getKind() == Token.Kind.COMMA);
+            }
         }
-
+        shift(Token.Kind.RPAREN);
         return parameters;
     }
 
@@ -544,20 +545,14 @@ public class Parser {
                 shift(Token.Kind.PROC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
-                shift(Token.Kind.LPAREN);
-                @SuppressWarnings("unchecked") List<Parameter> parameters = (lastToken.getKind() == Token.Kind.RPAREN) ?
-                        Collections.EMPTY_LIST : parseParamSeq();
-                shift(Token.Kind.RPAREN);
+                List<Parameter> parameters = parseParamSeq();
                 yield new FuncParameter(funcName, parameters, new Type.Void());
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
-                shift(Token.Kind.LPAREN);
-                @SuppressWarnings("unchecked") List<Parameter> parameters = (lastToken.getKind() == Token.Kind.RPAREN) ?
-                        Collections.EMPTY_LIST : parseParamSeq();
-                shift(Token.Kind.RPAREN);
+                List<Parameter> parameters = parseParamSeq();
                 shift(Token.Kind.COLON);
                 Type funcType = parseType();
                 yield new FuncParameter(funcName, parameters, funcType);
