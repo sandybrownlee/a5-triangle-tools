@@ -420,6 +420,7 @@ public final class SemanticAnalyzer {
                 }
 
                 if (!leftOperand.getType().equals(argTypes.get(0))) {
+                    //noinspection SequencedCollectionMethodCanBeUsed
                     throw new SemanticException.TypeError(binop.sourcePos(), argTypes.get(0), leftOperand.getType());
                 }
 
