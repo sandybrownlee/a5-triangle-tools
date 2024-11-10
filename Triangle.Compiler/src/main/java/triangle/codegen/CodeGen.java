@@ -9,7 +9,7 @@ import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Parameter.VarParameter;
 import triangle.ast.Statement;
-import triangle.types.RuntimeType;
+import triangle.ast.RuntimeType;
 import triangle.util.SymbolTable;
 
 import java.io.DataOutputStream;

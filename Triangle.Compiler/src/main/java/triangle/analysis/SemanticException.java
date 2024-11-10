@@ -7,7 +7,7 @@ import triangle.ast.Expression.LitRecord.RecordField;
 import triangle.ast.Parameter;
 import triangle.ast.SourcePosition;
 import triangle.ast.Type;
-import triangle.types.RuntimeType;
+import triangle.ast.RuntimeType;
 
 public abstract class SemanticException extends Exception {
 

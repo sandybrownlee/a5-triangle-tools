@@ -1,7 +1,5 @@
 package triangle.ast;
 
-import triangle.types.RuntimeType;
-
 import java.util.List;
 
 sealed public interface Declaration

@@ -1,4 +1,4 @@
-package triangle.types;
+package triangle.ast;
 
 import java.util.List;
 

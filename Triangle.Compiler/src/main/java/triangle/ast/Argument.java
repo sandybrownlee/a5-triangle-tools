@@ -1,7 +1,5 @@
 package triangle.ast;
 
-import triangle.types.RuntimeType;
-
 sealed public interface Argument extends Typeable permits Argument.FuncArgument, Argument.VarArgument, Expression {
 
     SourcePosition sourcePos();

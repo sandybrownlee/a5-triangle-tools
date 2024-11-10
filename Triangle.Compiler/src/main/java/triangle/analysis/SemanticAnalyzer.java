@@ -22,8 +22,8 @@ import triangle.ast.Parameter;
 import triangle.ast.SourcePosition;
 import triangle.ast.Statement;
 import triangle.ast.Type;
-import triangle.types.RuntimeType;
-import triangle.types.RuntimeType.PrimType.FuncType;
+import triangle.ast.RuntimeType;
+import triangle.ast.RuntimeType.PrimType.FuncType;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static triangle.ast.Type.BasicType;
-import static triangle.types.RuntimeType.*;
+import static triangle.ast.RuntimeType.*;
 
 // semantic analysis does several things:
 //      it checks that all uses of an identifier are in a scope with a corresponding declaration
