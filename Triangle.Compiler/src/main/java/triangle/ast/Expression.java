@@ -23,22 +23,15 @@ sealed public interface Expression extends Argument, Typeable
             private final SourcePosition sourcePos;
             private final String         name;
             private       RuntimeType    type;
-            private       Declaration    declaration;
 
-            private BasicIdentifier(SourcePosition sourcePos, String name, RuntimeType type, Declaration declaration) {
+            private BasicIdentifier(SourcePosition sourcePos, String name, RuntimeType type) {
                 this.sourcePos = sourcePos;
                 this.name = name;
                 this.type = type;
-                this.declaration = declaration;
             }
 
             public BasicIdentifier(SourcePosition sourcePos, String name) {
-                this(sourcePos, name, null, null);
-            }
-
-            // needed when setting up stdenv
-            public BasicIdentifier(String name, RuntimeType type) {
-                this(null, name, type, null);
+                this(sourcePos, name, null);
             }
 
             @Override public BasicIdentifier root() {
@@ -55,14 +48,6 @@ sealed public interface Expression extends Argument, Typeable
 
             @Override public String toString() {
                 return "BasicIdentifier[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ']';
-            }
-
-            public void setDeclaration(Declaration declaration) {
-                this.declaration = declaration;
-            }
-
-            public Declaration declaration() {
-                return declaration;
             }
 
             @Override public void setType(RuntimeType type) {

@@ -315,7 +315,6 @@ public final class SemanticAnalyzer {
             case BasicIdentifier basicIdentifier -> {
                 Binding binding = lookup(basicIdentifier);
                 basicIdentifier.setType(binding.type());
-                basicIdentifier.setDeclaration(binding.declaration());
             }
             case Identifier.RecordAccess recordAccess -> {
                 Identifier record = recordAccess.record();
