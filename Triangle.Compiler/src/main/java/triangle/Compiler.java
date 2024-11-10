@@ -22,16 +22,12 @@ import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 import triangle.ast.Statement;
 import triangle.codeGenerator.CodeGen;
-import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Encoder;
-import triangle.contextualAnalyzer.Checker;
 import triangle.contextualAnalyzer.SemanticAnalyzer;
 import triangle.syntacticAnalyzer.Lexer;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.SyntaxError;
-import triangle.treeDrawer.Drawer;
+import triangle.util.ASTPrinter;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -111,7 +107,7 @@ public class Compiler {
      @return true iff the source program is free of compile-time errors, otherwise
      false.
      */
-    static boolean compileProgram(InputStream inputStream, String objectName, boolean showingAST, boolean showingTable)
+    static void compileProgram(InputStream inputStream, String objectName, boolean showingAST, boolean showingTable)
             throws IOException, SyntaxError {
 
         System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
@@ -119,12 +115,7 @@ public class Compiler {
         System.out.println("Syntactic Analysis ...");
 
         Lexer lexer = new Lexer(inputStream);
-        ErrorReporter reporter = new ErrorReporter(false);
-        Parser parser = new Parser(lexer, reporter);
-        Checker checker = new Checker(reporter);
-        Emitter emitter = new Emitter(reporter);
-        Encoder encoder = new Encoder(emitter, reporter);
-        Drawer drawer = new Drawer();
+        Parser parser = new Parser(lexer);
 
         // lexer.enableDebugging();
 //        lexer.dump();
@@ -134,37 +125,6 @@ public class Compiler {
         System.out.println(new ASTPrinter().prettyPrint(theAST));
         new SemanticAnalyzer().check(theAST).forEach(e -> System.err.println(e.getMessage()));
 		new CodeGen().compile(theAST);
-
-        if (reporter.getNumErrors() == 0) {
-
-            // TODO:
-            // if (showingAST) {
-            // drawer.draw(theAST);
-            // }
-
-            System.out.println("Contextual Analysis ...");
-//            checker.check(theAST); // 2nd pass
-//            if (showingAST) {
-//                drawer.draw(theAST);
-//            }
-//            if (folding) {
-//                theAST.visit(new ConstantFolder());
-//            }
-//
-//            if (reporter.getNumErrors() == 0) {
-//                System.out.println("Code Generation ...");
-//                encoder.encodeRun(theAST, showingTable); // 3rd pass
-//            }
-        }
-
-        boolean successful = (reporter.getNumErrors() == 0);
-        if (successful) {
-            emitter.saveObjectProgram(objectName);
-            System.out.println("Compilation was successful.");
-        } else {
-            System.out.println("Compilation was unsuccessful.");
-        }
-        return successful;
     }
 
 }

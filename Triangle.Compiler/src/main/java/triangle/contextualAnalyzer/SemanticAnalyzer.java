@@ -24,7 +24,8 @@ import triangle.types.RuntimeType.ArrayType;
 import triangle.types.RuntimeType.RecordType;
 
 import triangle.types.RuntimeType.PrimType.FuncType;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.ast.SourcePosition;
+import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.Collections;

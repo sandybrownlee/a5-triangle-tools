@@ -1,7 +1,6 @@
 package triangle.codeGenerator;
 
 import triangle.abstractMachine.Machine;
-import triangle.abstractMachine.OpCode;
 import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 import triangle.ast.Argument;
@@ -10,12 +9,11 @@ import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Parameter.VarParameter;
 import triangle.ast.Statement;
-import triangle.contextualAnalyzer.SymbolTable;
+import triangle.util.SymbolTable;
 import triangle.types.RuntimeType;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -164,7 +162,7 @@ public class CodeGen {
         }
 
         // so I don't have to type 'new Address ...' repeatedly
-        Function<Instruction.LABEL, Address> toCodeAddress = label -> new Address(Register.CB, labelLocations.get(label));
+        Function<Instruction.LABEL, Instruction.Address> toCodeAddress = label -> new Instruction.Address(Register.CB, labelLocations.get(label));
 
         // TODO: this also patches calls to CALL_PRIM, but that should probably be done in another method
         List<Instruction> patchedInstructions = new ArrayList<>();
@@ -182,7 +180,7 @@ public class CodeGen {
                 case Instruction.CALL_PRIM(Primitive primitive) ->
                     // use whatever as static link for primitive
                     // 0'th primitive in Primitive corresponds to address PB + 1
-                    patchedInstructions.add(new Instruction.CALL(Register.SB, new Address(Register.PB, primitive.ordinal())));
+                    patchedInstructions.add(new Instruction.CALL(Register.SB, new Instruction.Address(Register.PB, primitive.ordinal())));
                 default -> patchedInstructions.add(instruction);
             }
         }
@@ -393,7 +391,7 @@ public class CodeGen {
                         case Argument.FuncArgument funcArgument -> {
                             SymbolTable<Instruction.LABEL, Void>.DepthLookup lookup =
                                     funcAddresses.lookupWithDepth(funcArgument.func().name());
-                            block.add(new Instruction.LOADA(new Address(getDisplayRegister(lookup.depth()), 0)));
+                            block.add(new Instruction.LOADA(new Instruction.Address(getDisplayRegister(lookup.depth()), 0)));
                             block.add(new Instruction.LOADA_LABEL(lookup.t()));
                         }
                         // load address of var argument
@@ -416,9 +414,9 @@ public class CodeGen {
                         //  CALLI
 
                         // static link is a 1-word value ...
-                        block.add(new Instruction.LOAD(1, new Address(staticLink, closureStackOffset)));
+                        block.add(new Instruction.LOAD(1, new Instruction.Address(staticLink, closureStackOffset)));
                         // ... immediately followed by the code address
-                        block.add(new Instruction.LOAD(1, new Address(staticLink, closureStackOffset + 1)));
+                        block.add(new Instruction.LOAD(1, new Instruction.Address(staticLink, closureStackOffset + 1)));
                         // then just call the closure
                         block.add(new Instruction.CALLI());
                         return block;
@@ -623,7 +621,7 @@ public class CodeGen {
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                block.add(new Instruction.LOADA(new Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset)));
+                block.add(new Instruction.LOADA(new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset)));
                 if (lookup.t().isReference()) {
                     // if its a reference then we want to dereference it
                     block.add(new Instruction.LOADI(basicIdentifier.getType().size()));

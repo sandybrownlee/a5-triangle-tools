@@ -1,9 +1,6 @@
 package triangle.ast;
 
-import triangle.syntacticAnalyzer.SourcePosition;
-
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 sealed public interface Statement

@@ -25,6 +25,7 @@ import triangle.ast.Expression;
 import triangle.ast.Expression.*;
 import triangle.ast.Parameter;
 import triangle.ast.Parameter.*;
+import triangle.ast.SourcePosition;
 import triangle.ast.Statement;
 import triangle.ast.Statement.*;
 import triangle.ast.Type;
@@ -65,7 +66,7 @@ public class Parser {
     private final Lexer lexer;
     private       Token lastToken;
 
-    public Parser(Lexer lexer, Object ignored) {
+    public Parser(Lexer lexer) {
         this.lexer = lexer;
     }
 

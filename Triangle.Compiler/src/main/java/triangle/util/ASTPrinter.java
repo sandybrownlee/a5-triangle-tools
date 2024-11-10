@@ -1,4 +1,4 @@
-package triangle;
+package triangle.util;
 
 import triangle.ast.Argument;
 import triangle.ast.Declaration;

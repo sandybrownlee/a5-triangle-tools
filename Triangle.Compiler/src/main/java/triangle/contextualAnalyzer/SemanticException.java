@@ -1,14 +1,13 @@
 package triangle.contextualAnalyzer;
 
 import triangle.ast.Argument;
-import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Expression.Identifier;
 import triangle.ast.Expression.LitRecord.RecordField;
 import triangle.ast.Parameter;
 import triangle.ast.Type;
 import triangle.types.RuntimeType;
-import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.ast.SourcePosition;
 
 public abstract class SemanticException extends Exception {
 

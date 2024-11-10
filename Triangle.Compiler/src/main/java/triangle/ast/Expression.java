@@ -1,6 +1,5 @@
 package triangle.ast;
 
-import triangle.syntacticAnalyzer.SourcePosition;
 import triangle.types.RuntimeType;
 
 import java.util.List;
