@@ -419,21 +419,15 @@ public final class SemanticAnalyzer {
                 }
 
                 // for each argument
-                Declaration.FuncDeclaration decl = (Declaration.FuncDeclaration) lookup(funCall.func()).declaration();
+                Declaration declaration = lookup(funCall.func()).declaration();
+                if (declaration instanceof Declaration.ProcDeclaration procDeclaration) {
+                    checkArgumentTypes(arguments, procDeclaration.parameters());
+                } else if (declaration instanceof Declaration.FuncDeclaration funcDeclaration) {
+                    checkArgumentTypes(arguments, funcDeclaration.parameters());
+                }
 
                 for (int i = 0; i < argTypes.size(); i++) {
                     Argument arg = arguments.get(i);
-                    Parameter param = decl.parameters().get(i);
-
-                    // if the corresponding parameter was declared var, the argument must be too
-                    if (param instanceof Parameter.VarParameter && !(arg instanceof Argument.VarArgument)) {
-                        throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.VarParameter.class);
-                    }
-
-                    // if the corresponding parameter was declared func, the argument must be too
-                    if (param instanceof Parameter.FuncParameter && !(arg instanceof Argument.FuncArgument)) {
-                        throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.FuncParameter.class);
-                    }
 
                     // we dont have to resolveType() the types in function arg list since it should have been done at
                     // declaration time
@@ -565,6 +559,26 @@ public final class SemanticAnalyzer {
         }
     }
 
+    // checks if an argument list
+    private static void checkArgumentTypes(final List<Argument> arguments, final List<Parameter> declaredParams)
+            throws SemanticException {
+        assert arguments.size() == declaredParams.size();
+        for (int i = 0; i < arguments.size(); i++) {
+            Argument arg = arguments.get(i);
+            Parameter param = declaredParams.get(i);
+
+            // if the corresponding parameter was declared var, the argument must be too
+            if (param instanceof Parameter.VarParameter && !(arg instanceof Argument.VarArgument)) {
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.VarParameter.class);
+            }
+
+            // if the corresponding parameter was declared func, the argument must be too
+            if (param instanceof Parameter.FuncParameter && !(arg instanceof Argument.FuncArgument)) {
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.FuncParameter.class);
+            }
+        }
+    }
+
     private void visit(final Parameter parameter) throws SemanticException {
         switch (parameter) {
             case Parameter.FuncParameter funcParameter -> {
@@ -600,7 +614,10 @@ public final class SemanticAnalyzer {
                 Expression rvalue = assignStatement.expression();
 
                 try {
-                    if (lookup(lvalue.root()).constant()) {
+                    // TODO: does this even work rn?
+                    // bit of a hack-ish way of ensure the user doesnt circumvent const-protection by passing in, say a var to
+                    //  the const
+                    if (terms.lookupAll(lvalue.root().name()).stream().anyMatch(Binding::constant)) {
                         errors.add(new SemanticException.AssignmentToConstant(assignStatement.sourcePos(), lvalue));
                     }
 
