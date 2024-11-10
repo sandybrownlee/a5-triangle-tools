@@ -27,12 +27,13 @@ import java.util.Map;
 
 public final class Lexer {
 
-    // TODO: make configurable for '\r\n' or '\n'
     public static final char EOL = '\n';
     public static final char EOT = '\u0000';
 
-    private static final List<Character>         operators     = List.of('+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%',
-                                                                         '^', '?', '|');
+    //@formatter:off
+    private static final List<Character>         operators     = List.of(
+            '+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%', '^', '?', '|'
+    );
     private static final Map<String, Token.Kind> reservedWords = new HashMap<>();
 
     static {
@@ -59,6 +60,7 @@ public final class Lexer {
         reservedWords.put("var", Token.Kind.VAR);
         reservedWords.put("while", Token.Kind.WHILE);
     }
+    //@formatter:on
 
     private final InputStream  source;
     private final StringBuffer buffer;
@@ -81,7 +83,7 @@ public final class Lexer {
             read();
         }
 
-        Token toEmit = switch (lastChar()) {
+        return switch (lastChar()) {
 
             case Character c when Character.isWhitespace(c) -> {
                 do {
@@ -92,8 +94,8 @@ public final class Lexer {
                 yield nextToken();
             }
 
+            // TODO: should block comments be stackable?
             case '$' -> {
-                // TODO: should block comments be stackable?
                 do {
                     read();
                 } while (lastChar() != '$');
@@ -145,17 +147,17 @@ public final class Lexer {
             }
 
             case ':' -> {
-                int line = this.line;
-                int column = this.column;
+                int line1 = this.line;
+                int column1 = this.column;
 
                 read();
 
                 if (lastChar() == '=') {
                     reset();
-                    yield new Token(Token.Kind.BECOMES, line, column);
+                    yield new Token(Token.Kind.BECOMES, line1, column1);
                 }
 
-                Token token = new Token(Token.Kind.COLON, line, column);
+                Token token = new Token(Token.Kind.COLON, line1, column1);
                 resetExceptLast();
                 yield token;
             }
@@ -174,36 +176,36 @@ public final class Lexer {
             }
 
             case Character c when Character.isDigit(c) -> {
-                int line = this.line;
-                int column = this.column;
+                int line1 = this.line;
+                int column1 = this.column;
 
                 do {
                     read();
                 } while (Character.isDigit(lastChar()));
 
-                Token token = new TextToken(Token.Kind.INTLITERAL, line, column, buffer.substring(0, buffer.length() - 1));
+                Token token = new TextToken(Token.Kind.INTLITERAL, line1, column1, buffer.substring(0, buffer.length() - 1));
                 resetExceptLast();
                 yield token;
             }
 
             case '\'' -> {
-                int line = this.line;
-                int column = this.column;
+                int line1 = this.line;
+                int column1 = this.column;
 
                 read();
                 read();
                 if (!(lastChar() == '\'')) {
-                    yield new Token(Token.Kind.ERROR, line, column);
+                    yield new Token(Token.Kind.ERROR, line1, column1);
                 }
 
-                Token token = new TextToken(Token.Kind.CHARLITERAL, line, column, String.valueOf(buffer.charAt(1)));
+                Token token = new TextToken(Token.Kind.CHARLITERAL, line1, column1, String.valueOf(buffer.charAt(1)));
                 reset();
                 yield token;
             }
 
             case Character c when Character.isLetter(c) -> {
-                int line = this.line;
-                int column = this.column;
+                int line1 = this.line;
+                int column1 = this.column;
 
                 do {
                     read();
@@ -211,24 +213,24 @@ public final class Lexer {
 
                 // if the matched string is a reserved word, then create a token of the corresponding type
                 String matchedString = buffer.substring(0, buffer.length() - 1);
-                Token token = reservedWords.containsKey(matchedString) ?
-                        new Token(reservedWords.get(matchedString), line, column) :
+                Token token = reservedWords.containsKey(matchedString) ? new Token(
+                        reservedWords.get(matchedString), line1, column1) :
                         // else we have an identifier token
-                        new TextToken(Token.Kind.IDENTIFIER, line, column, matchedString);
+                        new TextToken(Token.Kind.IDENTIFIER, line1, column1, matchedString);
 
                 resetExceptLast();
                 yield token;
             }
 
             case Character c when operators.contains(c) -> {
-                int line = this.line;
-                int column = this.column;
+                int line1 = this.line;
+                int column1 = this.column;
 
                 do {
                     read();
                 } while (operators.contains(lastChar()));
 
-                Token token = new TextToken(Token.Kind.OPERATOR, line, column, buffer.substring(0, buffer.length() - 1));
+                Token token = new TextToken(Token.Kind.OPERATOR, line1, column1, buffer.substring(0, buffer.length() - 1));
                 resetExceptLast();
                 yield token;
             }
@@ -238,10 +240,6 @@ public final class Lexer {
                 yield new Token(Token.Kind.ERROR, line, column);
             }
         };
-
-//        System.out.println(toEmit.getKind() + " " + (toEmit instanceof TextToken tt ? tt.getText() : "#") + " " + toEmit
-//        .getLine() + "," + toEmit.getColumn());
-        return toEmit;
     }
 
     void read() throws IOException {
@@ -275,19 +273,6 @@ public final class Lexer {
         char lastRead = lastChar();
         reset();
         buffer.append(lastRead);
-    }
-
-    // TODO: Remove
-    public void dump() throws IOException {
-        Token tok = nextToken();
-
-        if (tok.getKind() == Token.Kind.EOT) {
-            return;
-        }
-
-        System.out.println(tok.getLine() + "," + tok.getColumn() + "\t\t"
-                           + tok.getKind() + " " + (tok instanceof TextToken tt ? tt.getText() : "#"));
-        dump();
     }
 
 }
