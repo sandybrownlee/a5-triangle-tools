@@ -577,6 +577,10 @@ public final class SemanticAnalyzer {
             if (param instanceof Parameter.FuncParameter && !(arg instanceof Argument.FuncArgument)) {
                 throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.FuncParameter.class);
             }
+
+            if (param instanceof Parameter.ValueParameter && !(arg instanceof Expression)) {
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.ValueParameter.class);
+            }
         }
     }
 
