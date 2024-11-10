@@ -116,7 +116,6 @@ public final class SemanticAnalyzer {
     // checks if an argument list
     private static void checkArgumentTypes(final List<Argument> arguments, final List<Parameter> declaredParams)
             throws SemanticException {
-        assert arguments.size() == declaredParams.size();
         for (int i = 0; i < arguments.size(); i++) {
             Argument arg = arguments.get(i);
             Parameter param = declaredParams.get(i);
