@@ -62,10 +62,13 @@ sealed public interface Expression extends Argument, Typeable
                 this.declaration = declaration;
             }
 
+            public Declaration declaration() {
+                return declaration;
+            }
+
             @Override public void setType(RuntimeType type) {
                 this.type = type;
             }
-
 
             @Override public RuntimeType getType() {
                 return type;

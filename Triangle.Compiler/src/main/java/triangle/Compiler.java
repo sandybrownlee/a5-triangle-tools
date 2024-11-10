@@ -79,7 +79,7 @@ public class Compiler {
 //                compileProgram(new FileInputStream("programs/" + path), objectName, showTree, false);
 //                System.in.read();
 //            }
-            compileProgram(new FileInputStream("programs/test2.tri"), objectName, showTree, false);
+            compileProgram(new FileInputStream("programs/test.tri"), objectName, showTree, false);
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             System.exit(1);
@@ -133,7 +133,7 @@ public class Compiler {
         Statement theAST = parser.parseProgram(); // 1st pass
         System.out.println(new ASTPrinter().prettyPrint(theAST));
         new SemanticAnalyzer().check(theAST).forEach(e -> System.err.println(e.getMessage()));
-		new CodeGen().compile(theAST).forEach(System.out::println);
+		new CodeGen().compile(theAST);
 
         if (reporter.getNumErrors() == 0) {
 
