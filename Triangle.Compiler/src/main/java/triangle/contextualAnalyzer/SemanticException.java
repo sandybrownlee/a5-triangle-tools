@@ -112,4 +112,11 @@ public abstract class SemanticException extends Exception {
 
     }
 
+    static final class IntegerLiteralTooLarge extends SemanticException {
+
+        IntegerLiteralTooLarge(final SourcePosition sourcePos, final int value) {
+            super(sourcePos, "Integer literal too large: " + value);
+        }
+
+    }
 }

@@ -1,5 +1,6 @@
 package triangle.contextualAnalyzer;
 
+import triangle.abstractMachine.Machine;
 import triangle.ast.Argument;
 import triangle.ast.Declaration;
 import triangle.ast.Declaration.ConstDeclaration;
@@ -110,14 +111,38 @@ public final class SemanticAnalyzer {
 
     // stores the "resolved" type of each type
     private final SymbolTable<RuntimeType, Void> types = new SymbolTable<>(STD_TYPES, null);
-    private final List<SemanticException>  errors = new ArrayList<>();
+    private final List<SemanticException>        errors = new ArrayList<>();
+
+    // checks if an argument list
+    private static void checkArgumentTypes(final List<Argument> arguments, final List<Parameter> declaredParams)
+            throws SemanticException {
+        assert arguments.size() == declaredParams.size();
+        for (int i = 0; i < arguments.size(); i++) {
+            Argument arg = arguments.get(i);
+            Parameter param = declaredParams.get(i);
+
+            // if the corresponding parameter was declared var, the argument must be too
+            if (param instanceof Parameter.VarParameter && !(arg instanceof Argument.VarArgument)) {
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Argument.VarArgument.class);
+            }
+
+            // if the corresponding parameter was declared func, the argument must be too
+            if (param instanceof Parameter.FuncParameter && !(arg instanceof Argument.FuncArgument)) {
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Argument.FuncArgument.class);
+            }
+
+            if (param instanceof Parameter.ValueParameter && !(arg instanceof Expression)) {
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Expression.class);
+            }
+        }
+    }
+
+    // the methods are named visit() to help readers familiar with the visitor-pattern understand this code
 
     public List<SemanticException> check(final Statement program) {
         visit(program);
         return errors;
     }
-
-    // the methods are named visit() to help readers familiar with the visitor-pattern understand this code
 
     private void visit(final Argument argument) throws SemanticException {
         switch (argument) {
@@ -506,7 +531,12 @@ public final class SemanticAnalyzer {
                 litArray.setType(new ArrayType(values.size(), expectedType));
             }
             case LitChar _ -> { }
-            case LitInt _ -> { }
+            case LitInt(SourcePosition sourcePos, int value) -> {
+                // the TAM specification defines `Integer` to be between -maxint...+maxint (not two's complement!)
+                if (value > Machine.maxintRep || value < (Machine.maxintRep * -1)) {
+                    throw new SemanticException.IntegerLiteralTooLarge(sourcePos, value);
+                }
+            }
             case LitRecord litRecord -> {
 
                 SourcePosition sourcePos = litRecord.sourcePos();
@@ -556,30 +586,6 @@ public final class SemanticAnalyzer {
                 unaryOp.setType(returnType);
             }
             case LitBool _ -> { }
-        }
-    }
-
-    // checks if an argument list
-    private static void checkArgumentTypes(final List<Argument> arguments, final List<Parameter> declaredParams)
-            throws SemanticException {
-        assert arguments.size() == declaredParams.size();
-        for (int i = 0; i < arguments.size(); i++) {
-            Argument arg = arguments.get(i);
-            Parameter param = declaredParams.get(i);
-
-            // if the corresponding parameter was declared var, the argument must be too
-            if (param instanceof Parameter.VarParameter && !(arg instanceof Argument.VarArgument)) {
-                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Argument.VarArgument.class);
-            }
-
-            // if the corresponding parameter was declared func, the argument must be too
-            if (param instanceof Parameter.FuncParameter && !(arg instanceof Argument.FuncArgument)) {
-                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Argument.FuncArgument.class);
-            }
-
-            if (param instanceof Parameter.ValueParameter && !(arg instanceof Expression)) {
-                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Expression.class);
-            }
         }
     }
 
