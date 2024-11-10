@@ -527,31 +527,31 @@ public class Parser {
         return switch (lastToken.getKind()) {
             case IDENTIFIER -> {
                 String varName = ((TextToken) lastToken).getText();
-                SourcePosition start = shift(Token.Kind.IDENTIFIER);
+                shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 Type varType = parseType();
-                yield new ValueParameter(start, varName, varType);
+                yield new ValueParameter(varName, varType);
             }
             case VAR -> {
-                SourcePosition start = shift(Token.Kind.VAR);
+                shift(Token.Kind.VAR);
                 String varName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 Type varType = parseType();
-                yield new VarParameter(start, varName, varType);
+                yield new VarParameter(varName, varType);
             }
             case PROC -> {
-                SourcePosition start = shift(Token.Kind.PROC);
+                shift(Token.Kind.PROC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
                 @SuppressWarnings("unchecked") List<Parameter> parameters = (lastToken.getKind() == Token.Kind.RPAREN) ?
                         Collections.EMPTY_LIST : parseParamSeq();
                 shift(Token.Kind.RPAREN);
-                yield new FuncParameter(start, funcName, parameters, new Type.Void());
+                yield new FuncParameter(funcName, parameters, new Type.Void());
             }
             case FUNC -> {
-                SourcePosition start = shift(Token.Kind.FUNC);
+                shift(Token.Kind.FUNC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.LPAREN);
@@ -560,7 +560,7 @@ public class Parser {
                 shift(Token.Kind.RPAREN);
                 shift(Token.Kind.COLON);
                 Type funcType = parseType();
-                yield new FuncParameter(start, funcName, parameters, funcType);
+                yield new FuncParameter(funcName, parameters, funcType);
             }
             default -> throw new SyntaxError(lastToken);
         };
