@@ -10,13 +10,37 @@ import java.util.List;
 //      type R ~ record x : (record x : Integer), y : (record x : Integer) end
 sealed public interface RuntimeType {
 
-    int size();
-
     // static instances of primitive types for convenience
     RuntimeType BOOL_TYPE = new PrimType.BoolType();
     RuntimeType INT_TYPE  = new PrimType.IntType();
     RuntimeType CHAR_TYPE = new PrimType.CharType();
     RuntimeType VOID_TYPE = new PrimType.VoidType();
+
+    int size();
+
+    record ArrayType(int arraySize, RuntimeType elementType) implements RuntimeType {
+
+        @Override public int size() {
+            return elementType.size() * arraySize;
+        }
+
+    }
+
+    record RecordType(List<FieldType> fieldTypes) implements RuntimeType {
+
+        @Override public int size() {
+            int totalSize = 0;
+
+            for (FieldType fieldType : fieldTypes) {
+                totalSize += fieldType.fieldType.size();
+            }
+
+            return totalSize;
+        }
+
+        public record FieldType(String fieldName, RuntimeType fieldType) { }
+
+    }
 
     sealed interface PrimType extends RuntimeType
             permits PrimType.FuncType, PrimType.BoolType, PrimType.IntType, PrimType.CharType,
@@ -62,30 +86,6 @@ sealed public interface RuntimeType {
             }
 
         }
-
-    }
-
-    record ArrayType(int arraySize, RuntimeType elementType) implements RuntimeType {
-
-        @Override public int size() {
-            return elementType.size() * arraySize;
-        }
-
-    }
-
-    record RecordType(List<FieldType> fieldTypes) implements RuntimeType {
-
-        @Override public int size() {
-            int totalSize = 0;
-
-            for (FieldType fieldType : fieldTypes) {
-                totalSize += fieldType.fieldType.size();
-            }
-
-            return totalSize;
-        }
-
-        public record FieldType(String fieldName, RuntimeType fieldType) { }
 
     }
 

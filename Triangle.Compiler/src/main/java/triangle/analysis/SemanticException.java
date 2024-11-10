@@ -5,9 +5,9 @@ import triangle.ast.Expression;
 import triangle.ast.Expression.Identifier;
 import triangle.ast.Expression.LitRecord.RecordField;
 import triangle.ast.Parameter;
+import triangle.ast.SourcePosition;
 import triangle.ast.Type;
 import triangle.types.RuntimeType;
-import triangle.ast.SourcePosition;
 
 public abstract class SemanticException extends Exception {
 
@@ -119,4 +119,5 @@ public abstract class SemanticException extends Exception {
         }
 
     }
+
 }

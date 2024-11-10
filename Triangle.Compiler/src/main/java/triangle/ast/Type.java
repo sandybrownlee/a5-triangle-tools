@@ -16,4 +16,5 @@ sealed public interface Type permits Type.ArrayType, Type.BasicType, Type.Record
     }
 
     record Void() implements Type { }
+
 }

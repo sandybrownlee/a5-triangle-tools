@@ -27,6 +27,10 @@ sealed public interface Declaration
             this.declaredType = declaredType;
         }
 
+        public void setRuntimeType(RuntimeType type) {
+            this.runtimeType = type;
+        }
+
         @Override public String name() {
             return name;
         }
@@ -35,21 +39,17 @@ sealed public interface Declaration
             return sourcePos;
         }
 
+        @Override public String toString() {
+            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "declaredType=" + declaredType +
+                   ']';
+        }
+
         public Type declaredType() {
             return this.declaredType;
         }
 
         public RuntimeType runtimeType() {
             return runtimeType;
-        }
-
-        public void setRuntimeType(RuntimeType type) {
-            this.runtimeType = type;
-        }
-
-        @Override public String toString() {
-            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "declaredType=" + declaredType +
-                   ']';
         }
 
     }

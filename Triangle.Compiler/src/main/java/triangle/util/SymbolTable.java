@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 // this is a naive implementation of a symbol table; if compiler performance becomes an issue, this is probably the place to start
-public final class SymbolTable<T,S> {
+public final class SymbolTable<T, S> {
 
     // ArrayDeque does not permit null elements + LinkedList is fast for prepend/pop operations which we'll be doing a lot of
     private final Deque<Map<String, T>> scopes          = new LinkedList<>();
@@ -24,6 +24,11 @@ public final class SymbolTable<T,S> {
         // create a copy to prevent mutability shenanigans
         scopes.push(new HashMap<>(initialScope));
         scopeLocalState.push(initialState);
+    }
+
+    public void setScopeLocalState(S newState) {
+        scopeLocalState.pop();
+        scopeLocalState.push(newState);
     }
 
     public void add(String name, T binding) {
@@ -80,11 +85,6 @@ public final class SymbolTable<T,S> {
         return scopeLocalState.peek();
     }
 
-    public void setScopeLocalState(S newState) {
-        scopeLocalState.pop();
-        scopeLocalState.push(newState);
-    }
-
     // result of a lookupWithDepth
     public final class DepthLookup {
 
@@ -96,16 +96,16 @@ public final class SymbolTable<T,S> {
             this.t = t;
         }
 
+        @Override public String toString() {
+            return "DepthLookup[" + "depth=" + depth + ", " + "t=" + t + ']';
+        }
+
         public int depth() {
             return depth;
         }
 
         public T t() {
             return t;
-        }
-
-        @Override public String toString() {
-            return "DepthLookup[" + "depth=" + depth + ", " + "t=" + t + ']';
         }
 
     }

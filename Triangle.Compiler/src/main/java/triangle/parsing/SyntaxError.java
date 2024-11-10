@@ -28,4 +28,5 @@ public class SyntaxError extends Exception {
     SyntaxError(Token token) {
         super("unexpected token: " + token + " at line " + token.getLine() + ", column " + token.getColumn());
     }
+
 }

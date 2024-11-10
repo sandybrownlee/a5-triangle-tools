@@ -21,9 +21,9 @@ package triangle;
 
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
+import triangle.analysis.SemanticAnalyzer;
 import triangle.ast.Statement;
 import triangle.codegen.CodeGen;
-import triangle.analysis.SemanticAnalyzer;
 import triangle.parsing.Lexer;
 import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
@@ -62,7 +62,6 @@ public class Compiler {
             System.err.println("IOException while compiling: " + e.getMessage());
             e.printStackTrace();
             System.exit(1);
-
         } catch (SyntaxError e) {
             System.err.println("SyntaxError while compiling: " + e.getMessage());
             e.printStackTrace();

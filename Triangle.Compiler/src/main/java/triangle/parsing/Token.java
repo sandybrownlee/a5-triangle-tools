@@ -2,8 +2,8 @@ package triangle.parsing;
 
 class Token {
 
-    private final int line;
-    private final int column;
+    private final int  line;
+    private final int  column;
     private final Kind kind;
 
     Token(final Kind kind, final int line, final int column) {
@@ -24,6 +24,10 @@ class Token {
         return kind;
     }
 
+    @Override public String toString() {
+        return kind.toString();
+    }
+
     public enum Kind {
         // literals, identifiers, operators...
         INTLITERAL, CHARLITERAL, IDENTIFIER, OPERATOR, TRUE, FALSE,
@@ -39,10 +43,6 @@ class Token {
 
         // special tokens...
         EOT, ERROR
-    }
-
-    @Override public String toString() {
-        return kind.toString();
     }
 
 }

@@ -21,21 +21,20 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return sourcePos;
         }
 
-        public Expression.Identifier var() {
-            return var;
-        }
-
         @Override public String toString() {
             return "VarArgument[" + "sourcePos=" + sourcePos + ", " + "var=" + var + ']';
+        }
+
+        @Override public RuntimeType getType() {
+            return type;
         }
 
         public void setType(final RuntimeType type) {
             this.type = type;
         }
 
-
-        @Override public RuntimeType getType() {
-            return type;
+        public Expression.Identifier var() {
+            return var;
         }
 
     }
@@ -55,21 +54,20 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return sourcePos;
         }
 
-        public Expression.Identifier.BasicIdentifier func() {
-            return func;
-        }
-
         @Override public String toString() {
             return "FuncArgument[" + "sourcePos=" + sourcePos + ", " + "func=" + func + ']';
+        }
+
+        @Override public RuntimeType getType() {
+            return type;
         }
 
         public void setType(final RuntimeType type) {
             this.type = type;
         }
 
-
-        @Override public RuntimeType getType() {
-            return type;
+        public Expression.Identifier.BasicIdentifier func() {
+            return func;
         }
 
     }

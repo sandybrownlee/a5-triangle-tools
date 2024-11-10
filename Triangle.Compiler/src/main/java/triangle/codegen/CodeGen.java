@@ -9,8 +9,8 @@ import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Parameter.VarParameter;
 import triangle.ast.Statement;
-import triangle.util.SymbolTable;
 import triangle.types.RuntimeType;
+import triangle.util.SymbolTable;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 public class CodeGen {
 
     // maps primitives to their number
-    private static Map<String, Primitive> primitives = new HashMap<>();
+    private static final Map<String, Primitive> primitives = new HashMap<>();
 
     static {
         // TODO: fill up
@@ -39,16 +39,6 @@ public class CodeGen {
         primitives.put("-", Primitive.SUB);
         primitives.put("putint", Primitive.PUTINT);
     }
-
-    private final SymbolTable<Instruction.LABEL, Void> funcAddresses = new SymbolTable<>(null);
-    private final SymbolTable<VarState, Integer>       localVars     = new SymbolTable<>(0);
-    private final Supplier<Instruction.LABEL>          labelSupplier = new Supplier<>() {
-        private int i = 0;
-
-        @Override public Instruction.LABEL get() {
-            return new Instruction.LABEL(i++);
-        }
-    };
 
     // TODO: SemanticAnalyzer should ensure static-nesting depth does not exceed the maximum
     private static Register getDisplayRegister(final int depth) {
@@ -65,7 +55,7 @@ public class CodeGen {
     }
 
     private static void write(final List<Instruction> instructions) {
-        try(DataOutputStream fw = new DataOutputStream(new FileOutputStream("output.tam"))) {
+        try (DataOutputStream fw = new DataOutputStream(new FileOutputStream("output.tam"))) {
             for (Instruction instruction : instructions) {
                 // TODO: this is too ugly to stay + fill in
                 switch (instruction) {
@@ -162,31 +152,44 @@ public class CodeGen {
         }
 
         // so I don't have to type 'new Address ...' repeatedly
-        Function<Instruction.LABEL, Instruction.Address> toCodeAddress = label -> new Instruction.Address(Register.CB, labelLocations.get(label));
+        Function<Instruction.LABEL, Instruction.Address> toCodeAddress = label -> new Instruction.Address(Register.CB,
+                                                                                                          labelLocations.get(
+                                                                                                                  label)
+        );
 
         // TODO: this also patches calls to CALL_PRIM, but that should probably be done in another method
         List<Instruction> patchedInstructions = new ArrayList<>();
         for (Instruction instruction : instructions) {
             switch (instruction) {
                 case Instruction.LABEL _ -> { }
-                case Instruction.CALL_LABEL(Register staticLink, Instruction.LABEL label) ->
-                        patchedInstructions.add(new Instruction.CALL(staticLink, toCodeAddress.apply(label)));
-                case Instruction.JUMPIF_LABEL(int value, Instruction.LABEL label) ->
-                        patchedInstructions.add(new Instruction.JUMPIF(value, toCodeAddress.apply(label)));
-                case Instruction.JUMP_LABEL(Instruction.LABEL label) ->
-                        patchedInstructions.add(new Instruction.JUMP(toCodeAddress.apply(label)));
-                case Instruction.LOADA_LABEL(Instruction.LABEL label) ->
-                        patchedInstructions.add(new Instruction.LOADA(toCodeAddress.apply(label)));
+                case Instruction.CALL_LABEL(Register staticLink, Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.CALL(staticLink, toCodeAddress.apply(label)));
+                case Instruction.JUMPIF_LABEL(int value, Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.JUMPIF(value, toCodeAddress.apply(label)));
+                case Instruction.JUMP_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.JUMP(toCodeAddress.apply(label)));
+                case Instruction.LOADA_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.LOADA(toCodeAddress.apply(label)));
                 case Instruction.CALL_PRIM(Primitive primitive) ->
                     // use whatever as static link for primitive
                     // 0'th primitive in Primitive corresponds to address PB + 1
-                    patchedInstructions.add(new Instruction.CALL(Register.SB, new Instruction.Address(Register.PB, primitive.ordinal())));
+                        patchedInstructions.add(
+                                new Instruction.CALL(Register.SB, new Instruction.Address(Register.PB, primitive.ordinal())));
                 default -> patchedInstructions.add(instruction);
             }
         }
 
         return patchedInstructions;
     }
+    private final SymbolTable<Instruction.LABEL, Void> funcAddresses = new SymbolTable<>(null);
+    private final SymbolTable<VarState, Integer>       localVars     = new SymbolTable<>(0);
+    private final Supplier<Instruction.LABEL>          labelSupplier = new Supplier<>() {
+        private int i = 0;
+
+        @Override public Instruction.LABEL get() {
+            return new Instruction.LABEL(i++);
+        }
+    };
 
     public List<Instruction> compile(Statement statement) {
         List<Instruction> unpatched = generate(statement);
@@ -621,7 +624,8 @@ public class CodeGen {
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                block.add(new Instruction.LOADA(new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset)));
+                block.add(new Instruction.LOADA(
+                        new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset)));
                 if (lookup.t().isReference()) {
                     // if its a reference then we want to dereference it
                     block.add(new Instruction.LOADI(basicIdentifier.getType().size()));

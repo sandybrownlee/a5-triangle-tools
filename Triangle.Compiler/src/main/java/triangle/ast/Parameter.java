@@ -24,14 +24,6 @@ sealed public interface Parameter extends Typeable
             return name;
         }
 
-        public String name() {
-            return name;
-        }
-
-        public Type declaredType() {
-            return declaredType;
-        }
-
         @Override public String toString() {
             return "ValueParameter[" + ", " + "name=" + name + ", " + "type=" + declaredType + ']';
         }
@@ -40,9 +32,16 @@ sealed public interface Parameter extends Typeable
             return type;
         }
 
-
         @Override public void setType(RuntimeType type) {
             this.type = type;
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public Type declaredType() {
+            return declaredType;
         }
 
     }
@@ -62,6 +61,18 @@ sealed public interface Parameter extends Typeable
             return name;
         }
 
+        @Override public String toString() {
+            return "VarParameter[" + ", " + "name=" + name + ", " + "type=" + type + ']';
+        }
+
+        @Override public RuntimeType getType() {
+            return type;
+        }
+
+        @Override public void setType(RuntimeType type) {
+            this.type = type;
+        }
+
         public String name() {
             return name;
         }
@@ -70,21 +81,8 @@ sealed public interface Parameter extends Typeable
             return type;
         }
 
-        @Override public String toString() {
-            return "VarParameter[" + ", " + "name=" + name + ", " + "type=" + type + ']';
-        }
-
         public Type declaredType() {
             return declaredType;
-        }
-
-        @Override public RuntimeType getType() {
-            return type;
-        }
-
-
-        @Override public void setType(RuntimeType type) {
-            this.type = type;
         }
 
     }
@@ -108,6 +106,19 @@ sealed public interface Parameter extends Typeable
             return callable;
         }
 
+        @Override public String toString() {
+            return "FuncParameter[" + ", " + "callable=" + callable + ", " + "parameters=" + parameters + ", " + "returnType=" +
+                   returnType + ']';
+        }
+
+        @Override public RuntimeType getType() {
+            return returnType;
+        }
+
+        @Override public void setType(RuntimeType returnType) {
+            this.returnType = returnType;
+        }
+
         public String callable() {
             return callable;
         }
@@ -118,20 +129,6 @@ sealed public interface Parameter extends Typeable
 
         public Type declaredReturnType() {
             return declaredReturnType;
-        }
-
-        @Override public String toString() {
-            return "FuncParameter[" + ", " + "callable=" + callable + ", " + "parameters=" + parameters + ", " + "returnType=" +
-                   returnType + ']';
-        }
-
-        @Override public RuntimeType getType() {
-            return returnType;
-        }
-
-
-        @Override public void setType(RuntimeType returnType) {
-            this.returnType = returnType;
         }
 
     }

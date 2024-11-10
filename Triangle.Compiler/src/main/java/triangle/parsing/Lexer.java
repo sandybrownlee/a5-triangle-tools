@@ -62,6 +62,9 @@ public final class Lexer {
     }
     //@formatter:on
 
+    public static Lexer fromResource(String handle) {
+        return new Lexer(Lexer.class.getResourceAsStream(handle));
+    }
     private final InputStream  source;
     private final StringBuffer buffer;
     private       int          line;
@@ -72,10 +75,6 @@ public final class Lexer {
         this.line = 1;
         this.column = 1;
         this.buffer = new StringBuffer();
-    }
-
-    public static Lexer fromResource(String handle) {
-        return new Lexer(Lexer.class.getResourceAsStream(handle));
     }
 
     Token nextToken() throws IOException {
