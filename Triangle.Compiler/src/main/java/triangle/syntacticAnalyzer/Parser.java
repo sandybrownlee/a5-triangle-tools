@@ -353,14 +353,23 @@ public class Parser {
 
     private Argument parseArg() throws IOException, SyntaxError {
         return switch (lastToken.getKind()) {
-            case PROC, FUNC -> {
+            case FUNC -> {
+                SourcePosition start = shift(Token.Kind.FUNC);
+                Identifier callable = parseIdentifier();
+                if (callable instanceof Identifier.BasicIdentifier basicIdentifier) {
+                    yield new Argument.FuncArgument(start, basicIdentifier);
+                }
+
+                throw new RuntimeException("HOF is currently unsupported, so function argument must be a simple variable name");
+            }
+            case PROC -> {
                 SourcePosition start = shift(Token.Kind.PROC);
                 Identifier callable = parseIdentifier();
                 if (callable instanceof Identifier.BasicIdentifier basicIdentifier) {
                     yield new Argument.FuncArgument(start, basicIdentifier);
                 }
 
-                throw new RuntimeException("HOF is currently unsupported, so function call must be a simple variable name");
+                throw new RuntimeException("HOF is currently unsupported, so function argument must be a simple variable name");
             }
             case VAR -> {
                 SourcePosition start = shift(Token.Kind.VAR);
