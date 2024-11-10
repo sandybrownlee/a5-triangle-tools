@@ -570,16 +570,16 @@ public final class SemanticAnalyzer {
 
             // if the corresponding parameter was declared var, the argument must be too
             if (param instanceof Parameter.VarParameter && !(arg instanceof Argument.VarArgument)) {
-                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.VarParameter.class);
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Argument.VarArgument.class);
             }
 
             // if the corresponding parameter was declared func, the argument must be too
             if (param instanceof Parameter.FuncParameter && !(arg instanceof Argument.FuncArgument)) {
-                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.FuncParameter.class);
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Argument.FuncArgument.class);
             }
 
             if (param instanceof Parameter.ValueParameter && !(arg instanceof Expression)) {
-                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Parameter.ValueParameter.class);
+                throw new SemanticException.InvalidArgument(arg.sourcePos(), arg, Expression.class);
             }
         }
     }

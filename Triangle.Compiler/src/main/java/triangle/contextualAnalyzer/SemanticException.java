@@ -106,8 +106,8 @@ public abstract class SemanticException extends Exception {
 
     static final class InvalidArgument extends SemanticException {
 
-        InvalidArgument(final SourcePosition sourcePos, final Argument argument, Class<? extends Parameter> expectedClass) {
-            super(sourcePos, "Expected argument " + argument + " to be of type " + expectedClass);
+        InvalidArgument(final SourcePosition sourcePos, final Argument argument, Class<? extends Argument> expectedClass) {
+            super(sourcePos, "Expected argument " + argument + " to be of " + expectedClass);
         }
 
     }
