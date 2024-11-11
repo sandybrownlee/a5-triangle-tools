@@ -329,7 +329,7 @@ sealed public interface Expression extends Argument, Typeable
         // this finds the "root" of a (possibly complex) identifier
         // e.g., arr[i] -> root = arr
         //       recx.recy.recz -> root = recx
-        // this is needed, for example, to check if a record is a constant or not
+        // this is needed, for example, to check if a record is a constant or not and for deciding addresses during codegen
         BasicIdentifier root();
 
         final class BasicIdentifier implements Identifier {

@@ -37,7 +37,9 @@ public class CodeGen {
         primitives.put(">", Primitive.GT);
         primitives.put(">=", Primitive.GE);
         primitives.put("-", Primitive.SUB);
+        primitives.put("+", Primitive.ADD);
         primitives.put("putint", Primitive.PUTINT);
+        primitives.put("puteol", Primitive.PUTEOL);
     }
 
     // TODO: SemanticAnalyzer should ensure static-nesting depth does not exceed the maximum
@@ -55,7 +57,7 @@ public class CodeGen {
     }
 
     private static void write(final List<Instruction> instructions) {
-        try (DataOutputStream fw = new DataOutputStream(new FileOutputStream("output.tam"))) {
+        try (DataOutputStream fw = new DataOutputStream(new FileOutputStream("obj.tam"))) {
             for (Instruction instruction : instructions) {
                 // TODO: this is too ugly to stay + fill in
                 switch (instruction) {
@@ -65,7 +67,7 @@ public class CodeGen {
                         fw.writeInt(call.staticLink().ordinal());
                         fw.writeInt(call.address().d());
                     }
-                    case Instruction.CALLI calli -> { }
+                    case Instruction.CALLI calli -> throw new RuntimeException();
                     case Instruction.HALT halt -> {
                         fw.writeInt(15);
                         fw.writeInt(0);
@@ -84,7 +86,12 @@ public class CodeGen {
                         fw.writeInt(jumpif.value());
                         fw.writeInt(jumpif.address().d());
                     }
-                    case Instruction.LOAD load -> { }
+                    case Instruction.LOAD load -> {
+                        fw.writeInt(0);
+                        fw.writeInt(load.address().r().ordinal());
+                        fw.writeInt(load.words());
+                        fw.writeInt(load.address().d());
+                    }
                     case Instruction.LOADA loada -> {
                         fw.writeInt(1);
                         fw.writeInt(loada.address().r().ordinal());
@@ -115,8 +122,18 @@ public class CodeGen {
                         fw.writeInt(0);
                         fw.writeInt(push.words());
                     }
-                    case Instruction.RETURN aReturn -> { }
-                    case Instruction.STORE store -> { }
+                    case Instruction.RETURN aReturn -> {
+                        fw.writeInt(8);
+                        fw.writeInt(0);
+                        fw.writeInt(aReturn.resultSize());
+                        fw.writeInt(aReturn.argsSize());
+                    }
+                    case Instruction.STORE store -> {
+                        fw.writeInt(4);
+                        fw.writeInt(store.address().r().ordinal());
+                        fw.writeInt(store.words());
+                        fw.writeInt(store.address().d());
+                    }
                     case Instruction.STOREI storei -> {
                         fw.writeInt(5);
                         fw.writeInt(0);
@@ -152,9 +169,10 @@ public class CodeGen {
         }
 
         // so I don't have to type 'new Address ...' repeatedly
-        Function<Instruction.LABEL, Instruction.Address> toCodeAddress = label -> new Instruction.Address(Register.CB,
-                                                                                                          labelLocations.get(
-                                                                                                                  label)
+        Function<Instruction.LABEL, Instruction.Address> toCodeAddress = label -> new Instruction.Address(
+                Register.CB,
+                labelLocations.get(
+                        label)
         );
 
         // TODO: this also patches calls to CALL_PRIM, but that should probably be done in another method
@@ -181,6 +199,7 @@ public class CodeGen {
 
         return patchedInstructions;
     }
+
     private final SymbolTable<Instruction.LABEL, Void> funcAddresses = new SymbolTable<>(null);
     private final SymbolTable<VarState, Integer>       localVars     = new SymbolTable<>(0);
     private final Supplier<Instruction.LABEL>          labelSupplier = new Supplier<>() {
@@ -232,9 +251,7 @@ public class CodeGen {
                 // evaluate expression
                 block.addAll(generate(assignStatement.expression()));
                 // evaluate address of identifier and put on stack
-                block.addAll(evaluateAddress(assignStatement.identifier()));
-                // STOREI
-                block.add(new Instruction.STOREI(assignStatement.expression().getType().size()));
+                block.addAll(generateStore(assignStatement.identifier(), assignStatement.expression().getType().size()));
                 return block;
             }
             case Statement.IfStatement ifStatement -> {
@@ -376,7 +393,6 @@ public class CodeGen {
                 block.addAll(generate(binaryOp.leftOperand()));
                 // evaluate right operand and leave on stack
                 block.addAll(generate(binaryOp.rightOperand()));
-                // TODO: don't hardcode primitives
                 block.add(new Instruction.CALL_PRIM(primitives.get(binaryOp.operator().name())));
                 return block;
             }
@@ -397,7 +413,12 @@ public class CodeGen {
                             block.add(new Instruction.LOADA_LABEL(lookup.t()));
                         }
                         // load address of var argument
-                        case Argument.VarArgument varArgument -> block.addAll(evaluateAddress(varArgument.var()));
+                        case Argument.VarArgument varArgument -> {
+                            Expression.Identifier var = varArgument.var();
+                            RuntimeType type = varArgument.getType();
+                            // if the argument provided is already an address, then dont dereference it here needlessly
+                            block.addAll(generateRuntimeLocation(var, type instanceof RuntimeType.RefOf));
+                        }
                         // just evaluate expr and leave it on stack
                         case Expression expressionArg -> block.addAll(generate(expressionArg));
                     }
@@ -439,12 +460,8 @@ public class CodeGen {
                 return block;
             }
             case Expression.Identifier identifier -> {
-
-                //  evaluateAddress(identifier)
-                //  LOADI identifierSize
-
-                block.addAll(evaluateAddress(identifier));
-                block.add(new Instruction.LOADI(identifier.getType().size()));
+                // fetch the value and leave on stack
+                block.addAll(generateFetch(identifier, identifier.getType().baseType().size()));
                 return block;
             }
             case Expression.IfExpression ifExpression -> throw new RuntimeException();
@@ -602,53 +619,96 @@ public class CodeGen {
         return (paramOffset * -1) - 1;
     }
 
-    // a list of instructions that, when evaluated, leaves the address of the identifier, as the top  element in the stack
-    // leaves the stack otherwise unchanged
-    private List<Instruction> evaluateAddress(Expression.Identifier identifier) {
+    // generate instructions to store to the location associated with the identifier, dereferencing only if needed
+    // the last `size` words of data on the stack will be popped and stored to the address
+    private List<Instruction> generateStore(Expression.Identifier identifier, int size) {
         List<Instruction> block = new ArrayList<>();
+
+        switch (identifier) {
+            case Expression.Identifier.ArraySubscript arraySubscript -> {
+                block.addAll(generateRuntimeLocation(arraySubscript, true));
+                block.add(new Instruction.STOREI(size));
+                return block;
+            }
+            case Expression.Identifier.BasicIdentifier basicIdentifier -> {
+                SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
+                Instruction.Address address = new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
+
+                if (basicIdentifier.getType() instanceof RuntimeType.RefOf) {
+                    block.addAll(generateRuntimeLocation(identifier, true));
+                    block.add(new Instruction.STOREI(size));
+                } else {
+                    block.add(new Instruction.STORE(size, address));
+                }
+
+                return block;
+            }
+            case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
+        }
+    }
+
+    // a list of instructions that, when evaluated, leaves the address associated with identifier on the stack top,
+    //  dereferencing reference values only if needed; the final address will point to where the data actually resides on the
+    //  stack, not an address to it
+    // leaves the stack otherwise unchanged
+    private List<Instruction> generateRuntimeLocation(Expression.Identifier identifier, boolean dereferencing) {
+        List<Instruction> block = new ArrayList<>();
+
         switch (identifier) {
             case Expression.Identifier.ArraySubscript arraySubscript -> {
                 // push address of array base on stack
-                block.addAll(evaluateAddress(arraySubscript.array()));
-                // evaluate subscript and leaves its result on stack
+                block.addAll(generateRuntimeLocation(arraySubscript.array(), dereferencing));
+                // evaluate subscript
                 block.addAll(generate(arraySubscript.subscript()));
-                // push array element type size on stack
-                int elemSize = ((RuntimeType.ArrayType) arraySubscript.array().getType()).elementType().size();
-                block.add(new Instruction.LOADL(elemSize));
-                // multiply top two, to get offset
+                // LOADL arrayElementSize
+                // push element size on stack
+                block.add(new Instruction.LOADL(((RuntimeType.ArrayType) arraySubscript.array().getType().baseType()).elementType().size()));
+                // CALL Primitive.MULT, to get offset
                 block.add(new Instruction.CALL_PRIM(Primitive.MULT));
-                // add top two, to get final address
+                // CALL Primitive.ADD, to add offset to address of root
                 block.add(new Instruction.CALL_PRIM(Primitive.ADD));
                 return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                block.add(new Instruction.LOADA(
-                        new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset)));
-                if (lookup.t().isReference()) {
-                    // if its a reference then we want to dereference it
-                    block.add(new Instruction.LOADI(basicIdentifier.getType().size()));
+                Instruction.Address address = new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
+                block.add(new Instruction.LOADA(address));
+
+                // if its a identifier is already a reference, then "dereference" it
+                if (dereferencing && basicIdentifier.getType() instanceof RuntimeType.RefOf) {
+                    block.add(new Instruction.LOADI(Machine.addressSize));
                 }
+
                 return block;
             }
-            case Expression.Identifier.RecordAccess recordAccess -> {
-                // calculate the offset of the accessed field from the base address of the record
-                int offset = 0;
-                for (RuntimeType.RecordType.FieldType fieldType : ((RuntimeType.RecordType) recordAccess.record()
-                                                                                                        .getType()).fieldTypes()) {
-                    if (fieldType.fieldName().equals(recordAccess.field().root().name())) {
-                        break;
-                    }
-                    offset += fieldType.fieldType().size();
-                }
-                // evaluate base address of record and leave on stack
-                block.addAll(evaluateAddress(recordAccess.record()));
-                // load offset literal onto stack
-                block.add(new Instruction.LOADL(offset));
-                // call primitive add
-                block.add(new Instruction.CALL_PRIM(Primitive.ADD));
+            case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
+        }
+    }
+
+    // a list of instructions that, when evaluated, fetches `size` words of data from the address associated with identifier;
+    // dereferencing reference values only if needed
+    private List<Instruction> generateFetch(Expression.Identifier identifier, int size) {
+        List<Instruction> block = new ArrayList<>();
+        switch (identifier) {
+            case Expression.Identifier.ArraySubscript arraySubscript -> {
+                block.addAll(generateRuntimeLocation(arraySubscript, true));
+                block.add(new Instruction.LOADI(size));
                 return block;
             }
+            case Expression.Identifier.BasicIdentifier basicIdentifier -> {
+                SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
+                Instruction.Address address = new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
+
+                if (basicIdentifier.getType() instanceof RuntimeType.RefOf) {
+                    block.addAll(generateRuntimeLocation(identifier, true));
+                    block.add(new Instruction.LOADI(size));
+                } else {
+                    block.add(new Instruction.LOAD(size, address));
+                }
+
+                return block;
+            }
+            case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
         }
     }
 
