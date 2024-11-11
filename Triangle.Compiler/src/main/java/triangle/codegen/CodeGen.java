@@ -66,7 +66,12 @@ public class CodeGen {
                         fw.writeInt(call.staticLink().ordinal());
                         fw.writeInt(call.address().d());
                     }
-                    case Instruction.CALLI calli -> throw new RuntimeException();
+                    case Instruction.CALLI calli -> {
+                        fw.writeInt(7);
+                        fw.writeInt(0);
+                        fw.writeInt(0);
+                        fw.writeInt(0);
+                    }
                     case Instruction.HALT halt -> {
                         fw.writeInt(15);
                         fw.writeInt(0);
@@ -406,10 +411,20 @@ public class CodeGen {
                     switch (argument) {
                         // put a closure - static link + code address - onto the stack
                         case Argument.FuncArgument funcArgument -> {
-                            SymbolTable<Instruction.LABEL, Void>.DepthLookup lookup =
-                                    funcAddresses.lookupWithDepth(funcArgument.func().name());
-                            block.add(new Instruction.LOADA(new Instruction.Address(getDisplayRegister(lookup.depth()), 0)));
-                            block.add(new Instruction.LOADA_LABEL(lookup.t()));
+                            // TODO: this is very ugly, cleanup
+                            try {
+                                SymbolTable<Instruction.LABEL, Void>.DepthLookup lookup =
+                                        funcAddresses.lookupWithDepth(funcArgument.func().name());
+                                block.add(new Instruction.LOADA_LABEL(lookup.t()));
+                                block.add(new Instruction.LOADA(new Instruction.Address(getDisplayRegister(lookup.depth()), 0)));
+                            } catch (NoSuchElementException _) {
+                                if (primitives.containsKey(funcArgument.func().name())) {
+                                    block.add(new Instruction.LOADA(new Instruction.Address(Register.PB, primitives.get(funcArgument.func().name()).ordinal())));
+                                    block.add(new Instruction.LOADA(new Instruction.Address(Register.LB, 0)));
+                                } else {
+                                    throw new RuntimeException();
+                                }
+                            }
                         }
                         // load address of var argument
                         case Argument.VarArgument varArgument -> {
@@ -423,6 +438,8 @@ public class CodeGen {
                     }
                 }
 
+                // TODO: remove this special casing, deal seamlessly with funcs that are params and funcs whose addresses are
+                //  known statically
                 try {
                     SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(funCall.func().name());
                     if (lookup.t().isFunc()) {
@@ -431,14 +448,19 @@ public class CodeGen {
                         Register staticLink = getDisplayRegister(lookup.depth());
                         int closureStackOffset = lookup.t().stackOffset();
 
-                        //  LOAD 1 (closureStackOffset) [staticLink]
-                        //  LOAD 1 (closureStackOffset + 1) [staticLink]
+                        //  LOAD addressSize (closureStackOffset) [staticLink]
+                        //  LOAD addressSize (closureStackOffset - addressSize) [staticLink]
                         //  CALLI
 
                         // static link is a 1-word value ...
-                        block.add(new Instruction.LOAD(1, new Instruction.Address(staticLink, closureStackOffset)));
-                        // ... immediately followed by the code address
-                        block.add(new Instruction.LOAD(1, new Instruction.Address(staticLink, closureStackOffset + 1)));
+                        block.add(new Instruction.LOAD(Machine.addressSize,
+                                                       new Instruction.Address(staticLink, closureStackOffset)
+                        ));
+                        // ... immediately preceded by the code address
+                        block.add(new Instruction.LOAD(
+                                Machine.addressSize,
+                                new Instruction.Address(staticLink, closureStackOffset - Machine.addressSize)
+                        ));
                         // then just call the closure
                         block.add(new Instruction.CALLI());
                         return block;
