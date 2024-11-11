@@ -223,7 +223,7 @@ public final class SemanticAnalyzer {
                     // assign each parameter to a basic identifier with its resolved type
                     for (int i = 0; i < funcDeclaration.parameters().size(); i++) {
                         Parameter p = funcDeclaration.parameters().get(i);
-                        // parameters dont have a declaration
+                        // parameters don't have a declaration
                         terms.add(p.getName(), new Binding(p.getType(), false, null));
                     }
 
@@ -254,7 +254,7 @@ public final class SemanticAnalyzer {
                 }
 
                 // add the newly declared function to this scopes terms
-                // functions are always constant since we dont support HOF
+                // functions are always constant since we don't support HOF
                 terms.add(funcDeclaration.name(), new Binding(funcType, true, funcDeclaration));
             }
             case TypeDeclaration typeDeclaration -> {
@@ -303,7 +303,7 @@ public final class SemanticAnalyzer {
                     // assign each parameter to a basic identifier with its resolved type
                     for (int i = 0; i < procDeclaration.parameters().size(); i++) {
                         Parameter p = procDeclaration.parameters().get(i);
-                        // parameters dont have a declaration
+                        // parameters don't have a declaration
                         terms.add(p.getName(), new Binding(p.getType(), false, null));
                     }
 
@@ -321,7 +321,7 @@ public final class SemanticAnalyzer {
                 }
 
                 // add the newly declared function to this scopes terms
-                // functions are always constant since we dont support HOF
+                // functions are always constant since we don't support HOF
                 terms.add(procDeclaration.name(), new Binding(funcType, true, procDeclaration));
             }
         }
@@ -361,7 +361,7 @@ public final class SemanticAnalyzer {
                 // record access has a new scope with the field names and types of the record available
                 types.enterNewScope(null);
                 for (RecordType.FieldType fieldType : recordType.fieldTypes()) {
-                    // record fields dont have a declaration
+                    // record fields don't have a declaration
                     terms.add(fieldType.fieldName(), new Binding(fieldType.fieldType(), true, null));
                 }
                 visit(field);
@@ -423,7 +423,7 @@ public final class SemanticAnalyzer {
                 }
 
                 if (argTypes.size() != 2) {
-                    // since we dont allow custom operator definitions, this can only happen if we mess up the stdenv
+                    // since we don't allow custom operator definitions, this can only happen if we mess up the stdenv
                     throw new SemanticException.ArityMismatch(binop.sourcePos(), operator, 2, argTypes.size());
                 }
 
@@ -463,7 +463,7 @@ public final class SemanticAnalyzer {
                 for (int i = 0; i < argTypes.size(); i++) {
                     Argument arg = arguments.get(i);
 
-                    // we dont have to resolveType() the types in function arg list since it should have been done at
+                    // we don't have to resolveType() the types in function arg list since it should have been done at
                     // declaration time
                     RuntimeType expectedType = argTypes.get(i);
 
@@ -479,7 +479,7 @@ public final class SemanticAnalyzer {
             }
             case Identifier identifier -> {
                 visit(identifier);
-                // cannot evaluate a function as a result since we dont support HOF
+                // cannot evaluate a function as a result since we don't support HOF
                 if (identifier.getType() instanceof FuncType) {
                     throw new SemanticException.FunctionResult(identifier.sourcePos(), identifier);
                 }
@@ -582,7 +582,7 @@ public final class SemanticAnalyzer {
                 }
 
                 if (argTypes.size() != 1) {
-                    // since we dont allow custom operator definitions, this can only happen if we mess up the stdenv
+                    // since we don't allow custom operator definitions, this can only happen if we mess up the stdenv
                     throw new SemanticException.ArityMismatch(unaryOp.sourcePos(), operator, 1, argTypes.size());
                 }
 
@@ -634,7 +634,7 @@ public final class SemanticAnalyzer {
 
                 try {
                     // TODO: does this even work rn?
-                    // bit of a hack-ish way of ensure the user doesnt circumvent const-protection by passing in, say a var to
+                    // bit of a hack-ish way of ensure the user doesn't circumvent const-protection by passing in, say a var to
                     //  the const
                     if (terms.lookupAll(lvalue.root().name()).stream().anyMatch(Binding::constant)) {
                         errors.add(new SemanticException.AssignmentToConstant(assignStatement.sourcePos(), lvalue));

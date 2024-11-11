@@ -123,12 +123,12 @@ public class CodeGen {
                         fw.writeInt(storei.size());
                         fw.writeInt(0);
                     }
-                    case Instruction.CALL_LABEL callLabel -> throw new RuntimeException("write of psuedo-instruction");
-                    case Instruction.CALL_PRIM callPrim -> throw new RuntimeException("write of psuedo-instruction");
-                    case Instruction.JUMPIF_LABEL jumpifLabel -> throw new RuntimeException("write of psuedo-instruction");
-                    case Instruction.JUMP_LABEL jumpLabel -> throw new RuntimeException("write of psuedo-instruction");
-                    case Instruction.LABEL label -> throw new RuntimeException("write of psuedo-instruction");
-                    case Instruction.LOADA_LABEL loadaLabel -> throw new RuntimeException("write of psuedo-instruction");
+                    case Instruction.CALL_LABEL callLabel -> throw new RuntimeException("write of pseudo-instruction");
+                    case Instruction.CALL_PRIM callPrim -> throw new RuntimeException("write of pseudo-instruction");
+                    case Instruction.JUMPIF_LABEL jumpifLabel -> throw new RuntimeException("write of pseudo-instruction");
+                    case Instruction.JUMP_LABEL jumpLabel -> throw new RuntimeException("write of pseudo-instruction");
+                    case Instruction.LABEL label -> throw new RuntimeException("write of pseudo-instruction");
+                    case Instruction.LOADA_LABEL loadaLabel -> throw new RuntimeException("write of pseudo-instruction");
                 }
             }
         } catch (IOException e) {
@@ -138,7 +138,7 @@ public class CodeGen {
 
     // TODO: maybe do some optimizations before backpatching? eg. any label immediately followed by a jump can just edit all jumps
     //  to that label
-    // backpath the instruction list to resolve all labels, etc.
+    // backpatch the instruction list to resolve all labels, etc.
     private static List<Instruction> backpatch(final List<Instruction> instructions) {
         Map<Instruction.LABEL, Integer> labelLocations = new HashMap<>();
 
@@ -376,7 +376,7 @@ public class CodeGen {
                 block.addAll(generate(binaryOp.leftOperand()));
                 // evaluate right operand and leave on stack
                 block.addAll(generate(binaryOp.rightOperand()));
-                // TODO: dont hardcode primitives
+                // TODO: don't hardcode primitives
                 block.add(new Instruction.CALL_PRIM(primitives.get(binaryOp.operator().name())));
                 return block;
             }
@@ -465,7 +465,7 @@ public class CodeGen {
                 return block;
             }
             case Expression.LitArray litArray -> {
-                // just generate all the values and leave them on the stack contigously
+                // just generate all the values and leave them on the stack contiguously
                 for (Expression e : litArray.elements()) {
                     block.addAll(generate(e));
                 }

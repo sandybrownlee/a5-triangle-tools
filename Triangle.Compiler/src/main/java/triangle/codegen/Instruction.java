@@ -42,7 +42,7 @@ public sealed interface Instruction
     // TODO: CALL_PRIM can probably be removed
     record CALL_PRIM(Primitive primitive) implements Instruction { }
 
-    // psuedo-instructions corresponding to symbolic addresses
+    // pseudo-instructions corresponding to symbolic addresses
 
     record LABEL(int labelNo) implements Instruction { }
 
