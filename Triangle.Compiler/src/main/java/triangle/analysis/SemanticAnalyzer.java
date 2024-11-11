@@ -23,7 +23,6 @@ import triangle.ast.SourcePosition;
 import triangle.ast.Statement;
 import triangle.ast.Type;
 import triangle.types.RuntimeType;
-import triangle.types.RuntimeType.*;
 import triangle.types.RuntimeType.PrimType.FuncType;
 import triangle.util.SymbolTable;
 
@@ -690,78 +689,34 @@ public final class SemanticAnalyzer {
                 types.exitScope();
             }
             case Statement.LoopWhileStatement loopWhileStatement -> {
-                Expression condition = loopWhileStatement.condition();
-                Statement loopBody = loopWhileStatement.loopBody();
-                Statement doBody = loopWhileStatement.doBody();
-
-                try {
-                    visit(condition);
-                    if (!(condition.getType() instanceof PrimType.BoolType)) {
-                        errors.add(
-                                new SemanticException.TypeError(loopWhileStatement.sourcePos(), condition.getType(), BOOL_TYPE));
-                    }
-                } catch (SemanticException e) {
-                    errors.add(e);
-                }
-
-                visit(loopBody);
-                visit(doBody);
+                visitLoop(loopWhileStatement.sourcePos(), loopWhileStatement.condition(), loopWhileStatement.loopBody());
+                visit(loopWhileStatement.doBody());
             }
-            case Statement.RepeatUntilStatement repeatUntilStatement -> {
-                Expression condition = repeatUntilStatement.condition();
-                Statement body = repeatUntilStatement.body();
-
-                try {
-                    visit(condition);
-                    if (!(condition.getType() instanceof PrimType.BoolType)) {
-                        errors.add(new SemanticException.TypeError(repeatUntilStatement.sourcePos(), condition.getType(),
-                                                                   BOOL_TYPE
-                        ));
-                    }
-                } catch (SemanticException e) {
-                    errors.add(e);
-                }
-
-                visit(body);
-            }
-            case Statement.RepeatWhileStatement repeatWhileStatement -> {
-                Expression condition = repeatWhileStatement.condition();
-                Statement body = repeatWhileStatement.body();
-
-                try {
-                    visit(condition);
-                    if (!(condition.getType() instanceof PrimType.BoolType)) {
-                        errors.add(new SemanticException.TypeError(repeatWhileStatement.sourcePos(), condition.getType(),
-                                                                   BOOL_TYPE
-                        ));
-                    }
-                } catch (SemanticException e) {
-                    errors.add(e);
-                }
-
-                visit(body);
-            }
+            case Statement.RepeatUntilStatement repeatUntilStatement ->
+                    visitLoop(repeatUntilStatement.sourcePos(), repeatUntilStatement.condition(), repeatUntilStatement.body());
+            case Statement.RepeatWhileStatement repeatWhileStatement ->
+                    visitLoop(repeatWhileStatement.sourcePos(), repeatWhileStatement.condition(), repeatWhileStatement.body());
             case Statement.StatementBlock statementBlock -> {
                 for (Statement stmt : statementBlock.statements()) {
                     visit(stmt);
                 }
             }
-            case Statement.WhileStatement whileStatement -> {
-                Expression condition = whileStatement.condition();
-                Statement body = whileStatement.body();
-
-                try {
-                    visit(condition);
-                    if (!(condition.getType() instanceof PrimType.BoolType)) {
-                        errors.add(new SemanticException.TypeError(whileStatement.sourcePos(), condition.getType(), BOOL_TYPE));
-                    }
-                } catch (SemanticException e) {
-                    errors.add(e);
-                }
-
-                visit(body);
-            }
+            case Statement.WhileStatement whileStatement ->
+                    visitLoop(whileStatement.sourcePos(), whileStatement.condition(), whileStatement.body());
         }
+    }
+
+    private void visitLoop(final SourcePosition sourcePos, final Expression condition, final Statement body) {
+        try {
+            visit(condition);
+            if (!(condition.getType() instanceof PrimType.BoolType)) {
+                errors.add(new SemanticException.TypeError(sourcePos, condition.getType(), BOOL_TYPE));
+            }
+        } catch (SemanticException e) {
+            errors.add(e);
+        }
+
+        visit(body);
     }
 
     // all syntactic types, i.e., syntactic phrases used as types in the source code must resolve to an "actual" type -
