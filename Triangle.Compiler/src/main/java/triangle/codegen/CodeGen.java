@@ -13,8 +13,6 @@ import java.util.function.Function;
 
 public final class CodeGen {
 
-    static final Map<String, IRGenerator.Callable> primitives = new HashMap<>();
-
     public static void write(final String objName, final List<Instruction.TAMInstruction> instructions) throws IOException {
         try (DataOutputStream fw = new DataOutputStream(new FileOutputStream(objName))) {
             for (Instruction.TAMInstruction i : instructions) {

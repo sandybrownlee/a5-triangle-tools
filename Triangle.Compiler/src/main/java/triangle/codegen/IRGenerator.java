@@ -13,20 +13,24 @@ import triangle.ast.RuntimeType;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 // TODO: verify static links work as expected
 public class IRGenerator {
 
+    static final  Map<String, Callable>         primitives    = new HashMap<>();
+
     static {
         // TODO: fill up
-        CodeGen.primitives.put(">", new Callable.PrimitiveCallable(Primitive.GT));
-        CodeGen.primitives.put(">=", new Callable.PrimitiveCallable(Primitive.GE));
-        CodeGen.primitives.put("-", new Callable.PrimitiveCallable(Primitive.SUB));
-        CodeGen.primitives.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
-        CodeGen.primitives.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
-        CodeGen.primitives.put("puteol", new Callable.PrimitiveCallable(Primitive.PUTEOL));
+        primitives.put(">", new Callable.PrimitiveCallable(Primitive.GT));
+        primitives.put(">=", new Callable.PrimitiveCallable(Primitive.GE));
+        primitives.put("-", new Callable.PrimitiveCallable(Primitive.SUB));
+        primitives.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
+        primitives.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
+        primitives.put("puteol", new Callable.PrimitiveCallable(Primitive.PUTEOL));
     }
 
     // TODO: SemanticAnalyzer should ensure static-nesting depth does not exceed the maximum
@@ -42,8 +46,7 @@ public class IRGenerator {
             default -> throw new RuntimeException("static nesting-depth limit exceeded");
         };
     }
-
-    private final SymbolTable<Callable, Void>   funcAddresses = new SymbolTable<>(CodeGen.primitives, null);
+    private final SymbolTable<Callable, Void>   funcAddresses = new SymbolTable<>(primitives, null);
     private final SymbolTable<Integer, Integer> localVars     = new SymbolTable<>(0);
     private final Supplier<Instruction.LABEL>   labelSupplier = new Supplier<>() {
         private int i = 0;
