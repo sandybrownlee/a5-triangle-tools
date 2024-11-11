@@ -229,7 +229,6 @@ public class CodeGen {
                 //  evaluateAddress(variable)
                 //  STOREI varSize
 
-                VarState lookup = localVars.lookup(assignStatement.identifier().root().name());
                 // evaluate expression
                 block.addAll(generate(assignStatement.expression()));
                 // evaluate address of identifier and put on stack
