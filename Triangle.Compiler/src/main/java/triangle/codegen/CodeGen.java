@@ -204,7 +204,7 @@ public class CodeGen {
     }
 
     private final SymbolTable<Callable, Void> funcAddresses = new SymbolTable<>(primitives, null);
-    private final SymbolTable<VarState, Integer>       localVars     = new SymbolTable<>(0);
+    private final SymbolTable<Integer, Integer>       localVars     = new SymbolTable<>(0);
     private final Supplier<Instruction.LABEL>          labelSupplier = new Supplier<>() {
         private int i = 0;
 
@@ -536,7 +536,7 @@ public class CodeGen {
             switch (declaration) {
                 case Declaration.ConstDeclaration constDeclaration -> {
                     block.addAll(generate(constDeclaration.value()));
-                    localVars.add(constDeclaration.name(), new VarState(stackOffset));
+                    localVars.add(constDeclaration.name(), stackOffset);
                     stackOffset += constDeclaration.value().getType().size();
                 }
                 case Declaration.FuncDeclaration funcDeclaration -> {
@@ -580,7 +580,7 @@ public class CodeGen {
                 case Declaration.TypeDeclaration _ -> { }
                 case Declaration.VarDeclaration varDeclaration -> {
                     block.add(new Instruction.PUSH(varDeclaration.runtimeType().size()));
-                    localVars.add(varDeclaration.name(), new VarState(stackOffset));
+                    localVars.add(varDeclaration.name(), stackOffset);
                     stackOffset += varDeclaration.runtimeType().size();
                 }
                 case Declaration.ProcDeclaration procDeclaration -> {
@@ -633,8 +633,8 @@ public class CodeGen {
                                                                                 new Callable.DynamicCallable(paramOffset)
                 );
                 case Parameter.ValueParameter valueParameter -> localVars.add(
-                        valueParameter.getName(), new VarState(paramOffset, false, false));
-                case VarParameter varParameter -> localVars.add(varParameter.getName(), new VarState(paramOffset, true, false));
+                        valueParameter.getName(), paramOffset);
+                case VarParameter varParameter -> localVars.add(varParameter.getName(), paramOffset);
             }
             paramOffset -= parameter.getType().size();
         }
@@ -734,19 +734,8 @@ public class CodeGen {
     }
 
     private Instruction.Address lookupAddress(Expression.Identifier.BasicIdentifier basicIdentifier) {
-        SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-        return new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
-    }
-
-    // localAddresses needs to store (depth,offset) and keep track of current offset since scopes of localAddresses do not
-    //      correspond with order of our function calls
-    record VarState(int stackOffset, boolean isReference, boolean isFunc) {
-
-        // for the common case of adding a plain variable
-        VarState(int stackOffset) {
-            this(stackOffset, false, false);
-        }
-
+        SymbolTable<Integer, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
+        return new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t());
     }
 
     // represents things that may be the target of CALL/CALLI instructions
