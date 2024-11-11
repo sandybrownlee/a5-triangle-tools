@@ -18,6 +18,7 @@
 
 package triangle.syntacticAnalyzer;
 
+
 import triangle.ErrorReporter;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.abstractSyntaxTrees.actuals.ActualParameter;
@@ -35,31 +36,14 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ProcDeclaration;
 import triangle.abstractSyntaxTrees.declarations.SequentialDeclaration;
 import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
-import triangle.abstractSyntaxTrees.expressions.ArrayExpression;
-import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
-import triangle.abstractSyntaxTrees.expressions.CallExpression;
-import triangle.abstractSyntaxTrees.expressions.CharacterExpression;
-import triangle.abstractSyntaxTrees.expressions.Expression;
-import triangle.abstractSyntaxTrees.expressions.IfExpression;
-import triangle.abstractSyntaxTrees.expressions.IntegerExpression;
-import triangle.abstractSyntaxTrees.expressions.LetExpression;
-import triangle.abstractSyntaxTrees.expressions.RecordExpression;
-import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
-import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.*;
 import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
 import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.FormalParameter;
@@ -278,9 +262,33 @@ public class Parser {
 		start(commandPos);
 
 		switch (currentToken.kind) {
-
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
+
+
+			if (currentToken.kind == Token.Kind.STARSTAR){
+
+				//create simple variable name (vName) as indetifier for variable
+				Vname vAST = new SimpleVname(iAST,commandPos);
+				//wrap in vNameExperssion to be used in binary expression
+				VnameExpression vnameExprAST = new VnameExpression(vAST,commandPos);
+
+				//consume **
+				acceptIt();
+				BinaryExpression squareExpression = new BinaryExpression(
+						vnameExprAST, // the variable as the left operator
+						new Operator("*", commandPos), //multiplication operator
+						vnameExprAST, // same variable as the right operator
+						commandPos //position info for error reporting and tracking
+				);
+
+				//create assign command to assign the result of 'variable' * 'variable' to 'variable'
+				finish(commandPos);
+				commandAST = new AssignCommand(vAST, squareExpression, commandPos);
+				//exit switch since command has been fully processed
+				break;
+			}
+
 			if (currentToken.kind == Token.Kind.LPAREN) {
 				acceptIt();
 				ActualParameterSequence apsAST = parseActualParameterSequence();
@@ -393,10 +401,15 @@ public class Parser {
 		}
 			break;
 
+
+
 		default:
 			expressionAST = parseSecondaryExpression();
 			break;
 		}
+
+
+
 		return expressionAST;
 	}
 

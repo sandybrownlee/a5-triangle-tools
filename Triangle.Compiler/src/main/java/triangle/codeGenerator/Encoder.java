@@ -52,17 +52,7 @@ import triangle.abstractSyntaxTrees.declarations.ProcDeclaration;
 import triangle.abstractSyntaxTrees.declarations.SequentialDeclaration;
 import triangle.abstractSyntaxTrees.declarations.UnaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
-import triangle.abstractSyntaxTrees.expressions.ArrayExpression;
-import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
-import triangle.abstractSyntaxTrees.expressions.CallExpression;
-import triangle.abstractSyntaxTrees.expressions.CharacterExpression;
-import triangle.abstractSyntaxTrees.expressions.EmptyExpression;
-import triangle.abstractSyntaxTrees.expressions.IfExpression;
-import triangle.abstractSyntaxTrees.expressions.IntegerExpression;
-import triangle.abstractSyntaxTrees.expressions.LetExpression;
-import triangle.abstractSyntaxTrees.expressions.RecordExpression;
-import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
-import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.*;
 import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
 import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.FuncFormalParameter;
@@ -275,6 +265,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		encodeFetch(ast.V, frame, valSize);
 		return valSize;
 	}
+
 
 	// Declarations
 	@Override

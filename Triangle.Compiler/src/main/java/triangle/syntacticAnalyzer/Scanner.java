@@ -167,7 +167,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':
@@ -183,6 +182,15 @@ public final class Scanner {
 				takeIt();
 			return Token.Kind.OPERATOR;
 
+			case '*':
+				takeIt(); // take first '*'
+				if (currentChar == '*'){ // check if next char is also '*'
+					takeIt(); // if so take second '*'
+                    return Token.Kind.STARSTAR; //return starstar
+				}
+				return Token.Kind.OPERATOR; //otherwise, treat as normal '*' operator
+
+
 		case '\'':
 			takeIt();
 			takeIt(); // the quoted character
@@ -191,6 +199,7 @@ public final class Scanner {
 				return Token.Kind.CHARLITERAL;
 			} else
 				return Token.Kind.ERROR;
+
 
 		case '.':
 			takeIt();

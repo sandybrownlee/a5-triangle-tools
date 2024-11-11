@@ -19,7 +19,6 @@
 package triangle;
 
 //import CLI parser libraries
-
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 
