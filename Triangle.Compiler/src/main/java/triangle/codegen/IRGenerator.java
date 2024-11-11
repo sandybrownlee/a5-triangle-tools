@@ -362,7 +362,7 @@ public class IRGenerator {
                 block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset - 1)));
                 block.add(new Instruction.CALLI());
             }
-            case Callable.PrimitiveCallable(Primitive primitive) -> block.add(new Instruction.CALL_PRIM(primitive));
+            case Callable.PrimitiveCallable(Primitive primitive) -> block.add(Instruction.TAMInstruction.callPrim(primitive));
             case Callable.StaticCallable(Instruction.LABEL label) -> block.add(new Instruction.CALL_LABEL(nonLocalsLink, label));
         }
 
@@ -528,9 +528,9 @@ public class IRGenerator {
                 block.add(new Instruction.LOADL(
                         ((RuntimeType.ArrayType) arraySubscript.array().getType().baseType()).elementType().size()));
                 // CALL Primitive.MULT, to get offset
-                block.add(new Instruction.CALL_PRIM(Primitive.MULT));
+                block.add(Instruction.TAMInstruction.callPrim(Primitive.MULT));
                 // CALL Primitive.ADD, to add offset to address of root
-                block.add(new Instruction.CALL_PRIM(Primitive.ADD));
+                block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
                 return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {

@@ -87,8 +87,7 @@ public class Compiler {
         IRGenerator IRGenerator = new IRGenerator();
         List<Instruction> ir = IRGenerator.generateIR(ast);
 
-        ir = CodeGen.backpatch(ir);
-        CodeGen.write(ir);
+        CodeGen.write(CodeGen.backpatch(ir));
     }
 
 }

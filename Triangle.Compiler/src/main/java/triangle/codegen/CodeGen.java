@@ -1,6 +1,5 @@
 package triangle.codegen;
 
-import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 
 import java.io.DataOutputStream;
@@ -16,9 +15,9 @@ public final class CodeGen {
 
     static final Map<String, IRGenerator.Callable> primitives = new HashMap<>();
 
-    public static void write(final List<Instruction> instructions) {
+    public static void write(final List<Instruction.TAMInstruction> instructions) throws IOException {
         try (DataOutputStream fw = new DataOutputStream(new FileOutputStream("obj.tam"))) {
-            for (Instruction instruction : instructions) {
+            for (Instruction.TAMInstruction instruction : instructions) {
                 // TODO: this is too ugly to stay + fill in
                 switch (instruction) {
                     case Instruction.CALL call -> {
@@ -105,23 +104,15 @@ public final class CodeGen {
                         fw.writeInt(storei.size());
                         fw.writeInt(0);
                     }
-                    case Instruction.CALL_LABEL _,
-                         Instruction.CALL_PRIM _,
-                         Instruction.JUMPIF_LABEL _,
-                         Instruction.JUMP_LABEL _,
-                         Instruction.LABEL _,
-                         Instruction.LOADA_LABEL _ -> throw new RuntimeException("attempted write of pseudo-instruction");
                 }
             }
-        } catch (IOException e) {
-            System.err.println("failed write: " + e.getMessage());
         }
     }
 
     // TODO: maybe do some optimizations before backpatching? eg. any label immediately followed by a jump can just edit all jumps
     //  to that label
     // backpatch the instruction list to resolve all labels, etc.
-    public static List<Instruction> backpatch(final List<Instruction> instructions) {
+    public static List<Instruction.TAMInstruction> backpatch(final List<Instruction> instructions) {
         Map<Instruction.LABEL, Integer> labelLocations = new HashMap<>();
 
         int offset = 0;
@@ -133,15 +124,15 @@ public final class CodeGen {
             }
         }
 
+        // @formatter:off
         // so I don't have to type 'new Address ...' repeatedly
         Function<Instruction.LABEL, Instruction.Address> toCodeAddress = label -> new Instruction.Address(
                 Register.CB,
-                labelLocations.get(
-                        label)
+                labelLocations.get(label)
         );
+        // @formatter:on
 
-        // TODO: this also patches calls to CALL_PRIM, but that should probably be done in another method
-        List<Instruction> patchedInstructions = new ArrayList<>();
+        List<Instruction.TAMInstruction> patchedInstructions = new ArrayList<>();
         for (Instruction instruction : instructions) {
             switch (instruction) {
                 case Instruction.LABEL _ -> { }
@@ -153,12 +144,7 @@ public final class CodeGen {
                         new Instruction.JUMP(toCodeAddress.apply(label)));
                 case Instruction.LOADA_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
                         new Instruction.LOADA(toCodeAddress.apply(label)));
-                case Instruction.CALL_PRIM(Primitive primitive) ->
-                    // use whatever as static link for primitive
-                    // 0'th primitive in Primitive corresponds to address PB + 1
-                        patchedInstructions.add(
-                                new Instruction.CALL(Register.SB, new Instruction.Address(Register.PB, primitive.ordinal())));
-                default -> patchedInstructions.add(instruction);
+                case Instruction.TAMInstruction tamInstruction -> patchedInstructions.add(tamInstruction);
             }
         }
 
