@@ -8,8 +8,6 @@ sealed public interface Statement
                 Statement.LoopWhileStatement, Statement.RepeatUntilStatement, Statement.RepeatWhileStatement,
                 Statement.StatementBlock, Statement.WhileStatement {
 
-    SourcePosition sourcePos();
-
     record StatementBlock(SourcePosition sourcePos, List<Statement> statements) implements Statement { }
 
     record LetStatement(SourcePosition sourcePos, List<Declaration> declarations, Statement statement) implements Statement { }

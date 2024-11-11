@@ -8,10 +8,6 @@ sealed public interface Declaration
         permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.ProcDeclaration,
                 Declaration.TypeDeclaration, Declaration.VarDeclaration {
 
-    String name();
-
-    SourcePosition sourcePos();
-
     record ConstDeclaration(SourcePosition sourcePos, String name, Expression value) implements Declaration { }
 
     final class VarDeclaration implements Declaration {
@@ -31,11 +27,11 @@ sealed public interface Declaration
             this.runtimeType = type;
         }
 
-        @Override public String name() {
+        public String name() {
             return name;
         }
 
-        @Override public SourcePosition sourcePos() {
+        public SourcePosition sourcePos() {
             return sourcePos;
         }
 
