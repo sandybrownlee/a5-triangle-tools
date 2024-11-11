@@ -19,26 +19,25 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-// TODO: verify func/proc arguments/parameters are handled correctly;
 // TODO: verify static links work as expected
 // TODO: variable access is kinda hacky rn; figure out a way to deal with var args, func args, and plain values seamlessly
+// TODO: canonicalize record types
 public class CodeGen {
 
     // maps primitives to their number
-    private static final Map<String, Primitive> primitives = new HashMap<>();
+    private static final Map<String, Callable> primitives = new HashMap<>();
 
     static {
         // TODO: fill up
-        primitives.put(">", Primitive.GT);
-        primitives.put(">=", Primitive.GE);
-        primitives.put("-", Primitive.SUB);
-        primitives.put("+", Primitive.ADD);
-        primitives.put("putint", Primitive.PUTINT);
-        primitives.put("puteol", Primitive.PUTEOL);
+        primitives.put(">", new Callable.PrimitiveCallable(Primitive.GT));
+        primitives.put(">=", new Callable.PrimitiveCallable(Primitive.GE));
+        primitives.put("-", new Callable.PrimitiveCallable(Primitive.SUB));
+        primitives.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
+        primitives.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
+        primitives.put("puteol", new Callable.PrimitiveCallable(Primitive.PUTEOL));
     }
 
     // TODO: SemanticAnalyzer should ensure static-nesting depth does not exceed the maximum
@@ -204,7 +203,7 @@ public class CodeGen {
         return patchedInstructions;
     }
 
-    private final SymbolTable<Instruction.LABEL, Void> funcAddresses = new SymbolTable<>(null);
+    private final SymbolTable<Callable, Void> funcAddresses = new SymbolTable<>(primitives, null);
     private final SymbolTable<VarState, Integer>       localVars     = new SymbolTable<>(0);
     private final Supplier<Instruction.LABEL>          labelSupplier = new Supplier<>() {
         private int i = 0;
@@ -393,11 +392,13 @@ public class CodeGen {
 
         switch (expression) {
             case Expression.BinaryOp binaryOp -> {
-                // evaluate left operand and leave on stack
-                block.addAll(generate(binaryOp.leftOperand()));
-                // evaluate right operand and leave on stack
-                block.addAll(generate(binaryOp.rightOperand()));
-                block.add(new Instruction.CALL_PRIM(primitives.get(binaryOp.operator().name())));
+
+                //  [lOperand]
+                //  [rOperand]
+                //  generateCall(op)
+
+                block.addAll(generateCall(binaryOp.operator().name(),
+                                          List.of(binaryOp.leftOperand(), binaryOp.rightOperand())));
                 return block;
             }
             case Expression.FunCall funCall -> {
@@ -406,78 +407,9 @@ public class CodeGen {
                 //  [arguments(2)]
                 //  ...
                 //  [arguments(n)]
+                //  CALL/CALLI/CALL_PRIM -- depending on the type of function called
 
-                for (Argument argument : funCall.arguments()) {
-                    switch (argument) {
-                        // put a closure - static link + code address - onto the stack
-                        case Argument.FuncArgument funcArgument -> {
-                            // TODO: this is very ugly, cleanup
-                            try {
-                                SymbolTable<Instruction.LABEL, Void>.DepthLookup lookup =
-                                        funcAddresses.lookupWithDepth(funcArgument.func().name());
-                                block.add(new Instruction.LOADA_LABEL(lookup.t()));
-                                block.add(new Instruction.LOADA(new Instruction.Address(getDisplayRegister(lookup.depth()), 0)));
-                            } catch (NoSuchElementException _) {
-                                if (primitives.containsKey(funcArgument.func().name())) {
-                                    block.add(new Instruction.LOADA(new Instruction.Address(Register.PB, primitives.get(funcArgument.func().name()).ordinal())));
-                                    block.add(new Instruction.LOADA(new Instruction.Address(Register.LB, 0)));
-                                } else {
-                                    throw new RuntimeException();
-                                }
-                            }
-                        }
-                        // load address of var argument
-                        case Argument.VarArgument varArgument -> {
-                            Expression.Identifier var = varArgument.var();
-                            RuntimeType type = varArgument.getType();
-                            // if the argument provided is already an address, then dont dereference it here needlessly
-                            block.addAll(generateRuntimeLocation(var, type instanceof RuntimeType.RefOf));
-                        }
-                        // just evaluate expr and leave it on stack
-                        case Expression expressionArg -> block.addAll(generate(expressionArg));
-                    }
-                }
-
-                // TODO: remove this special casing, deal seamlessly with funcs that are params and funcs whose addresses are
-                //  known statically
-                try {
-                    SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(funCall.func().name());
-                    if (lookup.t().isFunc()) {
-                        // TODO: make sure static-link and code address are loaded in the correct order
-                        // the frame and offset that the local local func is found in
-                        Register staticLink = getDisplayRegister(lookup.depth());
-                        int closureStackOffset = lookup.t().stackOffset();
-
-                        //  LOAD addressSize (closureStackOffset) [staticLink]
-                        //  LOAD addressSize (closureStackOffset - addressSize) [staticLink]
-                        //  CALLI
-
-                        // static link is a 1-word value ...
-                        block.add(new Instruction.LOAD(Machine.addressSize,
-                                                       new Instruction.Address(staticLink, closureStackOffset)
-                        ));
-                        // ... immediately preceded by the code address
-                        block.add(new Instruction.LOAD(
-                                Machine.addressSize,
-                                new Instruction.Address(staticLink, closureStackOffset - Machine.addressSize)
-                        ));
-                        // then just call the closure
-                        block.add(new Instruction.CALLI());
-                        return block;
-                    }
-                    // this means we just have a local parameter with the same name as the function we want to call
-                } catch (NoSuchElementException _) { }
-
-                if (primitives.containsKey(funCall.func().name())) {
-                    block.add(new Instruction.CALL_PRIM(primitives.get(funCall.func().name())));
-                    return block;
-                }
-
-                // if we are here, this means that the function must be found statically in our lexical scope
-                SymbolTable<Instruction.LABEL, Void>.DepthLookup funcLabel = funcAddresses.lookupWithDepth(funCall.func().name());
-                // then just make a standard call; we can figure out the static link just by the nesting depth of the
-                //  funcAddress lookup
-                block.add(new Instruction.CALL_LABEL(getDisplayRegister(funcLabel.depth()), funcLabel.t()));
+                block.addAll(generateCall(funCall.func().name(), funCall.arguments()));
                 return block;
             }
             case Expression.Identifier identifier -> {
@@ -527,6 +459,76 @@ public class CodeGen {
         }
     }
 
+    private List<Instruction> generateCall(final String funcName, final List<Argument> arguments) {
+        List<Instruction> block = new ArrayList<>();
+
+        //  [argument(0)]
+        //  [argument(1)]
+        //  ...
+        //  [argument(n)]
+
+        for (Argument argument : arguments) {
+            switch (argument) {
+                // put a closure - static link + code address - onto the stack
+                case Argument.FuncArgument funcArgument -> {
+                    SymbolTable<Callable, Void>.DepthLookup lookup = funcAddresses.lookupWithDepth(funcArgument.func().name());
+                    Register nonLocalsLink = getDisplayRegister(lookup.depth());
+
+                    switch (lookup.t()) {
+                        case Callable.DynamicCallable(int stackOffset) -> {
+
+                            // the `CALLI` instruction expects static link to be on top, followed by code address
+
+                            // LOADA stackOffset[nonLocalsLink]         <- load code address
+                            // LOADA (stackOffset - 1)[nonLocalsLink]   <- load static link
+
+                            block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset)));
+                            block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset - 1)));
+                        }
+                        case Callable.PrimitiveCallable(Primitive primitive) -> {
+                            block.add(new Instruction.LOADA(new Instruction.Address(Register.PB, primitive.ordinal())));
+                            // use whatever as static link for primitives -- 0[LB] here
+                            block.add(new Instruction.LOADA(new Instruction.Address(Register.LB, 0)));
+                        }
+                        case Callable.StaticCallable(Instruction.LABEL label) -> {
+                            block.add(new Instruction.LOADA_LABEL(label));
+                            block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, 0)));
+                        }
+                    }
+                }
+                // load address of var argument
+                case Argument.VarArgument varArgument -> {
+                    Expression.Identifier var = varArgument.var();
+                    RuntimeType type = varArgument.getType();
+                    // if the argument provided is already an address, then dont dereference it here needlessly
+                    block.addAll(generateRuntimeLocation(var, type instanceof RuntimeType.RefOf));
+                }
+                // just evaluate expr and leave it on stack
+                case Expression expressionArg -> block.addAll(generate(expressionArg));
+            }
+        }
+
+        SymbolTable<Callable, Void>.DepthLookup lookup = funcAddresses.lookupWithDepth(funcName);
+        Register nonLocalsLink = getDisplayRegister(lookup.depth());
+
+        switch (lookup.t()) {
+            case Callable.DynamicCallable(int stackOffset) -> {
+
+                // LOAD addressSize stackOffset[nonLocalsLink]          <- load code address
+                // LOAD addressSize (stackOffset - 1)[nonLocalsLink]    <- load static link
+                // CALLI
+
+                block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset)));
+                block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset - 1)));
+                block.add(new Instruction.CALLI());
+            }
+            case Callable.PrimitiveCallable(Primitive primitive) -> block.add(new Instruction.CALL_PRIM(primitive));
+            case Callable.StaticCallable(Instruction.LABEL label) -> block.add(new Instruction.CALL_LABEL(nonLocalsLink, label));
+        }
+
+        return block;
+    }
+
     private int allocateDeclarations(final List<Instruction> block, final List<Declaration> declarations) {
         int stackOffset = localVars.scopeLocalState();
 
@@ -551,7 +553,7 @@ public class CodeGen {
                     block.add(funcLabel);
 
                     // add the function currently being declared to funcAddresses
-                    funcAddresses.add(funcDeclaration.name(), funcLabel);
+                    funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
 
                     // create a new local address scope where the parameters are going to be visible
                     localVars.enterNewScope(0);
@@ -627,8 +629,9 @@ public class CodeGen {
         for (Parameter parameter : parameters.reversed()) {
             switch (parameter) {
                 // static link and code address to be on stack
-                case Parameter.FuncParameter funcParameter -> localVars.add(
-                        funcParameter.getName(), new VarState(paramOffset, false, true));
+                case Parameter.FuncParameter funcParameter -> funcAddresses.add(funcParameter.getName(),
+                                                                                new Callable.DynamicCallable(paramOffset)
+                );
                 case Parameter.ValueParameter valueParameter -> localVars.add(
                         valueParameter.getName(), new VarState(paramOffset, false, false));
                 case VarParameter varParameter -> localVars.add(varParameter.getName(), new VarState(paramOffset, true, false));
@@ -746,4 +749,13 @@ public class CodeGen {
 
     }
 
+    // represents things that may be the target of CALL/CALLI instructions
+    sealed interface Callable permits Callable.DynamicCallable, Callable.PrimitiveCallable, Callable.StaticCallable {
+        // a callable whose location is known statically
+        record StaticCallable(Instruction.LABEL label) implements Callable { }
+        // a callable whose closure may be found at the given stackOffset with static nesting depth decided elsewhere
+        record DynamicCallable(int stackOffset) implements Callable { }
+        // a primitive call
+        record PrimitiveCallable(Primitive primitive) implements Callable { }
+    }
 }
