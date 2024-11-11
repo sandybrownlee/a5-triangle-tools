@@ -1,0 +1,15 @@
+let
+ var x: Integer;
+ var y: Integer
+in
+ begin
+  x:= 6;
+  y:= 4;
+  putint(x+y);
+  puteol();
+  putint(x*y);
+  puteol();
+  if x=y
+   then put('S')
+  else;
+end

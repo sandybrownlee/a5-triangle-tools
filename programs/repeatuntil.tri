@@ -6,9 +6,7 @@ in
 begin
   a := 0;
   repeat
-  begin
     put('a');
-    a := a + 1;
-  end
+    a := a + 1
   until a >= 5
 end
