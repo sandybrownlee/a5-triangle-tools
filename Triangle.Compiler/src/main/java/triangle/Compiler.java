@@ -24,6 +24,8 @@ import com.sampullara.cli.Argument;
 import triangle.analysis.SemanticAnalyzer;
 import triangle.ast.Statement;
 import triangle.codegen.CodeGen;
+import triangle.codegen.IRGenerator;
+import triangle.codegen.Instruction;
 import triangle.parsing.Lexer;
 import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
@@ -32,6 +34,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 // TODO: replace ErrorReporter with robust logging
 // TODO: showStats cmdline option
@@ -81,8 +84,11 @@ public class Compiler {
             return;
         }
 
-        CodeGen codeGen = new CodeGen();
-        codeGen.compile(ast);
+        IRGenerator IRGenerator = new IRGenerator();
+        List<Instruction> ir = IRGenerator.generateIR(ast);
+
+        ir = CodeGen.backpatch(ir);
+        CodeGen.write(ir);
     }
 
 }
