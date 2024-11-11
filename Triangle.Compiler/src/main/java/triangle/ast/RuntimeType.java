@@ -18,6 +18,11 @@ sealed public interface RuntimeType {
 
     int size();
 
+    // e.g: baseType(RefOf(RefOf(Integer)) = Integer
+    default RuntimeType baseType() {
+        return this;
+    }
+
     record ArrayType(int arraySize, RuntimeType elementType) implements RuntimeType {
 
         @Override public int size() {
@@ -39,6 +44,26 @@ sealed public interface RuntimeType {
         }
 
         public record FieldType(String fieldName, RuntimeType fieldType) { }
+
+    }
+
+    record RefOf(RuntimeType type) implements RuntimeType {
+
+        public RefOf(RuntimeType type) {
+            if (type instanceof RefOf) {
+                throw new RuntimeException("creating ref of ref");
+            }
+            this.type = type;
+        }
+
+        // TAM specification ensures all references (pointers) are 1 word wide
+        @Override public int size() {
+            return 1;
+        }
+
+        @Override public RuntimeType baseType() {
+            return type;
+        }
 
     }
 

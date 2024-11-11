@@ -70,45 +70,45 @@ public final class SemanticAnalyzer {
         // TODO: this is very hackish and ugly
         STD_TERMS.putAll(
                 Map.of(
-                        "\\/", new Binding(binaryRelation, true, null),
-                        "/\\", new Binding(binaryRelation, true, null),
-                        "<=",  new Binding(binaryIntRelation, true, null),
-                        ">=",  new Binding(binaryIntRelation, true, null),
-                        ">",   new Binding(binaryIntRelation, true, null),
-                        "<",   new Binding(binaryIntRelation, true, null),
-                        "\\",  new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE), true, null)
+                        "\\/", new Binding(binaryRelation),
+                        "/\\", new Binding(binaryRelation),
+                        "<=",  new Binding(binaryIntRelation),
+                        ">=",  new Binding(binaryIntRelation),
+                        ">",   new Binding(binaryIntRelation),
+                        "<",   new Binding(binaryIntRelation),
+                        "\\",  new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE))
                 ));
 
         STD_TERMS.putAll(
                 Map.of(
-                        "-",  new Binding(binaryIntFunc, true, null),
-                        "+",  new Binding(binaryIntFunc, true, null),
-                        "*",  new Binding(binaryIntFunc, true, null),
-                        "/",  new Binding(binaryIntFunc, true, null),
-                        "//", new Binding(binaryIntFunc, true, null),
-                        "|",  new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null),
-                        "++", new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE), true, null)
+                        "-",  new Binding(binaryIntFunc),
+                        "+",  new Binding(binaryIntFunc),
+                        "*",  new Binding(binaryIntFunc),
+                        "/",  new Binding(binaryIntFunc),
+                        "//", new Binding(binaryIntFunc),
+                        "|",  new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE)),
+                        "++", new Binding(new FuncType(List.of(INT_TYPE), INT_TYPE))
         ));
 
         // these are set to void just as dummy values so that we fail fast in case something tries to access their types since
         //  these are supposed to be special-cased in analyze(Expression)
         STD_TERMS.putAll(
                 Map.of(
-                        "=", new Binding(VOID_TYPE, true, null),
-                        "\\=", new Binding(VOID_TYPE, true, null)
+                        "=", new Binding(VOID_TYPE),
+                        "\\=", new Binding(VOID_TYPE)
                 ));
 
         STD_TERMS.putAll(
                 Map.of(
-                        "get",      new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
-                        "getint",   new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
-                        "geteol",   new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
-                        "puteol",   new Binding(new FuncType(List.of(), VOID_TYPE), true, null),
-                        "put",      new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE), true, null),
-                        "putint",   new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE), true, null),
-                        "chr",      new Binding(new FuncType(List.of(INT_TYPE), CHAR_TYPE), true, null),
-                        "eol",      new Binding(new FuncType(List.of(), BOOL_TYPE), true, null),
-                        "ord",      new Binding(new FuncType(List.of(CHAR_TYPE), INT_TYPE), true, null)
+                        "get",      new Binding(new FuncType(List.of(new RefOf(CHAR_TYPE)), VOID_TYPE)),
+                        "getint",   new Binding(new FuncType(List.of(new RefOf(INT_TYPE)), VOID_TYPE)),
+                        "geteol",   new Binding(new FuncType(List.of(), VOID_TYPE)),
+                        "puteol",   new Binding(new FuncType(List.of(), VOID_TYPE)),
+                        "put",      new Binding(new FuncType(List.of(CHAR_TYPE), VOID_TYPE)),
+                        "putint",   new Binding(new FuncType(List.of(INT_TYPE), VOID_TYPE)),
+                        "chr",      new Binding(new FuncType(List.of(INT_TYPE), CHAR_TYPE)),
+                        "eol",      new Binding(new FuncType(List.of(), BOOL_TYPE)),
+                        "ord",      new Binding(new FuncType(List.of(CHAR_TYPE), INT_TYPE))
                 ));
     }
     //@formatter:on
@@ -158,8 +158,9 @@ public final class SemanticAnalyzer {
                 Identifier func = funcArgument.func();
 
                 visit(func);
-                if (!(func.getType() instanceof FuncType funcType)) {
-                    throw new SemanticException.TypeError(funcArgument.sourcePos(), func.getType(), "function");
+                RuntimeType funcType = func.getType().baseType();
+                if (!(funcType instanceof FuncType)) {
+                    throw new SemanticException.TypeError(funcArgument.sourcePos(), funcType, "function");
                 }
 
                 funcArgument.setType(funcType);
@@ -168,18 +169,20 @@ public final class SemanticAnalyzer {
                 Identifier var = varArgument.var();
 
                 visit(var);
-                if (var.getType() instanceof FuncType) {
+                RuntimeType varType = var.getType().baseType();
+                if (varType instanceof FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC
-                    throw new SemanticException.TypeError(varArgument.sourcePos(), var.getType(), "not a function");
+                    throw new SemanticException.TypeError(varArgument.sourcePos(), varType, "not a function");
                 }
 
                 varArgument.setType(var.getType());
             }
             case Expression expression -> {
                 visit(expression);
-                if (expression.getType() instanceof FuncType) {
+                RuntimeType exprType = expression.getType().baseType();
+                if (exprType instanceof FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC/PROC
-                    throw new SemanticException.TypeError(expression.sourcePos(), expression.getType(), "not a function");
+                    throw new SemanticException.TypeError(expression.sourcePos(), exprType, "not a function");
                 }
             }
         }
@@ -333,41 +336,62 @@ public final class SemanticAnalyzer {
                 Identifier array = arraySubscript.array();
                 Expression subscript = arraySubscript.subscript();
 
+                // "unpack" the types, if they are refs, since we want to treat var arguments transparently
+
+                // this means that:
+                //   arr[0] has type arr.elementType if arr is not a ref
+                //              type RefOf(arr.elementType) if arr is a RefOf(refType)
+
                 visit(array);
-                if (!(array.getType() instanceof ArrayType arrayType)) {
-                    throw new SemanticException.TypeError(arraySubscript.sourcePos(), array.getType(), "array");
+                RuntimeType rArrayType = array.getType().baseType();
+                if (!(rArrayType instanceof ArrayType arrayType)) {
+                    throw new SemanticException.TypeError(arraySubscript.sourcePos(), rArrayType, "array");
                 }
 
                 visit(subscript);
-                if (!(subscript.getType() instanceof PrimType.IntType)) {
-                    throw new SemanticException.TypeError(arraySubscript.sourcePos(), subscript.getType(), INT_TYPE);
+                RuntimeType subscriptType = subscript.getType().baseType();
+                if (!(subscriptType instanceof PrimType.IntType)) {
+                    throw new SemanticException.TypeError(arraySubscript.sourcePos(), subscriptType, INT_TYPE);
                 }
 
-                arraySubscript.setType(arrayType.elementType());
+                RuntimeType elementType = arrayType.elementType();
+                // repack the type if needed
+                arraySubscript.setType(array.getType() instanceof RefOf ? new RefOf(elementType) : elementType);
             }
             case BasicIdentifier basicIdentifier -> {
                 Binding binding = lookup(basicIdentifier);
+                // if the identifier is expected to be a reference, then assign it a RefOf() type
                 basicIdentifier.setType(binding.type());
             }
             case Identifier.RecordAccess recordAccess -> {
                 Identifier record = recordAccess.record();
                 Identifier field = recordAccess.field();
 
+                // same as ArraySubscript, we want to treat record field access transparently wrt references
+
                 visit(record);
-                if (!(record.getType() instanceof RecordType recordType)) {
-                    throw new SemanticException.TypeError(recordAccess.sourcePos(), record.getType(), "record");
+                RuntimeType rRecordType = record.getType().baseType();
+                if (!(rRecordType instanceof RecordType recordType)) {
+                    throw new SemanticException.TypeError(recordAccess.sourcePos(), rRecordType, "record");
                 }
 
-                // record access has a new scope with the field names and types of the record available
+                // record access has a new type-scope with the field names and types of the record available
                 types.enterNewScope(null);
                 for (RecordType.FieldType fieldType : recordType.fieldTypes()) {
+                    // the record field is a reference iff the main record (that is being accessed) is
                     // record fields don't have a declaration
-                    terms.add(fieldType.fieldName(), new Binding(fieldType.fieldType(), true, null));
+                    // repack the field types if needed
+                    RuntimeType rFieldType =
+                            record.getType() instanceof RefOf ?
+                                    new RefOf(fieldType.fieldType()) :
+                                    fieldType.fieldType();
+                    terms.add(fieldType.fieldName(), new Binding(rFieldType, true, null));
                 }
                 visit(field);
                 types.exitScope();
 
-                // TODO:
+                // field.getType() will be a RefOf iff record.getType() is RefOf
+                // this is ensured by case BasicIdentifier and the above loop
                 recordAccess.setType(field.getType());
             }
         }
@@ -390,36 +414,32 @@ public final class SemanticAnalyzer {
                 Expression leftOperand = binop.leftOperand();
                 Expression rightOperand = binop.rightOperand();
 
-                // throw exception early if we cant find the operator
                 Binding opBinding = lookup(operator);
+
                 visit(leftOperand);
                 visit(rightOperand);
 
-                // I special-case the equality operations because they are the ONLY polymorphic function and I do not have enough
+                RuntimeType lOperandType = leftOperand.getType().baseType();
+                RuntimeType rOperandType = rightOperand.getType().baseType();
+
+                // I special-case the equality operations because they are the ONLY polymorphic functions and I do not have enough
                 //  time to implement full polymorphism
-                if (operator.name().equals("=")) {
+                if (operator.name().equals("=") || operator.name().equals("\\=")) {
                     // just make sure that left and right operands are the same type
-                    if (!leftOperand.getType().equals(rightOperand.getType())) {
-                        throw new SemanticException.TypeError(binop.sourcePos(), leftOperand.getType(), rightOperand.getType());
+                    if (!lOperandType.equals(rOperandType)) {
+                        throw new SemanticException.TypeError(binop.sourcePos(), lOperandType, rOperandType);
                     }
 
                     binop.setType(BOOL_TYPE);
                     return;
                 }
-                if (operator.name().equals("\\=")) {
-                    // just make sure that left and right operands are the same type
-                    if (!leftOperand.getType().equals(rightOperand.getType())) {
-                        throw new SemanticException.TypeError(binop.sourcePos(), leftOperand.getType(), rightOperand.getType());
-                    }
-
-                    binop.setType(BOOL_TYPE);
-                    return;
-                }
+                // just make sure that left and right operands are the same type
                 // make sure the above special-case block precedes any attempt to access opType's value, since the equality
                 //  operations have their types set to null in the stdenv
 
-                if (!(opBinding.type() instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
-                    throw new SemanticException.TypeError(binop.sourcePos(), opBinding.type(), "function");
+                RuntimeType operatorType = opBinding.type().baseType();
+                if (!(operatorType instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
+                    throw new SemanticException.TypeError(binop.sourcePos(), operatorType, "function");
                 }
 
                 if (argTypes.size() != 2) {
@@ -427,13 +447,13 @@ public final class SemanticAnalyzer {
                     throw new SemanticException.ArityMismatch(binop.sourcePos(), operator, 2, argTypes.size());
                 }
 
-                if (!leftOperand.getType().equals(argTypes.get(0))) {
+                if (!lOperandType.equals(argTypes.get(0))) {
                     //noinspection SequencedCollectionMethodCanBeUsed
-                    throw new SemanticException.TypeError(binop.sourcePos(), argTypes.get(0), leftOperand.getType());
+                    throw new SemanticException.TypeError(binop.sourcePos(), argTypes.get(0), lOperandType);
                 }
 
-                if (!rightOperand.getType().equals(argTypes.get(1))) {
-                    throw new SemanticException.TypeError(binop.sourcePos(), argTypes.get(1), rightOperand.getType());
+                if (!rOperandType.equals(argTypes.get(1))) {
+                    throw new SemanticException.TypeError(binop.sourcePos(), argTypes.get(1), rOperandType);
                 }
 
                 binop.setType(returnType);
@@ -444,16 +464,20 @@ public final class SemanticAnalyzer {
 
                 visit(callable);
 
-                if (!(callable.getType() instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
-                    throw new SemanticException.TypeError(funCall.sourcePos(), callable.getType(), "function");
+                RuntimeType funcType = callable.getType().baseType();
+
+                if (!(funcType instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
+                    throw new SemanticException.TypeError(funCall.sourcePos(), funcType, "function");
                 }
 
                 if (argTypes.size() != arguments.size()) {
                     throw new SemanticException.ArityMismatch(funCall.sourcePos(), callable, argTypes.size(), arguments.size());
                 }
 
-                // for each argument
                 Declaration declaration = lookup(funCall.func()).declaration();
+                // if there is a corresponding declaration for this function (i.e., it is not a primitive call) check if the
+                //  arguments being passed correspond to the parameters; TAM specification requires that a parameter declared var
+                //  must have a corresponding argument declared var; etc.
                 if (declaration instanceof Declaration.ProcDeclaration procDeclaration) {
                     checkArgumentTypes(arguments, procDeclaration.parameters());
                 } else if (declaration instanceof Declaration.FuncDeclaration funcDeclaration) {
@@ -463,15 +487,14 @@ public final class SemanticAnalyzer {
                 for (int i = 0; i < argTypes.size(); i++) {
                     Argument arg = arguments.get(i);
 
-                    // we don't have to resolveType() the types in function arg list since it should have been done at
-                    // declaration time
-                    RuntimeType expectedType = argTypes.get(i);
+                    // we don't have to resolve the types in argTypes since it should have been done at declaration time
+                    RuntimeType expectedType = argTypes.get(i).baseType();
 
                     // analyze it
                     visit(arg);
-
-                    if (!(arg.getType().equals(expectedType))) {
-                        throw new SemanticException.TypeError(funCall.sourcePos(), arg.getType(), expectedType);
+                    RuntimeType argType = arg.getType().baseType();
+                    if (!(argType.equals(expectedType))) {
+                        throw new SemanticException.TypeError(funCall.sourcePos(), argType, expectedType);
                     }
                 }
 
@@ -480,7 +503,8 @@ public final class SemanticAnalyzer {
             case Identifier identifier -> {
                 visit(identifier);
                 // cannot evaluate a function as a result since we don't support HOF
-                if (identifier.getType() instanceof FuncType) {
+                final RuntimeType identifierType = identifier.getType().baseType();
+                if (identifierType instanceof FuncType) {
                     throw new SemanticException.FunctionResult(identifier.sourcePos(), identifier);
                 }
             }
@@ -490,17 +514,20 @@ public final class SemanticAnalyzer {
                 Expression alternative = ifExpression.alternative();
 
                 visit(condition);
-                if (!(condition.getType() instanceof PrimType.BoolType)) {
-                    throw new SemanticException.TypeError(ifExpression.sourcePos(), condition.getType(), BOOL_TYPE);
+                RuntimeType condType = condition.getType();
+                if (!(condType instanceof PrimType.BoolType)) {
+                    throw new SemanticException.TypeError(ifExpression.sourcePos(), condType, BOOL_TYPE);
                 }
 
                 visit(consequent);
                 visit(alternative);
-                if (!(consequent.getType().equals(alternative.getType()))) {
-                    throw new SemanticException.TypeError(ifExpression.sourcePos(), consequent.getType(), alternative.getType());
+                RuntimeType conseqType = consequent.getType();
+                RuntimeType alternType = alternative.getType();
+                if (!(conseqType.equals(alternType))) {
+                    throw new SemanticException.TypeError(ifExpression.sourcePos(), conseqType, alternType);
                 }
 
-                ifExpression.setType(consequent.getType());
+                ifExpression.setType(conseqType);
             }
             case LetExpression letExpression -> {
                 List<Declaration> declarations = letExpression.declarations();
@@ -517,7 +544,7 @@ public final class SemanticAnalyzer {
 
                 types.exitScope();
 
-                letExpression.setType(expr.getType());
+                letExpression.setType(expr.getType().baseType());
             }
             case LitArray litArray -> {
                 SourcePosition sourcePos = litArray.sourcePos();
@@ -529,11 +556,12 @@ public final class SemanticAnalyzer {
                 }
 
                 visit(values.getFirst());
-                RuntimeType expectedType = values.getFirst().getType();
+                RuntimeType expectedType = values.getFirst().getType().baseType();
                 for (Expression value : values) {
                     visit(value);
-                    if (!value.getType().equals(expectedType)) {
-                        throw new SemanticException.TypeError(sourcePos, expectedType, value.getType());
+                    RuntimeType valueType = value.getType().baseType();
+                    if (!valueType.equals(expectedType)) {
+                        throw new SemanticException.TypeError(sourcePos, expectedType, valueType);
                     }
                 }
 
@@ -577,8 +605,9 @@ public final class SemanticAnalyzer {
 
                 // throw exception early if we cant find the operator
                 Binding opBinding = lookup(operator);
-                if (!(opBinding.type() instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
-                    throw new SemanticException.TypeError(unaryOp.sourcePos(), opBinding.type(), "function");
+                RuntimeType opType = opBinding.type().baseType();
+                if (!(opType instanceof FuncType(List<RuntimeType> argTypes, RuntimeType returnType))) {
+                    throw new SemanticException.TypeError(unaryOp.sourcePos(), opType, "function");
                 }
 
                 if (argTypes.size() != 1) {
@@ -587,9 +616,10 @@ public final class SemanticAnalyzer {
                 }
 
                 visit(operand);
-                RuntimeType expectedType = argTypes.getFirst();
-                if (!operand.getType().equals(expectedType)) {
-                    throw new SemanticException.TypeError(unaryOp.sourcePos(), expectedType, operand.getType());
+                RuntimeType expectedType = argTypes.getFirst().baseType();
+                RuntimeType operandType = operand.getType().baseType();
+                if (!operandType.equals(expectedType)) {
+                    throw new SemanticException.TypeError(unaryOp.sourcePos(), expectedType, operandType);
                 }
 
                 unaryOp.setType(returnType);
@@ -614,7 +644,7 @@ public final class SemanticAnalyzer {
             }
 
             // resolve parameter type in current environment and set params type to resolved version
-            case Parameter.VarParameter varParameter -> parameter.setType(resolveType(varParameter.declaredType()));
+            case Parameter.VarParameter varParameter -> parameter.setType(new RefOf(resolveType(varParameter.declaredType())));
             case Parameter.ValueParameter valueParameter -> parameter.setType(resolveType(valueParameter.declaredType()));
         }
     }
@@ -642,9 +672,10 @@ public final class SemanticAnalyzer {
 
                     visit(rvalue);
                     visit(lvalue);
-                    if (!lvalue.getType().equals(rvalue.getType())) {
-                        errors.add(
-                                new SemanticException.TypeError(assignStatement.sourcePos(), lvalue.getType(), rvalue.getType()));
+                    RuntimeType lType = lvalue.getType().baseType();
+                    RuntimeType rType = rvalue.getType().baseType();
+                    if (!lType.equals(rType)) {
+                        errors.add(new SemanticException.TypeError(assignStatement.sourcePos(), lType, rType));
                     }
                 } catch (SemanticException e) {
                     errors.add(e);
@@ -657,8 +688,9 @@ public final class SemanticAnalyzer {
 
                 try {
                     visit(condition);
-                    if (!(condition.getType() instanceof PrimType.BoolType)) {
-                        errors.add(new SemanticException.TypeError(ifStatement.sourcePos(), condition.getType(), BOOL_TYPE));
+                    RuntimeType condType = condition.getType().baseType();
+                    if (!(condType instanceof PrimType.BoolType)) {
+                        errors.add(new SemanticException.TypeError(ifStatement.sourcePos(), condType, BOOL_TYPE));
                     }
                 } catch (SemanticException e) {
                     errors.add(e);
@@ -692,25 +724,26 @@ public final class SemanticAnalyzer {
                 visitLoop(loopWhileStatement.sourcePos(), loopWhileStatement.condition(), loopWhileStatement.loopBody());
                 visit(loopWhileStatement.doBody());
             }
-            case Statement.RepeatUntilStatement repeatUntilStatement ->
-                    visitLoop(repeatUntilStatement.sourcePos(), repeatUntilStatement.condition(), repeatUntilStatement.body());
-            case Statement.RepeatWhileStatement repeatWhileStatement ->
-                    visitLoop(repeatWhileStatement.sourcePos(), repeatWhileStatement.condition(), repeatWhileStatement.body());
+            case Statement.RepeatUntilStatement repeatUntilStatement -> visitLoop(
+                    repeatUntilStatement.sourcePos(), repeatUntilStatement.condition(), repeatUntilStatement.body());
+            case Statement.RepeatWhileStatement repeatWhileStatement -> visitLoop(
+                    repeatWhileStatement.sourcePos(), repeatWhileStatement.condition(), repeatWhileStatement.body());
             case Statement.StatementBlock statementBlock -> {
                 for (Statement stmt : statementBlock.statements()) {
                     visit(stmt);
                 }
             }
-            case Statement.WhileStatement whileStatement ->
-                    visitLoop(whileStatement.sourcePos(), whileStatement.condition(), whileStatement.body());
+            case Statement.WhileStatement whileStatement -> visitLoop(
+                    whileStatement.sourcePos(), whileStatement.condition(), whileStatement.body());
         }
     }
 
     private void visitLoop(final SourcePosition sourcePos, final Expression condition, final Statement body) {
         try {
             visit(condition);
-            if (!(condition.getType() instanceof PrimType.BoolType)) {
-                errors.add(new SemanticException.TypeError(sourcePos, condition.getType(), BOOL_TYPE));
+            RuntimeType condType = condition.getType().baseType();
+            if (!(condType instanceof PrimType.BoolType)) {
+                errors.add(new SemanticException.TypeError(sourcePos, condType, BOOL_TYPE));
             }
         } catch (SemanticException e) {
             errors.add(e);
@@ -755,6 +788,12 @@ public final class SemanticAnalyzer {
     }
 
     // each identifier is bound to its type, whether or not its constant, and the place where it was declared
-    record Binding(RuntimeType type, boolean constant, Declaration declaration) { }
+    record Binding(RuntimeType type, boolean constant, Declaration declaration) {
+
+        Binding(RuntimeType type) {
+            this(type, true, null);
+        }
+
+    }
 
 }
