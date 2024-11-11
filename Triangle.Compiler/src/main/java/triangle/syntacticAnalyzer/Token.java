@@ -53,6 +53,9 @@ final class Token {
 		// literals, identifiers, operators...
 		INTLITERAL("<int>"), CHARLITERAL("<char>"), IDENTIFIER("<identifier>"), OPERATOR("<operator>"),
 
+		//squared numbers token
+		SQUAREDNUM("**"),
+
 		// reserved words - keep in alphabetical order for ease of maintenance...
 		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), OF("of"),
 		PROC("proc"), RECORD("record"), THEN("then"), TYPE("type"), VAR("var"), WHILE("while"),

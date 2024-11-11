@@ -167,7 +167,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':
@@ -239,6 +238,14 @@ public final class Scanner {
 		case '}':
 			takeIt();
 			return Token.Kind.RCURLY;
+
+		case '*':
+			takeIt();
+			if (currentChar == '*'){
+				takeIt();
+				return Token.Kind.SQUAREDNUM;
+			}
+			return Token.Kind.OPERATOR;
 
 		case SourceFile.EOT:
 			return Token.Kind.EOT;

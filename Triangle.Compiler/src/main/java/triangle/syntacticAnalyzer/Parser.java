@@ -288,7 +288,18 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			}
+			else if (currentToken.kind == Token.Kind.SQUAREDNUM) {
+				acceptIt();
+				Vname vAST = new SimpleVname(iAST, commandPos);
+				VnameExpression vne = new VnameExpression(vAST, commandPos);
+				Operator op = new Operator("*", commandPos);
+				Expression eAST = new BinaryExpression(vne, op, vne, commandPos);
+				finish(commandPos);
+				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				break;
+			}
+			else {
 
 				Vname vAST = parseRestOfVname(iAST);
 				accept(Token.Kind.BECOMES);
@@ -298,6 +309,12 @@ public class Parser {
 			}
 		}
 			break;
+
+//		case SQUAREDNUM:
+//			acceptIt();
+//			commandAST = parseCommand();
+//			accept(Token.Kind.SQUAREDNUM);
+//			break;
 
 		case BEGIN:
 			acceptIt();
