@@ -169,6 +169,13 @@ public final class SemanticAnalyzer {
                 Identifier var = varArgument.var();
 
                 visit(var);
+
+                // not allowed to pass a const as a var argument; in principle we could analyze the called procedure to see if
+                // it mutates the corresponding var argument
+                if (lookup(var.root()).constant()) {
+                    throw new SemanticException.AssignmentToConstant(varArgument.sourcePos(), var.root());
+                }
+
                 RuntimeType varType = var.getType().baseType();
                 if (varType instanceof FuncType) {
                     // arguments are not allowed to be function types if they are not declared FUNC
@@ -663,10 +670,7 @@ public final class SemanticAnalyzer {
                 Expression rvalue = assignStatement.expression();
 
                 try {
-                    // TODO: does this even work rn?
-                    // bit of a hack-ish way of ensure the user doesn't circumvent const-protection by passing in, say a var to
-                    //  the const
-                    if (terms.lookupAll(lvalue.root().name()).stream().anyMatch(Binding::constant)) {
+                    if (lookup(lvalue.root()).constant()) {
                         errors.add(new SemanticException.AssignmentToConstant(assignStatement.sourcePos(), lvalue));
                     }
 

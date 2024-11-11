@@ -54,7 +54,7 @@ public abstract class SemanticException extends Exception {
     static final class AssignmentToConstant extends SemanticException {
 
         AssignmentToConstant(final SourcePosition sourcePos, final Identifier identifier) {
-            super(sourcePos, "Assignment to constant: " + identifier);
+            super(sourcePos, "Assignment to constant or passing constant as var argument: " + identifier);
         }
 
     }

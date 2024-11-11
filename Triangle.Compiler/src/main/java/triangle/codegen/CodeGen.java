@@ -23,7 +23,6 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-// TODO: verify if var arguments/parameters are handled correctly; does passing a const as a var break things?
 // TODO: verify func/proc arguments/parameters are handled correctly;
 // TODO: verify static links work as expected
 // TODO: variable access is kinda hacky rn; figure out a way to deal with var args, func args, and plain values seamlessly
