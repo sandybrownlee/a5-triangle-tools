@@ -27,8 +27,12 @@ public class IRGenerator {
         // TODO: fill up
         primitives.put(">", new Callable.PrimitiveCallable(Primitive.GT));
         primitives.put(">=", new Callable.PrimitiveCallable(Primitive.GE));
+        primitives.put("<=", new Callable.PrimitiveCallable(Primitive.LE));
         primitives.put("-", new Callable.PrimitiveCallable(Primitive.SUB));
         primitives.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
+        primitives.put("*", new Callable.PrimitiveCallable(Primitive.MULT));
+        primitives.put("getint", new Callable.PrimitiveCallable(Primitive.GETINT));
+        primitives.put("put", new Callable.PrimitiveCallable(Primitive.PUT));
         primitives.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
         primitives.put("puteol", new Callable.PrimitiveCallable(Primitive.PUTEOL));
     }
@@ -255,7 +259,27 @@ public class IRGenerator {
                 block.addAll(generateFetch(identifier, identifier.getType().baseType().size()));
                 return block;
             }
-            case Expression.IfExpression ifExpression -> throw new RuntimeException();
+            case Expression.IfExpression ifExpression -> {
+                //  [condition]
+                //  JUMPIF 0 altLabel
+                //  [consequent]
+                //  JUMP skipLabel
+                // alternateLabel:
+                //  [alternative]
+                // skipLabel:
+
+                Instruction.LABEL altLabel = labelSupplier.get();
+                Instruction.LABEL skipLabel = labelSupplier.get();
+
+                block.addAll(generate(ifExpression.condition()));
+                block.add(new Instruction.JUMPIF_LABEL(0, altLabel));
+                block.addAll(generate(ifExpression.consequent()));
+                block.add(new Instruction.JUMP_LABEL(skipLabel));
+                block.add(altLabel);
+                block.addAll(generate(ifExpression.alternative()));
+                block.add(skipLabel);
+                return block;
+            }
             case Expression.LetExpression letExpression -> {
                 // see generate(LetStatement) for comments
 
