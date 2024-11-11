@@ -394,6 +394,7 @@ public class IRGenerator {
                     //  RETURN returnValueSize paramsSize
                     // skipLabel:
 
+                    //noinspection DuplicatedCode
                     Instruction.LABEL skipLabel = labelSupplier.get();
                     Instruction.LABEL funcLabel = labelSupplier.get();
 
@@ -434,6 +435,7 @@ public class IRGenerator {
                     //  RETURN 0 paramsSize
                     // skipLabel:
 
+                    //noinspection DuplicatedCode
                     Instruction.LABEL skipLabel = labelSupplier.get();
                     Instruction.LABEL procLabel = labelSupplier.get();
 
