@@ -631,8 +631,7 @@ public class CodeGen {
                 return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
-                SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                Instruction.Address address = new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
+                Instruction.Address address = lookupAddress(basicIdentifier);
 
                 if (basicIdentifier.getType() instanceof RuntimeType.RefOf) {
                     block.addAll(generateRuntimeLocation(identifier, true));
@@ -670,8 +669,7 @@ public class CodeGen {
                 return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
-                SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                Instruction.Address address = new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
+                Instruction.Address address = lookupAddress(basicIdentifier);
                 block.add(new Instruction.LOADA(address));
 
                 // if its a identifier is already a reference, then "dereference" it
@@ -696,8 +694,7 @@ public class CodeGen {
                 return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
-                SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
-                Instruction.Address address = new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
+                Instruction.Address address = lookupAddress(basicIdentifier);
 
                 if (basicIdentifier.getType() instanceof RuntimeType.RefOf) {
                     block.addAll(generateRuntimeLocation(identifier, true));
@@ -710,6 +707,11 @@ public class CodeGen {
             }
             case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
         }
+    }
+
+    private Instruction.Address lookupAddress(Expression.Identifier.BasicIdentifier basicIdentifier) {
+        SymbolTable<VarState, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
+        return new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t().stackOffset);
     }
 
     // localAddresses needs to store (depth,offset) and keep track of current offset since scopes of localAddresses do not
