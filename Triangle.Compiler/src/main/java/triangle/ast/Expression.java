@@ -340,14 +340,9 @@ sealed public interface Expression extends Argument, Typeable
             private final String         name;
             private       RuntimeType    type;
 
-            private BasicIdentifier(SourcePosition sourcePos, String name, RuntimeType type) {
+            public BasicIdentifier(SourcePosition sourcePos, String name) {
                 this.sourcePos = sourcePos;
                 this.name = name;
-                this.type = type;
-            }
-
-            public BasicIdentifier(SourcePosition sourcePos, String name) {
-                this(sourcePos, name, null);
             }
 
             @Override public BasicIdentifier root() {
