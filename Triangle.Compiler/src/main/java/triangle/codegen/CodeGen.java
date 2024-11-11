@@ -22,12 +22,10 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
+// TODO: move write() and backpatch() to separate class
 // TODO: verify static links work as expected
-// TODO: variable access is kinda hacky rn; figure out a way to deal with var args, func args, and plain values seamlessly
-// TODO: canonicalize record types
 public class CodeGen {
 
-    // maps primitives to their number
     private static final Map<String, Callable> primitives = new HashMap<>();
 
     static {
@@ -50,7 +48,7 @@ public class CodeGen {
             case 4 -> Register.L4;
             case 5 -> Register.L5;
             case 6 -> Register.L6;
-            default -> throw new RuntimeException("static-nesting depth exceeded");
+            default -> throw new RuntimeException("static nesting-depth limit exceeded");
         };
     }
 
@@ -143,12 +141,12 @@ public class CodeGen {
                         fw.writeInt(storei.size());
                         fw.writeInt(0);
                     }
-                    case Instruction.CALL_LABEL callLabel -> throw new RuntimeException("write of pseudo-instruction");
-                    case Instruction.CALL_PRIM callPrim -> throw new RuntimeException("write of pseudo-instruction");
-                    case Instruction.JUMPIF_LABEL jumpifLabel -> throw new RuntimeException("write of pseudo-instruction");
-                    case Instruction.JUMP_LABEL jumpLabel -> throw new RuntimeException("write of pseudo-instruction");
-                    case Instruction.LABEL label -> throw new RuntimeException("write of pseudo-instruction");
-                    case Instruction.LOADA_LABEL loadaLabel -> throw new RuntimeException("write of pseudo-instruction");
+                    case Instruction.CALL_LABEL _,
+                         Instruction.CALL_PRIM _,
+                         Instruction.JUMPIF_LABEL _,
+                         Instruction.JUMP_LABEL _,
+                         Instruction.LABEL _,
+                         Instruction.LOADA_LABEL _ -> throw new RuntimeException("attempted write of pseudo-instruction");
                 }
             }
         } catch (IOException e) {
@@ -203,9 +201,9 @@ public class CodeGen {
         return patchedInstructions;
     }
 
-    private final SymbolTable<Callable, Void> funcAddresses = new SymbolTable<>(primitives, null);
-    private final SymbolTable<Integer, Integer>       localVars     = new SymbolTable<>(0);
-    private final Supplier<Instruction.LABEL>          labelSupplier = new Supplier<>() {
+    private final SymbolTable<Callable, Void>   funcAddresses = new SymbolTable<>(primitives, null);
+    private final SymbolTable<Integer, Integer> localVars     = new SymbolTable<>(0);
+    private final Supplier<Instruction.LABEL>   labelSupplier = new Supplier<>() {
         private int i = 0;
 
         @Override public Instruction.LABEL get() {
@@ -214,6 +212,7 @@ public class CodeGen {
     };
 
     public List<Instruction> compile(Statement statement) {
+        // TODO: refactor
         List<Instruction> unpatched = generate(statement);
         unpatched.add(new Instruction.HALT());
         unpatched.forEach(System.out::println);
@@ -226,18 +225,20 @@ public class CodeGen {
         return x;
     }
 
-    // the non-trivial code-generation bits below have comments explaining the structure of the generated code:
-    //      [xyz] denotes the result of generating code for xyz
+    // the non-trivial code-generation bits below have comments, in following format, explaining the generated code:
+    //      OPCODE (n) d[r]     is used as in the TAM specification
+    //      [expression]               denotes the result of generating code for `expression`
+
     private List<Instruction> generate(Statement statement) {
         List<Instruction> block = new ArrayList<>();
 
         switch (statement) {
             case Statement.ExpressionStatement expressionStatement -> {
-
                 //  [expression]
                 //  POP 0 resultSize
 
                 block.addAll(generate(expressionStatement.expression()));
+
                 // discard results of ExpressionStatements, since they are intended to be used only for side-effects
                 int resultSize = expressionStatement.expression().getType().size();
                 if (resultSize > 0) {
@@ -246,7 +247,6 @@ public class CodeGen {
                 return block;
             }
             case Statement.AssignStatement assignStatement -> {
-
                 //  [expression]
                 //  evaluateAddress(variable)
                 //  STOREI varSize
@@ -258,13 +258,13 @@ public class CodeGen {
                 return block;
             }
             case Statement.IfStatement ifStatement -> {
-                Instruction.LABEL skipLabel = labelSupplier.get();
-
                 //  [condition]
                 //  JUMPIF 0 skipLabel
                 //  [consequent]
                 // skipLabel:
                 //  [alternative]
+
+                Instruction.LABEL skipLabel = labelSupplier.get();
 
                 block.addAll(generate(ifStatement.condition()));
                 block.add(new Instruction.JUMPIF_LABEL(0, skipLabel));
@@ -281,28 +281,29 @@ public class CodeGen {
                 return block;
             }
             case Statement.LetStatement letStatement -> {
-
                 //  allocateDeclarations(declarations)
                 //  [statement]
 
-                // as declarations are evaluated, they will expand the stack; new consts/vars are stored at stack[stackOffset]
+                // as declarations are evaluated, they will expand the stack
+                // store the current stack top so we know how much to POP when returning
                 int savedStackOffset = localVars.scopeLocalState();
                 int newStackOffset = allocateDeclarations(block, letStatement.declarations());
+                int totalAllocated = newStackOffset - savedStackOffset;
 
+                // set the scope local state to the new stack top so that any let statements/expressions in let body know how
+                // much to POP when returning
                 localVars.setScopeLocalState(newStackOffset);
-                // letStatement.statement() is generated in the new scope containing all our definitions
+
+                // let body is generated in the new scope containing all our definitions
                 block.addAll(generate(letStatement.statement()));
 
-                if (newStackOffset - savedStackOffset > 0) {
-                    block.add(new Instruction.POP(0, newStackOffset - savedStackOffset));
+                if (totalAllocated > 0) {
+                    block.add(new Instruction.POP(0, totalAllocated));
                 }
 
                 return block;
             }
             case Statement.LoopWhileStatement loopWhileStatement -> {
-                Instruction.LABEL loopLabel = labelSupplier.get();
-                Instruction.LABEL skipLabel = labelSupplier.get();
-
                 // loopLabel:
                 //  [loopBody]
                 //  [condition]
@@ -310,6 +311,9 @@ public class CodeGen {
                 //  [doBody]
                 //  JUMP loopLabel
                 // skipLabel:
+
+                Instruction.LABEL loopLabel = labelSupplier.get();
+                Instruction.LABEL skipLabel = labelSupplier.get();
 
                 block.add(loopLabel);
                 block.addAll(generate(loopWhileStatement.loopBody()));
@@ -323,7 +327,6 @@ public class CodeGen {
             }
             case Statement.RepeatUntilStatement repeatUntilStatement -> {
                 Instruction.LABEL loopLabel = labelSupplier.get();
-
                 // loopLabel:
                 //  [body]
                 //  [condition]
@@ -338,7 +341,6 @@ public class CodeGen {
             }
             case Statement.RepeatWhileStatement repeatWhileStatement -> {
                 Instruction.LABEL loopLabel = labelSupplier.get();
-
                 // loopLabel:
                 //  [body]
                 //  [condition]
@@ -352,7 +354,6 @@ public class CodeGen {
                 return block;
             }
             case Statement.StatementBlock statementBlock -> {
-
                 //  [statements(1)]
                 //  [statements(2)]
                 //  ...
@@ -365,15 +366,15 @@ public class CodeGen {
                 return block;
             }
             case Statement.WhileStatement whileStatement -> {
-                Instruction.LABEL loopLabel = labelSupplier.get();
-                Instruction.LABEL skipLabel = labelSupplier.get();
-
                 // loopLabel:
                 //  [condition]
                 //  JUMPIF 0 skipLabel
                 //  [body]
                 //  JUMP loopLabel
                 // skipLabel:
+
+                Instruction.LABEL loopLabel = labelSupplier.get();
+                Instruction.LABEL skipLabel = labelSupplier.get();
 
                 block.add(loopLabel);
                 block.addAll(generate(whileStatement.condition()));
@@ -392,17 +393,17 @@ public class CodeGen {
 
         switch (expression) {
             case Expression.BinaryOp binaryOp -> {
-
                 //  [lOperand]
                 //  [rOperand]
                 //  generateCall(op)
 
-                block.addAll(generateCall(binaryOp.operator().name(),
-                                          List.of(binaryOp.leftOperand(), binaryOp.rightOperand())));
+                block.addAll(generateCall(
+                        binaryOp.operator().name(),
+                        List.of(binaryOp.leftOperand(), binaryOp.rightOperand())
+                ));
                 return block;
             }
             case Expression.FunCall funCall -> {
-
                 //  [arguments(1)]
                 //  [arguments(2)]
                 //  ...
@@ -419,23 +420,26 @@ public class CodeGen {
             }
             case Expression.IfExpression ifExpression -> throw new RuntimeException();
             case Expression.LetExpression letExpression -> {
-                // as declarations are evaluated, they will expand the stack; new consts/vars are stored at stack[stackOffset]
+                // see generate(LetStatement) for comments
+
                 int savedStackOffset = localVars.scopeLocalState();
                 int newStackOffset = allocateDeclarations(block, letExpression.declarations());
+                int totalAllocated = newStackOffset - savedStackOffset;
 
-                // letExpression.statement() is generated in the new scope containing all our definitions
+                localVars.setScopeLocalState(newStackOffset);
+
                 block.addAll(generate(letExpression.expression()));
 
                 int resultSize = letExpression.expression().getType().size();
-                int localVarsSize = newStackOffset - savedStackOffset;
-                if (localVarsSize > 0) {
-                    block.add(new Instruction.POP(resultSize, localVarsSize));
+
+                if (totalAllocated > 0) {
+                    block.add(new Instruction.POP(resultSize, totalAllocated));
                 }
 
                 return block;
             }
             case Expression.LitArray litArray -> {
-                // just generate all the values and leave them on the stack contiguously
+                // generate all the values and leave them on the stack contiguously
                 for (Expression e : litArray.elements()) {
                     block.addAll(generate(e));
                 }
@@ -469,40 +473,43 @@ public class CodeGen {
 
         for (Argument argument : arguments) {
             switch (argument) {
-                // put a closure - static link + code address - onto the stack
                 case Argument.FuncArgument funcArgument -> {
+                    // put a closure -- static link + code address -- onto the stack
+
                     SymbolTable<Callable, Void>.DepthLookup lookup = funcAddresses.lookupWithDepth(funcArgument.func().name());
                     Register nonLocalsLink = getDisplayRegister(lookup.depth());
 
                     switch (lookup.t()) {
                         case Callable.DynamicCallable(int stackOffset) -> {
+                            //  LOADA stackOffset[nonLocalsLink]         <- load code address
+                            //  LOADA (stackOffset - 1)[nonLocalsLink]   <- load static link
 
                             // the `CALLI` instruction expects static link to be on top, followed by code address
-
-                            // LOADA stackOffset[nonLocalsLink]         <- load code address
-                            // LOADA (stackOffset - 1)[nonLocalsLink]   <- load static link
 
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset)));
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset - 1)));
                         }
                         case Callable.PrimitiveCallable(Primitive primitive) -> {
+                            //  LOADA primitive.ordinal()[PB]
+                            //  LOADA 0[LB]
+
                             block.add(new Instruction.LOADA(new Instruction.Address(Register.PB, primitive.ordinal())));
                             // use whatever as static link for primitives -- 0[LB] here
                             block.add(new Instruction.LOADA(new Instruction.Address(Register.LB, 0)));
                         }
                         case Callable.StaticCallable(Instruction.LABEL label) -> {
+                            //  LOADA label
+                            //  LOADA 0[nonLocalsLink]
+
                             block.add(new Instruction.LOADA_LABEL(label));
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, 0)));
                         }
                     }
                 }
                 // load address of var argument
-                case Argument.VarArgument varArgument -> {
-                    Expression.Identifier var = varArgument.var();
-                    RuntimeType type = varArgument.getType();
-                    // if the argument provided is already an address, then dont dereference it here needlessly
-                    block.addAll(generateRuntimeLocation(var, type instanceof RuntimeType.RefOf));
-                }
+                // if the argument provided is already an address, then dont dereference it here needlessly
+                case Argument.VarArgument varArgument -> block.addAll(
+                        generateRuntimeLocation(varArgument.var(), varArgument.getType() instanceof RuntimeType.RefOf));
                 // just evaluate expr and leave it on stack
                 case Expression expressionArg -> block.addAll(generate(expressionArg));
             }
@@ -513,10 +520,9 @@ public class CodeGen {
 
         switch (lookup.t()) {
             case Callable.DynamicCallable(int stackOffset) -> {
-
-                // LOAD addressSize stackOffset[nonLocalsLink]          <- load code address
-                // LOAD addressSize (stackOffset - 1)[nonLocalsLink]    <- load static link
-                // CALLI
+                //  LOAD addressSize stackOffset[nonLocalsLink]          <- load code address
+                //  LOAD addressSize (stackOffset - 1)[nonLocalsLink]    <- load static link
+                //  CALLI
 
                 block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset)));
                 block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset - 1)));
@@ -529,50 +535,51 @@ public class CodeGen {
         return block;
     }
 
+    // allocate space for each declaration, pushing to the stack as needed
+    // when procedures/functions are encountered, the code for the function is generated in-place but a jump-ahead is included
+    // so that it is not executed immediately; a label is associated with the entry point of the newly defined function and
+    // added to funcAddresses
     private int allocateDeclarations(final List<Instruction> block, final List<Declaration> declarations) {
         int stackOffset = localVars.scopeLocalState();
 
         for (Declaration declaration : declarations) {
             switch (declaration) {
                 case Declaration.ConstDeclaration constDeclaration -> {
+                    // generate value -> declaration name with stack offset -> bump stack offset by size of declared value
                     block.addAll(generate(constDeclaration.value()));
                     localVars.add(constDeclaration.name(), stackOffset);
                     stackOffset += constDeclaration.value().getType().size();
                 }
                 case Declaration.FuncDeclaration funcDeclaration -> {
-                    // skipLabel points to a label to skip to so as to not execute the function body while declaring it
+                    //  JUMP skipLabel
+                    // funcLabel:
+                    //  [functionBody]
+                    //  RETURN returnValueSize paramsSize
+                    // skipLabel:
+
                     Instruction.LABEL skipLabel = labelSupplier.get();
-                    // funcLabel points to a label, stored in funcAddresses, that other parts of the code can refer to to
-                    //      call the function currently being declared
                     Instruction.LABEL funcLabel = labelSupplier.get();
 
-                    // JUMP skipLabel
                     block.add(new Instruction.JUMP_LABEL(skipLabel));
-
-                    // LABEL funcLabel
                     block.add(funcLabel);
 
-                    // add the function currently being declared to funcAddresses
-                    funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
-
-                    // create a new local address scope where the parameters are going to be visible
+                    // new scope for local vars and functions
                     localVars.enterNewScope(0);
                     funcAddresses.enterNewScope(null);
 
-                    // add each param, offset by the appropriate amount, to local addresses
-                    int paramOffset = allocateParameters(funcDeclaration.parameters());
+                    // the function currently being declared must be visible in its own definition, so as to allow recursion
+                    funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
 
-                    // the function currently being declared must be visible in its own definition, to allow recursion
-                    funcAddresses.add(funcDeclaration.name(), funcLabel);
+                    // we need the total amount of space taken by the function to know what to use for the RETURN call
+                    int paramsSize = addParametersToScope(funcDeclaration.parameters());
 
-                    // generate code for the body of the function in the new scope
-                    // we want to explicitly cast it to an expression, if its type is not Statement, so as to not discard
-                    //  the return value
                     block.addAll(generate(funcDeclaration.expression()));
-                    block.add(new Instruction.RETURN(funcDeclaration.expression().getType().size(), paramOffset));
+                    block.add(new Instruction.RETURN(funcDeclaration.expression().getType().size(), paramsSize));
 
                     localVars.exitScope();
                     funcAddresses.exitScope();
+
+                    funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
 
                     block.add(skipLabel);
                 }
@@ -584,36 +591,35 @@ public class CodeGen {
                     stackOffset += varDeclaration.runtimeType().size();
                 }
                 case Declaration.ProcDeclaration procDeclaration -> {
-                    // skipLabel points to a label to skip to so as to not execute the function body while declaring it
+                    //  JUMP skipLabel
+                    // procLabel:
+                    //  [procBody]
+                    //  RETURN 0 paramsSize
+                    // skipLabel:
+
                     Instruction.LABEL skipLabel = labelSupplier.get();
-                    // funcLabel points to a label, stored in funcAddresses, that other parts of the code can refer to to
-                    //      call the function currently being declared
-                    Instruction.LABEL funcLabel = labelSupplier.get();
+                    Instruction.LABEL procLabel = labelSupplier.get();
 
-                    // JUMP skipLabel
                     block.add(new Instruction.JUMP_LABEL(skipLabel));
+                    block.add(procLabel);
 
-                    // LABEL funcLabel
-                    block.add(funcLabel);
-
-                    // add the function currently being declared to funcAddresses
-                    funcAddresses.add(procDeclaration.name(), funcLabel);
-
-                    // create a new local address scope where the parameters are going to be visible
+                    // new scope for local vars and functions
                     localVars.enterNewScope(0);
                     funcAddresses.enterNewScope(null);
 
-                    // add each param, offset by the appropriate amount, to local addresses
-                    int paramOffset = allocateParameters(procDeclaration.parameters());
+                    // the proc currently being declared must be visible in its own definition, so as to allow recursion
+                    funcAddresses.add(procDeclaration.name(), new Callable.StaticCallable(procLabel));
 
-                    // generate code for the body of the function in the new scope
+                    // we need the total amount of space that will be taken by the parameters to know how to RETURN
+                    int paramsSize = addParametersToScope(procDeclaration.parameters());
+
                     block.addAll(generate(procDeclaration.statement()));
-
-                    // a proc has no return value
-                    block.add(new Instruction.RETURN(0, paramOffset));
+                    block.add(new Instruction.RETURN(0, paramsSize));
 
                     localVars.exitScope();
                     funcAddresses.exitScope();
+
+                    funcAddresses.add(procDeclaration.name(), new Callable.StaticCallable(procLabel));
 
                     block.add(skipLabel);
                 }
@@ -623,14 +629,16 @@ public class CodeGen {
         return stackOffset;
     }
 
-    // associates each parameter with its location relative to current frame, returns total words allocated for parameter
-    private int allocateParameters(List<Parameter> parameters) {
+    // associates each parameter with its location relative to current frame, returns no words that will be  allocated for
+    // parameter when the corresponding function is called
+    private int addParametersToScope(List<Parameter> parameters) {
         int paramOffset = -1;
         for (Parameter parameter : parameters.reversed()) {
             switch (parameter) {
                 // static link and code address to be on stack
-                case Parameter.FuncParameter funcParameter -> funcAddresses.add(funcParameter.getName(),
-                                                                                new Callable.DynamicCallable(paramOffset)
+                case Parameter.FuncParameter funcParameter -> funcAddresses.add(
+                        funcParameter.getName(),
+                        new Callable.DynamicCallable(paramOffset)
                 );
                 case Parameter.ValueParameter valueParameter -> localVars.add(
                         valueParameter.getName(), paramOffset);
@@ -639,12 +647,12 @@ public class CodeGen {
             paramOffset -= parameter.getType().size();
         }
 
-        // the total size allocated for parameters is the abs value of paramOffset, minus one because paramOffset starts at -1
+        // |paramOffset| - 1, because paramOffset starts at -1
         return (paramOffset * -1) - 1;
     }
 
-    // generate instructions to store to the location associated with the identifier, dereferencing only if needed
-    // the last `size` words of data on the stack will be popped and stored to the address
+    // generates instructions to pop the last `size` words of data and store it to the location that identifier will be found in
+    // at runtime
     private List<Instruction> generateStore(Expression.Identifier identifier, int size) {
         List<Instruction> block = new ArrayList<>();
 
@@ -670,10 +678,8 @@ public class CodeGen {
         }
     }
 
-    // a list of instructions that, when evaluated, leaves the address associated with identifier on the stack top,
-    //  dereferencing reference values only if needed; the final address will point to where the data actually resides on the
-    //  stack, not an address to it
-    // leaves the stack otherwise unchanged
+    // generates instructions to push the address of `identifier`s runtime location to the stack; if dereferencing is true, the
+    // address is dereferenced iff it is a RefOf
     private List<Instruction> generateRuntimeLocation(Expression.Identifier identifier, boolean dereferencing) {
         List<Instruction> block = new ArrayList<>();
 
@@ -685,7 +691,8 @@ public class CodeGen {
                 block.addAll(generate(arraySubscript.subscript()));
                 // LOADL arrayElementSize
                 // push element size on stack
-                block.add(new Instruction.LOADL(((RuntimeType.ArrayType) arraySubscript.array().getType().baseType()).elementType().size()));
+                block.add(new Instruction.LOADL(
+                        ((RuntimeType.ArrayType) arraySubscript.array().getType().baseType()).elementType().size()));
                 // CALL Primitive.MULT, to get offset
                 block.add(new Instruction.CALL_PRIM(Primitive.MULT));
                 // CALL Primitive.ADD, to add offset to address of root
@@ -707,8 +714,7 @@ public class CodeGen {
         }
     }
 
-    // a list of instructions that, when evaluated, fetches `size` words of data from the address associated with identifier;
-    // dereferencing reference values only if needed
+    // generates instructions to push the value in `identifier`'s runtime location to the stack
     private List<Instruction> generateFetch(Expression.Identifier identifier, int size) {
         List<Instruction> block = new ArrayList<>();
         switch (identifier) {
@@ -733,6 +739,7 @@ public class CodeGen {
         }
     }
 
+    // given a basic identifier, gets the address it may be found in at runtime
     private Instruction.Address lookupAddress(Expression.Identifier.BasicIdentifier basicIdentifier) {
         SymbolTable<Integer, Integer>.DepthLookup lookup = localVars.lookupWithDepth(basicIdentifier.name());
         return new Instruction.Address(getDisplayRegister(lookup.depth()), lookup.t());
@@ -740,11 +747,16 @@ public class CodeGen {
 
     // represents things that may be the target of CALL/CALLI instructions
     sealed interface Callable permits Callable.DynamicCallable, Callable.PrimitiveCallable, Callable.StaticCallable {
+
         // a callable whose location is known statically
         record StaticCallable(Instruction.LABEL label) implements Callable { }
+
         // a callable whose closure may be found at the given stackOffset with static nesting depth decided elsewhere
         record DynamicCallable(int stackOffset) implements Callable { }
+
         // a primitive call
         record PrimitiveCallable(Primitive primitive) implements Callable { }
+
     }
+
 }
