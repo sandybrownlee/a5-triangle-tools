@@ -5,7 +5,7 @@ import java.util.List;
 sealed public interface Expression extends Argument, Typeable
         permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
-                Expression.UnaryOp {
+                Expression.SequenceExpression, Expression.UnaryOp {
 
     record LitBool(SourcePosition sourcePos, boolean value) implements Expression {
 
@@ -319,6 +319,41 @@ sealed public interface Expression extends Argument, Typeable
 
         public List<Argument> arguments() {
             return arguments;
+        }
+
+    }
+
+    final class SequenceExpression implements Expression {
+
+        private final SourcePosition sourcePos;
+        private final Statement      statement;
+        private final Expression     expression;
+        private       RuntimeType    type;
+
+        public SequenceExpression(SourcePosition sourcePos, Statement statement, Expression expression) {
+            this.sourcePos = sourcePos;
+            this.statement = statement;
+            this.expression = expression;
+        }
+
+        public SourcePosition sourcePos() {
+            return sourcePos;
+        }
+
+        public Statement statement() {
+            return statement;
+        }
+
+        public Expression expression() {
+            return expression;
+        }
+
+        @Override public RuntimeType getType() {
+            return type;
+        }
+
+        @Override public void setType(final RuntimeType type) {
+            this.type = type;
         }
 
     }

@@ -135,6 +135,11 @@ public final class ASTPrinter {
                     prettyPrint(unaryOp.operand())
             );
             case Expression.LitBool litBool -> Boolean.toString(litBool.value());
+            case Expression.SequenceExpression sequenceExpression -> String.format(
+                    "AFTER %s RETURN %s",
+                    sequenceExpression.statement(),
+                    sequenceExpression.expression()
+            );
         } + ")";
     }
 

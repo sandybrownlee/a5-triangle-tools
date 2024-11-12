@@ -318,6 +318,14 @@ public class IRGenerator {
             // the fields in a lit record can be declared in any order?
             case Expression.LitRecord litRecord -> throw new RuntimeException();
             case Expression.UnaryOp unaryOp -> throw new RuntimeException();
+            case Expression.SequenceExpression sequenceExpression -> {
+                // [statement]
+                // [expression]
+
+                block.addAll(generate(sequenceExpression.statement()));
+                block.addAll(generate(sequenceExpression.expression()));
+                return block;
+            }
         }
     }
 

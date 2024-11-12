@@ -632,6 +632,11 @@ public final class SemanticAnalyzer {
                 unaryOp.setType(returnType);
             }
             case LitBool _ -> { }
+            case Expression.SequenceExpression sequenceExpression -> {
+                visit(sequenceExpression.statement());
+                visit(sequenceExpression.expression());
+                sequenceExpression.setType(sequenceExpression.expression().getType());
+            }
         }
     }
 

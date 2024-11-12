@@ -22,17 +22,7 @@ package triangle.parsing;
 import triangle.ast.Argument;
 import triangle.ast.Declaration;
 import triangle.ast.Expression;
-import triangle.ast.Expression.BinaryOp;
-import triangle.ast.Expression.FunCall;
-import triangle.ast.Expression.Identifier;
-import triangle.ast.Expression.IfExpression;
-import triangle.ast.Expression.LetExpression;
-import triangle.ast.Expression.LitArray;
-import triangle.ast.Expression.LitBool;
-import triangle.ast.Expression.LitChar;
-import triangle.ast.Expression.LitInt;
-import triangle.ast.Expression.LitRecord;
-import triangle.ast.Expression.UnaryOp;
+import triangle.ast.Expression.*;
 import triangle.ast.Parameter;
 import triangle.ast.Parameter.FuncParameter;
 import triangle.ast.Parameter.ValueParameter;
@@ -264,6 +254,13 @@ public class Parser {
                 shift(Token.Kind.ELSE);
                 Expression alternative = parseExpression();
                 yield new IfExpression(start, condition, consequent, alternative);
+            }
+            case AFTER -> {
+                SourcePosition start = shift(Token.Kind.AFTER);
+                Statement statement = parseStmt();
+                shift(Token.Kind.RETURN);
+                Expression expression = parseExpression();
+                yield new SequenceExpression(start, statement, expression);
             }
             case IDENTIFIER -> parseIfCall(parseIdentifier());
             // unary prefix op

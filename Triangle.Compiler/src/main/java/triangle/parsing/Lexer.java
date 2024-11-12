@@ -37,6 +37,7 @@ public final class Lexer {
     private static final Map<String, Token.Kind> reservedWords = new HashMap<>();
 
     static {
+        reservedWords.put("after", Token.Kind.AFTER);
         reservedWords.put("array", Token.Kind.ARRAY);
         reservedWords.put("begin", Token.Kind.BEGIN);
         reservedWords.put("const", Token.Kind.CONST);
@@ -53,6 +54,7 @@ public final class Lexer {
         reservedWords.put("proc", Token.Kind.PROC);
         reservedWords.put("record", Token.Kind.RECORD);
         reservedWords.put("repeat", Token.Kind.REPEAT);
+        reservedWords.put("return", Token.Kind.RETURN);
         reservedWords.put("then", Token.Kind.THEN);
         reservedWords.put("true", Token.Kind.TRUE);
         reservedWords.put("type", Token.Kind.TYPE);
@@ -93,7 +95,7 @@ public final class Lexer {
                 yield nextToken();
             }
 
-            // TODO: should block comments be stackable?
+            // TODO: should block comments be nestable?
             case '$' -> {
                 do {
                     read();

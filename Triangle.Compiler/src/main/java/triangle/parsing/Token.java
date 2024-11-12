@@ -33,7 +33,8 @@ class Token {
         INTLITERAL, CHARLITERAL, IDENTIFIER, OPERATOR, TRUE, FALSE,
 
         // reserved words - keep in alphabetical order for ease of maintenance...
-        ARRAY, BEGIN, CONST, DO, ELSE, END, FUNC, IF, IN, LET, LOOP, OF, PROC, RECORD, REPEAT, THEN, TYPE, UNTIL, VAR, WHILE,
+        AFTER, ARRAY, BEGIN, CONST, DO, ELSE, END, FUNC, IF, IN, LET, LOOP, OF, PROC, RECORD, REPEAT,
+        RETURN, THEN, TYPE, UNTIL, VAR, WHILE,
 
         // punctuation...
         DOT, COLON, SEMICOLON, COMMA, BECOMES, IS,
