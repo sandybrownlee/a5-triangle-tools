@@ -438,8 +438,9 @@ public class IRGenerator {
                     block.add(new Instruction.JUMP_LABEL(skipLabel));
                     block.add(funcLabel);
 
-                    // new scope for local vars and functions
-                    localVars.enterNewScope(0);
+                    // new scope for local vars and functions, since we are in a func declaration, the scope local state (i.e.,
+                    // the initial stack offset) must be 3 * address-width -- for static link, dynamic link, return address
+                    localVars.enterNewScope(3 * Machine.addressSize);
                     funcAddresses.enterNewScope(null);
 
                     // the function currently being declared must be visible in its own definition, so as to allow recursion
@@ -479,8 +480,9 @@ public class IRGenerator {
                     block.add(new Instruction.JUMP_LABEL(skipLabel));
                     block.add(procLabel);
 
-                    // new scope for local vars and functions
-                    localVars.enterNewScope(0);
+                    // new scope for local vars and functions, since we are in a proc declaration, the scope local state (i.e.,
+                    // the initial stack offset) must be 3 * address-width -- for static link, dynamic link, return address
+                    localVars.enterNewScope(3 * Machine.addressSize);
                     funcAddresses.enterNewScope(null);
 
                     // the proc currently being declared must be visible in its own definition, so as to allow recursion
