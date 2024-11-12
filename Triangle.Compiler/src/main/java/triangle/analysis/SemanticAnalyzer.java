@@ -389,7 +389,7 @@ public final class SemanticAnalyzer {
                 }
 
                 // record access has a new type-scope with the field names and types of the record available
-                types.enterNewScope(null);
+                terms.enterNewScope(null);
                 for (RecordType.FieldType fieldType : recordType.fieldTypes()) {
                     // the record field is a reference iff the main record (that is being accessed) is
                     // record fields don't have a declaration
@@ -401,7 +401,7 @@ public final class SemanticAnalyzer {
                     terms.add(fieldType.fieldName(), new Binding(rFieldType, true, null));
                 }
                 visit(field);
-                types.exitScope();
+                terms.exitScope();
 
                 // field.getType() will be a RefOf iff record.getType() is RefOf
                 // this is ensured by case BasicIdentifier and the above loop
@@ -588,13 +588,15 @@ public final class SemanticAnalyzer {
                 }
             }
             case LitRecord litRecord -> {
+                // the wording of the TAM specification (interpreted strictly) implies that two records of types:
+                // { a : Integer, b : Char } and { b : Char, a : Integer } are not equivalent
+                // this means that field names are irrelevant for deciding record-type equality, the only thing that matters
+                // is the order and type of fields
 
                 SourcePosition sourcePos = litRecord.sourcePos();
                 List<LitRecord.RecordField> fields = litRecord.fields();
 
                 if (fields.isEmpty()) {
-                    // implementing this sensibly will take row-poly types which is too hard so we just treat all empty records
-                    // as belonging to a single special empty-record type
                     litRecord.setType(new RecordType(Collections.emptyList()));
                     return;
                 }

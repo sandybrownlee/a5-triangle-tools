@@ -19,6 +19,8 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 // TODO: records
+// TODO: when we know that an identifier's location is statically derivable (does not contain array with non-constant
+//  subscript) we can special-case the generateStore/Fetch methods to be more efficient
 public class IRGenerator {
 
     static final  Map<String, Callable> builtins = new HashMap<>();
@@ -35,6 +37,7 @@ public class IRGenerator {
         builtins.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
         builtins.put("*", new Callable.PrimitiveCallable(Primitive.MULT));
         builtins.put("/", new Callable.PrimitiveCallable(Primitive.DIV));
+        builtins.put("\\", new Callable.PrimitiveCallable(Primitive.NOT));
         builtins.put("/\\", new Callable.PrimitiveCallable(Primitive.AND));
         builtins.put("\\/", new Callable.PrimitiveCallable(Primitive.OR));
         builtins.put("//", new Callable.PrimitiveCallable(Primitive.MOD));
@@ -328,8 +331,12 @@ public class IRGenerator {
                 block.add(new Instruction.LOADL(litInt.value()));
                 return block;
             }
-            // the fields in a lit record can be declared in any order?
-            case Expression.LitRecord litRecord -> throw new RuntimeException();
+            case Expression.LitRecord litRecord -> {
+                for (Expression.LitRecord.RecordField field : litRecord.fields()) {
+                    block.addAll(generate(field.value()));
+                }
+                return block;
+            }
             case Expression.UnaryOp unaryOp -> {
                 // generateCall(op, [operand])
                 block.addAll(generateCall(unaryOp.operator().name(), List.of(unaryOp.operand())));
@@ -576,7 +583,11 @@ public class IRGenerator {
 
                 return block;
             }
-            case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
+            case Expression.Identifier.RecordAccess recordAccess -> {
+                block.addAll(generateRuntimeLocation(recordAccess, true));
+                block.add(new Instruction.STOREI(size));
+                return block;
+            }
         }
     }
 
@@ -612,7 +623,75 @@ public class IRGenerator {
 
                 return block;
             }
-            case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
+            case Expression.Identifier.RecordAccess recordAccess -> {
+                block.addAll(generateRuntimeLocation(recordAccess.record(), dereferencing));
+                block.addAll(generateRecordAccess(recordAccess));
+                return block;
+            }
+        }
+    }
+
+    private List<Instruction> generateRecordAccess(Expression.Identifier.RecordAccess recordAccess) {
+        List<Instruction> block = new ArrayList<>();
+
+        // first generate instructions to access the base of the record; this can be any arbitrary identifier
+        switch (recordAccess.record()) {
+            case Expression.Identifier.ArraySubscript arraySubscript -> {
+                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType();
+                int elemSize = arrayType.elementType().baseType().size();
+
+                block.addAll(generate(arraySubscript.subscript()));
+                block.add(new Instruction.LOADL(elemSize));
+                block.add(Instruction.TAMInstruction.callPrim(Primitive.MULT));
+                block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
+            }
+            case Expression.Identifier.BasicIdentifier basicIdentifier -> { }
+            // our parser guarantees this
+            case Expression.Identifier.RecordAccess access -> throw new RuntimeException();
+        }
+
+        // calculate the offset from base address of root, to the place where the field we want to access starts
+        // this assumes that order of field types corresponds to order in which field values are located contiguously
+        // in memory
+        int offset = 0;
+        var fieldTypes = ((RuntimeType.RecordType) recordAccess.record().getType().baseType()).fieldTypes();
+        for (var fieldType : fieldTypes) {
+            if (fieldType.fieldName().equals(recordAccess.field().root().name())) {
+                break;
+            }
+
+            assert !(fieldType.fieldType() instanceof RuntimeType.RefOf);
+            offset += fieldType.fieldType().size();
+        }
+
+        // bump address on the stack by `offset`, if needed
+        if (offset > 0) {
+            block.add(new Instruction.LOADL(offset));
+            block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
+        }
+
+        // now, the top of the stack contains the base address for record.accessedField
+
+        // depending on what kind of identifier the field is, we want to do a few different things
+        switch (recordAccess.field()) {
+            case Expression.Identifier.ArraySubscript arraySubscript -> {
+                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType();
+                int elemSize = arrayType.elementType().baseType().size();
+
+                block.addAll(generate(arraySubscript.subscript()));
+                block.add(new Instruction.LOADL(elemSize));
+                block.add(Instruction.TAMInstruction.callPrim(Primitive.MULT));
+                block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
+
+                return block;
+            }
+            case Expression.Identifier.BasicIdentifier basicIdentifier -> {
+                return block;
+            }
+            case Expression.Identifier.RecordAccess access -> {
+                block.addAll(generateRecordAccess(access));
+                return block;
+            }
         }
     }
 
@@ -637,7 +716,12 @@ public class IRGenerator {
 
                 return block;
             }
-            case Expression.Identifier.RecordAccess recordAccess -> throw new RuntimeException();
+            case Expression.Identifier.RecordAccess recordAccess -> {
+                block.addAll(generateRuntimeLocation(recordAccess.record(), true));
+                block.addAll(generateRecordAccess(recordAccess));
+                block.add(new Instruction.LOADI(size));
+                return block;
+            }
         }
     }
 
