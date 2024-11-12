@@ -508,8 +508,9 @@ public class IRGenerator {
     // associates each parameter with its location relative to current frame, returns no words that will be  allocated for
     // parameter when the corresponding function is called
     private int addParametersToScope(List<Parameter> parameters) {
-        int paramOffset = -1;
+        int paramOffset = 0;
         for (Parameter parameter : parameters.reversed()) {
+            paramOffset -= parameter.getType().size();
             switch (parameter) {
                 // static link and code address to be on stack
                 case Parameter.FuncParameter funcParameter -> funcAddresses.add(
@@ -520,11 +521,9 @@ public class IRGenerator {
                         valueParameter.getName(), paramOffset);
                 case VarParameter varParameter -> localVars.add(varParameter.getName(), paramOffset);
             }
-            paramOffset -= parameter.getType().size();
         }
 
-        // |paramOffset| - 1, because paramOffset starts at -1
-        return (paramOffset * -1) - 1;
+        return paramOffset * -1;
     }
 
     // generates instructions to pop the last `size` words of data and store it to the location that identifier will be found in
