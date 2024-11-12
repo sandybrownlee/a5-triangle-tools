@@ -46,6 +46,11 @@ import static triangle.ast.RuntimeType.*;
 //      it updates the AST to annotated all Typeable nodes with their types; i.e., it produces an explicitly-typed AST
 //      it ensures that the program does not attempt to return a function/procedure as a value, as HOF are not supported
 
+// TODO: split into TypeResolverAnnotater -> SemanticAnalyzer
+// TODO: need to handle duplicate declarations
+// TODO: need to ensure static-nesting depth does not exceed maximum
+// TODO: TAMSpecificaition requires second operand of // (mod) must be positive; this needs to be done at runtime
+// TODO: to handle ++, we need some kind of rewriting system
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 public final class SemanticAnalyzer {
 
@@ -79,6 +84,7 @@ public final class SemanticAnalyzer {
                         "\\",  new Binding(new FuncType(List.of(BOOL_TYPE), BOOL_TYPE))
                 ));
 
+        // TODO: remove ++ and turn it into a rewrite
         STD_TERMS.putAll(
                 Map.of(
                         "-",  new Binding(binaryIntFunc),

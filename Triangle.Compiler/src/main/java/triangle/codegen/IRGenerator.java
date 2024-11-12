@@ -16,9 +16,9 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
+// TODO: records
 public class IRGenerator {
 
     static final  Map<String, Callable> builtins = new HashMap<>();
@@ -37,6 +37,7 @@ public class IRGenerator {
         builtins.put("/", new Callable.PrimitiveCallable(Primitive.DIV));
         builtins.put("/\\", new Callable.PrimitiveCallable(Primitive.AND));
         builtins.put("\\/", new Callable.PrimitiveCallable(Primitive.OR));
+        builtins.put("//", new Callable.PrimitiveCallable(Primitive.MOD));
         builtins.put("getint", new Callable.PrimitiveCallable(Primitive.GETINT));
         builtins.put("put", new Callable.PrimitiveCallable(Primitive.PUT));
         builtins.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
@@ -47,6 +48,7 @@ public class IRGenerator {
         builtins.put("geteol", new Callable.PrimitiveCallable(Primitive.GETEOL));
 
         // Compiler generated operations (++, --, etc)
+        // |
         builtins.put("|", new Callable.CompilerGenerated(List.of(
                 new Instruction.LOADL(100),
                 Instruction.TAMInstruction.callPrim(Primitive.MULT)
