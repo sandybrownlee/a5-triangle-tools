@@ -374,6 +374,21 @@ public class IRGenerator {
             }
         }
 
+        // we have to special case chr and ord; TAM cannot provide primitives for these because it doesn't know our char encoding
+        if (funcName.equals("chr") || funcName.equals("ord")) {
+            // the argument was generated and already on the stack, so just return; SemanticAnalyzer ensures that nothing can
+            // go wrong if we just leave the value as is, because our char encoding translated without changes to
+            // our integer encoding
+            return block;
+        }
+
+        // eq and neq take an additional size argument that is not visible to the user (i.e., it does not and should not show
+        // up on semantic analysis and the user must not have to add the size argument manually)
+        if (funcName.equals("=") || funcName.equals("\\=")) {
+            // push size on the stack
+            block.add(new Instruction.LOADL(arguments.getFirst().getType().baseType().size()));
+        }
+
         SymbolTable<Callable, Void>.DepthLookup lookup = funcAddresses.lookupWithDepth(funcName);
         Register nonLocalsLink = getDisplayRegister(lookup.depth());
 
