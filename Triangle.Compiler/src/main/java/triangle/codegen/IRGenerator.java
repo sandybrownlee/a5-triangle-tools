@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-// TODO: verify static links work as expected
 public class IRGenerator {
 
     static final  Map<String, Callable>         primitives    = new HashMap<>();
@@ -438,13 +437,14 @@ public class IRGenerator {
                     block.add(new Instruction.JUMP_LABEL(skipLabel));
                     block.add(funcLabel);
 
+                    // the function currently being declared be added to funcAddresses before we process its declaration, so as
+                    // to allow recursion
+                    funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
+
                     // new scope for local vars and functions, since we are in a func declaration, the scope local state (i.e.,
                     // the initial stack offset) must be 3 * address-width -- for static link, dynamic link, return address
                     localVars.enterNewScope(3 * Machine.addressSize);
                     funcAddresses.enterNewScope(null);
-
-                    // the function currently being declared must be visible in its own definition, so as to allow recursion
-                    funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
 
                     // we need the total amount of space taken by the function to know what to use for the RETURN call
                     int paramsSize = addParametersToScope(funcDeclaration.parameters());
@@ -454,8 +454,6 @@ public class IRGenerator {
 
                     localVars.exitScope();
                     funcAddresses.exitScope();
-
-                    funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
 
                     block.add(skipLabel);
                 }
@@ -480,13 +478,14 @@ public class IRGenerator {
                     block.add(new Instruction.JUMP_LABEL(skipLabel));
                     block.add(procLabel);
 
+                    // the proc currently being declared must be added to funcAddresses before we process its declaration, so
+                    // as to allow recursion
+                    funcAddresses.add(procDeclaration.name(), new Callable.StaticCallable(procLabel));
+
                     // new scope for local vars and functions, since we are in a proc declaration, the scope local state (i.e.,
                     // the initial stack offset) must be 3 * address-width -- for static link, dynamic link, return address
                     localVars.enterNewScope(3 * Machine.addressSize);
                     funcAddresses.enterNewScope(null);
-
-                    // the proc currently being declared must be visible in its own definition, so as to allow recursion
-                    funcAddresses.add(procDeclaration.name(), new Callable.StaticCallable(procLabel));
 
                     // we need the total amount of space that will be taken by the parameters to know how to RETURN
                     int paramsSize = addParametersToScope(procDeclaration.parameters());
@@ -496,8 +495,6 @@ public class IRGenerator {
 
                     localVars.exitScope();
                     funcAddresses.exitScope();
-
-                    funcAddresses.add(procDeclaration.name(), new Callable.StaticCallable(procLabel));
 
                     block.add(skipLabel);
                 }
