@@ -157,7 +157,7 @@ public class IRGenerator {
                 block.add(loopLabel);
                 block.addAll(generate(loopWhileStatement.loopBody()));
                 block.addAll(generate(loopWhileStatement.condition()));
-                block.add(new Instruction.JUMPIF_LABEL(0, skipLabel));
+                block.add(new Instruction.JUMPIF_LABEL(Machine.falseRep, skipLabel));
                 block.addAll(generate(loopWhileStatement.doBody()));
                 block.add(new Instruction.JUMP_LABEL(loopLabel));
                 block.add(skipLabel);
@@ -174,7 +174,7 @@ public class IRGenerator {
                 block.add(loopLabel);
                 block.addAll(generate(repeatUntilStatement.body()));
                 block.addAll(generate(repeatUntilStatement.condition()));
-                block.add(new Instruction.JUMPIF_LABEL(0, loopLabel));
+                block.add(new Instruction.JUMPIF_LABEL(Machine.falseRep, loopLabel));
 
                 return block;
             }
@@ -188,7 +188,7 @@ public class IRGenerator {
                 block.add(loopLabel);
                 block.addAll(generate(repeatWhileStatement.body()));
                 block.addAll(generate(repeatWhileStatement.condition()));
-                block.add(new Instruction.JUMPIF_LABEL(1, loopLabel));
+                block.add(new Instruction.JUMPIF_LABEL(Machine.trueRep, loopLabel));
 
                 return block;
             }
@@ -217,7 +217,7 @@ public class IRGenerator {
 
                 block.add(loopLabel);
                 block.addAll(generate(whileStatement.condition()));
-                block.add(new Instruction.JUMPIF_LABEL(0, skipLabel));
+                block.add(new Instruction.JUMPIF_LABEL(Machine.falseRep, skipLabel));
                 block.addAll(generate(whileStatement.body()));
                 block.add(new Instruction.JUMP_LABEL(loopLabel));
                 block.add(skipLabel);
