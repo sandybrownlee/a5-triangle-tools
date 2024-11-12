@@ -371,28 +371,29 @@ public class IRGenerator {
 
                     switch (lookup.t()) {
                         case Callable.DynamicCallable(int stackOffset) -> {
-                            //  LOADA stackOffset[nonLocalsLink]         <- load code address
-                            //  LOADA (stackOffset - 1)[nonLocalsLink]   <- load static link
+                            //  LOADA stackOffset[nonLocalsLink]         <- load static link
+                            //  LOADA (stackOffset + 1)[nonLocalsLink]   <- load code addr
 
-                            // the `CALLI` instruction expects static link to be on top, followed by code address
-
+                            // closure (i.e, func and proc arguments) are addresses to addresses, so dereference
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset)));
-                            block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset - 1)));
+                            block.add(new Instruction.LOADI(Machine.addressSize));
+                            block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset + 1)));
+                            block.add(new Instruction.LOADI(Machine.addressSize));
                         }
                         case Callable.PrimitiveCallable(Primitive primitive) -> {
                             //  LOADA primitive.ordinal()[PB]
                             //  LOADA 0[LB]
 
-                            block.add(new Instruction.LOADA(new Instruction.Address(Register.PB, primitive.ordinal())));
                             // use whatever as static link for primitives -- 0[LB] here
                             block.add(new Instruction.LOADA(new Instruction.Address(Register.LB, 0)));
+                            block.add(new Instruction.LOADA(new Instruction.Address(Register.PB, primitive.ordinal())));
                         }
                         case Callable.StaticCallable(Instruction.LABEL label) -> {
                             //  LOADA label
                             //  LOADA 0[nonLocalsLink]
 
-                            block.add(new Instruction.LOADA_LABEL(label));
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, 0)));
+                            block.add(new Instruction.LOADA_LABEL(label));
                         }
                         // [instructions]
                         case Callable.CompilerGenerated(List<Instruction> instructions) -> block.addAll(instructions);
@@ -427,12 +428,12 @@ public class IRGenerator {
 
         switch (lookup.t()) {
             case Callable.DynamicCallable(int stackOffset) -> {
-                //  LOAD addressSize stackOffset[nonLocalsLink]          <- load code address
-                //  LOAD addressSize (stackOffset - 1)[nonLocalsLink]    <- load static link
+                //  LOAD addressSize stackOffset[nonLocalsLink]          <- load static link
+                //  LOAD addressSize (stackOffset + 1)[nonLocalsLink]    <- load code addr
                 //  CALLI
 
                 block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset)));
-                block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset - 1)));
+                block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset + 1)));
                 block.add(new Instruction.CALLI());
             }
             case Callable.PrimitiveCallable(Primitive primitive) -> block.add(Instruction.TAMInstruction.callPrim(primitive));
