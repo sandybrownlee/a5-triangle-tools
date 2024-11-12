@@ -16,24 +16,41 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 public class IRGenerator {
 
-    static final  Map<String, Callable>         primitives    = new HashMap<>();
+    static final  Map<String, Callable> builtins = new HashMap<>();
 
     static {
         // TODO: fill up
-        primitives.put(">", new Callable.PrimitiveCallable(Primitive.GT));
-        primitives.put(">=", new Callable.PrimitiveCallable(Primitive.GE));
-        primitives.put("<=", new Callable.PrimitiveCallable(Primitive.LE));
-        primitives.put("-", new Callable.PrimitiveCallable(Primitive.SUB));
-        primitives.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
-        primitives.put("*", new Callable.PrimitiveCallable(Primitive.MULT));
-        primitives.put("getint", new Callable.PrimitiveCallable(Primitive.GETINT));
-        primitives.put("put", new Callable.PrimitiveCallable(Primitive.PUT));
-        primitives.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
-        primitives.put("puteol", new Callable.PrimitiveCallable(Primitive.PUTEOL));
+        // TAM primitives
+        builtins.put("=", new Callable.PrimitiveCallable(Primitive.EQ));
+        builtins.put("<", new Callable.PrimitiveCallable(Primitive.LT));
+        builtins.put(">", new Callable.PrimitiveCallable(Primitive.GT));
+        builtins.put(">=", new Callable.PrimitiveCallable(Primitive.GE));
+        builtins.put("<=", new Callable.PrimitiveCallable(Primitive.LE));
+        builtins.put("-", new Callable.PrimitiveCallable(Primitive.SUB));
+        builtins.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
+        builtins.put("*", new Callable.PrimitiveCallable(Primitive.MULT));
+        builtins.put("/", new Callable.PrimitiveCallable(Primitive.DIV));
+        builtins.put("/\\", new Callable.PrimitiveCallable(Primitive.AND));
+        builtins.put("\\/", new Callable.PrimitiveCallable(Primitive.OR));
+        builtins.put("getint", new Callable.PrimitiveCallable(Primitive.GETINT));
+        builtins.put("put", new Callable.PrimitiveCallable(Primitive.PUT));
+        builtins.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
+        builtins.put("puteol", new Callable.PrimitiveCallable(Primitive.PUTEOL));
+        builtins.put("eol", new Callable.PrimitiveCallable(Primitive.EOL));
+        builtins.put("get", new Callable.PrimitiveCallable(Primitive.GET));
+        builtins.put("\\=", new Callable.PrimitiveCallable(Primitive.NE));
+        builtins.put("geteol", new Callable.PrimitiveCallable(Primitive.GETEOL));
+
+        // Compiler generated operations (++, --, etc)
+        builtins.put("|", new Callable.CompilerGenerated(List.of(
+                new Instruction.LOADL(100),
+                Instruction.TAMInstruction.callPrim(Primitive.MULT)
+        )));
     }
 
     // TODO: SemanticAnalyzer should ensure static-nesting depth does not exceed the maximum
@@ -49,7 +66,7 @@ public class IRGenerator {
             default -> throw new RuntimeException("static nesting-depth limit exceeded");
         };
     }
-    private final SymbolTable<Callable, Void>   funcAddresses = new SymbolTable<>(primitives, null);
+    private final SymbolTable<Callable, Void>   funcAddresses = new SymbolTable<>(builtins, null);
     private final SymbolTable<Integer, Integer> localVars     = new SymbolTable<>(0);
     private final Supplier<Instruction.LABEL>   labelSupplier = new Supplier<>() {
         private int i = 0;
@@ -231,9 +248,7 @@ public class IRGenerator {
 
         switch (expression) {
             case Expression.BinaryOp binaryOp -> {
-                //  [lOperand]
-                //  [rOperand]
-                //  generateCall(op)
+                //  generateCall(op, [lOperand, rOperand])
 
                 block.addAll(generateCall(
                         binaryOp.operator().name(),
@@ -242,11 +257,7 @@ public class IRGenerator {
                 return block;
             }
             case Expression.FunCall funCall -> {
-                //  [arguments(1)]
-                //  [arguments(2)]
-                //  ...
-                //  [arguments(n)]
-                //  CALL/CALLI/CALL_PRIM -- depending on the type of function called
+                // generateCall(func, func.arguments)
 
                 block.addAll(generateCall(funCall.func().name(), funCall.arguments()));
                 return block;
@@ -317,7 +328,11 @@ public class IRGenerator {
             }
             // the fields in a lit record can be declared in any order?
             case Expression.LitRecord litRecord -> throw new RuntimeException();
-            case Expression.UnaryOp unaryOp -> throw new RuntimeException();
+            case Expression.UnaryOp unaryOp -> {
+                // generateCall(op, [operand])
+                block.addAll(generateCall(unaryOp.operator().name(), List.of(unaryOp.operand())));
+                return block;
+            }
             case Expression.SequenceExpression sequenceExpression -> {
                 // [statement]
                 // [expression]
@@ -370,6 +385,8 @@ public class IRGenerator {
                             block.add(new Instruction.LOADA_LABEL(label));
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, 0)));
                         }
+                        // [instructions]
+                        case Callable.CompilerGenerated(List<Instruction> instructions) -> block.addAll(instructions);
                     }
                 }
                 // load address of var argument
@@ -411,6 +428,7 @@ public class IRGenerator {
             }
             case Callable.PrimitiveCallable(Primitive primitive) -> block.add(Instruction.TAMInstruction.callPrim(primitive));
             case Callable.StaticCallable(Instruction.LABEL label) -> block.add(new Instruction.CALL_LABEL(nonLocalsLink, label));
+            case Callable.CompilerGenerated(List<Instruction> instructions) -> block.addAll(instructions);
         }
 
         return block;
@@ -628,7 +646,8 @@ public class IRGenerator {
     }
 
     // represents things that may be the target of CALL/CALLI instructions
-    sealed interface Callable permits Callable.DynamicCallable, Callable.PrimitiveCallable, Callable.StaticCallable {
+    sealed interface Callable
+            permits Callable.CompilerGenerated, Callable.DynamicCallable, Callable.PrimitiveCallable, Callable.StaticCallable {
 
         // a callable whose location is known statically
         record StaticCallable(Instruction.LABEL label) implements Callable { }
@@ -638,6 +657,11 @@ public class IRGenerator {
 
         // a primitive call
         record PrimitiveCallable(Primitive primitive) implements Callable { }
+
+        // TODO: we shouldnt generate instructions repeatedly like this; have a List<Instruction> of compiler generated
+        //  routines and use StaticCallable instead
+        // a sequence of compiler generated instructions which can directly be inlined
+        @Deprecated record CompilerGenerated(List<Instruction> instructions) implements Callable { }
 
     }
 
