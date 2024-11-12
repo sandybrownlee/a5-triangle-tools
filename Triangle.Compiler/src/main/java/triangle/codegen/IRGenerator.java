@@ -100,25 +100,23 @@ public class IRGenerator {
             }
             case Statement.IfStatement ifStatement -> {
                 //  [condition]
-                //  JUMPIF 0 skipLabel
+                //  JUMPIF 0 altLabel
                 //  [consequent]
-                // skipLabel:
+                //  JUMP skipLabel
+                // altLabel:
                 //  [alternative]
+                // skipLabel:
 
+                Instruction.LABEL altLabel = labelSupplier.get();
                 Instruction.LABEL skipLabel = labelSupplier.get();
 
                 block.addAll(generate(ifStatement.condition()));
-                block.add(new Instruction.JUMPIF_LABEL(0, skipLabel));
-
-                if (ifStatement.consequent().isPresent()) {
-                    block.addAll(generate(ifStatement.consequent().get()));
-                }
+                block.add(new Instruction.JUMPIF_LABEL(0, altLabel));
+                ifStatement.consequent().ifPresent(s -> block.addAll(generate(s)));
+                block.add(new Instruction.JUMP_LABEL(skipLabel));
+                block.add(altLabel);
+                ifStatement.alternative().ifPresent(s -> block.addAll(generate(s)));
                 block.add(skipLabel);
-
-                if (ifStatement.alternative().isPresent()) {
-                    block.addAll(generate(ifStatement.alternative().get()));
-                }
-
                 return block;
             }
             case Statement.LetStatement letStatement -> {
