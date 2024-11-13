@@ -640,7 +640,7 @@ public class IRGenerator {
         // first generate instructions to access the base of the record; this can be any arbitrary identifier
         switch (recordAccess.record()) {
             case Expression.Identifier.ArraySubscript arraySubscript -> {
-                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType();
+                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType().baseType();
                 int elemSize = arrayType.elementType().baseType().size();
 
                 block.addAll(generate(arraySubscript.subscript()));
@@ -678,7 +678,7 @@ public class IRGenerator {
         // depending on what kind of identifier the field is, we want to do a few different things
         switch (recordAccess.field()) {
             case Expression.Identifier.ArraySubscript arraySubscript -> {
-                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType();
+                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType().baseType();
                 int elemSize = arrayType.elementType().baseType().size();
 
                 block.addAll(generate(arraySubscript.subscript()));
