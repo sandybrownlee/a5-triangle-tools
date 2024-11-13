@@ -2,21 +2,51 @@ package triangle.repr;
 
 import java.util.List;
 
-sealed public interface Declaration
+sealed public interface Declaration extends SourceLocatable
         permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.ProcDeclaration,
                 Declaration.TypeDeclaration, Declaration.VarDeclaration {
 
-    record ConstDeclaration(SourcePosition sourcePos, String name, Expression value) implements Declaration { }
+    final class ConstDeclaration implements Declaration {
+
+        private final String         name;
+        private final Expression     value;
+        private       SourcePosition sourcePos;
+
+        public ConstDeclaration(String name, Expression value) {
+            this.name = name;
+            this.value = value;
+        }
+
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
+        @Override public String toString() {
+            return "ConstDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "value=" + value + ']';
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public Expression value() {
+            return value;
+        }
+
+    }
 
     final class VarDeclaration implements Declaration {
 
-        private final SourcePosition sourcePos;
-        private final String      name;
-        private final TypeSig typeSig;
-        private       Type    type;
+        private final String         name;
+        private final TypeSig        typeSig;
+        private       SourcePosition sourcePos;
+        private       Type           type;
 
-        public VarDeclaration(SourcePosition sourcePos, String name, TypeSig typeSig) {
-            this.sourcePos = sourcePos;
+        public VarDeclaration(String name, TypeSig typeSig) {
             this.name = name;
             this.typeSig = typeSig;
         }
@@ -25,17 +55,20 @@ sealed public interface Declaration
             this.type = type;
         }
 
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
         @Override public String toString() {
-            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "typeSig=" + typeSig +
-                   ']';
+            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "typeSig=" + typeSig + ']';
         }
 
         public String name() {
             return name;
-        }
-
-        public SourcePosition sourcePos() {
-            return sourcePos;
         }
 
         public TypeSig declaredType() {
@@ -48,12 +81,125 @@ sealed public interface Declaration
 
     }
 
-    record FuncDeclaration(SourcePosition sourcePos, String name, List<Parameter> parameters, TypeSig returnTypeSig,
-                           Expression expression) implements Declaration { }
+    final class FuncDeclaration implements Declaration {
 
-    record ProcDeclaration(SourcePosition sourcePos, String name, List<Parameter> parameters, Statement statement)
-            implements Declaration { }
+        private final String          name;
+        private final List<Parameter> parameters;
+        private final TypeSig         returnTypeSig;
+        private final Expression      expression;
+        private       SourcePosition  sourcePos;
 
-    record TypeDeclaration(SourcePosition sourcePos, String name, TypeSig typeSig) implements Declaration { }
+        public FuncDeclaration(
+                String name, List<Parameter> parameters, TypeSig returnTypeSig, Expression expression
+        ) {
+            this.name = name;
+            this.parameters = parameters;
+            this.returnTypeSig = returnTypeSig;
+            this.expression = expression;
+        }
+
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
+        @Override public String toString() {
+            return "FuncDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "parameters=" + parameters +
+                   ", " + "returnTypeSig=" + returnTypeSig + ", " + "expression=" + expression + ']';
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public List<Parameter> parameters() {
+            return parameters;
+        }
+
+        public TypeSig returnTypeSig() {
+            return returnTypeSig;
+        }
+
+        public Expression expression() {
+            return expression;
+        }
+
+    }
+
+    final class ProcDeclaration implements Declaration {
+
+        private final String          name;
+        private final List<Parameter> parameters;
+        private final Statement       statement;
+        private       SourcePosition  sourcePos;
+
+        public ProcDeclaration(String name, List<Parameter> parameters, Statement statement) {
+            this.name = name;
+            this.parameters = parameters;
+            this.statement = statement;
+        }
+
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
+        @Override public String toString() {
+            return "ProcDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "parameters=" + parameters +
+                   ", " + "statement=" + statement + ']';
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public List<Parameter> parameters() {
+            return parameters;
+        }
+
+        public Statement statement() {
+            return statement;
+        }
+
+    }
+
+    final class TypeDeclaration implements Declaration {
+
+        private final String         name;
+        private final TypeSig        typeSig;
+        private       SourcePosition sourcePos;
+
+        public TypeDeclaration(String name, TypeSig typeSig) {
+            this.name = name;
+            this.typeSig = typeSig;
+        }
+
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
+        @Override public String toString() {
+            return "TypeDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "typeSig=" + typeSig + ']';
+        }
+
+        public String name() {
+            return name;
+        }
+
+        public TypeSig typeSig() {
+            return typeSig;
+        }
+
+    }
 
 }

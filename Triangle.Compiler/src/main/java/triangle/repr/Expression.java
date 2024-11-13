@@ -2,7 +2,7 @@ package triangle.repr;
 
 import java.util.List;
 
-sealed public interface Expression extends Argument, Typeable
+sealed public interface Expression extends Argument, Typeable, SourceLocatable
         permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.SequenceExpression, Expression.UnaryOp {
@@ -18,9 +18,9 @@ sealed public interface Expression extends Argument, Typeable
 
         final class BasicIdentifier implements Identifier {
 
-            private final SourcePosition sourcePos;
-            private final String name;
-            private       Type   type;
+            private final String         name;
+            private       SourcePosition sourcePos;
+            private       Type           type;
 
             public BasicIdentifier(SourcePosition sourcePos, String name) {
                 this.sourcePos = sourcePos;
@@ -31,7 +31,11 @@ sealed public interface Expression extends Argument, Typeable
                 return this;
             }
 
-            @Override public SourcePosition sourcePos() {
+            @Override public void setSourcePosition(final SourcePosition sourcePos) {
+                this.sourcePos = sourcePos;
+            }
+
+            @Override public SourcePosition sourcePosition() {
                 return sourcePos;
             }
 
@@ -55,10 +59,10 @@ sealed public interface Expression extends Argument, Typeable
 
         final class RecordAccess implements Identifier {
 
-            private final SourcePosition sourcePos;
             private final Identifier     record;
-            private final Identifier field;
-            private       Type       type;
+            private final Identifier     field;
+            private       SourcePosition sourcePos;
+            private       Type           type;
 
             public RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) {
                 this.sourcePos = sourcePos;
@@ -70,7 +74,11 @@ sealed public interface Expression extends Argument, Typeable
                 return record.root();
             }
 
-            @Override public SourcePosition sourcePos() {
+            @Override public void setSourcePosition(final SourcePosition sourcePos) {
+                this.sourcePos = sourcePos;
+            }
+
+            @Override public SourcePosition sourcePosition() {
                 return sourcePos;
             }
 
@@ -98,10 +106,10 @@ sealed public interface Expression extends Argument, Typeable
 
         final class ArraySubscript implements Identifier {
 
-            private final SourcePosition sourcePos;
             private final Identifier     array;
-            private final Expression subscript;
-            private       Type       type;
+            private final Expression     subscript;
+            private       SourcePosition sourcePos;
+            private       Type           type;
 
             public ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) {
                 this.sourcePos = sourcePos;
@@ -113,7 +121,11 @@ sealed public interface Expression extends Argument, Typeable
                 return array.root();
             }
 
-            @Override public SourcePosition sourcePos() {
+            @Override public void setSourcePosition(final SourcePosition sourcePos) {
+                this.sourcePos = sourcePos;
+            }
+
+            @Override public SourcePosition sourcePosition() {
                 return sourcePos;
             }
 
@@ -142,7 +154,15 @@ sealed public interface Expression extends Argument, Typeable
 
     }
 
-    record LitBool(SourcePosition sourcePos, boolean value) implements Expression {
+    final class LitBool implements Expression {
+
+        private final boolean        value;
+        private       SourcePosition sourcePos;
+
+        public LitBool(SourcePosition sourcePos, boolean value) {
+            this.sourcePos = sourcePos;
+            this.value = value;
+        }
 
         @Override public Type getType() {
             return Type.BOOL_TYPE;
@@ -152,9 +172,33 @@ sealed public interface Expression extends Argument, Typeable
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
+        @Override public String toString() {
+            return "LitBool[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
+        }
+
+        public boolean value() {
+            return value;
+        }
+
     }
 
-    record LitInt(SourcePosition sourcePos, int value) implements Expression {
+    final class LitInt implements Expression {
+
+        private final int            value;
+        private       SourcePosition sourcePos;
+
+        public LitInt(SourcePosition sourcePos, int value) {
+            this.sourcePos = sourcePos;
+            this.value = value;
+        }
 
         @Override public Type getType() {
             return Type.INT_TYPE;
@@ -164,9 +208,33 @@ sealed public interface Expression extends Argument, Typeable
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
+        @Override public String toString() {
+            return "LitInt[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
+        }
+
+        public int value() {
+            return value;
+        }
+
     }
 
-    record LitChar(SourcePosition sourcePos, char value) implements Expression {
+    final class LitChar implements Expression {
+
+        private final char           value;
+        private       SourcePosition sourcePos;
+
+        public LitChar(SourcePosition sourcePos, char value) {
+            this.sourcePos = sourcePos;
+            this.value = value;
+        }
 
         @Override public Type getType() {
             return Type.CHAR_TYPE;
@@ -176,12 +244,28 @@ sealed public interface Expression extends Argument, Typeable
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
+        @Override public String toString() {
+            return "LitChar[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
+        }
+
+        public char value() {
+            return value;
+        }
+
     }
 
     final class LitArray implements Expression, Typeable {
 
-        private final SourcePosition   sourcePos;
         private final List<Expression> elements;
+        private       SourcePosition   sourcePos;
         private       Type             type;
 
         public LitArray(SourcePosition sourcePos, List<Expression> elements) {
@@ -189,7 +273,11 @@ sealed public interface Expression extends Argument, Typeable
             this.elements = elements;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -213,8 +301,8 @@ sealed public interface Expression extends Argument, Typeable
 
     final class LitRecord implements Expression, Typeable {
 
-        private final SourcePosition    sourcePos;
         private final List<RecordField> fields;
+        private       SourcePosition    sourcePos;
         private       Type              type;
 
         public LitRecord(SourcePosition sourcePos, List<RecordField> fields) {
@@ -222,7 +310,11 @@ sealed public interface Expression extends Argument, Typeable
             this.fields = fields;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -248,18 +340,21 @@ sealed public interface Expression extends Argument, Typeable
 
     final class UnaryOp implements Expression, Typeable {
 
-        private final SourcePosition             sourcePos;
         private final Identifier.BasicIdentifier operator;
-        private final Expression operand;
-        private       Type       type;
+        private final Expression                 operand;
+        private       SourcePosition             sourcePos;
+        private       Type                       type;
 
-        public UnaryOp(SourcePosition sourcePos, Identifier.BasicIdentifier operator, Expression operand) {
-            this.sourcePos = sourcePos;
+        public UnaryOp(Identifier.BasicIdentifier operator, Expression operand) {
             this.operator = operator;
             this.operand = operand;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -287,11 +382,11 @@ sealed public interface Expression extends Argument, Typeable
 
     final class BinaryOp implements Expression, Typeable {
 
-        private final SourcePosition             sourcePos;
         private final Identifier.BasicIdentifier operator;
         private final Expression                 leftOperand;
-        private final Expression rightOperand;
-        private       Type       type;
+        private final Expression                 rightOperand;
+        private       SourcePosition             sourcePos;
+        private       Type                       type;
 
         public BinaryOp(
                 SourcePosition sourcePos, Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand
@@ -302,7 +397,11 @@ sealed public interface Expression extends Argument, Typeable
             this.rightOperand = rightOperand;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -335,10 +434,10 @@ sealed public interface Expression extends Argument, Typeable
 
     final class LetExpression implements Expression, Typeable {
 
-        private final SourcePosition    sourcePos;
         private final List<Declaration> declarations;
-        private final Expression expression;
-        private       Type       type;
+        private final Expression        expression;
+        private       SourcePosition    sourcePos;
+        private       Type              type;
 
         public LetExpression(SourcePosition sourcePos, List<Declaration> declarations, Expression expression) {
             this.sourcePos = sourcePos;
@@ -346,7 +445,11 @@ sealed public interface Expression extends Argument, Typeable
             this.expression = expression;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -375,11 +478,11 @@ sealed public interface Expression extends Argument, Typeable
 
     final class IfExpression implements Expression, Typeable {
 
-        private final SourcePosition sourcePos;
         private final Expression     condition;
         private final Expression     consequent;
-        private final Expression alternative;
-        private       Type       type;
+        private final Expression     alternative;
+        private       SourcePosition sourcePos;
+        private       Type           type;
 
         public IfExpression(SourcePosition sourcePos, Expression condition, Expression consequent, Expression alternative) {
             this.sourcePos = sourcePos;
@@ -388,7 +491,11 @@ sealed public interface Expression extends Argument, Typeable
             this.alternative = alternative;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -421,10 +528,10 @@ sealed public interface Expression extends Argument, Typeable
 
     final class FunCall implements Expression, Typeable {
 
-        private final SourcePosition             sourcePos;
         private final Identifier.BasicIdentifier func;
-        private final List<Argument> arguments;
-        private       Type           type;
+        private final List<Argument>             arguments;
+        private       SourcePosition             sourcePos;
+        private       Type                       type;
 
         public FunCall(SourcePosition sourcePos, Identifier.BasicIdentifier func, List<Argument> arguments) {
             this.sourcePos = sourcePos;
@@ -432,7 +539,11 @@ sealed public interface Expression extends Argument, Typeable
             this.arguments = arguments;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -460,19 +571,15 @@ sealed public interface Expression extends Argument, Typeable
 
     final class SequenceExpression implements Expression {
 
-        private final SourcePosition sourcePos;
         private final Statement      statement;
-        private final Expression expression;
-        private       Type       type;
+        private final Expression     expression;
+        private       SourcePosition sourcePos;
+        private       Type           type;
 
         public SequenceExpression(SourcePosition sourcePos, Statement statement, Expression expression) {
             this.sourcePos = sourcePos;
             this.statement = statement;
             this.expression = expression;
-        }
-
-        public SourcePosition sourcePos() {
-            return sourcePos;
         }
 
         @Override public Type getType() {
@@ -481,6 +588,14 @@ sealed public interface Expression extends Argument, Typeable
 
         @Override public void setType(final Type type) {
             this.type = type;
+        }
+
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
         }
 
         public Statement statement() {

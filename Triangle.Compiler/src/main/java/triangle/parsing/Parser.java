@@ -108,14 +108,18 @@ public class Parser {
                 SourcePosition start = shift(Token.Kind.BEGIN);
                 List<Statement> statements = parseStmtSeq();
                 shift(Token.Kind.END);
-                yield new StatementBlock(start, statements);
+                StatementBlock statementBlock = new StatementBlock(statements);
+                statementBlock.setSourcePosition(start);
+                yield statementBlock;
             }
             case LET -> {
                 SourcePosition start = shift(Token.Kind.LET);
                 List<Declaration> declarations = parseDeclSeq();
                 shift(Token.Kind.IN);
                 Statement statement = parseStmt();
-                yield new LetStatement(start, declarations, statement);
+                LetStatement letStatement = new LetStatement(declarations, statement);
+                letStatement.setSourcePosition(start);
+                yield letStatement;
             }
             case IF -> {
                 SourcePosition start = shift(Token.Kind.IF);
@@ -134,14 +138,18 @@ public class Parser {
                     default -> Optional.empty();
                 };
 
-                yield new IfStatement(start, condition, consequent, alternative);
+                IfStatement ifStatement = new IfStatement(condition, consequent, alternative);
+                ifStatement.setSourcePosition(start);
+                yield ifStatement;
             }
             case WHILE -> {
                 SourcePosition start = shift(Token.Kind.WHILE);
                 Expression condition = parseExpression();
                 shift(Token.Kind.DO);
                 Statement statement = parseStmt();
-                yield new WhileStatement(start, condition, statement);
+                WhileStatement whileStatement = new WhileStatement(condition, statement);
+                whileStatement.setSourcePosition(start);
+                yield whileStatement;
             }
             case LOOP -> {
                 SourcePosition start = shift(Token.Kind.LOOP);
@@ -150,7 +158,9 @@ public class Parser {
                 Expression condition = parseExpression();
                 shift(Token.Kind.DO);
                 Statement statement2 = parseStmt();
-                yield new LoopWhileStatement(start, condition, statement1, statement2);
+                LoopWhileStatement loopWhileStatement = new LoopWhileStatement(condition, statement1, statement2);
+                loopWhileStatement.setSourcePosition(start);
+                yield loopWhileStatement;
             }
             case REPEAT -> {
                 SourcePosition start = shift(Token.Kind.REPEAT);
@@ -158,11 +168,15 @@ public class Parser {
                 if (nextToken.getKind() == Token.Kind.WHILE) {
                     shift(Token.Kind.WHILE);
                     Expression condition = parseExpression();
-                    yield new RepeatWhileStatement(start, condition, statement);
+                    RepeatWhileStatement repeatWhileStatement = new RepeatWhileStatement(condition, statement);
+                    repeatWhileStatement.setSourcePosition(start);
+                    yield repeatWhileStatement;
                 } else {
                     shift(Token.Kind.UNTIL);
                     Expression condition = parseExpression();
-                    yield new RepeatUntilStatement(start, condition, statement);
+                    RepeatUntilStatement repeatUntilStatement = new RepeatUntilStatement(condition, statement);
+                    repeatUntilStatement.setSourcePosition(start);
+                    yield repeatUntilStatement;
                 }
             }
             case IDENTIFIER -> {
@@ -170,7 +184,9 @@ public class Parser {
                 if (nextToken.getKind() == Token.Kind.BECOMES) {
                     shift(Token.Kind.BECOMES);
                     Expression expression = parseExpression();
-                    yield new AssignStatement(identifier.sourcePos(), identifier, expression);
+                    AssignStatement assignStatement = new AssignStatement(identifier, expression);
+                    assignStatement.setSourcePosition(identifier.sourcePosition());
+                    yield assignStatement;
                 }
 
                 // check if the identifier leads into a side-effectful operation
@@ -181,18 +197,27 @@ public class Parser {
 
                     if (EXPRESSION_FIRST_SET.contains(nextToken.getKind())) {
                         Expression secondExpression = parseExpression();
-                        yield new ExpressionStatement(start, new BinaryOp(start, operator, identifier, secondExpression));
+                        ExpressionStatement expressionStatement = new ExpressionStatement(new BinaryOp(start, operator,
+                                                                                                       identifier, secondExpression));
+                        expressionStatement.setSourcePosition(start);
+                        yield expressionStatement;
                     }
 
-                    yield new ExpressionStatement(start, new UnaryOp(start, operator, identifier));
+                    ExpressionStatement expressionStatement = new ExpressionStatement(new UnaryOp(operator, identifier));
+                    expressionStatement.setSourcePosition(start);
+                    yield expressionStatement;
                 }
 
                 Expression e = parseIfCall(identifier);
-                yield new ExpressionStatement(e.sourcePos(), e);
+                ExpressionStatement expressionStatement = new ExpressionStatement(e);
+                expressionStatement.setSourcePosition(e.sourcePosition());
+                yield expressionStatement;
             }
             case Token.Kind k when EXPRESSION_FIRST_SET.contains(k) -> {
                 Expression e = parseExpression();
-                yield new ExpressionStatement(e.sourcePos(), e);
+                ExpressionStatement expressionStatement = new ExpressionStatement(e);
+                expressionStatement.setSourcePosition(e.sourcePosition());
+                yield expressionStatement;
             }
             default -> throw new SyntaxError(nextToken);
         };
@@ -268,7 +293,9 @@ public class Parser {
                 SourcePosition start = shift(Token.Kind.OPERATOR);
                 Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(start, operatorText);
                 Expression expression = parseExpression();
-                yield new UnaryOp(start, operator, expression);
+                UnaryOp unaryOp = new UnaryOp(operator, expression);
+                unaryOp.setSourcePosition(start);
+                yield unaryOp;
             }
 
             default -> throw new SyntaxError(nextToken);
@@ -284,7 +311,9 @@ public class Parser {
                 return new BinaryOp(start, operator, firstExpression, secondExpression);
             }
 
-            return new UnaryOp(start, operator, firstExpression);
+            UnaryOp unaryOp = new UnaryOp(operator, firstExpression);
+            unaryOp.setSourcePosition(start);
+            return unaryOp;
         }
 
         return firstExpression;
@@ -479,7 +508,9 @@ public class Parser {
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                yield new Declaration.ConstDeclaration(start, constName, expression);
+                Declaration.ConstDeclaration constDeclaration = new Declaration.ConstDeclaration(constName, expression);
+                constDeclaration.setSourcePosition(start);
+                yield constDeclaration;
             }
             case VAR -> {
                 SourcePosition start = shift(Token.Kind.VAR);
@@ -487,7 +518,9 @@ public class Parser {
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 TypeSig varTypeSig = parseType();
-                yield new Declaration.VarDeclaration(start, varName, varTypeSig);
+                Declaration.VarDeclaration varDeclaration = new Declaration.VarDeclaration(varName, varTypeSig);
+                varDeclaration.setSourcePosition(start);
+                yield varDeclaration;
             }
             case PROC -> {
                 SourcePosition start = shift(Token.Kind.PROC);
@@ -496,7 +529,9 @@ public class Parser {
                 List<Parameter> parameters = parseParamSeq();
                 shift(Token.Kind.IS);
                 Statement statement = parseStmt();
-                yield new Declaration.ProcDeclaration(start, funcName, parameters, statement);
+                Declaration.ProcDeclaration procDeclaration = new Declaration.ProcDeclaration(funcName, parameters, statement);
+                procDeclaration.setSourcePosition(start);
+                yield procDeclaration;
             }
             case FUNC -> {
                 SourcePosition start = shift(Token.Kind.FUNC);
@@ -507,7 +542,9 @@ public class Parser {
                 TypeSig typeSig = parseType();
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                yield new Declaration.FuncDeclaration(start, funcName, parameters, typeSig, expression);
+                Declaration.FuncDeclaration funcDeclaration = new Declaration.FuncDeclaration(funcName, parameters, typeSig, expression);
+                funcDeclaration.setSourcePosition(start);
+                yield funcDeclaration;
             }
             case TYPE -> {
                 SourcePosition start = shift(Token.Kind.TYPE);
@@ -515,7 +552,9 @@ public class Parser {
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.IS);
                 TypeSig typeSig = parseType();
-                yield new Declaration.TypeDeclaration(start, typeName, typeSig);
+                Declaration.TypeDeclaration typeDeclaration = new Declaration.TypeDeclaration(typeName, typeSig);
+                typeDeclaration.setSourcePosition(start);
+                yield typeDeclaration;
             }
             default -> throw new SyntaxError(nextToken);
         };

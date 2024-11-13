@@ -2,16 +2,17 @@ package triangle.repr;
 
 import java.util.List;
 
-sealed public interface Parameter extends Typeable
+sealed public interface Parameter extends Typeable, SourceLocatable
         permits Parameter.ValueParameter, Parameter.FuncParameter, Parameter.VarParameter {
 
     String getName();
 
     final class ValueParameter implements Parameter {
 
-        private final String      name;
-        private final TypeSig typeSig;
-        private       Type    type;
+        private final String         name;
+        private final TypeSig        typeSig;
+        private       SourcePosition sourcePos;
+        private       Type           type;
 
         public ValueParameter(String name, TypeSig typeSig) {
             this.name = name;
@@ -34,6 +35,14 @@ sealed public interface Parameter extends Typeable
             this.type = type;
         }
 
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
         public String name() {
             return name;
         }
@@ -46,9 +55,10 @@ sealed public interface Parameter extends Typeable
 
     final class VarParameter implements Parameter {
 
-        private final String      name;
-        private final TypeSig typeSig;
-        private       Type    type;
+        private final String         name;
+        private final TypeSig        typeSig;
+        private       SourcePosition sourcePos;
+        private       Type           type;
 
         public VarParameter(String name, TypeSig typeSig) {
             this.name = name;
@@ -71,6 +81,14 @@ sealed public interface Parameter extends Typeable
             this.type = type;
         }
 
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
+        }
+
         public String name() {
             return name;
         }
@@ -89,12 +107,11 @@ sealed public interface Parameter extends Typeable
 
         private final String          callable;
         private final List<Parameter> parameters;
-        private final TypeSig returnTypeSig;
-        private       Type    returnType;
+        private final TypeSig         returnTypeSig;
+        private       SourcePosition  sourcePos;
+        private       Type            returnType;
 
-        public FuncParameter(
-                String callable, List<Parameter> parameters, TypeSig returnTypeSig
-        ) {
+        public FuncParameter(String callable, List<Parameter> parameters, TypeSig returnTypeSig) {
             this.callable = callable;
             this.parameters = parameters;
             this.returnTypeSig = returnTypeSig;
@@ -115,6 +132,14 @@ sealed public interface Parameter extends Typeable
 
         @Override public void setType(Type returnType) {
             this.returnType = returnType;
+        }
+
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
+            return sourcePos;
         }
 
         public String callable() {

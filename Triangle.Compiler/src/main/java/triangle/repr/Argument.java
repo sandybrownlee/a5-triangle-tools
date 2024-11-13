@@ -1,13 +1,12 @@
 package triangle.repr;
 
-sealed public interface Argument extends Typeable permits Argument.FuncArgument, Argument.VarArgument, Expression {
-
-    SourcePosition sourcePos();
+sealed public interface Argument extends Typeable, SourceLocatable
+        permits Argument.FuncArgument, Argument.VarArgument, Expression {
 
     final class VarArgument implements Argument {
 
-        private final SourcePosition        sourcePos;
         private final Expression.Identifier var;
+        private       SourcePosition        sourcePos;
         private       Type                  type;
 
         public VarArgument(SourcePosition sourcePos, Expression.Identifier var) {
@@ -15,7 +14,11 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             this.var = var;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -27,7 +30,7 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return type;
         }
 
-        public void setType(final Type type) {
+        @Override public void setType(final Type type) {
             this.type = type;
         }
 
@@ -39,8 +42,8 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
 
     final class FuncArgument implements Argument {
 
-        private final SourcePosition                        sourcePos;
         private final Expression.Identifier.BasicIdentifier func;
+        private       SourcePosition                        sourcePos;
         private       Type                                  type;
 
         public FuncArgument(SourcePosition sourcePos, Expression.Identifier.BasicIdentifier func) {
@@ -48,7 +51,11 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             this.func = func;
         }
 
-        @Override public SourcePosition sourcePos() {
+        @Override public void setSourcePosition(final SourcePosition sourcePos) {
+            this.sourcePos = sourcePos;
+        }
+
+        @Override public SourcePosition sourcePosition() {
             return sourcePos;
         }
 
@@ -60,7 +67,7 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return type;
         }
 
-        public void setType(final Type type) {
+        @Override public void setType(final Type type) {
             this.type = type;
         }
 
