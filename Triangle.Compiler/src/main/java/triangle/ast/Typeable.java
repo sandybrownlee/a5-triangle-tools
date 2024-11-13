@@ -3,8 +3,8 @@ package triangle.ast;
 
 public interface Typeable {
 
-    RuntimeType getType();
+    Type getType();
 
-    void setType(RuntimeType type);
+    void setType(Type type);
 
 }

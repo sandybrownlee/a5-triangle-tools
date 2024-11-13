@@ -5,9 +5,9 @@ import triangle.ast.Expression;
 import triangle.ast.Expression.Identifier;
 import triangle.ast.Expression.LitRecord.RecordField;
 import triangle.ast.Parameter;
-import triangle.ast.RuntimeType;
-import triangle.ast.SourcePosition;
 import triangle.ast.Type;
+import triangle.ast.SourcePosition;
+import triangle.ast.TypeSig;
 
 public abstract class SemanticException extends Exception {
 
@@ -25,19 +25,19 @@ public abstract class SemanticException extends Exception {
             super(sourcePos, "Undeclared use of identifier: " + identifier);
         }
 
-        UndeclaredUse(Type type) {
-            super("Undeclared use of type: " + type);
+        UndeclaredUse(TypeSig typeSig) {
+            super("Undeclared use of type: " + typeSig);
         }
 
     }
 
     static final class TypeError extends SemanticException {
 
-        TypeError(SourcePosition sourcePos, RuntimeType left, RuntimeType right) {
+        TypeError(SourcePosition sourcePos, Type left, Type right) {
             super(sourcePos, "Type mismatch: " + left + " and " + right);
         }
 
-        TypeError(SourcePosition sourcePos, RuntimeType type, String expected) {
+        TypeError(SourcePosition sourcePos, Type type, String expected) {
             super(sourcePos, "Unexpected type: " + type + " expecting: " + expected);
         }
 
@@ -69,20 +69,20 @@ public abstract class SemanticException extends Exception {
 
     static final class DuplicateRecordTypeField extends SemanticException {
 
-        private final Type.RecordType.FieldType fieldType;
+        private final TypeSig.RecordTypeSig.FieldType fieldType;
 
-        DuplicateRecordTypeField(final SourcePosition sourcePos, final Type.RecordType.FieldType fieldType) {
+        DuplicateRecordTypeField(final SourcePosition sourcePos, final TypeSig.RecordTypeSig.FieldType fieldType) {
             this.fieldType = fieldType;
             super(sourcePos, "Duplicate field in record type: " + fieldType.fieldName());
         }
 
-        // we may not always have source positions; e.g, when checking a record field type
-        DuplicateRecordTypeField(final Type.RecordType.FieldType fieldType) {
+        // we may not always have source positions; e.g, when checking a record field typeSig
+        DuplicateRecordTypeField(final TypeSig.RecordTypeSig.FieldType fieldType) {
             this.fieldType = fieldType;
             super("Duplicate field in record type: " + fieldType.fieldName());
         }
 
-        Type.RecordType.FieldType getFieldType() {
+        TypeSig.RecordTypeSig.FieldType getFieldType() {
             return fieldType;
         }
 

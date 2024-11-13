@@ -11,22 +11,22 @@ sealed public interface Declaration
     final class VarDeclaration implements Declaration {
 
         private final SourcePosition sourcePos;
-        private final String         name;
-        private final Type           declaredType;
-        private       RuntimeType    runtimeType;
+        private final String      name;
+        private final TypeSig typeSig;
+        private       Type    type;
 
-        public VarDeclaration(SourcePosition sourcePos, String name, Type declaredType) {
+        public VarDeclaration(SourcePosition sourcePos, String name, TypeSig typeSig) {
             this.sourcePos = sourcePos;
             this.name = name;
-            this.declaredType = declaredType;
+            this.typeSig = typeSig;
         }
 
-        public void setRuntimeType(RuntimeType type) {
-            this.runtimeType = type;
+        public void setRuntimeType(Type type) {
+            this.type = type;
         }
 
         @Override public String toString() {
-            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "declaredType=" + declaredType +
+            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "typeSig=" + typeSig +
                    ']';
         }
 
@@ -38,22 +38,22 @@ sealed public interface Declaration
             return sourcePos;
         }
 
-        public Type declaredType() {
-            return this.declaredType;
+        public TypeSig declaredType() {
+            return this.typeSig;
         }
 
-        public RuntimeType runtimeType() {
-            return runtimeType;
+        public Type runtimeType() {
+            return type;
         }
 
     }
 
-    record FuncDeclaration(SourcePosition sourcePos, String name, List<Parameter> parameters, Type declaredReturnType,
+    record FuncDeclaration(SourcePosition sourcePos, String name, List<Parameter> parameters, TypeSig returnTypeSig,
                            Expression expression) implements Declaration { }
 
     record ProcDeclaration(SourcePosition sourcePos, String name, List<Parameter> parameters, Statement statement)
             implements Declaration { }
 
-    record TypeDeclaration(SourcePosition sourcePos, String name, Type type) implements Declaration { }
+    record TypeDeclaration(SourcePosition sourcePos, String name, TypeSig typeSig) implements Declaration { }
 
 }

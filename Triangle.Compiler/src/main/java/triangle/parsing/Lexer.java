@@ -213,7 +213,7 @@ public final class Lexer {
                     read();
                 } while (Character.isLetter(lastChar()) || Character.isDigit(lastChar()));
 
-                // if the matched string is a reserved word, then create a token of the corresponding type
+                // if the matched string is a reserved word, then create a token of the corresponding type signature
                 String matchedString = buffer.substring(0, buffer.length() - 1);
                 Token token = reservedWords.containsKey(matchedString) ? new Token(
                         reservedWords.get(matchedString), line1, column1) :

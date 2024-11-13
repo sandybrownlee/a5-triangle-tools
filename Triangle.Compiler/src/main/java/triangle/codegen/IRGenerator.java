@@ -8,7 +8,7 @@ import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Parameter.VarParameter;
-import triangle.ast.RuntimeType;
+import triangle.ast.Type;
 import triangle.ast.Statement;
 import triangle.util.SymbolTable;
 
@@ -406,7 +406,7 @@ public class IRGenerator {
                 // load address of var argument
                 // if the argument provided is already an address, then dont dereference it here needlessly
                 case Argument.VarArgument varArgument -> block.addAll(
-                        generateRuntimeLocation(varArgument.var(), varArgument.getType() instanceof RuntimeType.RefOf));
+                        generateRuntimeLocation(varArgument.var(), varArgument.getType() instanceof Type.RefOf));
                 // just evaluate expr and leave it on stack
                 case Expression expressionArg -> block.addAll(generate(expressionArg));
             }
@@ -579,7 +579,7 @@ public class IRGenerator {
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 Instruction.Address address = lookupAddress(basicIdentifier);
 
-                if (basicIdentifier.getType() instanceof RuntimeType.RefOf) {
+                if (basicIdentifier.getType() instanceof Type.RefOf) {
                     block.addAll(generateRuntimeLocation(identifier, true));
                     block.add(new Instruction.STOREI(size));
                 } else {
@@ -610,7 +610,7 @@ public class IRGenerator {
                 // LOADL arrayElementSize
                 // push element size on stack
                 block.add(new Instruction.LOADL(
-                        ((RuntimeType.ArrayType) arraySubscript.array().getType().baseType()).elementType().size()));
+                        ((Type.ArrayType) arraySubscript.array().getType().baseType()).elementType().size()));
                 // CALL Primitive.MULT, to get offset
                 block.add(Instruction.TAMInstruction.callPrim(Primitive.MULT));
                 // CALL Primitive.ADD, to add offset to address of root
@@ -622,7 +622,7 @@ public class IRGenerator {
                 block.add(new Instruction.LOADA(address));
 
                 // if its a identifier is already a reference, then "dereference" it
-                if (dereferencing && basicIdentifier.getType() instanceof RuntimeType.RefOf) {
+                if (dereferencing && basicIdentifier.getType() instanceof Type.RefOf) {
                     block.add(new Instruction.LOADI(Machine.addressSize));
                 }
 
@@ -642,7 +642,7 @@ public class IRGenerator {
         // first generate instructions to access the base of the record; this can be any arbitrary identifier
         switch (recordAccess.record()) {
             case Expression.Identifier.ArraySubscript arraySubscript -> {
-                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType().baseType();
+                Type.ArrayType arrayType = (Type.ArrayType) arraySubscript.array().getType().baseType();
                 int elemSize = arrayType.elementType().baseType().size();
 
                 block.addAll(generate(arraySubscript.subscript()));
@@ -659,13 +659,13 @@ public class IRGenerator {
         // this assumes that order of field types corresponds to order in which field values are located contiguously
         // in memory
         int offset = 0;
-        var fieldTypes = ((RuntimeType.RecordType) recordAccess.record().getType().baseType()).fieldTypes();
+        var fieldTypes = ((Type.RecordType) recordAccess.record().getType().baseType()).fieldTypes();
         for (var fieldType : fieldTypes) {
             if (fieldType.fieldName().equals(recordAccess.field().root().name())) {
                 break;
             }
 
-            assert !(fieldType.fieldType() instanceof RuntimeType.RefOf);
+            assert !(fieldType.fieldType() instanceof Type.RefOf);
             offset += fieldType.fieldType().size();
         }
 
@@ -680,7 +680,7 @@ public class IRGenerator {
         // depending on what kind of identifier the field is, we want to do a few different things
         switch (recordAccess.field()) {
             case Expression.Identifier.ArraySubscript arraySubscript -> {
-                RuntimeType.ArrayType arrayType = (RuntimeType.ArrayType) arraySubscript.array().getType().baseType();
+                Type.ArrayType arrayType = (Type.ArrayType) arraySubscript.array().getType().baseType();
                 int elemSize = arrayType.elementType().baseType().size();
 
                 block.addAll(generate(arraySubscript.subscript()));
@@ -712,7 +712,7 @@ public class IRGenerator {
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 Instruction.Address address = lookupAddress(basicIdentifier);
 
-                if (basicIdentifier.getType() instanceof RuntimeType.RefOf) {
+                if (basicIdentifier.getType() instanceof Type.RefOf) {
                     block.addAll(generateRuntimeLocation(identifier, true));
                     block.add(new Instruction.LOADI(size));
                 } else {

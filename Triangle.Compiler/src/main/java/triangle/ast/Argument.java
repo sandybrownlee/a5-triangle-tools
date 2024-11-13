@@ -8,7 +8,7 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
 
         private final SourcePosition        sourcePos;
         private final Expression.Identifier var;
-        private       RuntimeType           type;
+        private       Type                  type;
 
         public VarArgument(SourcePosition sourcePos, Expression.Identifier var) {
             this.sourcePos = sourcePos;
@@ -23,11 +23,11 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return "VarArgument[" + "sourcePos=" + sourcePos + ", " + "var=" + var + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        public void setType(final RuntimeType type) {
+        public void setType(final Type type) {
             this.type = type;
         }
 
@@ -41,7 +41,7 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
 
         private final SourcePosition                        sourcePos;
         private final Expression.Identifier.BasicIdentifier func;
-        private       RuntimeType                           type;
+        private       Type                                  type;
 
         public FuncArgument(SourcePosition sourcePos, Expression.Identifier.BasicIdentifier func) {
             this.sourcePos = sourcePos;
@@ -56,11 +56,11 @@ sealed public interface Argument extends Typeable permits Argument.FuncArgument,
             return "FuncArgument[" + "sourcePos=" + sourcePos + ", " + "func=" + func + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        public void setType(final RuntimeType type) {
+        public void setType(final Type type) {
             this.type = type;
         }
 

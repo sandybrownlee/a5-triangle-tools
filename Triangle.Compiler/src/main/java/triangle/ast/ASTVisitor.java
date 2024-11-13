@@ -70,11 +70,11 @@ public interface ASTVisitor<T, E extends Exception> {
 
     T visit(Statement.AssignStatement assignStatement) throws E;
 
-    // Type
-    T visit(Type.BasicType basicType) throws E;
+    // TypeSig
+    T visit(TypeSig.BasicTypeSig basicType) throws E;
 
-    T visit(Type.ArrayType arrayType) throws E;
+    T visit(TypeSig.ArrayTypeSig arrayType) throws E;
 
-    T visit(Type.RecordType recordType) throws E;
+    T visit(TypeSig.RecordTypeSig recordType) throws E;
 
 }

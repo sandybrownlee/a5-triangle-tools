@@ -5,7 +5,7 @@ import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Statement;
-import triangle.ast.Type;
+import triangle.ast.TypeSig;
 
 public final class ASTPrinter {
 
@@ -76,12 +76,12 @@ public final class ASTPrinter {
                     funcDeclaration.name(),
                     funcDeclaration.parameters().stream().map(p -> prettyPrint(p) + ",").reduce("", String::concat),
                     prettyPrint(funcDeclaration.expression()),
-                    prettyPrint(funcDeclaration.declaredReturnType())
+                    prettyPrint(funcDeclaration.returnTypeSig())
             );
             case Declaration.TypeDeclaration typeDeclaration -> String.format(
                     "%s : %s",
                     typeDeclaration.name(),
-                    prettyPrint(typeDeclaration.type())
+                    prettyPrint(typeDeclaration.typeSig())
             );
             case Declaration.VarDeclaration varDeclaration -> String.format("VAR %s", varDeclaration.name());
             case Declaration.ProcDeclaration procDeclaration -> String.format(
@@ -160,19 +160,19 @@ public final class ASTPrinter {
         };
     }
 
-    private String prettyPrint(final Type type) {
-        return "TYPE " + switch (type) {
-            case Type.ArrayType arrayType -> String.format(
+    private String prettyPrint(final TypeSig typeSig) {
+        return "TYPE " + switch (typeSig) {
+            case TypeSig.ArrayTypeSig arrayType -> String.format(
                     "%s[%d]",
-                    prettyPrint(arrayType.elementType()),
+                    prettyPrint(arrayType.elementTypeSig()),
                     arrayType.arraySize()
             );
-            case Type.RecordType recordType -> String.format(
+            case TypeSig.RecordTypeSig recordType -> String.format(
                     "RECORD {%s}",
-                    recordType.fieldTypes().stream().map(t -> t.fieldName() + " : " + prettyPrint(t.fieldType()) + ",")
+                    recordType.fieldTypes().stream().map(t -> t.fieldName() + " : " + prettyPrint(t.fieldTypeSig()) + ",")
             );
-            case Type.BasicType basicType -> basicType.name();
-            case Type.Void _ -> "VOID";
+            case TypeSig.BasicTypeSig basicType -> basicType.name();
+            case TypeSig.Void _ -> "VOID";
         };
     }
 

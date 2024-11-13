@@ -19,8 +19,8 @@ sealed public interface Expression extends Argument, Typeable
         final class BasicIdentifier implements Identifier {
 
             private final SourcePosition sourcePos;
-            private final String         name;
-            private       RuntimeType    type;
+            private final String name;
+            private       Type   type;
 
             public BasicIdentifier(SourcePosition sourcePos, String name) {
                 this.sourcePos = sourcePos;
@@ -39,11 +39,11 @@ sealed public interface Expression extends Argument, Typeable
                 return "BasicIdentifier[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ']';
             }
 
-            @Override public RuntimeType getType() {
+            @Override public Type getType() {
                 return type;
             }
 
-            @Override public void setType(RuntimeType type) {
+            @Override public void setType(Type type) {
                 this.type = type;
             }
 
@@ -57,8 +57,8 @@ sealed public interface Expression extends Argument, Typeable
 
             private final SourcePosition sourcePos;
             private final Identifier     record;
-            private final Identifier     field;
-            private       RuntimeType    type;
+            private final Identifier field;
+            private       Type       type;
 
             public RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) {
                 this.sourcePos = sourcePos;
@@ -78,11 +78,11 @@ sealed public interface Expression extends Argument, Typeable
                 return "RecordAccess[" + "sourcePos=" + sourcePos + ", " + "record=" + record + ", " + "field=" + field + ']';
             }
 
-            @Override public RuntimeType getType() {
+            @Override public Type getType() {
                 return type;
             }
 
-            public void setType(RuntimeType type) {
+            public void setType(Type type) {
                 this.type = type;
             }
 
@@ -100,8 +100,8 @@ sealed public interface Expression extends Argument, Typeable
 
             private final SourcePosition sourcePos;
             private final Identifier     array;
-            private final Expression     subscript;
-            private       RuntimeType    type;
+            private final Expression subscript;
+            private       Type       type;
 
             public ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) {
                 this.sourcePos = sourcePos;
@@ -122,11 +122,11 @@ sealed public interface Expression extends Argument, Typeable
                        ']';
             }
 
-            @Override public RuntimeType getType() {
+            @Override public Type getType() {
                 return type;
             }
 
-            public void setType(RuntimeType type) {
+            public void setType(Type type) {
                 this.type = type;
             }
 
@@ -144,11 +144,11 @@ sealed public interface Expression extends Argument, Typeable
 
     record LitBool(SourcePosition sourcePos, boolean value) implements Expression {
 
-        @Override public RuntimeType getType() {
-            return RuntimeType.BOOL_TYPE;
+        @Override public Type getType() {
+            return Type.BOOL_TYPE;
         }
 
-        @Override public void setType(final RuntimeType type) {
+        @Override public void setType(final Type type) {
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
@@ -156,11 +156,11 @@ sealed public interface Expression extends Argument, Typeable
 
     record LitInt(SourcePosition sourcePos, int value) implements Expression {
 
-        @Override public RuntimeType getType() {
-            return RuntimeType.INT_TYPE;
+        @Override public Type getType() {
+            return Type.INT_TYPE;
         }
 
-        @Override public void setType(final RuntimeType type) {
+        @Override public void setType(final Type type) {
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
@@ -168,11 +168,11 @@ sealed public interface Expression extends Argument, Typeable
 
     record LitChar(SourcePosition sourcePos, char value) implements Expression {
 
-        @Override public RuntimeType getType() {
-            return RuntimeType.CHAR_TYPE;
+        @Override public Type getType() {
+            return Type.CHAR_TYPE;
         }
 
-        @Override public void setType(final RuntimeType type) {
+        @Override public void setType(final Type type) {
             throw new RuntimeException("Attempted to set type of literal value");
         }
 
@@ -182,7 +182,7 @@ sealed public interface Expression extends Argument, Typeable
 
         private final SourcePosition   sourcePos;
         private final List<Expression> elements;
-        private       RuntimeType      type;
+        private       Type             type;
 
         public LitArray(SourcePosition sourcePos, List<Expression> elements) {
             this.sourcePos = sourcePos;
@@ -197,11 +197,11 @@ sealed public interface Expression extends Argument, Typeable
             return "LitArray[" + "sourcePos=" + sourcePos + ", " + "elements=" + elements + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -215,7 +215,7 @@ sealed public interface Expression extends Argument, Typeable
 
         private final SourcePosition    sourcePos;
         private final List<RecordField> fields;
-        private       RuntimeType       type;
+        private       Type              type;
 
         public LitRecord(SourcePosition sourcePos, List<RecordField> fields) {
             this.sourcePos = sourcePos;
@@ -230,11 +230,11 @@ sealed public interface Expression extends Argument, Typeable
             return "LitRecord[" + "sourcePos=" + sourcePos + ", " + "fields=" + fields + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -250,8 +250,8 @@ sealed public interface Expression extends Argument, Typeable
 
         private final SourcePosition             sourcePos;
         private final Identifier.BasicIdentifier operator;
-        private final Expression                 operand;
-        private       RuntimeType                type;
+        private final Expression operand;
+        private       Type       type;
 
         public UnaryOp(SourcePosition sourcePos, Identifier.BasicIdentifier operator, Expression operand) {
             this.sourcePos = sourcePos;
@@ -267,11 +267,11 @@ sealed public interface Expression extends Argument, Typeable
             return "UnaryOp[" + "sourcePos=" + sourcePos + ", " + "operator=" + operator + ", " + "operand=" + operand + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -290,8 +290,8 @@ sealed public interface Expression extends Argument, Typeable
         private final SourcePosition             sourcePos;
         private final Identifier.BasicIdentifier operator;
         private final Expression                 leftOperand;
-        private final Expression                 rightOperand;
-        private       RuntimeType                type;
+        private final Expression rightOperand;
+        private       Type       type;
 
         public BinaryOp(
                 SourcePosition sourcePos, Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand
@@ -311,11 +311,11 @@ sealed public interface Expression extends Argument, Typeable
                    ", " + "rightOperand=" + rightOperand + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -337,8 +337,8 @@ sealed public interface Expression extends Argument, Typeable
 
         private final SourcePosition    sourcePos;
         private final List<Declaration> declarations;
-        private final Expression        expression;
-        private       RuntimeType       type;
+        private final Expression expression;
+        private       Type       type;
 
         public LetExpression(SourcePosition sourcePos, List<Declaration> declarations, Expression expression) {
             this.sourcePos = sourcePos;
@@ -355,11 +355,11 @@ sealed public interface Expression extends Argument, Typeable
                    expression + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -378,8 +378,8 @@ sealed public interface Expression extends Argument, Typeable
         private final SourcePosition sourcePos;
         private final Expression     condition;
         private final Expression     consequent;
-        private final Expression     alternative;
-        private       RuntimeType    type;
+        private final Expression alternative;
+        private       Type       type;
 
         public IfExpression(SourcePosition sourcePos, Expression condition, Expression consequent, Expression alternative) {
             this.sourcePos = sourcePos;
@@ -397,11 +397,11 @@ sealed public interface Expression extends Argument, Typeable
                    consequent + ", " + "alternative=" + alternative + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -423,8 +423,8 @@ sealed public interface Expression extends Argument, Typeable
 
         private final SourcePosition             sourcePos;
         private final Identifier.BasicIdentifier func;
-        private final List<Argument>             arguments;
-        private       RuntimeType                type;
+        private final List<Argument> arguments;
+        private       Type           type;
 
         public FunCall(SourcePosition sourcePos, Identifier.BasicIdentifier func, List<Argument> arguments) {
             this.sourcePos = sourcePos;
@@ -440,11 +440,11 @@ sealed public interface Expression extends Argument, Typeable
             return "FunCall[" + "sourcePos=" + sourcePos + ", " + "callable=" + func + ", " + "arguments=" + arguments + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -462,8 +462,8 @@ sealed public interface Expression extends Argument, Typeable
 
         private final SourcePosition sourcePos;
         private final Statement      statement;
-        private final Expression     expression;
-        private       RuntimeType    type;
+        private final Expression expression;
+        private       Type       type;
 
         public SequenceExpression(SourcePosition sourcePos, Statement statement, Expression expression) {
             this.sourcePos = sourcePos;
@@ -475,11 +475,11 @@ sealed public interface Expression extends Argument, Typeable
             return sourcePos;
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(final RuntimeType type) {
+        @Override public void setType(final Type type) {
             this.type = type;
         }
 

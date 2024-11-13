@@ -10,12 +10,12 @@ sealed public interface Parameter extends Typeable
     final class ValueParameter implements Parameter {
 
         private final String      name;
-        private final Type        declaredType;
-        private       RuntimeType type;
+        private final TypeSig typeSig;
+        private       Type    type;
 
-        public ValueParameter(String name, Type declaredType) {
+        public ValueParameter(String name, TypeSig typeSig) {
             this.name = name;
-            this.declaredType = declaredType;
+            this.typeSig = typeSig;
         }
 
         @Override public String getName() {
@@ -23,14 +23,14 @@ sealed public interface Parameter extends Typeable
         }
 
         @Override public String toString() {
-            return "ValueParameter[" + ", " + "name=" + name + ", " + "type=" + declaredType + ']';
+            return "ValueParameter[" + ", " + "name=" + name + ", " + "typeSig=" + typeSig + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -38,8 +38,8 @@ sealed public interface Parameter extends Typeable
             return name;
         }
 
-        public Type declaredType() {
-            return declaredType;
+        public TypeSig declaredType() {
+            return typeSig;
         }
 
     }
@@ -47,12 +47,12 @@ sealed public interface Parameter extends Typeable
     final class VarParameter implements Parameter {
 
         private final String      name;
-        private final Type        declaredType;
-        private       RuntimeType type;
+        private final TypeSig typeSig;
+        private       Type    type;
 
-        public VarParameter(String name, Type declaredType) {
+        public VarParameter(String name, TypeSig typeSig) {
             this.name = name;
-            this.declaredType = declaredType;
+            this.typeSig = typeSig;
         }
 
         @Override public String getName() {
@@ -60,14 +60,14 @@ sealed public interface Parameter extends Typeable
         }
 
         @Override public String toString() {
-            return "VarParameter[" + ", " + "name=" + name + ", " + "type=" + type + ']';
+            return "VarParameter[" + ", " + "name=" + name + ", " + "typeSig=" + type + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return type;
         }
 
-        @Override public void setType(RuntimeType type) {
+        @Override public void setType(Type type) {
             this.type = type;
         }
 
@@ -75,12 +75,12 @@ sealed public interface Parameter extends Typeable
             return name;
         }
 
-        public RuntimeType type() {
+        public Type type() {
             return type;
         }
 
-        public Type declaredType() {
-            return declaredType;
+        public TypeSig declaredType() {
+            return typeSig;
         }
 
     }
@@ -89,15 +89,15 @@ sealed public interface Parameter extends Typeable
 
         private final String          callable;
         private final List<Parameter> parameters;
-        private final Type            declaredReturnType;
-        private       RuntimeType     returnType;
+        private final TypeSig returnTypeSig;
+        private       Type    returnType;
 
         public FuncParameter(
-                String callable, List<Parameter> parameters, triangle.ast.Type declaredReturnType
+                String callable, List<Parameter> parameters, TypeSig returnTypeSig
         ) {
             this.callable = callable;
             this.parameters = parameters;
-            this.declaredReturnType = declaredReturnType;
+            this.returnTypeSig = returnTypeSig;
         }
 
         @Override public String getName() {
@@ -109,11 +109,11 @@ sealed public interface Parameter extends Typeable
                    returnType + ']';
         }
 
-        @Override public RuntimeType getType() {
+        @Override public Type getType() {
             return returnType;
         }
 
-        @Override public void setType(RuntimeType returnType) {
+        @Override public void setType(Type returnType) {
             this.returnType = returnType;
         }
 
@@ -125,8 +125,8 @@ sealed public interface Parameter extends Typeable
             return parameters;
         }
 
-        public Type declaredReturnType() {
-            return declaredReturnType;
+        public TypeSig declaredReturnType() {
+            return returnTypeSig;
         }
 
     }

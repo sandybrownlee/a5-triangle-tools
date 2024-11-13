@@ -38,10 +38,9 @@ import triangle.ast.Statement.RepeatUntilStatement;
 import triangle.ast.Statement.RepeatWhileStatement;
 import triangle.ast.Statement.StatementBlock;
 import triangle.ast.Statement.WhileStatement;
-import triangle.ast.Type;
-import triangle.ast.Type.ArrayType;
-import triangle.ast.Type.BasicType;
-import triangle.ast.Type.RecordType;
+import triangle.ast.TypeSig;
+import triangle.ast.TypeSig.BasicTypeSig;
+import triangle.ast.TypeSig.RecordTypeSig;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -51,7 +50,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-// TODO: parse custom type definitions
+// TODO: parse custom type signatures
 public class Parser {
 
     private static final Set<Token.Kind> EXPRESSION_FIRST_SET = new HashSet<>();
@@ -331,10 +330,10 @@ public class Parser {
         return identifier;
     }
 
-    private Type parseType() throws IOException, SyntaxError {
+    private TypeSig parseType() throws IOException, SyntaxError {
         return switch (lastToken.getKind()) {
             case IDENTIFIER -> {
-                BasicType type = new BasicType(((TextToken) lastToken).getText());
+                TypeSig.BasicTypeSig type = new BasicTypeSig(((TextToken) lastToken).getText());
                 shift(Token.Kind.IDENTIFIER);
                 yield type;
             }
@@ -343,15 +342,15 @@ public class Parser {
                 int size = Integer.parseInt(((TextToken) lastToken).getText());
                 shift(Token.Kind.INTLITERAL);
                 shift(Token.Kind.OF);
-                Type elementType = parseType();
-                yield new ArrayType(size, elementType);
+                TypeSig elementTypeSig = parseType();
+                yield new TypeSig.ArrayTypeSig(size, elementTypeSig);
             }
             case RECORD -> {
                 shift(Token.Kind.RECORD);
-                @SuppressWarnings("unchecked") List<RecordType.FieldType> fieldTypes = (lastToken.getKind() == Token.Kind.END) ?
+                @SuppressWarnings("unchecked") List<RecordTypeSig.FieldType> fieldTypes = (lastToken.getKind() == Token.Kind.END) ?
                         Collections.EMPTY_LIST : parseFieldTypeSeq();
                 shift(Token.Kind.END);
-                yield new RecordType(fieldTypes);
+                yield new RecordTypeSig(fieldTypes);
             }
             default -> throw new SyntaxError(lastToken);
         };
@@ -435,8 +434,8 @@ public class Parser {
         return new LitRecord.RecordField(fieldName, parseExpression());
     }
 
-    private List<RecordType.FieldType> parseFieldTypeSeq() throws IOException, SyntaxError {
-        List<RecordType.FieldType> fieldTypes = new ArrayList<>();
+    private List<RecordTypeSig.FieldType> parseFieldTypeSeq() throws IOException, SyntaxError {
+        List<RecordTypeSig.FieldType> fieldTypes = new ArrayList<>();
         fieldTypes.add(parseFieldType());
 
         if (lastToken.getKind() == Token.Kind.COMMA) {
@@ -449,12 +448,12 @@ public class Parser {
         return fieldTypes;
     }
 
-    private RecordType.FieldType parseFieldType() throws IOException, SyntaxError {
+    private RecordTypeSig.FieldType parseFieldType() throws IOException, SyntaxError {
         String fieldName = ((TextToken) lastToken).getText();
         shift(Token.Kind.IDENTIFIER);
         shift(Token.Kind.COLON);
-        Type fieldType = parseType();
-        return new RecordType.FieldType(fieldName, fieldType);
+        TypeSig fieldTypeSig = parseType();
+        return new TypeSig.RecordTypeSig.FieldType(fieldName, fieldTypeSig);
     }
 
     private List<Declaration> parseDeclSeq() throws IOException, SyntaxError {
@@ -487,8 +486,8 @@ public class Parser {
                 String varName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
-                Type varType = parseType();
-                yield new Declaration.VarDeclaration(start, varName, varType);
+                TypeSig varTypeSig = parseType();
+                yield new Declaration.VarDeclaration(start, varName, varTypeSig);
             }
             case PROC -> {
                 SourcePosition start = shift(Token.Kind.PROC);
@@ -505,18 +504,18 @@ public class Parser {
                 shift(Token.Kind.IDENTIFIER);
                 List<Parameter> parameters = parseParamSeq();
                 shift(Token.Kind.COLON);
-                Type type = parseType();
+                TypeSig typeSig = parseType();
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                yield new Declaration.FuncDeclaration(start, funcName, parameters, type, expression);
+                yield new Declaration.FuncDeclaration(start, funcName, parameters, typeSig, expression);
             }
             case TYPE -> {
                 SourcePosition start = shift(Token.Kind.TYPE);
                 String typeName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.IS);
-                Type type = parseType();
-                yield new Declaration.TypeDeclaration(start, typeName, type);
+                TypeSig typeSig = parseType();
+                yield new Declaration.TypeDeclaration(start, typeName, typeSig);
             }
             default -> throw new SyntaxError(lastToken);
         };
@@ -549,23 +548,23 @@ public class Parser {
                 String varName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
-                Type varType = parseType();
-                yield new ValueParameter(varName, varType);
+                TypeSig varTypeSig = parseType();
+                yield new ValueParameter(varName, varTypeSig);
             }
             case VAR -> {
                 shift(Token.Kind.VAR);
                 String varName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
-                Type varType = parseType();
-                yield new VarParameter(varName, varType);
+                TypeSig varTypeSig = parseType();
+                yield new VarParameter(varName, varTypeSig);
             }
             case PROC -> {
                 shift(Token.Kind.PROC);
                 String funcName = ((TextToken) lastToken).getText();
                 shift(Token.Kind.IDENTIFIER);
                 List<Parameter> parameters = parseParamSeq();
-                yield new FuncParameter(funcName, parameters, new Type.Void());
+                yield new FuncParameter(funcName, parameters, new TypeSig.Void());
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
@@ -573,8 +572,8 @@ public class Parser {
                 shift(Token.Kind.IDENTIFIER);
                 List<Parameter> parameters = parseParamSeq();
                 shift(Token.Kind.COLON);
-                Type funcType = parseType();
-                yield new FuncParameter(funcName, parameters, funcType);
+                TypeSig funcTypeSig = parseType();
+                yield new FuncParameter(funcName, parameters, funcTypeSig);
             }
             default -> throw new SyntaxError(lastToken);
         };
