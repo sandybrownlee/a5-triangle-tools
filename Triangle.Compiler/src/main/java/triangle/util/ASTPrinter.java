@@ -1,11 +1,11 @@
 package triangle.util;
 
-import triangle.ast.Argument;
-import triangle.ast.Declaration;
-import triangle.ast.Expression;
-import triangle.ast.Parameter;
-import triangle.ast.Statement;
-import triangle.ast.TypeSig;
+import triangle.repr.Argument;
+import triangle.repr.Declaration;
+import triangle.repr.Expression;
+import triangle.repr.Parameter;
+import triangle.repr.Statement;
+import triangle.repr.TypeSig;
 
 public final class ASTPrinter {
 

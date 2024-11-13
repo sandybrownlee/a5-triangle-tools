@@ -1,4 +1,4 @@
-package triangle.ast;
+package triangle.repr;
 
 import java.util.List;
 import java.util.Optional;

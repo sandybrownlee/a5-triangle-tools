@@ -1,4 +1,4 @@
-package triangle.ast;
+package triangle.repr;
 
 import triangle.abstractMachine.Machine;
 

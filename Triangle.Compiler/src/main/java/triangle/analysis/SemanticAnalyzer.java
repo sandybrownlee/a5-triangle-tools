@@ -1,19 +1,19 @@
 package triangle.analysis;
 
 import triangle.abstractMachine.Machine;
-import triangle.ast.Argument;
-import triangle.ast.Declaration;
-import triangle.ast.Declaration.ConstDeclaration;
-import triangle.ast.Declaration.TypeDeclaration;
-import triangle.ast.Expression;
-import triangle.ast.Expression.*;
-import triangle.ast.Expression.Identifier.BasicIdentifier;
-import triangle.ast.Parameter;
-import triangle.ast.Type;
-import triangle.ast.Type.PrimType.FuncType;
-import triangle.ast.SourcePosition;
-import triangle.ast.Statement;
-import triangle.ast.TypeSig;
+import triangle.repr.Argument;
+import triangle.repr.Declaration;
+import triangle.repr.Declaration.ConstDeclaration;
+import triangle.repr.Declaration.TypeDeclaration;
+import triangle.repr.Expression;
+import triangle.repr.Expression.*;
+import triangle.repr.Expression.Identifier.BasicIdentifier;
+import triangle.repr.Parameter;
+import triangle.repr.Type;
+import triangle.repr.Type.PrimType.FuncType;
+import triangle.repr.SourcePosition;
+import triangle.repr.Statement;
+import triangle.repr.TypeSig;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
@@ -26,7 +26,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-import static triangle.ast.Type.*;
+import static triangle.repr.Type.*;
 
 // semantic analysis does several things:
 //      it checks that all uses of an identifier are in a scope with a corresponding declaration

@@ -1,4 +1,4 @@
-package triangle.ast;
+package triangle.repr;
 
 // visitor pattern is not actually needed because I am using sealed interfaces to emulate ADTs;
 // this is a perfunctory implementation to complete Task 3

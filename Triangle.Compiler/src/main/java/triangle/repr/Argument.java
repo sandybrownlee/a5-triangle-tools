@@ -1,4 +1,4 @@
-package triangle.ast;
+package triangle.repr;
 
 sealed public interface Argument extends Typeable permits Argument.FuncArgument, Argument.VarArgument, Expression {
 

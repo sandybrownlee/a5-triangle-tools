@@ -1,4 +1,4 @@
-package triangle.ast;
+package triangle.repr;
 
 
 public interface Typeable {

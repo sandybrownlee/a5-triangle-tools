@@ -1,13 +1,13 @@
 package triangle.analysis;
 
-import triangle.ast.Argument;
-import triangle.ast.Expression;
-import triangle.ast.Expression.Identifier;
-import triangle.ast.Expression.LitRecord.RecordField;
-import triangle.ast.Parameter;
-import triangle.ast.Type;
-import triangle.ast.SourcePosition;
-import triangle.ast.TypeSig;
+import triangle.repr.Argument;
+import triangle.repr.Expression;
+import triangle.repr.Expression.Identifier;
+import triangle.repr.Expression.LitRecord.RecordField;
+import triangle.repr.Parameter;
+import triangle.repr.Type;
+import triangle.repr.SourcePosition;
+import triangle.repr.TypeSig;
 
 public abstract class SemanticException extends Exception {
 
