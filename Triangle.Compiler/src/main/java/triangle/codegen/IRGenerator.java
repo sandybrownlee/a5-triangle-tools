@@ -132,7 +132,7 @@ public class IRGenerator {
                 Instruction.LABEL skipLabel = labelSupplier.get();
 
                 block.addAll(generate(ifStatement.condition()));
-                block.add(new Instruction.JUMPIF_LABEL(0, altLabel));
+                block.add(new Instruction.JUMPIF_LABEL(Machine.falseRep, altLabel));
                 ifStatement.consequent().ifPresent(s -> block.addAll(generate(s)));
                 block.add(new Instruction.JUMP_LABEL(skipLabel));
                 block.add(altLabel);
@@ -285,7 +285,7 @@ public class IRGenerator {
                 Instruction.LABEL skipLabel = labelSupplier.get();
 
                 block.addAll(generate(ifExpression.condition()));
-                block.add(new Instruction.JUMPIF_LABEL(0, altLabel));
+                block.add(new Instruction.JUMPIF_LABEL(Machine.falseRep, altLabel));
                 block.addAll(generate(ifExpression.consequent()));
                 block.add(new Instruction.JUMP_LABEL(skipLabel));
                 block.add(altLabel);
@@ -372,7 +372,9 @@ public class IRGenerator {
                     switch (lookup.t()) {
                         case Callable.DynamicCallable(int stackOffset) -> {
                             //  LOADA stackOffset[nonLocalsLink]         <- load static link
+                            //  LOADI Machine.addressSize
                             //  LOADA (stackOffset + 1)[nonLocalsLink]   <- load code addr
+                            //  LOADI Machine.addressSize
 
                             // closure (i.e, func and proc arguments) are addresses to addresses, so dereference
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, stackOffset)));
@@ -381,16 +383,16 @@ public class IRGenerator {
                             block.add(new Instruction.LOADI(Machine.addressSize));
                         }
                         case Callable.PrimitiveCallable(Primitive primitive) -> {
-                            //  LOADA primitive.ordinal()[PB]
                             //  LOADA 0[LB]
+                            //  LOADA primitive.ordinal()[PB]
 
                             // use whatever as static link for primitives -- 0[LB] here
                             block.add(new Instruction.LOADA(new Instruction.Address(Register.LB, 0)));
                             block.add(new Instruction.LOADA(new Instruction.Address(Register.PB, primitive.ordinal())));
                         }
                         case Callable.StaticCallable(Instruction.LABEL label) -> {
-                            //  LOADA label
                             //  LOADA 0[nonLocalsLink]
+                            //  LOADA label
 
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, 0)));
                             block.add(new Instruction.LOADA_LABEL(label));
@@ -478,8 +480,8 @@ public class IRGenerator {
                     funcAddresses.add(funcDeclaration.name(), new Callable.StaticCallable(funcLabel));
 
                     // new scope for local vars and functions, since we are in a func declaration, the scope local state (i.e.,
-                    // the initial stack offset) must be 3 * address-width -- for static link, dynamic link, return address
-                    localVars.enterNewScope(3 * Machine.addressSize);
+                    // the initial stack offset) must be Machine.linkDataSize -- for static link, dynamic link, return address
+                    localVars.enterNewScope(Machine.linkDataSize);
                     funcAddresses.enterNewScope(null);
 
                     // we need the total amount of space taken by the function to know what to use for the RETURN call
@@ -519,8 +521,8 @@ public class IRGenerator {
                     funcAddresses.add(procDeclaration.name(), new Callable.StaticCallable(procLabel));
 
                     // new scope for local vars and functions, since we are in a proc declaration, the scope local state (i.e.,
-                    // the initial stack offset) must be 3 * address-width -- for static link, dynamic link, return address
-                    localVars.enterNewScope(3 * Machine.addressSize);
+                    // the initial stack offset) must be Machine.linkDataSize -- for static link, dynamic link, return address
+                    localVars.enterNewScope(Machine.linkDataSize);
                     funcAddresses.enterNewScope(null);
 
                     // we need the total amount of space that will be taken by the parameters to know how to RETURN

@@ -1,5 +1,7 @@
 package triangle.ast;
 
+import triangle.abstractMachine.Machine;
+
 import java.util.List;
 
 // interface that represents types that are "resolved", i.e.:
@@ -56,9 +58,8 @@ sealed public interface RuntimeType {
             this.type = type;
         }
 
-        // TAM specification ensures all references (pointers) are 1 word wide
         @Override public int size() {
-            return 1;
+            return Machine.addressSize;
         }
 
         @Override public RuntimeType baseType() {
@@ -73,9 +74,8 @@ sealed public interface RuntimeType {
 
         record FuncType(List<RuntimeType> argTypes, RuntimeType returnType) implements PrimType {
 
-            // the size of a function value is 2 words for static link and code address
             @Override public int size() {
-                return 2;
+                return Machine.closureSize;
             }
 
         }
@@ -83,7 +83,7 @@ sealed public interface RuntimeType {
         record BoolType() implements PrimType {
 
             @Override public int size() {
-                return 1;
+                return Machine.booleanSize;
             }
 
         }
@@ -91,7 +91,7 @@ sealed public interface RuntimeType {
         record IntType() implements PrimType {
 
             @Override public int size() {
-                return 1;
+                return Machine.integerSize;
             }
 
         }
@@ -99,7 +99,7 @@ sealed public interface RuntimeType {
         record CharType() implements PrimType {
 
             @Override public int size() {
-                return 1;
+                return Machine.characterSize;
             }
 
         }
