@@ -25,49 +25,6 @@ sealed public interface RuntimeType {
         return this;
     }
 
-    record ArrayType(int arraySize, RuntimeType elementType) implements RuntimeType {
-
-        @Override public int size() {
-            return elementType.size() * arraySize;
-        }
-
-    }
-
-    record RecordType(List<FieldType> fieldTypes) implements RuntimeType {
-
-        @Override public int size() {
-            int totalSize = 0;
-
-            for (FieldType fieldType : fieldTypes) {
-                totalSize += fieldType.fieldType.size();
-            }
-
-            return totalSize;
-        }
-
-        public record FieldType(String fieldName, RuntimeType fieldType) { }
-
-    }
-
-    record RefOf(RuntimeType type) implements RuntimeType {
-
-        public RefOf(RuntimeType type) {
-            if (type instanceof RefOf) {
-                throw new RuntimeException("creating ref of ref");
-            }
-            this.type = type;
-        }
-
-        @Override public int size() {
-            return Machine.addressSize;
-        }
-
-        @Override public RuntimeType baseType() {
-            return type;
-        }
-
-    }
-
     sealed interface PrimType extends RuntimeType
             permits PrimType.FuncType, PrimType.BoolType, PrimType.IntType, PrimType.CharType,
                     PrimType.VoidType {
@@ -110,6 +67,49 @@ sealed public interface RuntimeType {
                 return 0;
             }
 
+        }
+
+    }
+
+    record ArrayType(int arraySize, RuntimeType elementType) implements RuntimeType {
+
+        @Override public int size() {
+            return elementType.size() * arraySize;
+        }
+
+    }
+
+    record RecordType(List<FieldType> fieldTypes) implements RuntimeType {
+
+        @Override public int size() {
+            int totalSize = 0;
+
+            for (FieldType fieldType : fieldTypes) {
+                totalSize += fieldType.fieldType.size();
+            }
+
+            return totalSize;
+        }
+
+        public record FieldType(String fieldName, RuntimeType fieldType) { }
+
+    }
+
+    record RefOf(RuntimeType type) implements RuntimeType {
+
+        public RefOf(RuntimeType type) {
+            if (type instanceof RefOf) {
+                throw new RuntimeException("creating ref of ref");
+            }
+            this.type = type;
+        }
+
+        @Override public int size() {
+            return Machine.addressSize;
+        }
+
+        @Override public RuntimeType baseType() {
+            return type;
         }
 
     }

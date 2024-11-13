@@ -7,6 +7,141 @@ sealed public interface Expression extends Argument, Typeable
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.SequenceExpression, Expression.UnaryOp {
 
+    sealed interface Identifier extends Expression, Typeable
+            permits Identifier.BasicIdentifier, Identifier.RecordAccess, Identifier.ArraySubscript {
+
+        // this finds the "root" of a (possibly complex) identifier
+        // e.g., arr[i] -> root = arr
+        //       recx.recy.recz -> root = recx
+        // this is needed, for example, to check if a record is a constant or not and for deciding addresses during codegen
+        BasicIdentifier root();
+
+        final class BasicIdentifier implements Identifier {
+
+            private final SourcePosition sourcePos;
+            private final String         name;
+            private       RuntimeType    type;
+
+            public BasicIdentifier(SourcePosition sourcePos, String name) {
+                this.sourcePos = sourcePos;
+                this.name = name;
+            }
+
+            @Override public BasicIdentifier root() {
+                return this;
+            }
+
+            @Override public SourcePosition sourcePos() {
+                return sourcePos;
+            }
+
+            @Override public String toString() {
+                return "BasicIdentifier[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ']';
+            }
+
+            @Override public RuntimeType getType() {
+                return type;
+            }
+
+            @Override public void setType(RuntimeType type) {
+                this.type = type;
+            }
+
+            public String name() {
+                return name;
+            }
+
+        }
+
+        final class RecordAccess implements Identifier {
+
+            private final SourcePosition sourcePos;
+            private final Identifier     record;
+            private final Identifier     field;
+            private       RuntimeType    type;
+
+            public RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) {
+                this.sourcePos = sourcePos;
+                this.record = record;
+                this.field = field;
+            }
+
+            @Override public BasicIdentifier root() {
+                return record.root();
+            }
+
+            @Override public SourcePosition sourcePos() {
+                return sourcePos;
+            }
+
+            @Override public String toString() {
+                return "RecordAccess[" + "sourcePos=" + sourcePos + ", " + "record=" + record + ", " + "field=" + field + ']';
+            }
+
+            @Override public RuntimeType getType() {
+                return type;
+            }
+
+            public void setType(RuntimeType type) {
+                this.type = type;
+            }
+
+            public Identifier record() {
+                return record;
+            }
+
+            public Identifier field() {
+                return field;
+            }
+
+        }
+
+        final class ArraySubscript implements Identifier {
+
+            private final SourcePosition sourcePos;
+            private final Identifier     array;
+            private final Expression     subscript;
+            private       RuntimeType    type;
+
+            public ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) {
+                this.sourcePos = sourcePos;
+                this.array = array;
+                this.subscript = subscript;
+            }
+
+            @Override public BasicIdentifier root() {
+                return array.root();
+            }
+
+            @Override public SourcePosition sourcePos() {
+                return sourcePos;
+            }
+
+            @Override public String toString() {
+                return "ArraySubscript[" + "sourcePos=" + sourcePos + ", " + "array=" + array + ", " + "subscript=" + subscript +
+                       ']';
+            }
+
+            @Override public RuntimeType getType() {
+                return type;
+            }
+
+            public void setType(RuntimeType type) {
+                this.type = type;
+            }
+
+            public Identifier array() {
+                return array;
+            }
+
+            public Expression subscript() {
+                return subscript;
+            }
+
+        }
+
+    }
+
     record LitBool(SourcePosition sourcePos, boolean value) implements Expression {
 
         @Override public RuntimeType getType() {
@@ -340,14 +475,6 @@ sealed public interface Expression extends Argument, Typeable
             return sourcePos;
         }
 
-        public Statement statement() {
-            return statement;
-        }
-
-        public Expression expression() {
-            return expression;
-        }
-
         @Override public RuntimeType getType() {
             return type;
         }
@@ -356,139 +483,12 @@ sealed public interface Expression extends Argument, Typeable
             this.type = type;
         }
 
-    }
-
-    sealed interface Identifier extends Expression, Typeable
-            permits Identifier.BasicIdentifier, Identifier.RecordAccess, Identifier.ArraySubscript {
-
-        // this finds the "root" of a (possibly complex) identifier
-        // e.g., arr[i] -> root = arr
-        //       recx.recy.recz -> root = recx
-        // this is needed, for example, to check if a record is a constant or not and for deciding addresses during codegen
-        BasicIdentifier root();
-
-        final class BasicIdentifier implements Identifier {
-
-            private final SourcePosition sourcePos;
-            private final String         name;
-            private       RuntimeType    type;
-
-            public BasicIdentifier(SourcePosition sourcePos, String name) {
-                this.sourcePos = sourcePos;
-                this.name = name;
-            }
-
-            @Override public BasicIdentifier root() {
-                return this;
-            }
-
-            @Override public SourcePosition sourcePos() {
-                return sourcePos;
-            }
-
-            @Override public String toString() {
-                return "BasicIdentifier[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ']';
-            }
-
-            @Override public RuntimeType getType() {
-                return type;
-            }
-
-            @Override public void setType(RuntimeType type) {
-                this.type = type;
-            }
-
-            public String name() {
-                return name;
-            }
-
+        public Statement statement() {
+            return statement;
         }
 
-        final class RecordAccess implements Identifier {
-
-            private final SourcePosition sourcePos;
-            private final Identifier     record;
-            private final Identifier     field;
-            private       RuntimeType    type;
-
-            public RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) {
-                this.sourcePos = sourcePos;
-                this.record = record;
-                this.field = field;
-            }
-
-            @Override public BasicIdentifier root() {
-                return record.root();
-            }
-
-            @Override public SourcePosition sourcePos() {
-                return sourcePos;
-            }
-
-            @Override public String toString() {
-                return "RecordAccess[" + "sourcePos=" + sourcePos + ", " + "record=" + record + ", " + "field=" + field + ']';
-            }
-
-            @Override public RuntimeType getType() {
-                return type;
-            }
-
-            public void setType(RuntimeType type) {
-                this.type = type;
-            }
-
-            public Identifier record() {
-                return record;
-            }
-
-            public Identifier field() {
-                return field;
-            }
-
-        }
-
-        final class ArraySubscript implements Identifier {
-
-            private final SourcePosition sourcePos;
-            private final Identifier     array;
-            private final Expression     subscript;
-            private       RuntimeType    type;
-
-            public ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) {
-                this.sourcePos = sourcePos;
-                this.array = array;
-                this.subscript = subscript;
-            }
-
-            @Override public BasicIdentifier root() {
-                return array.root();
-            }
-
-            @Override public SourcePosition sourcePos() {
-                return sourcePos;
-            }
-
-            @Override public String toString() {
-                return "ArraySubscript[" + "sourcePos=" + sourcePos + ", " + "array=" + array + ", " + "subscript=" + subscript +
-                       ']';
-            }
-
-            @Override public RuntimeType getType() {
-                return type;
-            }
-
-            public void setType(RuntimeType type) {
-                this.type = type;
-            }
-
-            public Identifier array() {
-                return array;
-            }
-
-            public Expression subscript() {
-                return subscript;
-            }
-
+        public Expression expression() {
+            return expression;
         }
 
     }

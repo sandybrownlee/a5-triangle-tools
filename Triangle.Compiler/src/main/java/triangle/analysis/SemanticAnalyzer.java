@@ -6,24 +6,14 @@ import triangle.ast.Declaration;
 import triangle.ast.Declaration.ConstDeclaration;
 import triangle.ast.Declaration.TypeDeclaration;
 import triangle.ast.Expression;
-import triangle.ast.Expression.BinaryOp;
-import triangle.ast.Expression.FunCall;
-import triangle.ast.Expression.Identifier;
+import triangle.ast.Expression.*;
 import triangle.ast.Expression.Identifier.BasicIdentifier;
-import triangle.ast.Expression.IfExpression;
-import triangle.ast.Expression.LetExpression;
-import triangle.ast.Expression.LitArray;
-import triangle.ast.Expression.LitBool;
-import triangle.ast.Expression.LitChar;
-import triangle.ast.Expression.LitInt;
-import triangle.ast.Expression.LitRecord;
-import triangle.ast.Expression.UnaryOp;
 import triangle.ast.Parameter;
+import triangle.ast.RuntimeType;
+import triangle.ast.RuntimeType.PrimType.FuncType;
 import triangle.ast.SourcePosition;
 import triangle.ast.Statement;
 import triangle.ast.Type;
-import triangle.ast.RuntimeType;
-import triangle.ast.RuntimeType.PrimType.FuncType;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
@@ -36,8 +26,8 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-import static triangle.ast.Type.BasicType;
 import static triangle.ast.RuntimeType.*;
+import static triangle.ast.Type.BasicType;
 
 // semantic analysis does several things:
 //      it checks that all uses of an identifier are in a scope with a corresponding declaration

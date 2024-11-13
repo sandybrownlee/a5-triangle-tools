@@ -38,8 +38,6 @@ import java.util.List;
 
 // TODO: replace ErrorReporter with robust logging
 // TODO: showStats cmdline option
-// TODO: procedural.tri fails
-// TODO: procparam.tri fails
 public class Compiler {
 
     /** The filename for the object program, normally obj.tam. */
@@ -53,11 +51,6 @@ public class Compiler {
         Args.parseOrExit(Compiler.class, args);
 
         try {
-//            for (String path : new File("programs/").list()) {
-//                System.out.println("programs/" + path);
-//                compileProgram(new FileInputStream("programs/" + path));
-//                System.in.read();
-//            }
             compileProgram(new FileInputStream("programs/test.tri"));
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);

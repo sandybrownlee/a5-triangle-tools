@@ -8,8 +8,8 @@ import triangle.ast.Declaration;
 import triangle.ast.Expression;
 import triangle.ast.Parameter;
 import triangle.ast.Parameter.VarParameter;
-import triangle.ast.Statement;
 import triangle.ast.RuntimeType;
+import triangle.ast.Statement;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
@@ -18,12 +18,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-// TODO: records
+// TODO: tests for IRGen
 // TODO: when we know that an identifier's location is statically derivable (does not contain array with non-constant
 //  subscript) we can special-case the generateStore/Fetch methods to be more efficient
 public class IRGenerator {
 
-    static final  Map<String, Callable> builtins = new HashMap<>();
+    static final Map<String, Callable> builtins = new HashMap<>();
 
     static {
         // TODO: fill up
@@ -71,6 +71,7 @@ public class IRGenerator {
             default -> throw new RuntimeException("static nesting-depth limit exceeded");
         };
     }
+
     private final SymbolTable<Callable, Void>   funcAddresses = new SymbolTable<>(builtins, null);
     private final SymbolTable<Integer, Integer> localVars     = new SymbolTable<>(0);
     private final Supplier<Instruction.LABEL>   labelSupplier = new Supplier<>() {
@@ -249,6 +250,7 @@ public class IRGenerator {
     }
 
     private List<Instruction> generate(Expression expression) {
+        // TODO: use `return switch (expression) { ...`
         List<Instruction> block = new ArrayList<>();
 
         switch (expression) {

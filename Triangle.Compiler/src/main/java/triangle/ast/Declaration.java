@@ -25,17 +25,17 @@ sealed public interface Declaration
             this.runtimeType = type;
         }
 
+        @Override public String toString() {
+            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "declaredType=" + declaredType +
+                   ']';
+        }
+
         public String name() {
             return name;
         }
 
         public SourcePosition sourcePos() {
             return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "VarDeclaration[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ", " + "declaredType=" + declaredType +
-                   ']';
         }
 
         public Type declaredType() {
