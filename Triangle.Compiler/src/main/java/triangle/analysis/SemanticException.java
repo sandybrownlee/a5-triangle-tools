@@ -1,12 +1,13 @@
 package triangle.analysis;
 
 import triangle.repr.Argument;
+import triangle.repr.Declaration;
 import triangle.repr.Expression;
 import triangle.repr.Expression.Identifier;
 import triangle.repr.Expression.LitRecord.RecordField;
 import triangle.repr.Parameter;
-import triangle.repr.Type;
 import triangle.repr.SourcePosition;
+import triangle.repr.Type;
 import triangle.repr.TypeSig;
 
 public abstract class SemanticException extends Exception {
@@ -29,6 +30,10 @@ public abstract class SemanticException extends Exception {
             super("Undeclared use of type: " + typeSig);
         }
 
+        UndeclaredUse(String string) {
+            super("Undeclared use of symbol: " + string);
+        }
+
     }
 
     static final class TypeError extends SemanticException {
@@ -45,8 +50,8 @@ public abstract class SemanticException extends Exception {
 
     static final class ArityMismatch extends SemanticException {
 
-        ArityMismatch(final SourcePosition sourcePos, Expression callExpression, int expectedArity, int arity) {
-            super(sourcePos, "Arity mismatch: " + callExpression + " expected: " + expectedArity + " got: " + arity);
+        ArityMismatch(final SourcePosition sourcePos, int expectedArity, int arity) {
+            super(sourcePos, "Arity mismatch: " + " expected: " + expectedArity + " got: " + arity);
         }
 
     }
@@ -96,10 +101,18 @@ public abstract class SemanticException extends Exception {
 
     }
 
+    static final class DuplicateDeclaration extends SemanticException {
+
+        DuplicateDeclaration(final SourcePosition sourcePos, final Declaration declaration) {
+            super(sourcePos, "Duplicate declaration: " + declaration);
+        }
+
+    }
+
     static final class FunctionResult extends SemanticException {
 
-        FunctionResult(final SourcePosition sourcePos, final Identifier identifier) {
-            super(sourcePos, "Attempted to use a function/procedure as an expression result: " + identifier);
+        FunctionResult(final SourcePosition sourcePos, final Expression expression) {
+            super(sourcePos, "Attempted to use a function/procedure as result: " + expression);
         }
 
     }

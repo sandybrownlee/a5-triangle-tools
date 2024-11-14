@@ -169,7 +169,9 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         }
 
         @Override public void setType(final Type type) {
-            throw new RuntimeException("Attempted to set type of literal value");
+            if (!(type instanceof Type.PrimType.BoolType)) {
+                throw new RuntimeException("Attempted to set type of literal value");
+            }
         }
 
         @Override public void setSourcePosition(final SourcePosition sourcePos) {
@@ -205,7 +207,9 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         }
 
         @Override public void setType(final Type type) {
-            throw new RuntimeException("Attempted to set type of literal value");
+            if (!(type instanceof Type.PrimType.IntType)) {
+                throw new RuntimeException("Attempted to set type of literal value");
+            }
         }
 
         @Override public void setSourcePosition(final SourcePosition sourcePos) {
@@ -241,7 +245,9 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         }
 
         @Override public void setType(final Type type) {
-            throw new RuntimeException("Attempted to set type of literal value");
+            if (!(type instanceof Type.PrimType.CharType)) {
+                throw new RuntimeException("Attempted to set type of literal value to incorrect type");
+            }
         }
 
         @Override public void setSourcePosition(final SourcePosition sourcePos) {
@@ -382,6 +388,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     final class BinaryOp implements Expression, Typeable {
 
+        // TODO: maybe migrate operator type to String?
         private final Identifier.BasicIdentifier operator;
         private final Expression                 leftOperand;
         private final Expression                 rightOperand;

@@ -72,10 +72,12 @@ public class Compiler {
         Parser parser = new Parser(lexer);
 
         Statement ast = parser.parseProgram();
-        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer(ast);
-        semanticAnalyzer.check();
-        semanticAnalyzer.getErrors().forEach(System.err::println);
-        if (!semanticAnalyzer.getErrors().isEmpty()) {
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+
+        List<SemanticException> errors = semanticAnalyzer.analyzeProgram(ast);
+
+        if (!errors.isEmpty()) {
+            errors.forEach(System.err::println);
             return;
         }
 

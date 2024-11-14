@@ -97,11 +97,12 @@ sealed public interface Type {
 
     record RefOf(Type type) implements Type {
 
-        public RefOf(Type type) {
+        public RefOf {
             if (type instanceof RefOf) {
+                // this can be handled, with some effort, but allowing it wont give our language any new features or better
+                // performance, so I disallow it to keep the rest of the codebase simpler
                 throw new RuntimeException("creating ref of ref");
             }
-            this.type = type;
         }
 
         @Override public int size() {
@@ -109,7 +110,7 @@ sealed public interface Type {
         }
 
         @Override public Type baseType() {
-            return type;
+            return type.baseType();
         }
 
     }
