@@ -29,6 +29,7 @@ import java.util.Set;
 //  no duplicate declarations are attempted
 //  no duplicate parameters are defined, for each function/procedure
 //  record literals are canonicalized
+//  no duplicate fields in record literals
 //  func/proc parameters are only ever supplied with arguments marked func/proc
 //  var parameters are only ever supplied with arguments marked var
 
@@ -40,7 +41,7 @@ import java.util.Set;
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 public final class SemanticAnalyzer {
 
-    private static void checkArgumentKind(final List<Argument> arguments, final List<Parameter> declaredParams)
+    private static void checkArgumentKinds(final List<Argument> arguments, final List<Parameter> declaredParams)
     throws SemanticException {
         for (int i = 0; i < arguments.size(); i++) {
             Argument arg = arguments.get(i);
@@ -154,6 +155,101 @@ public final class SemanticAnalyzer {
         }
     }
 
+    // analyze(Expression) needs to throw SemanticException; since an expression may be part of a larger declaration and it
+    // wont know where to rewind to
+    private void analyze(final Expression expression) throws SemanticException {
+        switch (expression) {
+            case BinaryOp binop -> {
+                analyze(binop.leftOperand());
+                analyze(binop.rightOperand());
+            }
+            case FunCall funCall -> {
+                Identifier callable = funCall.func();
+                List<Argument> arguments = funCall.arguments();
+
+                analyze(callable);
+
+                Declaration declaration = lookup(funCall.func()).declaration();
+                // if there is a corresponding declaration for this function (i.e., it is not a primitive call) check if the
+                //  arguments being passed correspond to the parameters; TAM specification requires that a parameter declared var
+                //  must have a corresponding argument declared var; etc.
+                if (declaration instanceof Declaration.ProcDeclaration procDeclaration) {
+                    checkArgumentKinds(arguments, procDeclaration.parameters());
+                } else if (declaration instanceof Declaration.FuncDeclaration funcDeclaration) {
+                    checkArgumentKinds(arguments, funcDeclaration.parameters());
+                }
+
+                for (Argument arg : funCall.arguments()) {
+                    analyze(arg);
+                }
+            }
+            case Identifier identifier -> analyze(identifier);
+            case IfExpression ifExpression -> {
+                analyze(ifExpression.condition());
+                analyze(ifExpression.consequent());
+                analyze(ifExpression.alternative());
+            }
+            case LetExpression letExpression -> {
+                List<Declaration> declarations = letExpression.declarations();
+                Expression expr = letExpression.expression();
+
+                terms.enterNewScope(null);
+                bindDeclarations(declarations);
+                analyze(expr);
+                terms.exitScope();
+            }
+            case LitArray litArray -> {
+                for (Expression value : litArray.elements()) {
+                    analyze(value);
+                }
+            }
+            case LitChar _ -> { }
+            case LitInt litInt -> {
+                SourcePosition sourcePos = litInt.sourcePosition();
+                int value = litInt.value();
+                // the TAM specification defines `Integer` to be between -maxint...+maxint (not two's complement!)
+                if (value > Machine.maxintRep || value < (Machine.maxintRep * -1)) {
+                    throw new SemanticException.IntegerLiteralTooLarge(sourcePos, value);
+                }
+            }
+            case LitRecord litRecord -> {
+                // canonicalize fields
+                litRecord.fields().sort(Comparator.comparing(LitRecord.RecordField::name));
+
+                Set<String> seenFieldNames = new HashSet<>();
+                for (LitRecord.RecordField field : litRecord.fields()) {
+                    if (seenFieldNames.contains(field.name())) {
+                        throw new SemanticException.DuplicateRecordField(litRecord.sourcePosition(), field);
+                    }
+                    seenFieldNames.add(field.name());
+                    analyze(field.value());
+                }
+            }
+            case UnaryOp unaryOp -> {
+                lookup(unaryOp.operator());
+                analyze(unaryOp.operand());
+            }
+            case LitBool _ -> { }
+            case Expression.SequenceExpression sequenceExpression -> {
+                analyze(sequenceExpression.statement());
+                analyze(sequenceExpression.expression());
+            }
+        }
+    }
+
+    private void analyze(final Identifier identifier) throws SemanticException {
+        switch (identifier) {
+            case Identifier.ArraySubscript arraySubscript -> {
+                analyze(arraySubscript.array());
+                analyze(arraySubscript.subscript());
+            }
+            case BasicIdentifier basicIdentifier -> lookup(basicIdentifier);
+            // NOTE: record's field must be semantically analyzed in the type checker, since field names are only available
+            //  after type-resolution of the record, see TypeChecker.checkAndAnnotate(Identifier)
+            case Identifier.RecordAccess recordAccess -> analyze(recordAccess.record());
+        }
+    }
+
     private void analyze(final Argument argument) throws SemanticException {
         switch (argument) {
             case Argument.FuncArgument funcArgument -> analyze(funcArgument.func());
@@ -245,106 +341,11 @@ public final class SemanticAnalyzer {
         }
     }
 
-    private void analyze(final Identifier identifier) throws SemanticException {
-        switch (identifier) {
-            case Identifier.ArraySubscript arraySubscript -> {
-                analyze(arraySubscript.array());
-                analyze(arraySubscript.subscript());
-            }
-            case BasicIdentifier basicIdentifier -> lookup(basicIdentifier);
-            // NOTE: record's field must be semantically analyzed in the type checker, since field names are only available
-            //  after type-resolution of the record, see TypeChecker.checkAndAnnotate(Identifier)
-            case Identifier.RecordAccess recordAccess -> analyze(recordAccess.record());
-        }
-    }
-
     private Binding lookup(final BasicIdentifier basicIdentifier) throws SemanticException {
         try {
             return terms.lookup(basicIdentifier.name());
         } catch (NoSuchElementException e) {
             throw new SemanticException.UndeclaredUse(basicIdentifier.sourcePosition(), basicIdentifier);
-        }
-    }
-
-    // analyze(Expression) needs to throw SemanticException; since an expression may be part of a larger declaration and it
-    // wont know where to rewind to
-    private void analyze(final Expression expression) throws SemanticException {
-        switch (expression) {
-            case BinaryOp binop -> {
-                analyze(binop.leftOperand());
-                analyze(binop.rightOperand());
-            }
-            case FunCall funCall -> {
-                Identifier callable = funCall.func();
-                List<Argument> arguments = funCall.arguments();
-
-                analyze(callable);
-
-                Declaration declaration = lookup(funCall.func()).declaration();
-                // if there is a corresponding declaration for this function (i.e., it is not a primitive call) check if the
-                //  arguments being passed correspond to the parameters; TAM specification requires that a parameter declared var
-                //  must have a corresponding argument declared var; etc.
-                if (declaration instanceof Declaration.ProcDeclaration procDeclaration) {
-                    checkArgumentKind(arguments, procDeclaration.parameters());
-                } else if (declaration instanceof Declaration.FuncDeclaration funcDeclaration) {
-                    checkArgumentKind(arguments, funcDeclaration.parameters());
-                }
-
-                for (Argument arg : funCall.arguments()) {
-                    analyze(arg);
-                }
-            }
-            case Identifier identifier -> analyze(identifier);
-            case IfExpression ifExpression -> {
-                analyze(ifExpression.condition());
-                analyze(ifExpression.consequent());
-                analyze(ifExpression.alternative());
-            }
-            case LetExpression letExpression -> {
-                List<Declaration> declarations = letExpression.declarations();
-                Expression expr = letExpression.expression();
-
-                terms.enterNewScope(null);
-                bindDeclarations(declarations);
-                analyze(expr);
-                terms.exitScope();
-            }
-            case LitArray litArray -> {
-                for (Expression value : litArray.elements()) {
-                    analyze(value);
-                }
-            }
-            case LitChar _ -> { }
-            case LitInt litInt -> {
-                SourcePosition sourcePos = litInt.sourcePosition();
-                int value = litInt.value();
-                // the TAM specification defines `Integer` to be between -maxint...+maxint (not two's complement!)
-                if (value > Machine.maxintRep || value < (Machine.maxintRep * -1)) {
-                    throw new SemanticException.IntegerLiteralTooLarge(sourcePos, value);
-                }
-            }
-            case LitRecord litRecord -> {
-                // canonicalize fields
-                litRecord.fields().sort(Comparator.comparing(LitRecord.RecordField::name));
-
-                Set<String> seenFieldNames = new HashSet<>();
-                for (LitRecord.RecordField field : litRecord.fields()) {
-                    if (seenFieldNames.contains(field.name())) {
-                        throw new SemanticException.DuplicateRecordField(litRecord.sourcePosition(), field);
-                    }
-                    seenFieldNames.add(field.name());
-                    analyze(field.value());
-                }
-            }
-            case UnaryOp unaryOp -> {
-                lookup(unaryOp.operator());
-                analyze(unaryOp.operand());
-            }
-            case LitBool _ -> { }
-            case Expression.SequenceExpression sequenceExpression -> {
-                analyze(sequenceExpression.statement());
-                analyze(sequenceExpression.expression());
-            }
         }
     }
 
