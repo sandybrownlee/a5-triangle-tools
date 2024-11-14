@@ -554,12 +554,12 @@ public class IRGenerator {
             switch (parameter) {
                 // static link and code address to be on stack
                 case Parameter.FuncParameter funcParameter -> funcAddresses.add(
-                        funcParameter.getName(),
+                        funcParameter.name(),
                         new Callable.DynamicCallable(paramOffset)
                 );
                 case Parameter.ValueParameter valueParameter -> localVars.add(
-                        valueParameter.getName(), paramOffset);
-                case VarParameter varParameter -> localVars.add(varParameter.getName(), paramOffset);
+                        valueParameter.name(), paramOffset);
+                case VarParameter varParameter -> localVars.add(varParameter.name(), paramOffset);
             }
         }
 

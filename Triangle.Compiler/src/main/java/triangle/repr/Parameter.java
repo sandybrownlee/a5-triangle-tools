@@ -5,7 +5,7 @@ import java.util.List;
 sealed public interface Parameter extends Typeable, SourceLocatable
         permits Parameter.ValueParameter, Parameter.FuncParameter, Parameter.VarParameter {
 
-    String getName();
+    String name();
 
     final class ValueParameter implements Parameter {
 
@@ -17,10 +17,6 @@ sealed public interface Parameter extends Typeable, SourceLocatable
         public ValueParameter(String name, TypeSig typeSig) {
             this.name = name;
             this.typeSig = typeSig;
-        }
-
-        @Override public String getName() {
-            return name;
         }
 
         @Override public String toString() {
@@ -43,7 +39,7 @@ sealed public interface Parameter extends Typeable, SourceLocatable
             return sourcePos;
         }
 
-        public String name() {
+        @Override public String name() {
             return name;
         }
 
@@ -63,10 +59,6 @@ sealed public interface Parameter extends Typeable, SourceLocatable
         public VarParameter(String name, TypeSig typeSig) {
             this.name = name;
             this.typeSig = typeSig;
-        }
-
-        @Override public String getName() {
-            return name;
         }
 
         @Override public String toString() {
@@ -89,12 +81,8 @@ sealed public interface Parameter extends Typeable, SourceLocatable
             return sourcePos;
         }
 
-        public String name() {
+        @Override public String name() {
             return name;
-        }
-
-        public Type type() {
-            return type;
         }
 
         public TypeSig declaredType() {
@@ -117,7 +105,7 @@ sealed public interface Parameter extends Typeable, SourceLocatable
             this.returnTypeSig = returnTypeSig;
         }
 
-        @Override public String getName() {
+        @Override public String name() {
             return callable;
         }
 

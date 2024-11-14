@@ -154,7 +154,7 @@ public final class ASTPrinter {
             case Parameter.VarParameter varParameter -> varParameter.name() + ":" + prettyPrint(varParameter.declaredType());
             case Parameter.ValueParameter valueParameter -> String.format(
                     "%s : %s",
-                    valueParameter.getName(),
+                    valueParameter.name(),
                     prettyPrint(valueParameter.declaredType())
             );
         };

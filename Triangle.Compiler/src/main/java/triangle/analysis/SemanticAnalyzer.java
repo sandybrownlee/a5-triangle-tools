@@ -209,11 +209,11 @@ public final class SemanticAnalyzer {
                 List<Type> resolvedParamTypes = new ArrayList<>();
 
                 for (Parameter param : funcDeclaration.parameters()) {
-                    if (seenParameters.contains(param.getName())) {
+                    if (seenParameters.contains(param.name())) {
                         throw new SemanticException.DuplicateParameter(funcDeclaration.sourcePosition(), param);
                     }
 
-                    seenParameters.add(param.getName());
+                    seenParameters.add(param.name());
                     // resolve the type of the parameter in the current env
                     visit(param);
                     resolvedParamTypes.add(param.getType());
@@ -229,7 +229,7 @@ public final class SemanticAnalyzer {
                     for (int i = 0; i < funcDeclaration.parameters().size(); i++) {
                         Parameter p = funcDeclaration.parameters().get(i);
                         // parameters don't have a declaration
-                        terms.add(p.getName(), new Binding(p.getType(), false, null));
+                        terms.add(p.name(), new Binding(p.getType(), false, null));
                     }
 
                     Type resolvedReturnType = resolveType(funcDeclaration.returnTypeSig());
@@ -290,13 +290,13 @@ public final class SemanticAnalyzer {
                 List<Type> resolvedParamTypes = new ArrayList<>();
 
                 for (Parameter param : procDeclaration.parameters()) {
-                    if (seenParameters.contains(param.getName())) {
+                    if (seenParameters.contains(param.name())) {
                         throw new SemanticException.DuplicateParameter(procDeclaration.sourcePosition(), param);
                     }
 
                     // resolve the type of the parameter in the current env
                     visit(param);
-                    seenParameters.add(param.getName());
+                    seenParameters.add(param.name());
                     resolvedParamTypes.add(param.getType());
                 }
 
@@ -309,7 +309,7 @@ public final class SemanticAnalyzer {
                     for (int i = 0; i < procDeclaration.parameters().size(); i++) {
                         Parameter p = procDeclaration.parameters().get(i);
                         // parameters don't have a declaration
-                        terms.add(p.getName(), new Binding(p.getType(), false, null));
+                        terms.add(p.name(), new Binding(p.getType(), false, null));
                     }
 
                     // (optimistically) assign the function its declared return type
