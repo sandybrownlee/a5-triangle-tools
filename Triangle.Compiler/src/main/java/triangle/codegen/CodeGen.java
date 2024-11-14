@@ -1,7 +1,6 @@
 package triangle.codegen;
 
 import triangle.abstractMachine.Register;
-import triangle.repr.Instruction;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
