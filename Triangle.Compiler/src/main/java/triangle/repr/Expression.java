@@ -22,8 +22,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
             private       SourcePosition sourcePos;
             private       Type           type;
 
-            public BasicIdentifier(SourcePosition sourcePos, String name) {
-                this.sourcePos = sourcePos;
+            public BasicIdentifier(String name) {
                 this.name = name;
             }
 
@@ -64,8 +63,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
             private       SourcePosition sourcePos;
             private       Type           type;
 
-            public RecordAccess(SourcePosition sourcePos, Identifier record, Identifier field) {
-                this.sourcePos = sourcePos;
+            public RecordAccess(Identifier record, Identifier field) {
                 this.record = record;
                 this.field = field;
             }
@@ -111,8 +109,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
             private       SourcePosition sourcePos;
             private       Type           type;
 
-            public ArraySubscript(SourcePosition sourcePos, Identifier array, Expression subscript) {
-                this.sourcePos = sourcePos;
+            public ArraySubscript(Identifier array, Expression subscript) {
                 this.array = array;
                 this.subscript = subscript;
             }
@@ -159,8 +156,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         private final boolean        value;
         private       SourcePosition sourcePos;
 
-        public LitBool(SourcePosition sourcePos, boolean value) {
-            this.sourcePos = sourcePos;
+        public LitBool(boolean value) {
             this.value = value;
         }
 
@@ -197,8 +193,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         private final int            value;
         private       SourcePosition sourcePos;
 
-        public LitInt(SourcePosition sourcePos, int value) {
-            this.sourcePos = sourcePos;
+        public LitInt(int value) {
             this.value = value;
         }
 
@@ -235,8 +230,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         private final char           value;
         private       SourcePosition sourcePos;
 
-        public LitChar(SourcePosition sourcePos, char value) {
-            this.sourcePos = sourcePos;
+        public LitChar(char value) {
             this.value = value;
         }
 
@@ -268,14 +262,13 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     }
 
-    final class LitArray implements Expression, Typeable {
+    final class LitArray implements Expression, Annotatable.Typeable {
 
         private final List<Expression> elements;
         private       SourcePosition   sourcePos;
         private       Type             type;
 
-        public LitArray(SourcePosition sourcePos, List<Expression> elements) {
-            this.sourcePos = sourcePos;
+        public LitArray(List<Expression> elements) {
             this.elements = elements;
         }
 
@@ -305,14 +298,13 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     }
 
-    final class LitRecord implements Expression, Typeable {
+    final class LitRecord implements Expression, Annotatable.Typeable {
 
         private final List<RecordField> fields;
         private       SourcePosition    sourcePos;
         private       Type              type;
 
-        public LitRecord(SourcePosition sourcePos, List<RecordField> fields) {
-            this.sourcePos = sourcePos;
+        public LitRecord(List<RecordField> fields) {
             this.fields = fields;
         }
 
@@ -395,10 +387,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         private       SourcePosition             sourcePos;
         private       Type                       type;
 
-        public BinaryOp(
-                SourcePosition sourcePos, Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand
-        ) {
-            this.sourcePos = sourcePos;
+        public BinaryOp(Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand) {
             this.operator = operator;
             this.leftOperand = leftOperand;
             this.rightOperand = rightOperand;
@@ -439,15 +428,14 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     }
 
-    final class LetExpression implements Expression, Typeable {
+    final class LetExpression implements Expression, Annotatable.Typeable {
 
         private final List<Declaration> declarations;
         private final Expression        expression;
         private       SourcePosition    sourcePos;
         private       Type              type;
 
-        public LetExpression(SourcePosition sourcePos, List<Declaration> declarations, Expression expression) {
-            this.sourcePos = sourcePos;
+        public LetExpression(List<Declaration> declarations, Expression expression) {
             this.declarations = declarations;
             this.expression = expression;
         }
@@ -491,8 +479,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         private       SourcePosition sourcePos;
         private       Type           type;
 
-        public IfExpression(SourcePosition sourcePos, Expression condition, Expression consequent, Expression alternative) {
-            this.sourcePos = sourcePos;
+        public IfExpression(Expression condition, Expression consequent, Expression alternative) {
             this.condition = condition;
             this.consequent = consequent;
             this.alternative = alternative;
@@ -533,15 +520,14 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     }
 
-    final class FunCall implements Expression, Typeable {
+    final class FunCall implements Expression, Annotatable.Typeable {
 
         private final Identifier.BasicIdentifier func;
         private final List<Argument>             arguments;
         private       SourcePosition             sourcePos;
         private       Type                       type;
 
-        public FunCall(SourcePosition sourcePos, Identifier.BasicIdentifier func, List<Argument> arguments) {
-            this.sourcePos = sourcePos;
+        public FunCall(Identifier.BasicIdentifier func, List<Argument> arguments) {
             this.func = func;
             this.arguments = arguments;
         }
@@ -583,8 +569,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
         private       SourcePosition sourcePos;
         private       Type           type;
 
-        public SequenceExpression(SourcePosition sourcePos, Statement statement, Expression expression) {
-            this.sourcePos = sourcePos;
+        public SequenceExpression(Statement statement, Expression expression) {
             this.statement = statement;
             this.expression = expression;
         }

@@ -9,8 +9,7 @@ sealed public interface Argument extends Typeable, SourceLocatable
         private       SourcePosition        sourcePos;
         private       Type                  type;
 
-        public VarArgument(SourcePosition sourcePos, Expression.Identifier var) {
-            this.sourcePos = sourcePos;
+        public VarArgument(Expression.Identifier var) {
             this.var = var;
         }
 
@@ -46,8 +45,7 @@ sealed public interface Argument extends Typeable, SourceLocatable
         private       SourcePosition                        sourcePos;
         private       Type                                  type;
 
-        public FuncArgument(SourcePosition sourcePos, Expression.Identifier.BasicIdentifier func) {
-            this.sourcePos = sourcePos;
+        public FuncArgument(Expression.Identifier.BasicIdentifier func) {
             this.func = func;
         }
 
