@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+// TODO: parameterize CodeGen with DataOutputStream
 public final class CodeGen {
 
     public static void write(final String objName, final List<Instruction.TAMInstruction> instructions) throws IOException {

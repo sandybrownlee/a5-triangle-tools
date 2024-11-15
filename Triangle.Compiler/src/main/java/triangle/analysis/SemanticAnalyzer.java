@@ -33,9 +33,8 @@ import java.util.Set;
 //  func/proc parameters are only ever supplied with arguments marked func/proc
 //  var parameters are only ever supplied with arguments marked var
 
-// TODO: need to handle duplicate declarations
 // TODO: need to ensure static-nesting depth does not exceed maximum
-// TODO: TAMSpecificaition requires second operand of // (mod) must be positive; this needs to be done at runtime
+// TODO: TAM Specification requires second operand of // (mod) must be positive; this needs to be done at runtime
 // TODO: to handle ++, we need some kind of rewriting system
 
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
@@ -76,7 +75,7 @@ public final class SemanticAnalyzer {
         analyze(program);
 
         if (!this.errors.isEmpty()) {
-//            System.err.println("Semantic analysis found errors, not proceeding with type checking");
+            System.err.println("Semantic analysis found errors, not proceeding with type checking");
             return errors;
         }
 

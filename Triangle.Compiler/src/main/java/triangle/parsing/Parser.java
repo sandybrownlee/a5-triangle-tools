@@ -50,7 +50,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-// TODO: parse custom type signatures
 public class Parser {
 
     private static final Set<Token.Kind> EXPRESSION_FIRST_SET = new HashSet<>();
@@ -417,7 +416,7 @@ public class Parser {
                     yield new Argument.FuncArgument(start, basicIdentifier);
                 }
 
-                throw new RuntimeException("HOF is currently unsupported, so function argument must be a simple variable name");
+                throw new RuntimeException("HOF is currently unsupported, so procedure argument must be a simple variable name");
             }
             case VAR -> {
                 SourcePosition start = shift(Token.Kind.VAR);

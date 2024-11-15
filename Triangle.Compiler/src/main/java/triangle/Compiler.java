@@ -31,6 +31,7 @@ import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
 import triangle.repr.Statement;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -52,7 +53,12 @@ public class Compiler {
         Args.parseOrExit(Compiler.class, args);
 
         try {
-            compileProgram(new FileInputStream("programs/test.tri"));
+//            for (String fileName : new File("programs/").list()) {
+//                System.out.println("programs/" + fileName);
+//                compileProgram(new FileInputStream("programs/" + fileName));
+//                System.in.read();
+//            }
+            compileProgram(new FileInputStream("programs/procparam.tri"));
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             e.printStackTrace();

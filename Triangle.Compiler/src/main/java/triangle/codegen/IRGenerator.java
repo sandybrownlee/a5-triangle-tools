@@ -8,8 +8,8 @@ import triangle.repr.Declaration;
 import triangle.repr.Expression;
 import triangle.repr.Parameter;
 import triangle.repr.Parameter.VarParameter;
-import triangle.repr.Type;
 import triangle.repr.Statement;
+import triangle.repr.Type;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
@@ -636,6 +636,7 @@ public class IRGenerator {
         }
     }
 
+    // TODO: simplify record access
     private List<Instruction> generateRecordAccess(Expression.Identifier.RecordAccess recordAccess) {
         List<Instruction> block = new ArrayList<>();
 
@@ -652,7 +653,7 @@ public class IRGenerator {
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> { }
             // our parser guarantees this
-            case Expression.Identifier.RecordAccess access -> throw new RuntimeException();
+            case Expression.Identifier.RecordAccess access -> throw new RuntimeException("record access as left-side of record");
         }
 
         // calculate the offset from base address of root, to the place where the field we want to access starts

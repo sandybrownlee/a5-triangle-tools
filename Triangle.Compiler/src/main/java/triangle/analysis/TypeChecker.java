@@ -346,7 +346,6 @@ final class TypeChecker {
                     throw new SemanticException.UndeclaredUse(basicIdentifier.sourcePosition(), basicIdentifier);
                 }
             }
-            // TODO: record-access is bugged, failing on complexrecord.tri
             case Expression.Identifier.RecordAccess recordAccess -> {
                 // recordAccess(record : {... field : t ...}, field : _) : t
 
