@@ -2,6 +2,7 @@ package triangle.repr;
 
 import java.util.List;
 
+// TODO: maybe make Expression a sealed class and move sourcePos and type to it?
 sealed public interface Expression extends Argument, Annotatable.Typeable, Annotatable.SourceLocatable
         permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,

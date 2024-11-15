@@ -3,6 +3,7 @@ package triangle.repr;
 import java.util.List;
 import java.util.Optional;
 
+// TODO: maybe make Statement a sealed class, and move sourcePos info to it?
 sealed public interface Statement extends Annotatable.SourceLocatable
         permits Statement.AssignStatement, Statement.ExpressionStatement, Statement.IfStatement, Statement.LetStatement,
                 Statement.LoopWhileStatement, Statement.RepeatUntilStatement, Statement.RepeatWhileStatement,

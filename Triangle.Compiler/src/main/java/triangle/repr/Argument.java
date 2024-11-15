@@ -1,5 +1,6 @@
 package triangle.repr;
 
+// TODO: maybe make Argument a sealed class and move sourcePos and type to it?
 sealed public interface Argument extends Annotatable.Typeable, Annotatable.SourceLocatable
         permits Argument.FuncArgument, Argument.VarArgument, Expression {
 

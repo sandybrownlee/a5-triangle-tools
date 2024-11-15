@@ -2,6 +2,7 @@ package triangle.repr;
 
 import java.util.List;
 
+// TODO: maybe make Parameter a sealed class and move sourcePos and type to it?
 sealed public interface Parameter extends Annotatable.Typeable, Annotatable.SourceLocatable
         permits Parameter.ValueParameter, Parameter.FuncParameter, Parameter.VarParameter {
 

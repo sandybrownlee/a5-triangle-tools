@@ -2,6 +2,7 @@ package triangle.repr;
 
 import java.util.List;
 
+// TODO: maybe make Declaration a sealed class and move sourcePos and type to it?
 sealed public interface Declaration extends Annotatable.SourceLocatable
         permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.ProcDeclaration,
                 Declaration.TypeDeclaration, Declaration.VarDeclaration {
