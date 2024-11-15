@@ -1,5 +1,6 @@
 package triangle.repr;
 
+// unfortunately java does not have `this`-typing so we have to cast here but this should always be safe
 sealed public interface Annotatable {
 
     default <T extends Annotatable> T withAnnotationsOf(Annotatable that) {
@@ -36,7 +37,6 @@ sealed public interface Annotatable {
             }
         }
 
-        // unfortunately java does not have `this`-typing so we have to cast here but this should always be safe
         //noinspection unchecked
         return (T) this;
     }
@@ -47,6 +47,11 @@ sealed public interface Annotatable {
 
         SourcePosition sourcePosition();
 
+        default <T extends SourceLocatable> T withSourcePosition(SourcePosition sourcePos) {
+            this.setSourcePosition(sourcePos);
+            //noinspection unchecked
+            return (T) this;
+        }
     }
 
     non-sealed interface Typeable extends Annotatable {
@@ -55,6 +60,11 @@ sealed public interface Annotatable {
 
         void setType(Type type);
 
+        default <T extends Typeable> T withType(Type type) {
+            this.setType(type);
+            //noinspection unchecked
+            return (T) this;
+        }
     }
 
 }
