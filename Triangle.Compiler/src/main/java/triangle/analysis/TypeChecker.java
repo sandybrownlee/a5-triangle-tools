@@ -378,7 +378,7 @@ final class TypeChecker {
             case Argument.FuncArgument funcArgument -> lookup(funcArgument.func().name());
             case Argument.VarArgument varArgument -> {
                 checkAndAnnotate(varArgument.var());
-                yield new RefOf(varArgument.var().getType());
+                yield varArgument.var().getType();
             }
             case Expression expression -> {
                 checkAndAnnotate(expression);
@@ -469,7 +469,7 @@ final class TypeChecker {
                 resolvedTypes.enterNewScope(null);
 
                 for (Parameter parameter : procDeclaration.parameters()) {
-                    resolvedTypes.add(parameter.name(), parameter.getType().baseType());
+                    resolvedTypes.add(parameter.name(), parameter.getType());
                 }
 
                 // since its a statement, it knows how to catch and resume typechecking by itself
