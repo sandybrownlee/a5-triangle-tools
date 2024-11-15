@@ -40,7 +40,7 @@ sealed public interface Declaration extends Annotatable.SourceLocatable
 
     }
 
-    final class VarDeclaration implements Declaration {
+    final class VarDeclaration implements Declaration, Typeable {
 
         private final String         name;
         private final TypeSig        typeSig;
@@ -52,7 +52,11 @@ sealed public interface Declaration extends Annotatable.SourceLocatable
             this.typeSig = typeSig;
         }
 
-        public void setRuntimeType(Type type) {
+        @Override public Type getType() {
+            return type;
+        }
+
+        @Override public void setType(final Type type) {
             this.type = type;
         }
 
@@ -74,10 +78,6 @@ sealed public interface Declaration extends Annotatable.SourceLocatable
 
         public TypeSig declaredType() {
             return this.typeSig;
-        }
-
-        public Type runtimeType() {
-            return type;
         }
 
     }

@@ -503,9 +503,9 @@ public class IRGenerator {
                 // nothing to do for type declarations
                 case Declaration.TypeDeclaration _ -> { }
                 case Declaration.VarDeclaration varDeclaration -> {
-                    block.add(new Instruction.PUSH(varDeclaration.runtimeType().size()));
+                    block.add(new Instruction.PUSH(varDeclaration.getType().size()));
                     localVars.add(varDeclaration.name(), stackOffset);
-                    stackOffset += varDeclaration.runtimeType().size();
+                    stackOffset += varDeclaration.getType().size();
                 }
                 case Declaration.ProcDeclaration procDeclaration -> {
                     //  JUMP skipLabel

@@ -486,7 +486,7 @@ final class TypeChecker {
             case Declaration.VarDeclaration varDeclaration -> {
                 Type vT = resolveType(varDeclaration.declaredType());
                 resolvedTypes.add(varDeclaration.name(), vT);
-                varDeclaration.setRuntimeType(vT);
+                varDeclaration.setType(vT);
             }
         }
     }
