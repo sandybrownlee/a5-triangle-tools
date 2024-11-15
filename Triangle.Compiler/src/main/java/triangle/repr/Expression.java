@@ -2,12 +2,12 @@ package triangle.repr;
 
 import java.util.List;
 
-sealed public interface Expression extends Argument, Typeable, SourceLocatable
+sealed public interface Expression extends Argument, Annotatable.Typeable, Annotatable.SourceLocatable
         permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
                 Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
                 Expression.SequenceExpression, Expression.UnaryOp {
 
-    sealed interface Identifier extends Expression, Typeable
+    sealed interface Identifier extends Expression, Annotatable.Typeable
             permits Identifier.BasicIdentifier, Identifier.RecordAccess, Identifier.ArraySubscript {
 
         // this finds the "root" of a (possibly complex) identifier
@@ -336,7 +336,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     }
 
-    final class UnaryOp implements Expression, Typeable {
+    final class UnaryOp implements Expression, Annotatable.Typeable {
 
         private final Identifier.BasicIdentifier operator;
         private final Expression                 operand;
@@ -378,7 +378,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     }
 
-    final class BinaryOp implements Expression, Typeable {
+    final class BinaryOp implements Expression, Annotatable.Typeable {
 
         // TODO: maybe migrate operator type to String?
         private final Identifier.BasicIdentifier operator;
@@ -471,7 +471,7 @@ sealed public interface Expression extends Argument, Typeable, SourceLocatable
 
     }
 
-    final class IfExpression implements Expression, Typeable {
+    final class IfExpression implements Expression, Annotatable.Typeable {
 
         private final Expression     condition;
         private final Expression     consequent;

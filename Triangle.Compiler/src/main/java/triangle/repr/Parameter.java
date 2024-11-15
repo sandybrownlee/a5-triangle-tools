@@ -2,7 +2,7 @@ package triangle.repr;
 
 import java.util.List;
 
-sealed public interface Parameter extends Typeable, SourceLocatable
+sealed public interface Parameter extends Annotatable.Typeable, Annotatable.SourceLocatable
         permits Parameter.ValueParameter, Parameter.FuncParameter, Parameter.VarParameter {
 
     String name();

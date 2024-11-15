@@ -1,6 +1,6 @@
 package triangle.repr;
 
-sealed public interface Argument extends Typeable, SourceLocatable
+sealed public interface Argument extends Annotatable.Typeable, Annotatable.SourceLocatable
         permits Argument.FuncArgument, Argument.VarArgument, Expression {
 
     final class VarArgument implements Argument {

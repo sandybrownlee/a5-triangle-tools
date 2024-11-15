@@ -2,7 +2,7 @@ package triangle.repr;
 
 import java.util.List;
 
-sealed public interface Declaration extends SourceLocatable
+sealed public interface Declaration extends Annotatable.SourceLocatable
         permits Declaration.ConstDeclaration, Declaration.FuncDeclaration, Declaration.ProcDeclaration,
                 Declaration.TypeDeclaration, Declaration.VarDeclaration {
 
