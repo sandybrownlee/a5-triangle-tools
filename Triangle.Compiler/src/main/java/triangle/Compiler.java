@@ -24,9 +24,6 @@ import com.sampullara.cli.Argument;
 import triangle.analysis.SemanticAnalyzer;
 import triangle.analysis.SemanticException;
 import triangle.codegen.CodeGen;
-import triangle.codegen.IRGenerator;
-import triangle.codegen.Instruction;
-import triangle.parsing.Lexer;
 import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
 import triangle.repr.Statement;
@@ -75,8 +72,7 @@ public class Compiler {
     }
 
     static void compileProgram(InputStream inputStream) throws IOException, SyntaxError {
-        Lexer lexer = new Lexer(inputStream);
-        Parser parser = new Parser(lexer);
+        Parser parser = new Parser(inputStream);
 
         Statement ast = parser.parseProgram();
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
@@ -88,10 +84,7 @@ public class Compiler {
             return;
         }
 
-        IRGenerator IRGenerator = new IRGenerator();
-        List<Instruction> ir = IRGenerator.generateIR(ast);
-
-        CodeGen.write("obj.tam", CodeGen.backpatch(ir));
+        CodeGen.write("obj.tam", CodeGen.backpatch(CodeGen.generate(ast)));
     }
 
 }

@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class Lexer {
+final class Lexer {
 
     public static final char EOL = '\n';
     public static final char EOT = '\u0000';
@@ -73,7 +73,7 @@ public final class Lexer {
     private       int          line;
     private       int          column;
 
-    public Lexer(InputStream source) {
+    Lexer(InputStream source) {
         this.source = source;
         this.line = 1;
         this.column = 1;

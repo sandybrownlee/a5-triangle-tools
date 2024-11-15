@@ -27,6 +27,7 @@ public class IRGenerator {
 
     static {
         // TODO: fill up
+        // TODO: StdEnv should have a Map<String, Primitive> and we should build callables from it here
         // TAM primitives
         builtins.put("=", new Callable.PrimitiveCallable(Primitive.EQ));
         builtins.put("<", new Callable.PrimitiveCallable(Primitive.LT));
@@ -81,6 +82,8 @@ public class IRGenerator {
             return new Instruction.LABEL(i++);
         }
     };
+
+    IRGenerator() { }
 
     public List<Instruction> generateIR(Statement statement) {
         List<Instruction> ir = generate(statement);

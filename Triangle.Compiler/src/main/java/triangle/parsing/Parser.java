@@ -43,6 +43,7 @@ import triangle.repr.TypeSig.BasicTypeSig;
 import triangle.repr.TypeSig.RecordTypeSig;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
@@ -76,8 +77,8 @@ public class Parser {
     private final Lexer lexer;
     private       Token nextToken;
 
-    public Parser(Lexer lexer) {
-        this.lexer = lexer;
+    public Parser(InputStream inputStream) {
+        this.lexer = new Lexer(inputStream);
     }
 
     public Statement parseProgram() throws IOException, SyntaxError {

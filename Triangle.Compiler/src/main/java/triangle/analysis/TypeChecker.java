@@ -53,6 +53,8 @@ final class TypeChecker {
         StdEnv.STD_TERMS.forEach(resolvedTypes::add);
     }
 
+    TypeChecker() { }
+
     List<SemanticException> getErrors() {
         return errors;
     }

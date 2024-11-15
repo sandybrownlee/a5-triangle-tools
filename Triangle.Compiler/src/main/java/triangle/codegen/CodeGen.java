@@ -1,6 +1,7 @@
 package triangle.codegen;
 
 import triangle.abstractMachine.Register;
+import triangle.repr.Statement;
 
 import java.io.DataOutputStream;
 import java.io.FileOutputStream;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+// TODO: split optimization and writing out
 // TODO: parameterize CodeGen with DataOutputStream
 public final class CodeGen {
 
@@ -67,8 +69,11 @@ public final class CodeGen {
         return patchedInstructions;
     }
 
-    private CodeGen() {
-        throw new IllegalStateException("Utility class");
+    public static List<Instruction> generate(Statement statement) {
+        ConstantFolder constantFolder = new ConstantFolder();
+        IRGenerator irGenerator = new IRGenerator();
+
+        return irGenerator.generateIR(statement);
     }
 
 }

@@ -12,11 +12,11 @@ import triangle.repr.TypeSig;
 
 public abstract class SemanticException extends Exception {
 
-    public SemanticException(final String s) {
+    SemanticException(final String s) {
         super(s);
     }
 
-    public SemanticException(final SourcePosition sourcePos, final String s) {
+    SemanticException(final SourcePosition sourcePos, final String s) {
         this(s + " at " + sourcePos.lineNo() + ":" + sourcePos.colNo());
     }
 
