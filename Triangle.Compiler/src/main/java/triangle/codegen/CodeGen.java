@@ -73,7 +73,7 @@ public final class CodeGen {
         ConstantFolder constantFolder = new ConstantFolder();
         IRGenerator irGenerator = new IRGenerator();
 
-        return irGenerator.generateIR(statement);
+        return irGenerator.generateIR(constantFolder.fold(statement));
     }
 
 }
