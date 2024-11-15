@@ -336,7 +336,16 @@ final class TypeChecker {
 
                 arraySubscript.setType(eT);
             }
-            case Expression.Identifier.BasicIdentifier basicIdentifier -> basicIdentifier.setType(lookup(basicIdentifier.name()));
+            case Expression.Identifier.BasicIdentifier basicIdentifier -> {
+                try {
+                    basicIdentifier.setType(lookup(basicIdentifier.name()));
+                } catch (NoSuchElementException e) {
+                    // even though TypeCheck runs after SemanticAnalyzer, we may still have undeclared uses, because
+                    // SemanticAnalyzer does not check if field accesses of a record are valid (it doesn't have the necessary
+                    // type information)
+                    throw new SemanticException.UndeclaredUse(basicIdentifier.sourcePosition(), basicIdentifier);
+                }
+            }
             // TODO: record-access is bugged, failing on complexrecord.tri
             case Expression.Identifier.RecordAccess recordAccess -> {
                 // recordAccess(record : {... field : t ...}, field : _) : t
@@ -348,24 +357,18 @@ final class TypeChecker {
                     throw new SemanticException.TypeError(recordAccess.sourcePosition(), rT, "record");
                 }
 
-                for (Type.RecordType.FieldType fieldType : recordType.fieldTypes()) {
-                    if (fieldType.fieldName().equals(recordAccess.field().root().name())) {
-                        // like arrays, the record field is a reference iff the main record (that is being accessed) is
-                        Type fT = recordAccess.record().getType() instanceof Type.RefOf ? new Type.RefOf(fieldType.fieldType()) :
-                                  fieldType.fieldType();
+                resolvedTypes.enterNewScope(null);
 
-                        recordAccess.setType(fT);
-                        resolvedTypes.enterNewScope(null);
-                        resolvedTypes.add(fieldType.fieldName(), fieldType.fieldType());
-                        checkAndAnnotate(recordAccess.field());
-                        resolvedTypes.exitScope();
-                        return;
-                    }
+                for (Type.RecordType.FieldType fieldType : recordType.fieldTypes()) {
+                    resolvedTypes.add(fieldType.fieldName(), fieldType.fieldType());
                 }
 
-                // NOTE: TypeChecker is also responsible for ensuring that field access of a record are valid, since
-                //  SemanticAnalyzer cannot do this for us (it doesn't have the necessary type information)
-                throw new SemanticException.UndeclaredUse(recordAccess.field().sourcePosition(), recordAccess.field());
+                checkAndAnnotate(recordAccess.field());
+
+                resolvedTypes.exitScope();
+
+                Type fT = recordAccess.field().getType().baseType();
+                recordAccess.setType(fT);
             }
         }
     }
