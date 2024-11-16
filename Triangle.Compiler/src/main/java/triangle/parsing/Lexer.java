@@ -44,6 +44,7 @@ final class Lexer {
         reservedWords.put("do", Token.Kind.DO);
         reservedWords.put("else", Token.Kind.ELSE);
         reservedWords.put("end", Token.Kind.END);
+        // TODO: true/false must be handled as part of stdenv
         reservedWords.put("false", Token.Kind.FALSE);
         reservedWords.put("func", Token.Kind.FUNC);
         reservedWords.put("if", Token.Kind.IF);
@@ -56,6 +57,7 @@ final class Lexer {
         reservedWords.put("repeat", Token.Kind.REPEAT);
         reservedWords.put("return", Token.Kind.RETURN);
         reservedWords.put("then", Token.Kind.THEN);
+        // TODO: true/false must be handled as part of stdenv
         reservedWords.put("true", Token.Kind.TRUE);
         reservedWords.put("type", Token.Kind.TYPE);
         reservedWords.put("until", Token.Kind.UNTIL);

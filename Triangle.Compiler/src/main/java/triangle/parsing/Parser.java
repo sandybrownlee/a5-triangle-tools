@@ -199,6 +199,7 @@ public class Parser {
         };
     }
 
+    // TODO: true/false must be handled as part of stdenv
     private Expression parseExpression() throws IOException, SyntaxError {
         Expression firstExpression = switch (nextToken.getKind()) {
             case TRUE -> {
