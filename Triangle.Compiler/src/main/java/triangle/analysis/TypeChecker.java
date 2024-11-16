@@ -285,7 +285,7 @@ final class TypeChecker {
             case Expression.SequenceExpression sequenceExpression -> {
                 checkAndAnnotate(sequenceExpression.statement());
                 checkAndAnnotate(sequenceExpression.expression());
-                sequenceExpression.setType(sequenceExpression.getType().baseType());
+                sequenceExpression.setType(sequenceExpression.expression().getType().baseType());
             }
             case Expression.UnaryOp unaryOp -> {
                 Type opT = lookup(unaryOp.operator().name());
