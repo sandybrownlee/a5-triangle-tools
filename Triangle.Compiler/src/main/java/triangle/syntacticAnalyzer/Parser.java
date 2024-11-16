@@ -291,10 +291,35 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+				// PART (3) adding squaring functionality
+				//This treats when the `**` is present
+
+				//if token == ** -> go into if body
+				if(currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**"))
+				{
+					acceptIt();
+					
+					//variavle name gets wrapped in expression
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					
+					//operator will be *, since we are multiplying
+					Operator op = new Operator("*", commandPos);
+
+					//binary expression e.g. a** -> a*a 
+					Expression eAST = new BinaryExpression(vne, op, vne, commandPos);
+
+					finish(commandPos);
+
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				else //if not ** -> proceed
+				{
+					accept(Token.Kind.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;

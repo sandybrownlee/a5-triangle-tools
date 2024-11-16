@@ -1,0 +1,12 @@
+let
+    var a: Integer
+in 
+begin
+    a := 12;
+    a**;
+    putint(a);
+    put();
+    a**;
+    putint(a);
+end
+

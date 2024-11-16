@@ -78,6 +78,13 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+
+	//PART (3b) -> Test for (3a)
+	@Test
+	public void testSquare()
+	{
+		compileExpectSuccess("/square.tri");
+	}
 	
 	
 	private void compileExpectSuccess(String filename) {
