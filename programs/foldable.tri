@@ -1,0 +1,15 @@
+let
+    const negative ~ 0-1;
+
+    ! folds
+    func p(x : Integer) : Integer ~ x + 0;
+
+    ! folds
+    func q() : Integer ~ (7 * (4 + 3) / 12) + 4;
+
+    ! wont fold
+    proc p(x : Integer) ~ x + 5;
+
+ in
+    ! folds arg
+    p(4 + 5)
