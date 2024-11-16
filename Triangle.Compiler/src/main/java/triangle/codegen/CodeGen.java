@@ -72,8 +72,9 @@ public final class CodeGen {
     public static List<Instruction> generate(Statement statement) {
         ConstantFolder constantFolder = new ConstantFolder();
         IRGenerator irGenerator = new IRGenerator();
+        Hoister hoister = new Hoister();
 
-        return irGenerator.generateIR(constantFolder.fold(statement));
+        return irGenerator.generateIR(hoister.hoist(constantFolder.fold(statement)));
     }
 
 }
