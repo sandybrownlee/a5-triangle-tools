@@ -1,4 +1,4 @@
-package triangle.analysis;
+package triangle.util;
 
 import triangle.repr.Type;
 

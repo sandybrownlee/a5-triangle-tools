@@ -11,6 +11,7 @@ import triangle.repr.Expression.Identifier.BasicIdentifier;
 import triangle.repr.Parameter;
 import triangle.repr.SourcePosition;
 import triangle.repr.Statement;
+import triangle.util.StdEnv;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;

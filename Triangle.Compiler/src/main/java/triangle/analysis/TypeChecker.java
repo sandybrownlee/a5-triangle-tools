@@ -8,6 +8,7 @@ import triangle.repr.SourcePosition;
 import triangle.repr.Statement;
 import triangle.repr.Type;
 import triangle.repr.TypeSig;
+import triangle.util.StdEnv;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
