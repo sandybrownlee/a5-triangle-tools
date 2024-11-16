@@ -15,9 +15,8 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 
 public class TestScanner {
-	
-	/* some individual unit tests for helper methods in Scanner */
 
+	/* some individual unit tests for helper methods in Scanner */
 	@Test
 	public void testIsDigit() {
 		assertTrue(Scanner.isDigit('0'));
@@ -30,6 +29,25 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit('&'));
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
+	}
+	@Test
+	public void testIsLetter() {
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('b'));
+		assertTrue(Scanner.isLetter('z'));
+		assertTrue(Scanner.isLetter('m'));
+		assertTrue(Scanner.isLetter('M'));
+		assertTrue(Scanner.isLetter(Character.toUpperCase('a')));
+		assertTrue(Scanner.isLetter(Character.toUpperCase('b')));
+		assertTrue(Scanner.isLetter(Character.toUpperCase('z')));
+		assertFalse(Scanner.isLetter('0'));
+		assertFalse(Scanner.isLetter('9'));
+		assertFalse(Scanner.isLetter(';'));
+		assertFalse(Scanner.isLetter('\n'));
+		assertFalse(Scanner.isLetter('@'));
+		assertFalse(Scanner.isLetter('[' ));
+		assertFalse(Scanner.isLetter('`'));
+		assertFalse(Scanner.isLetter('{'));
 	}
 	
 	@Test
@@ -44,6 +62,15 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('?'));
 	}
 	
 	
