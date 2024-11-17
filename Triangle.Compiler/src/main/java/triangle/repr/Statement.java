@@ -3,31 +3,24 @@ package triangle.repr;
 import java.util.List;
 import java.util.Optional;
 
-// TODO: maybe make Statement a sealed class, and move sourcePos info to it?
-sealed public interface Statement extends Annotatable.SourceLocatable
-        permits Statement.AssignStatement, Statement.ExpressionStatement, Statement.IfStatement, Statement.LetStatement,
-                Statement.LoopWhileStatement, Statement.RepeatUntilStatement, Statement.RepeatWhileStatement,
-                Statement.StatementBlock, Statement.WhileStatement {
+sealed public abstract class Statement implements Annotatable.SourceLocatable {
 
-    final class StatementBlock implements Statement {
+    protected SourcePosition sourcePos;
+
+    @Override public void setSourcePosition(final SourcePosition sourcePos) {
+        this.sourcePos = sourcePos;
+    }
+
+    @Override public SourcePosition sourcePosition() {
+        return sourcePos;
+    }
+
+    public static final class StatementBlock extends Statement {
 
         private final List<Statement> statements;
-        private       SourcePosition  sourcePos;
 
         public StatementBlock(List<Statement> statements) {
             this.statements = statements;
-        }
-
-        @Override public String toString() {
-            return "StatementBlock[" + "sourcePos=" + sourcePos + ", " + "statements=" + statements + ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public List<Statement> statements() {
@@ -36,29 +29,14 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    final class LetStatement implements Statement {
+    public static final class LetStatement extends Statement {
 
         private final List<Declaration> declarations;
         private final Statement         statement;
-        private       SourcePosition    sourcePos;
 
         public LetStatement(List<Declaration> declarations, Statement statement) {
             this.declarations = declarations;
             this.statement = statement;
-        }
-
-
-        @Override public String toString() {
-            return "LetStatement[" + "sourcePos=" + sourcePos + ", " + "declarations=" + declarations + ", " + "statement=" +
-                   statement + ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public List<Declaration> declarations() {
@@ -71,12 +49,11 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    final class IfStatement implements Statement {
+    public static final class IfStatement extends Statement {
 
         private final Expression          condition;
         private final Optional<Statement> consequent;
         private final Optional<Statement> alternative;
-        private       SourcePosition      sourcePos;
 
         public IfStatement(
                 Expression condition, Optional<Statement> consequent, Optional<Statement> alternative
@@ -84,19 +61,6 @@ sealed public interface Statement extends Annotatable.SourceLocatable
             this.condition = condition;
             this.consequent = consequent;
             this.alternative = alternative;
-        }
-
-        @Override public String toString() {
-            return "IfStatement[" + "sourcePos=" + sourcePos + ", " + "condition=" + condition + ", " + "consequent=" +
-                   consequent + ", " + "alternative=" + alternative + ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public Expression condition() {
@@ -113,28 +77,14 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    final class WhileStatement implements Statement {
+    public static final class WhileStatement extends Statement {
 
-        private final Expression     condition;
-        private final Statement      body;
-        private       SourcePosition sourcePos;
+        private final Expression condition;
+        private final Statement  body;
 
         public WhileStatement(Expression condition, Statement body) {
             this.condition = condition;
             this.body = body;
-        }
-
-
-        @Override public String toString() {
-            return "WhileStatement[" + "sourcePos=" + sourcePos + ", " + "condition=" + condition + ", " + "body=" + body + ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public Expression condition() {
@@ -147,30 +97,16 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    final class LoopWhileStatement implements Statement {
+    public static final class LoopWhileStatement extends Statement {
 
-        private final Expression     condition;
-        private final Statement      loopBody;
-        private final Statement      doBody;
-        private       SourcePosition sourcePos;
+        private final Expression condition;
+        private final Statement  loopBody;
+        private final Statement  doBody;
 
         public LoopWhileStatement(Expression condition, Statement loopBody, Statement doBody) {
             this.condition = condition;
             this.loopBody = loopBody;
             this.doBody = doBody;
-        }
-
-        @Override public String toString() {
-            return "LoopWhileStatement[" + "sourcePos=" + sourcePos + ", " + "condition=" + condition + ", " + "loopBody=" +
-                   loopBody + ", " + "doBody=" + doBody + ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public Expression condition() {
@@ -187,30 +123,16 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    final class RepeatWhileStatement implements Statement {
+    public static final class RepeatWhileStatement extends Statement {
 
-        private final Expression     condition;
-        private final Statement      body;
-        private       SourcePosition sourcePos;
+        private final Expression condition;
+        private final Statement  body;
 
         public RepeatWhileStatement(Expression condition, Statement body) {
             this.condition = condition;
             this.body = body;
         }
 
-        @Override public String toString() {
-            return "RepeatWhileStatement[" + "sourcePos=" + sourcePos + ", " + "condition=" + condition + ", " + "body=" + body +
-                   ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
         public Expression condition() {
             return condition;
         }
@@ -221,31 +143,16 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    final class RepeatUntilStatement implements Statement {
+    public static final class RepeatUntilStatement extends Statement {
 
-        private final Expression     condition;
-        private final Statement      body;
-        private       SourcePosition sourcePos;
+        private final Expression condition;
+        private final Statement  body;
 
         public RepeatUntilStatement(Expression condition, Statement body) {
             this.condition = condition;
             this.body = body;
         }
 
-
-        @Override public String toString() {
-            return "RepeatUntilStatement[" + "sourcePos=" + sourcePos + ", " + "condition=" + condition + ", " + "body=" + body +
-                   ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
         public Expression condition() {
             return condition;
         }
@@ -256,29 +163,14 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    final class AssignStatement implements Statement {
+    public static final class AssignStatement extends Statement {
 
         private final Expression.Identifier identifier;
         private final Expression            expression;
-        private       SourcePosition        sourcePos;
 
         public AssignStatement(Expression.Identifier identifier, Expression expression) {
             this.identifier = identifier;
             this.expression = expression;
-        }
-
-
-        @Override public String toString() {
-            return "AssignStatement[" + "sourcePos=" + sourcePos + ", " + "identifier=" + identifier + ", " + "expression=" +
-                   expression + ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public Expression.Identifier identifier() {
@@ -291,27 +183,12 @@ sealed public interface Statement extends Annotatable.SourceLocatable
 
     }
 
-    // to evaluate an expression just for its side-effects; note that we cannot make Expression extend Statement since
-    // Expressions have to be treated differently during code-generation
-    final class ExpressionStatement implements Statement {
+    public static final class ExpressionStatement extends Statement {
 
-        private final Expression     expression;
-        private       SourcePosition sourcePos;
+        private final Expression expression;
 
         public ExpressionStatement(Expression expression) {
             this.expression = expression;
-        }
-
-        @Override public String toString() {
-            return "ExpressionStatement[" + "sourcePos=" + sourcePos + ", " + "expression=" + expression + ']';
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public Expression expression() {

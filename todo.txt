@@ -5,7 +5,6 @@ spec:
     true, false must be in stdenv
 add cmdline options for constant folding and hoisting
 maybe have a symbol class?
-make Expression, Statement, etc, abstract sealed classes
 dead code elim
 maybe do constant propagation?
 try to rewrite SemanticAnalyzer and TypeChecker into RewriteStages

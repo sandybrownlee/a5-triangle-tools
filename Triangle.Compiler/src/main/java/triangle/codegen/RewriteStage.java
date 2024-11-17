@@ -156,7 +156,7 @@ public interface RewriteStage {
     default Parameter rewrite(Parameter parameter) {
         return switch (parameter) {
             case Parameter.FuncParameter funcParameter ->
-                    new Parameter.FuncParameter(funcParameter.callable(),
+                    new Parameter.FuncParameter(funcParameter.name(),
                                                 funcParameter.parameters().stream().map(this::rewrite).toList(),
                                                 funcParameter.declaredReturnType())
                                  .withAnnotationsOf(funcParameter);

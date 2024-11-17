@@ -309,6 +309,9 @@ final class TypeChecker {
             }
         }
 
+        if (expression.getType() == null) {
+            System.out.println(expression);
+        }
         if (expression.getType().baseType() instanceof PrimType.FuncType) {
             throw new SemanticException.FunctionResult(expression.sourcePosition(), expression);
         }

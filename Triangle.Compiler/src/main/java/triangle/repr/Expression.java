@@ -2,26 +2,39 @@ package triangle.repr;
 
 import java.util.List;
 
-// TODO: maybe make Expression a sealed class and move sourcePos and type to it?
-sealed public interface Expression extends Argument, Annotatable.Typeable, Annotatable.SourceLocatable
-        permits Expression.BinaryOp, Expression.FunCall, Expression.Identifier, Expression.IfExpression, Expression.LetExpression,
-                Expression.LitArray, Expression.LitBool, Expression.LitChar, Expression.LitInt, Expression.LitRecord,
-                Expression.SequenceExpression, Expression.UnaryOp {
+sealed public abstract class Expression extends Argument implements Annotatable.Typeable, Annotatable.SourceLocatable {
 
-    sealed interface Identifier extends Expression, Annotatable.Typeable
+    protected SourcePosition sourcePos;
+    protected Type           type;
+
+    @Override public void setSourcePosition(final SourcePosition sourcePos) {
+        this.sourcePos = sourcePos;
+    }
+
+    @Override public SourcePosition sourcePosition() {
+        return sourcePos;
+    }
+
+    @Override public Type getType() {
+        return type;
+    }
+
+    @Override public void setType(Type type) {
+        this.type = type;
+    }
+
+    public sealed static abstract class Identifier extends Expression
             permits Identifier.BasicIdentifier, Identifier.RecordAccess, Identifier.ArraySubscript {
 
         // this finds the "root" of a (possibly complex) identifier
         // e.g., arr[i] -> root = arr
         //       recx.recy.recz -> root = recx
         // this is needed, for example, to check if a record is a constant or not and for deciding addresses during codegen
-        BasicIdentifier root();
+        abstract public BasicIdentifier root();
 
-        final class BasicIdentifier implements Identifier {
+        public static final class BasicIdentifier extends Identifier {
 
-            private final String         name;
-            private       SourcePosition sourcePos;
-            private       Type           type;
+            private final String name;
 
             public BasicIdentifier(String name) {
                 this.name = name;
@@ -31,38 +44,16 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
                 return this;
             }
 
-            @Override public void setSourcePosition(final SourcePosition sourcePos) {
-                this.sourcePos = sourcePos;
-            }
-
-            @Override public SourcePosition sourcePosition() {
-                return sourcePos;
-            }
-
-            @Override public String toString() {
-                return "BasicIdentifier[" + "sourcePos=" + sourcePos + ", " + "name=" + name + ']';
-            }
-
-            @Override public Type getType() {
-                return type;
-            }
-
-            @Override public void setType(Type type) {
-                this.type = type;
-            }
-
             public String name() {
                 return name;
             }
 
         }
 
-        final class RecordAccess implements Identifier {
+        public static final class RecordAccess extends Identifier {
 
-            private final Identifier     record;
-            private final Identifier     field;
-            private       SourcePosition sourcePos;
-            private       Type           type;
+            private final Identifier record;
+            private final Identifier field;
 
             public RecordAccess(Identifier record, Identifier field) {
                 this.record = record;
@@ -71,26 +62,6 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
             @Override public BasicIdentifier root() {
                 return record.root();
-            }
-
-            @Override public void setSourcePosition(final SourcePosition sourcePos) {
-                this.sourcePos = sourcePos;
-            }
-
-            @Override public SourcePosition sourcePosition() {
-                return sourcePos;
-            }
-
-            @Override public String toString() {
-                return "RecordAccess[" + "sourcePos=" + sourcePos + ", " + "record=" + record + ", " + "field=" + field + ']';
-            }
-
-            @Override public Type getType() {
-                return type;
-            }
-
-            public void setType(Type type) {
-                this.type = type;
             }
 
             public Identifier record() {
@@ -103,12 +74,10 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
         }
 
-        final class ArraySubscript implements Identifier {
+        public static final class ArraySubscript extends Identifier {
 
-            private final Identifier     array;
-            private final Expression     subscript;
-            private       SourcePosition sourcePos;
-            private       Type           type;
+            private final Identifier array;
+            private final Expression subscript;
 
             public ArraySubscript(Identifier array, Expression subscript) {
                 this.array = array;
@@ -117,27 +86,6 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
             @Override public BasicIdentifier root() {
                 return array.root();
-            }
-
-            @Override public void setSourcePosition(final SourcePosition sourcePos) {
-                this.sourcePos = sourcePos;
-            }
-
-            @Override public SourcePosition sourcePosition() {
-                return sourcePos;
-            }
-
-            @Override public String toString() {
-                return "ArraySubscript[" + "sourcePos=" + sourcePos + ", " + "array=" + array + ", " + "subscript=" + subscript +
-                       ']';
-            }
-
-            @Override public Type getType() {
-                return type;
-            }
-
-            public void setType(Type type) {
-                this.type = type;
             }
 
             public Identifier array() {
@@ -152,17 +100,14 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
     }
 
-    final class LitBool implements Expression {
+    public static final class LitBool extends Expression {
 
         private final boolean        value;
         private       SourcePosition sourcePos;
 
         public LitBool(boolean value) {
             this.value = value;
-        }
-
-        @Override public Type getType() {
-            return Type.BOOL_TYPE;
+            this.type = Type.BOOL_TYPE;
         }
 
         @Override public void setType(final Type type) {
@@ -179,27 +124,20 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
             return sourcePos;
         }
 
-        @Override public String toString() {
-            return "LitBool[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
-        }
-
         public boolean value() {
             return value;
         }
 
     }
 
-    final class LitInt implements Expression {
+    public static final class LitInt extends Expression {
 
         private final int            value;
         private       SourcePosition sourcePos;
 
         public LitInt(int value) {
             this.value = value;
-        }
-
-        @Override public Type getType() {
-            return Type.INT_TYPE;
+            this.type = Type.INT_TYPE;
         }
 
         @Override public void setType(final Type type) {
@@ -216,27 +154,19 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
             return sourcePos;
         }
 
-        @Override public String toString() {
-            return "LitInt[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
-        }
-
         public int value() {
             return value;
         }
 
     }
 
-    final class LitChar implements Expression {
+    public static final class LitChar extends Expression {
 
-        private final char           value;
-        private       SourcePosition sourcePos;
+        private final char value;
 
         public LitChar(char value) {
             this.value = value;
-        }
-
-        @Override public Type getType() {
-            return Type.CHAR_TYPE;
+            this.type = Type.CHAR_TYPE;
         }
 
         @Override public void setType(final Type type) {
@@ -245,52 +175,18 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
             }
         }
 
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "LitChar[" + "sourcePos=" + sourcePos + ", " + "value=" + value + ']';
-        }
-
         public char value() {
             return value;
         }
 
     }
 
-    final class LitArray implements Expression, Annotatable.Typeable {
+    public static final class LitArray extends Expression {
 
         private final List<Expression> elements;
-        private       SourcePosition   sourcePos;
-        private       Type             type;
 
         public LitArray(List<Expression> elements) {
             this.elements = elements;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "LitArray[" + "sourcePos=" + sourcePos + ", " + "elements=" + elements + ']';
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(Type type) {
-            this.type = type;
         }
 
         public List<Expression> elements() {
@@ -299,34 +195,12 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
     }
 
-    final class LitRecord implements Expression, Annotatable.Typeable {
+    public static final class LitRecord extends Expression {
 
         private final List<RecordField> fields;
-        private       SourcePosition    sourcePos;
-        private       Type              type;
 
         public LitRecord(List<RecordField> fields) {
             this.fields = fields;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "LitRecord[" + "sourcePos=" + sourcePos + ", " + "fields=" + fields + ']';
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(Type type) {
-            this.type = type;
         }
 
         public List<RecordField> fields() {
@@ -337,36 +211,14 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
     }
 
-    final class UnaryOp implements Expression, Annotatable.Typeable {
+    public static final class UnaryOp extends Expression {
 
         private final Identifier.BasicIdentifier operator;
         private final Expression                 operand;
-        private       SourcePosition             sourcePos;
-        private       Type                       type;
 
         public UnaryOp(Identifier.BasicIdentifier operator, Expression operand) {
             this.operator = operator;
             this.operand = operand;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "UnaryOp[" + "sourcePos=" + sourcePos + ", " + "operator=" + operator + ", " + "operand=" + operand + ']';
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(Type type) {
-            this.type = type;
         }
 
         public Identifier.BasicIdentifier operator() {
@@ -379,40 +231,17 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
     }
 
-    final class BinaryOp implements Expression, Annotatable.Typeable {
+    public static final class BinaryOp extends Expression {
 
         // TODO: maybe migrate operator type to String?
         private final Identifier.BasicIdentifier operator;
         private final Expression                 leftOperand;
         private final Expression                 rightOperand;
-        private       SourcePosition             sourcePos;
-        private       Type                       type;
 
         public BinaryOp(Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand) {
             this.operator = operator;
             this.leftOperand = leftOperand;
             this.rightOperand = rightOperand;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "BinaryOp[" + "sourcePos=" + sourcePos + ", " + "operator=" + operator + ", " + "leftOperand=" + leftOperand +
-                   ", " + "rightOperand=" + rightOperand + ']';
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(Type type) {
-            this.type = type;
         }
 
         public Identifier.BasicIdentifier operator() {
@@ -427,39 +256,20 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
             return rightOperand;
         }
 
+        public enum BINOPS {
+            OR, AND, LTE, GTE, GT, LT, NOT, SUB, ADD, MUL, DIV, MOD, EQ, NEQ
+        }
+
     }
 
-    final class LetExpression implements Expression, Annotatable.Typeable {
+    public static final class LetExpression extends Expression {
 
         private final List<Declaration> declarations;
         private final Expression        expression;
-        private       SourcePosition    sourcePos;
-        private       Type              type;
 
         public LetExpression(List<Declaration> declarations, Expression expression) {
             this.declarations = declarations;
             this.expression = expression;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "LetExpression[" + "sourcePos=" + sourcePos + ", " + "declarations=" + declarations + ", " + "expression=" +
-                   expression + ']';
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(Type type) {
-            this.type = type;
         }
 
         public List<Declaration> declarations() {
@@ -472,39 +282,16 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
     }
 
-    final class IfExpression implements Expression, Annotatable.Typeable {
+    public static final class IfExpression extends Expression {
 
-        private final Expression     condition;
-        private final Expression     consequent;
-        private final Expression     alternative;
-        private       SourcePosition sourcePos;
-        private       Type           type;
+        private final Expression condition;
+        private final Expression consequent;
+        private final Expression alternative;
 
         public IfExpression(Expression condition, Expression consequent, Expression alternative) {
             this.condition = condition;
             this.consequent = consequent;
             this.alternative = alternative;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "IfExpression[" + "sourcePos=" + sourcePos + ", " + "condition=" + condition + ", " + "consequent=" +
-                   consequent + ", " + "alternative=" + alternative + ']';
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(Type type) {
-            this.type = type;
         }
 
         public Expression condition() {
@@ -521,36 +308,14 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
     }
 
-    final class FunCall implements Expression, Annotatable.Typeable {
+    public static final class FunCall extends Expression {
 
         private final Identifier.BasicIdentifier func;
         private final List<Argument>             arguments;
-        private       SourcePosition             sourcePos;
-        private       Type                       type;
 
         public FunCall(Identifier.BasicIdentifier func, List<Argument> arguments) {
             this.func = func;
             this.arguments = arguments;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
-        }
-
-        @Override public String toString() {
-            return "FunCall[" + "sourcePos=" + sourcePos + ", " + "callable=" + func + ", " + "arguments=" + arguments + ']';
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(Type type) {
-            this.type = type;
         }
 
         public Identifier.BasicIdentifier func() {
@@ -563,32 +328,14 @@ sealed public interface Expression extends Argument, Annotatable.Typeable, Annot
 
     }
 
-    final class SequenceExpression implements Expression {
+    public static final class SequenceExpression extends Expression {
 
-        private final Statement      statement;
-        private final Expression     expression;
-        private       SourcePosition sourcePos;
-        private       Type           type;
+        private final Statement  statement;
+        private final Expression expression;
 
         public SequenceExpression(Statement statement, Expression expression) {
             this.statement = statement;
             this.expression = expression;
-        }
-
-        @Override public Type getType() {
-            return type;
-        }
-
-        @Override public void setType(final Type type) {
-            this.type = type;
-        }
-
-        @Override public void setSourcePosition(final SourcePosition sourcePos) {
-            this.sourcePos = sourcePos;
-        }
-
-        @Override public SourcePosition sourcePosition() {
-            return sourcePos;
         }
 
         public Statement statement() {

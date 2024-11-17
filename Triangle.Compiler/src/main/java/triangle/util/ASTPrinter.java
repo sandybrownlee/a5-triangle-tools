@@ -153,7 +153,7 @@ public final class ASTPrinter {
         return switch (parameter) {
             case Parameter.FuncParameter funcParameter -> String.format(
                     "CALLABLE %s (%s) : %s",
-                    funcParameter.callable(),
+                    funcParameter.name(),
                     makeDelimited(funcParameter.parameters(), ASTPrinter::prettyPrint),
                     prettyPrint(funcParameter.declaredReturnType())
             );
