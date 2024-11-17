@@ -1,0 +1,30 @@
+let var i : Integer;
+    var a : array 10 of Integer;
+    var n : Integer;
+    var x : Integer;
+
+    proc putinteol(n : Integer) ~ begin putint(n); puteol(); end
+in
+begin
+    i := 0-1;
+    while i < 9 do
+        begin
+            getint(var n);
+            a[i++] := n;
+        end;
+    putinteol(a[0]);
+    putinteol(a[1]);
+    putinteol(a[2]);
+    putinteol(a[3]);
+    putinteol(a[4]);
+    putinteol(a[5]);
+    putinteol(a[6]);
+    putinteol(a[7]);
+    putinteol(a[8]);
+    putinteol(a[9]);
+    x := 7;
+    putinteol(x);
+    x**;
+    putinteol(x);
+    putinteol((3 + 2)**);
+end

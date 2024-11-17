@@ -1,5 +1,3 @@
-make sure hoisting didnt break anything
-implement Rewriter
 implement jacoco tests
 implement SummaryVisitor
 spec:

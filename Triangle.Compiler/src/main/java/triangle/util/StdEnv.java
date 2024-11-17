@@ -47,7 +47,8 @@ public final class StdEnv {
                         "/",  BINARY_INT_FUNC,
                         "//", BINARY_INT_FUNC,
                         "|",  new PrimType.FuncType(List.of(INT_TYPE), INT_TYPE),
-                        "++", new PrimType.FuncType(List.of(INT_TYPE), INT_TYPE)
+                        "++", new PrimType.FuncType(List.of(INT_TYPE), INT_TYPE),
+                        "**", new PrimType.FuncType(List.of(INT_TYPE), INT_TYPE)
                 ));
 
         // these are set to VOID so that we (hopefully) fail fast in case something tries to access their types
