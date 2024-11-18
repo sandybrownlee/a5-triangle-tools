@@ -74,7 +74,7 @@ final class Lexer {
     Lexer(InputStream source) {
         this.source = source;
         this.line = 1;
-        this.column = 1;
+        this.column = 0;
         this.buffer = new StringBuffer();
     }
 
