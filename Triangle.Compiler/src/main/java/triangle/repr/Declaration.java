@@ -4,7 +4,16 @@ import java.util.List;
 
 sealed public abstract class Declaration implements Annotatable.SourceLocatable {
 
-    protected SourcePosition sourcePos;
+    protected final String         name;
+    protected       SourcePosition sourcePos;
+
+    private Declaration(final String name) {
+        this.name = name;
+    }
+
+    public final String name() {
+        return name;
+    }
 
     @Override public final SourcePosition sourcePosition() {
         return sourcePos;
@@ -16,16 +25,11 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
 
     public static final class ConstDeclaration extends Declaration {
 
-        private final String     name;
         private final Expression value;
 
         public ConstDeclaration(String name, Expression value) {
-            this.name = name;
+            super(name);
             this.value = value;
-        }
-
-        public String name() {
-            return name;
         }
 
         public Expression value() {
@@ -36,12 +40,11 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
 
     public static final class VarDeclaration extends Declaration implements Typeable {
 
-        private final String  name;
         private final TypeSig declaredType;
         private       Type    type;
 
         public VarDeclaration(String name, TypeSig declaredType) {
-            this.name = name;
+            super(name);
             this.declaredType = declaredType;
         }
 
@@ -53,10 +56,6 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
             this.type = type;
         }
 
-        public String name() {
-            return name;
-        }
-
         public TypeSig declaredType() {
             return this.declaredType;
         }
@@ -65,7 +64,6 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
 
     public static final class FuncDeclaration extends Declaration {
 
-        private final String          name;
         private final List<Parameter> parameters;
         private final TypeSig         returnTypeSig;
         private final Expression      expression;
@@ -73,14 +71,10 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
         public FuncDeclaration(
                 String name, List<Parameter> parameters, TypeSig returnTypeSig, Expression expression
         ) {
-            this.name = name;
+            super(name);
             this.parameters = parameters;
             this.returnTypeSig = returnTypeSig;
             this.expression = expression;
-        }
-
-        public String name() {
-            return name;
         }
 
         public List<Parameter> parameters() {
@@ -99,18 +93,13 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
 
     public static final class ProcDeclaration extends Declaration {
 
-        private final String          name;
         private final List<Parameter> parameters;
         private final Statement       statement;
 
         public ProcDeclaration(String name, List<Parameter> parameters, Statement statement) {
-            this.name = name;
+            super(name);
             this.parameters = parameters;
             this.statement = statement;
-        }
-
-        public String name() {
-            return name;
         }
 
         public List<Parameter> parameters() {
@@ -125,16 +114,11 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
 
     public static final class TypeDeclaration extends Declaration {
 
-        private final String  name;
         private final TypeSig typeSig;
 
         public TypeDeclaration(String name, TypeSig typeSig) {
-            this.name = name;
+            super(name);
             this.typeSig = typeSig;
-        }
-
-        public String name() {
-            return name;
         }
 
         public TypeSig typeSig() {
