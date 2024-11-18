@@ -66,10 +66,6 @@ final class Lexer {
     }
     //@formatter:on
 
-    public static Lexer fromResource(String handle) {
-        return new Lexer(Lexer.class.getResourceAsStream(handle));
-    }
-
     private final InputStream  source;
     private final StringBuffer buffer;
     private       int          line;
