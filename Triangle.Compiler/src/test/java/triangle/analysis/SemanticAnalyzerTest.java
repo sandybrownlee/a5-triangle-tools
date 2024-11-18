@@ -41,6 +41,11 @@ public class SemanticAnalyzerTest {
         assertTrue(analyzeExpectException("{ a ~ 10, a ~ 20}", SemanticException.DuplicateRecordField.class));
     }
 
+    @Test public void testDuplicateRecordTypeField() throws SyntaxError, IOException {
+        assertTrue(analyzeExpectException("let type R ~ record a : Integer, a : Char end in 1}",
+                                          SemanticException.DuplicateRecordTypeField.class));
+    }
+
     @Test public void testAssignmentToConstant() throws SyntaxError, IOException {
         assertTrue(analyzeExpectException("let const x ~ 10 in x := 1", SemanticException.AssignmentToConstant.class));
     }

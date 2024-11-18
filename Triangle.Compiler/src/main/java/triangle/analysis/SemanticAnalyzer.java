@@ -11,6 +11,7 @@ import triangle.repr.Expression.Identifier.BasicIdentifier;
 import triangle.repr.Parameter;
 import triangle.repr.SourcePosition;
 import triangle.repr.Statement;
+import triangle.repr.TypeSig;
 import triangle.util.StdEnv;
 import triangle.util.SymbolTable;
 
@@ -31,6 +32,7 @@ import java.util.Set;
 //  no duplicate parameters are defined, for each function/procedure
 //  record literals are canonicalized
 //  no duplicate fields in record literals
+//  no duplicate fields in record types
 //  func/proc parameters are only ever supplied with arguments marked func/proc
 //  var parameters are only ever supplied with arguments marked var
 
@@ -304,7 +306,17 @@ public final class SemanticAnalyzer {
                         terms.exitScope();
                     }
                 }
-                case TypeDeclaration _ -> { }
+                case TypeDeclaration typeDeclaration -> {
+                    if (typeDeclaration.typeSig() instanceof TypeSig.RecordTypeSig recordTypeSig) {
+                        Set<String> seenFieldNames = new HashSet<>();
+                        for (TypeSig.RecordTypeSig.FieldType fieldType : recordTypeSig.fieldTypes()) {
+                            if (seenFieldNames.contains(fieldType.fieldName())) {
+                                throw new SemanticException.DuplicateRecordTypeField(fieldType);
+                            }
+                            seenFieldNames.add(fieldType.fieldName());
+                        }
+                    }
+                }
                 case Declaration.VarDeclaration varDeclaration -> terms.add(
                         varDeclaration.name(), new Binding(false, varDeclaration));
                 case Declaration.ProcDeclaration procDeclaration -> {
