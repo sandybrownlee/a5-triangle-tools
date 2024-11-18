@@ -29,7 +29,7 @@ tasks.withType(Test).configureEach {
 dependencies {
     implementation project(':Triangle.AbstractMachine')
     implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation group: 'junit', name: 'junit', version: '5.11.3'
 }
 
 application {
