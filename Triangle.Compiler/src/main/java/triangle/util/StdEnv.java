@@ -38,7 +38,6 @@ public final class StdEnv {
                         "\\",  new PrimType.FuncType(List.of(BOOL_TYPE), BOOL_TYPE)
                 ));
 
-        // TODO: remove ++ and turn it into a rewrite
         STD_TERMS.putAll(
                 Map.of(
                         "-",  BINARY_INT_FUNC,
