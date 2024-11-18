@@ -555,34 +555,34 @@ public class Parser {
         return switch (nextToken.getKind()) {
             case IDENTIFIER -> {
                 String varName = ((TextToken) nextToken).getText();
-                shift(Token.Kind.IDENTIFIER);
+                SourcePosition start = shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 TypeSig varTypeSig = parseType();
-                yield new ValueParameter(varName, varTypeSig);
+                yield new ValueParameter(varName, varTypeSig).withSourcePosition(start);
             }
             case VAR -> {
                 shift(Token.Kind.VAR);
                 String varName = ((TextToken) nextToken).getText();
-                shift(Token.Kind.IDENTIFIER);
+                SourcePosition start = shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.COLON);
                 TypeSig varTypeSig = parseType();
-                yield new VarParameter(varName, varTypeSig);
+                yield new VarParameter(varName, varTypeSig).withSourcePosition(start);
             }
             case PROC -> {
                 shift(Token.Kind.PROC);
                 String funcName = ((TextToken) nextToken).getText();
-                shift(Token.Kind.IDENTIFIER);
+                SourcePosition start = shift(Token.Kind.IDENTIFIER);
                 List<Parameter> parameters = parseParamSeq();
-                yield new FuncParameter(funcName, parameters, new TypeSig.Void());
+                yield new FuncParameter(funcName, parameters, new TypeSig.Void()).withSourcePosition(start);
             }
             case FUNC -> {
                 shift(Token.Kind.FUNC);
                 String funcName = ((TextToken) nextToken).getText();
-                shift(Token.Kind.IDENTIFIER);
+                SourcePosition start = shift(Token.Kind.IDENTIFIER);
                 List<Parameter> parameters = parseParamSeq();
                 shift(Token.Kind.COLON);
                 TypeSig funcTypeSig = parseType();
-                yield new FuncParameter(funcName, parameters, funcTypeSig);
+                yield new FuncParameter(funcName, parameters, funcTypeSig).withSourcePosition(start);
             }
             default -> throw new SyntaxError(nextToken);
         };
