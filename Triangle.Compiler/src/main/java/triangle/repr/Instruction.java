@@ -1,4 +1,4 @@
-package triangle.codegen;
+package triangle.repr;
 
 import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;

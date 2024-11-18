@@ -23,37 +23,41 @@ import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 import triangle.analysis.SemanticAnalyzer;
 import triangle.codegen.CodeGen;
+import triangle.codegen.IRGenerator;
+import triangle.repr.Instruction;
+import triangle.codegen.Optimizer;
 import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
 import triangle.repr.Statement;
 
-import java.io.File;
+import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 // TODO: replace ErrorReporter with robust logging
-// TODO: showStats cmdline option
 public class Compiler {
 
-    /** The filename for the object program, normally obj.tam. */
-    @Argument(description = "The name of the file to store the object code into") static String objectName = "obj.tam";
+    @Argument(description = "The name of the file to store the object code into") private static String objectName = "obj.tam";
 
     @Argument(description = "The name of the source file to compile", required = true) private static String sourceName;
 
-    @Argument(description = "Whether or not to show the tree") private static boolean showTree;
+    @Argument(description = "Turn on constant folding") private static boolean constantFolding;
+
+    @Argument(description = "Turn on loop hoisting") private static boolean hoisting;
+
+    @Argument(description = "Show summary stats") private static boolean showStats;
 
     public static void main(String[] args) {
         Args.parseOrExit(Compiler.class, args);
 
+        sourceName = "programs/test.tri";
+
         try {
-//            for (String fileName : new File("programs/").list()) {
-//                System.out.println("programs/" + fileName);
-//                compileProgram(new FileInputStream("programs/" + fileName));
-//                System.in.read();
-//            }
-            compileProgram(new FileInputStream("programs/procparam.tri"));
+            compileProgram(new FileInputStream(sourceName), new FileOutputStream(objectName));
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             e.printStackTrace();
@@ -69,20 +73,38 @@ public class Compiler {
         }
     }
 
-    static void compileProgram(InputStream inputStream) throws IOException, SyntaxError {
+    static void compileProgram(InputStream inputStream, final FileOutputStream outputStream) throws IOException, SyntaxError {
         Parser parser = new Parser(inputStream);
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+        IRGenerator irGenerator = new IRGenerator();
+        CodeGen codeGen = new CodeGen(new DataOutputStream(outputStream));
 
         Statement program = parser.parseProgram();
-        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
 
+        // explicitly-typed AST
         program = semanticAnalyzer.analyzeAndType(program);
+
+        if (showStats) {
+            // show stats
+        }
 
         if (!semanticAnalyzer.getErrors().isEmpty()) {
             semanticAnalyzer.getErrors().forEach(System.err::println);
             return;
         }
 
-        CodeGen.write("obj.tam", CodeGen.backpatch(CodeGen.generate(program)));
+        if (constantFolding) {
+            program = Optimizer.foldConstants(program);
+        }
+
+        if (hoisting) {
+            program = Optimizer.hoist(program);
+        }
+
+        List<Instruction> ir = irGenerator.generateIR(program);
+        List<Instruction.TAMInstruction> objectCode = Optimizer.backpatch(ir);
+
+        codeGen.write(objectCode);
     }
 
 }

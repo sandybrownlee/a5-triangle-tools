@@ -3,8 +3,6 @@ implement SummaryVisitor
 spec:
     maxint must be in stdenv
     true, false must be in stdenv
-add cmdline options for constant folding and hoisting
 maybe have a symbol class?
 dead code elim
 maybe do constant propagation?
-try to rewrite SemanticAnalyzer and TypeChecker into RewriteStages

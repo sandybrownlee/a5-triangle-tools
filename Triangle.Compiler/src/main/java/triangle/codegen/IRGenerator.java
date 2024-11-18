@@ -6,6 +6,7 @@ import triangle.abstractMachine.Register;
 import triangle.repr.Argument;
 import triangle.repr.Declaration;
 import triangle.repr.Expression;
+import triangle.repr.Instruction;
 import triangle.repr.Parameter;
 import triangle.repr.Parameter.VarParameter;
 import triangle.repr.Statement;
@@ -82,8 +83,6 @@ public class IRGenerator {
             return new Instruction.LABEL(i++);
         }
     };
-
-    IRGenerator() { }
 
     public List<Instruction> generateIR(Statement statement) {
         List<Instruction> ir = generate(statement);
