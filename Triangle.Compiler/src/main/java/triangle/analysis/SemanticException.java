@@ -30,10 +30,6 @@ public abstract class SemanticException extends Exception {
             super("Undeclared use of type: " + typeSig);
         }
 
-        UndeclaredUse(String string) {
-            super("Undeclared use of symbol: " + string);
-        }
-
     }
 
     static final class TypeError extends SemanticException {

@@ -153,7 +153,7 @@ final class TypeChecker {
     private void checkAndAnnotate(Expression expression) throws SemanticException {
         switch (expression) {
             case Expression.BinaryOp binOp -> {
-                Type opT = lookup(binOp.operator().name());
+                Type opT = resolvedTypes.lookup(binOp.operator().name());
 
                 checkAndAnnotate(binOp.leftOperand());
                 checkAndAnnotate(binOp.rightOperand());
@@ -195,7 +195,7 @@ final class TypeChecker {
                 binOp.setType(funcType.returnType());
             }
             case Expression.FunCall funCall -> {
-                Type fT = lookup(funCall.func().name());
+                Type fT = resolvedTypes.lookup(funCall.func().name());
 
                 if (!(fT instanceof PrimType.FuncType(List<Type> paramTypes, Type returnType))) {
                     throw new SemanticException.TypeError(funCall.sourcePosition(), fT, "function");
@@ -289,7 +289,7 @@ final class TypeChecker {
                 sequenceExpression.setType(sequenceExpression.expression().getType().baseType());
             }
             case Expression.UnaryOp unaryOp -> {
-                Type opT = lookup(unaryOp.operator().name());
+                Type opT = resolvedTypes.lookup(unaryOp.operator().name());
 
                 checkAndAnnotate(unaryOp.operand());
 
@@ -344,7 +344,7 @@ final class TypeChecker {
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 try {
-                    basicIdentifier.setType(lookup(basicIdentifier.name()));
+                    basicIdentifier.setType(resolvedTypes.lookup(basicIdentifier.name()));
                 } catch (NoSuchElementException e) {
                     // even though TypeCheck runs after SemanticAnalyzer, we may still have undeclared uses, because
                     // SemanticAnalyzer does not check if field accesses of a record are valid (it doesn't have the necessary
@@ -380,7 +380,7 @@ final class TypeChecker {
 
     private void annotateArgument(final Argument argument) throws SemanticException {
         Type aT = switch (argument) {
-            case Argument.FuncArgument funcArgument -> lookup(funcArgument.func().name());
+            case Argument.FuncArgument funcArgument -> resolvedTypes.lookup(funcArgument.func().name());
             case Argument.VarArgument varArgument -> {
                 checkAndAnnotate(varArgument.var());
                 yield varArgument.var().getType();
@@ -523,21 +523,13 @@ final class TypeChecker {
             }
             case TypeSig.BasicTypeSig basicType -> {
                 try {
-                    yield lookup(basicType.name());
+                    yield resolvedTypes.lookup(basicType.name());
                 } catch (NoSuchElementException _) {
                     throw new SemanticException.UndeclaredUse(basicType);
                 }
             }
             case TypeSig.Void _ -> VOID_TYPE;
         };
-    }
-
-    private Type lookup(final String name) throws SemanticException {
-        try {
-            return resolvedTypes.lookup(name);
-        } catch (NoSuchElementException e) {
-            throw new SemanticException.UndeclaredUse(name);
-        }
     }
 
 }
