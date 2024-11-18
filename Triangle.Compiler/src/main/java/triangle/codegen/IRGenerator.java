@@ -252,29 +252,25 @@ public class IRGenerator {
     }
 
     private List<Instruction> generate(Expression expression) {
-        // TODO: use `return switch (expression) { ...`
         List<Instruction> block = new ArrayList<>();
 
         switch (expression) {
             case Expression.BinaryOp binaryOp -> {
                 //  generateCall(op, [lOperand, rOperand])
 
-                block.addAll(generateCall(
+                return generateCall(
                         binaryOp.operator().name(),
                         List.of(binaryOp.leftOperand(), binaryOp.rightOperand())
-                ));
-                return block;
+                );
             }
             case Expression.FunCall funCall -> {
                 // generateCall(func, func.arguments)
 
-                block.addAll(generateCall(funCall.func().name(), funCall.arguments()));
-                return block;
+                return generateCall(funCall.func().name(), funCall.arguments());
             }
             case Expression.Identifier identifier -> {
                 // fetch the value and leave on stack
-                block.addAll(generateFetch(identifier, identifier.getType().baseType().size()));
-                return block;
+                return generateFetch(identifier, identifier.getType().baseType().size());
             }
             case Expression.IfExpression ifExpression -> {
                 //  [condition]
