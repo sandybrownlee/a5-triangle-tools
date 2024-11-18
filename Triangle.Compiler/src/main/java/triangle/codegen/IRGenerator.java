@@ -60,7 +60,6 @@ public class IRGenerator {
         )));
     }
 
-    // TODO: SemanticAnalyzer should ensure static-nesting depth does not exceed the maximum
     static Register getDisplayRegister(final int depth) {
         return switch (depth) {
             case 0 -> Register.LB;

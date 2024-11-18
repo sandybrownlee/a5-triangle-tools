@@ -11,6 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static triangle.util.TestUtils.inputStreamOf;
 
 public class SemanticAnalyzerTest {
+
     static {
         // TODO: we should use proper logging in the rest of the code and get rid of this
         System.setErr(new PrintStream(PrintStream.nullOutputStream()));
@@ -43,7 +44,8 @@ public class SemanticAnalyzerTest {
 
     @Test public void testDuplicateRecordTypeField() throws SyntaxError, IOException {
         assertTrue(analyzeExpectException("let type R ~ record a : Integer, a : Char end in 1}",
-                                          SemanticException.DuplicateRecordTypeField.class));
+                                          SemanticException.DuplicateRecordTypeField.class
+        ));
     }
 
     @Test public void testAssignmentToConstant() throws SyntaxError, IOException {
@@ -70,6 +72,25 @@ public class SemanticAnalyzerTest {
         assertTrue(analyzeExpectException("let proc p(var x : Integer) ~ puteol(); var x : Integer in p(x)",
                                           SemanticException.InvalidArgument.class
         ));
+    }
+
+    @Test public void testNestingDepthExceeded() throws SyntaxError, IOException {
+        assertTrue(analyzeExpectException("""
+                                          let proc p() ~
+                                              let proc p() ~
+                                                  let proc p() ~
+                                                      let proc p() ~
+                                                          let proc p() ~
+                                                              let proc p() ~
+                                                                  let proc p() ~ puteol();
+                                                                   in puteol();
+                                                               in puteol();
+                                                           in puteol();
+                                                       in puteol();
+                                                   in puteol();
+                                               in puteol();
+                                           in puteol();
+                                          """, SemanticException.NestingDepthExceeded.class));
     }
 
 }

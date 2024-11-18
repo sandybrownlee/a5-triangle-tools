@@ -36,7 +36,6 @@ import java.util.Set;
 //  func/proc parameters are only ever supplied with arguments marked func/proc
 //  var parameters are only ever supplied with arguments marked var
 
-// TODO: need to ensure static-nesting depth does not exceed maximum
 // TODO: SemanticAnalyzer.analyzeAndType needs to be split across mutliple classes
 
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
@@ -68,6 +67,7 @@ public final class SemanticAnalyzer {
     private final List<SemanticException>    errors      = new ArrayList<>();
     private final TypeChecker                typeChecker = new TypeChecker();
     private final Desugarer                  desugarer   = new Desugarer();
+    private       int                        staticDepth = 0;
 
     {
         // populate initial scope with terms from stdenv
@@ -294,8 +294,13 @@ public final class SemanticAnalyzer {
                     // function must be bound in its own definition, to allow recursion
                     terms.add(funcDeclaration.name(), new Binding(false, funcDeclaration));
 
+                    if (staticDepth == Machine.maxRoutineLevel - 1) {
+                        throw new SemanticException.NestingDepthExceeded(funcDeclaration.sourcePosition());
+                    }
+
                     try {
                         terms.enterNewScope(null);
+                        staticDepth++;
                         bindParameters(funcDeclaration.parameters());
                         analyze(funcDeclaration.expression());
                     } catch (SemanticException e) {
@@ -303,6 +308,7 @@ public final class SemanticAnalyzer {
                         // we can continue binding other declarations
                     } finally {
                         // treat this function as being bound
+                        staticDepth--;
                         terms.exitScope();
                     }
                 }
@@ -323,7 +329,12 @@ public final class SemanticAnalyzer {
                     // proc must be visible in its own definition
                     terms.add(procDeclaration.name(), new Binding(false, procDeclaration));
 
+                    if (staticDepth == Machine.maxRoutineLevel - 1) {
+                        throw new SemanticException.NestingDepthExceeded(procDeclaration.sourcePosition());
+                    }
+
                     try {
+                        staticDepth++;
                         terms.enterNewScope(null);
                         bindParameters(procDeclaration.parameters());
                         analyze(procDeclaration.statement());
@@ -332,6 +343,7 @@ public final class SemanticAnalyzer {
                         // continue processing other declarations
                     } finally {
                         // treat this proc as being bound
+                        staticDepth--;
                         terms.exitScope();
                     }
                 }

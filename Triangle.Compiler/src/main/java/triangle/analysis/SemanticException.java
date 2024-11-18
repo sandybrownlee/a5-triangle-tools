@@ -129,4 +129,11 @@ public abstract class SemanticException extends Exception {
 
     }
 
+    static final class NestingDepthExceeded extends SemanticException {
+
+        NestingDepthExceeded(final SourcePosition sourcePos) {
+            super(sourcePos, "Static nesting depth exceeded");
+        }
+
+    }
 }
