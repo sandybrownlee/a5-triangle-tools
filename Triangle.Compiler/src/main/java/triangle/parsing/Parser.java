@@ -511,10 +511,7 @@ public class Parser {
                 TypeSig typeSig = parseType();
                 shift(Token.Kind.IS);
                 Expression expression = parseExpression();
-                Declaration.FuncDeclaration funcDeclaration = new Declaration.FuncDeclaration(
-                        funcName, parameters, typeSig, expression);
-                funcDeclaration.setSourcePosition(start);
-                yield funcDeclaration;
+                yield new Declaration.FuncDeclaration(funcName, parameters, typeSig, expression).withSourcePosition(start);
             }
             case TYPE -> {
                 SourcePosition start = shift(Token.Kind.TYPE);
@@ -522,9 +519,7 @@ public class Parser {
                 shift(Token.Kind.IDENTIFIER);
                 shift(Token.Kind.IS);
                 TypeSig typeSig = parseType();
-                Declaration.TypeDeclaration typeDeclaration = new Declaration.TypeDeclaration(typeName, typeSig);
-                typeDeclaration.setSourcePosition(start);
-                yield typeDeclaration;
+                yield new Declaration.TypeDeclaration(typeName, typeSig).withSourcePosition(start);
             }
             default -> throw new SyntaxError(nextToken);
         };
