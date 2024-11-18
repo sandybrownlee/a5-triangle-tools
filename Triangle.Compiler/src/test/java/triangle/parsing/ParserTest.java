@@ -80,7 +80,7 @@ public class ParserTest {
     }
 
     // test binops are parsed right-associatively
-    @Test public void testBinopsRightAssociative() throws IOException, SyntaxError {
+    @Test public void testBinopRightAssociative() throws IOException, SyntaxError {
         // should parse as: add
         //                  / \
         //                 4  mul
@@ -96,8 +96,8 @@ public class ParserTest {
         try {
             // EXPR = 4 + RIGHT_0
             BinaryOp expr = (BinaryOp) ((ExpressionStatement) program).expression();
-            LitInt opFour = (LitInt) expr.leftOperand();
-            BasicIdentifier opAdd = expr.operator();
+            LitInt four = (LitInt) expr.leftOperand();
+            BasicIdentifier add = expr.operator();
 
             // RIGHT_0 = 3 * RIGHT_1
             BinaryOp right_0 = (BinaryOp) expr.rightOperand();
@@ -117,12 +117,12 @@ public class ParserTest {
 
             // asserts everything is what we expected it to be
 
-            assertEquals("+", opAdd.name());
+            assertEquals("+", add.name());
             assertEquals("*", mul.name());
             assertEquals("/", div.name());
             assertEquals("//", mod.name());
 
-            assertEquals(4, opFour.value());
+            assertEquals(4, four.value());
             assertEquals(3, three.value());
             assertEquals(5, five.value());
             assertEquals(8, eight.value());
@@ -147,7 +147,7 @@ public class ParserTest {
             RecordAccess expr = (RecordAccess) ((ExpressionStatement) program).expression();
             BasicIdentifier outer = (BasicIdentifier) expr.record();
 
-            // RIGHT_1 = outer.inner
+            // RIGHT_1 = middle.inner
             RecordAccess right_1 = (RecordAccess) expr.field();
             BasicIdentifier middle = (BasicIdentifier) right_1.record();
             BasicIdentifier inner = (BasicIdentifier) right_1.field();
