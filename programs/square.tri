@@ -5,7 +5,7 @@ begin
     a := 12;
     a**;
     putint(a);
-    put();
+    put('_');
     a**;
     putint(a);
 end

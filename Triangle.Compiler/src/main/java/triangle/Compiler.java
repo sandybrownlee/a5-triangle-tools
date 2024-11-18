@@ -41,6 +41,7 @@
 	 
 	 static boolean showTree = false;
 	 static boolean folding = false;
+	 static boolean showStats = false;
  
 	 private static Scanner scanner;
 	 private static Parser parser;
@@ -105,6 +106,13 @@
 				 System.out.println("Code Generation ...");
 				 encoder.encodeRun(theAST, showingTable); // 3rd pass
 			 }
+
+			 if(showStats)
+			 {
+				SummaryVisitor summaryV = new SummaryVisitor();
+				theAST.visit(summaryV);
+				System.out.println(summaryV.toString());
+			 }
 		 }
  
 		 boolean successful = (reporter.getNumErrors() == 0);
@@ -114,6 +122,7 @@
 		 } else {
 			 System.out.println("Compilation was unsuccessful.");
 		 }
+		 
 		 return successful;
 	 }
  
@@ -150,6 +159,8 @@
 				 objectName = s.substring(3);
 			 } else if (sl.equals("folding")) {
 				 folding = true;
+			 } else if(sl.equals("stats")){
+				showStats = true;
 			 }
 		 }
 	 }
