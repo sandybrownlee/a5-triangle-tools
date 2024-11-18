@@ -29,6 +29,7 @@ import triangle.codegen.Optimizer;
 import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
 import triangle.repr.Statement;
+import triangle.util.SummaryVisitor;
 
 import java.io.DataOutputStream;
 import java.io.FileInputStream;
@@ -81,12 +82,21 @@ public class Compiler {
 
         Statement program = parser.parseProgram();
 
+        // need to show stats *before* any desugaring, else counts will not be correct
+        if (showStats) {
+            SummaryVisitor summaryVisitor = new SummaryVisitor();
+            if (summaryVisitor.generateSummary(program) instanceof SummaryVisitor.Summary(
+                    int whileStatements, int ifStatements, int binaryOps
+            )) {
+                System.out.println("Summary: ");
+                System.out.println("While Statements: " + whileStatements);
+                System.out.println("If Statements: " + ifStatements);
+                System.out.println("Binary Ops: " + binaryOps);
+            }
+        }
+
         // explicitly-typed AST
         program = semanticAnalyzer.analyzeAndType(program);
-
-        if (showStats) {
-            // show stats
-        }
 
         if (!semanticAnalyzer.getErrors().isEmpty()) {
             semanticAnalyzer.getErrors().forEach(System.err::println);
