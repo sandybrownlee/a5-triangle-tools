@@ -299,6 +299,11 @@ public class Parser {
 					finish(commandPos);
 					// Create a new assign command with the variable and the SquareAST Expression
 					commandAST = new AssignCommand(vAST, squareAST, commandPos);
+				} else if (currentToken.kind == Token.Kind.BECOMES) { // Add this case
+					acceptIt();
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
 				}
 			}
 		}
@@ -318,8 +323,6 @@ public class Parser {
 			commandAST = new LetCommand(dAST, cAST, commandPos);
 		}
 			break;
-
-
 		case IF: {
 			acceptIt();
 			Expression eAST = parseExpression();

@@ -23,6 +23,7 @@ import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
+import triangle.contextualAnalyzer.SummaryVisitor;
 import triangle.optimiser.ConstantFolder;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
@@ -50,7 +51,8 @@ public class Compiler {
 	    @Argument(alias = "sa", description = "Show the tree after optimisations have been applied", required = false)
 	    static boolean showTreeAfter = false;
 
-	
+	    @Argument(alias = "showStats", description = "Summarise how many If command, while command or binary expressions a program has ", required = false)
+	    static boolean showStats = false;
 	
 
 	private static Scanner scanner;
@@ -97,12 +99,18 @@ public class Compiler {
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
 
+
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
 			// if (showingAST) {
 			// drawer.draw(theAST);
 			// }
+			if (showStats) {
+				SummaryVisitor summery = new SummaryVisitor();
+				theAST.visit(summery);
+				summery.printSummery();
+			}
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
 			if (showingAST) {
@@ -111,6 +119,7 @@ public class Compiler {
 			if (folding){
 				theAST.visit(new ConstantFolder());
 				 // Show AST after folding if requested
+
 			}
 			if (showTreeAfter) {
 				theAST.visit(new ConstantFolder());
@@ -121,7 +130,6 @@ public class Compiler {
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
 		}
-
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
