@@ -3,26 +3,11 @@ package triangle.parsing;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static triangle.util.TestUtils.inputStreamOf;
 
 public class LexerTest {
-
-    // generates an ad-hoc input stream that reads from a snippet of provided source
-    private static InputStream inputStreamOf(String sourceCode) {
-        return new InputStream() {
-            private int index = 0;
-
-            @Override public int read() {
-                if (index == sourceCode.length()) {
-                    return -1;
-                }
-
-                return sourceCode.charAt(index++);
-            }
-        };
-    }
 
     @Test public void testTextToken() throws IOException {
         Lexer lexer = new Lexer(inputStreamOf("abcd1234"));
