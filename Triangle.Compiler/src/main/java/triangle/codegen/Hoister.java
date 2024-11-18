@@ -4,9 +4,9 @@ import triangle.repr.Argument;
 import triangle.repr.Declaration;
 import triangle.repr.Expression;
 import triangle.repr.Expression.Identifier.BasicIdentifier;
+import triangle.repr.RewriteStage;
 import triangle.repr.SourcePosition;
 import triangle.repr.Statement;
-import triangle.util.ASTPrinter;
 
 import java.util.ArrayList;
 import java.util.HashSet;

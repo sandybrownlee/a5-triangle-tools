@@ -22,7 +22,6 @@ package triangle;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 import triangle.analysis.SemanticAnalyzer;
-import triangle.analysis.SemanticException;
 import triangle.codegen.CodeGen;
 import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
@@ -33,7 +32,6 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.List;
 
 // TODO: replace ErrorReporter with robust logging
 // TODO: showStats cmdline option
@@ -74,17 +72,17 @@ public class Compiler {
     static void compileProgram(InputStream inputStream) throws IOException, SyntaxError {
         Parser parser = new Parser(inputStream);
 
-        Statement ast = parser.parseProgram();
+        Statement program = parser.parseProgram();
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
 
-        List<SemanticException> errors = semanticAnalyzer.analyzeProgram(ast);
+        program = semanticAnalyzer.analyzeAndType(program);
 
-        if (!errors.isEmpty()) {
-            errors.forEach(System.err::println);
+        if (!semanticAnalyzer.getErrors().isEmpty()) {
+            semanticAnalyzer.getErrors().forEach(System.err::println);
             return;
         }
 
-        CodeGen.write("obj.tam", CodeGen.backpatch(CodeGen.generate(ast)));
+        CodeGen.write("obj.tam", CodeGen.backpatch(CodeGen.generate(program)));
     }
 
 }

@@ -35,8 +35,7 @@ import java.util.Set;
 //  var parameters are only ever supplied with arguments marked var
 
 // TODO: need to ensure static-nesting depth does not exceed maximum
-// TODO: TAM Specification requires second operand of // (mod) must be positive; this needs to be done at runtime
-// TODO: to handle ++, we need some kind of rewriting system
+// TODO: SemanticAnalyzer.analyzeAndType needs to be split across mutliple classes
 
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 public final class SemanticAnalyzer {
@@ -66,24 +65,31 @@ public final class SemanticAnalyzer {
     private final SymbolTable<Binding, Void> terms       = new SymbolTable<>(null);
     private final List<SemanticException>    errors      = new ArrayList<>();
     private final TypeChecker                typeChecker = new TypeChecker();
+    private final Desugarer                  desugarer   = new Desugarer();
 
     {
         // populate initial scope with terms from stdenv
         StdEnv.STD_TERMS.forEach((term, _) -> terms.add(term, new Binding(false, null)));
     }
 
-    public List<SemanticException> analyzeProgram(Statement program) {
+    public List<SemanticException> getErrors() {
+        return errors;
+    }
+
+    public Statement analyzeAndType(Statement program) {
         analyze(program);
 
         if (!this.errors.isEmpty()) {
             System.err.println("Semantic analysis found errors, not proceeding with type checking");
-            return errors;
+            return program;
         }
 
-        typeChecker.checkAndAnnotate(program);
+        program = desugarer.desugar(program);
 
+        typeChecker.checkAndAnnotate(program);
         errors.addAll(typeChecker.getErrors());
-        return errors;
+
+        return program;
     }
 
     private void analyze(final Statement statement) {

@@ -7,6 +7,7 @@ import triangle.repr.Expression.BinaryOp;
 import triangle.repr.Expression.Identifier.BasicIdentifier;
 import triangle.repr.Expression.LitInt;
 import triangle.repr.Expression.SequenceExpression;
+import triangle.repr.RewriteStage;
 import triangle.repr.Statement;
 import triangle.repr.Statement.AssignStatement;
 
@@ -82,66 +83,8 @@ public final class CodeGen {
         ConstantFolder constantFolder = new ConstantFolder();
         IRGenerator irGenerator = new IRGenerator();
         Hoister hoister = new Hoister();
-        // small class to rewrite ++ and ** unary operations, must be done before hoisting
-        // this is incredibly ad-hoc, a real compiler would convert the AST to some appropriate IR before attempting these
-        // optimizations, but we are operating directly on the AST so this just does some ad-hoc rewriting for some of the
-        // unary operations
-        // TODO: this really should be done after SemanticAnalzer and before TypeChecking
-        RewriteStage incrementRewriter = new RewriteStage() {
 
-            private int fresh = 0;
-
-            @Override public Expression rewrite(final Expression expression) {
-                Expression rewritten = RewriteStage.super.rewrite(expression);
-
-                //@formatter:off
-                // if "++"
-                if (rewritten instanceof Expression.UnaryOp unaryOp && unaryOp.operator().name().equals("++")) {
-                    if (unaryOp.operand() instanceof BasicIdentifier identifier) {
-                        // after identifier := identifier + 1 return identifier
-                        Expression hoisted = new BinaryOp(new BasicIdentifier("+"), identifier, new LitInt(1)).withType(INT_TYPE);
-                        return new SequenceExpression(new AssignStatement(identifier, hoisted), identifier).withType(INT_TYPE);
-                    }
-
-                    String generatedName = "rw_increment_" +
-                                           unaryOp.operand().sourcePosition().lineNo() + "_" +
-                                           unaryOp.operand().sourcePosition().colNo();
-                    // let const <generated_name> ~ unaryop.operand() + 1 in <generated_name>
-                    Expression hoisted = new BinaryOp(new BasicIdentifier("+"),
-                                                      unaryOp.operand(),
-                                                      new LitInt(1)).withType(INT_TYPE);
-                    return new Expression.LetExpression(List.of(new Declaration.ConstDeclaration(generatedName, hoisted)),
-                                                        new BasicIdentifier(generatedName).withType(INT_TYPE));
-                }
-                //@formatter:on
-
-                //@formatter:off
-                // if "**"
-                if (rewritten instanceof Expression.UnaryOp unaryOp && unaryOp.operator().name().equals("**")) {
-                    if (unaryOp.operand() instanceof BasicIdentifier identifier) {
-                        // after identifier := identifier * identifier return identifier
-                        Expression hoisted = new BinaryOp(new BasicIdentifier("*"),
-                                                          identifier,
-                                                          identifier).withType(INT_TYPE);
-                        return new SequenceExpression(new AssignStatement(identifier, hoisted), identifier).withType(INT_TYPE);
-                    }
-
-                    String generatedName = "rw_square_" + fresh++;
-                    // must duplicate expression in const declaration, in case it has side-effects4
-                    // let const <generated_name> ~ unaryop.operand() * unaryop.operand() in <generated_name>
-                    Expression hoisted = new BinaryOp(new BasicIdentifier("*"),
-                                                      unaryOp.operand(),
-                                                      unaryOp.operand()).withType(INT_TYPE);
-                    return new Expression.LetExpression(List.of(new Declaration.ConstDeclaration(generatedName, hoisted)),
-                                                        new BasicIdentifier(generatedName).withType(INT_TYPE));
-                }
-                //@formatter:on
-
-                return rewritten;
-            }
-        };
-
-        return irGenerator.generateIR(hoister.hoist(incrementRewriter.rewrite(constantFolder.fold(statement))));
+        return irGenerator.generateIR(hoister.hoist((constantFolder.fold(statement))));
     }
 
 

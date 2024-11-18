@@ -5,6 +5,7 @@ import triangle.repr.Expression;
 import triangle.repr.Expression.LitBool;
 import triangle.repr.Expression.LitChar;
 import triangle.repr.Expression.LitInt;
+import triangle.repr.RewriteStage;
 import triangle.repr.Statement;
 
 // OCaml equivalents of rewrite rules are provided as //// comments for ease of understanding, with

@@ -1,10 +1,4 @@
-package triangle.codegen;
-
-import triangle.repr.Argument;
-import triangle.repr.Declaration;
-import triangle.repr.Expression;
-import triangle.repr.Parameter;
-import triangle.repr.Statement;
+package triangle.repr;
 
 // A RewriteStage represents a stage of rewriting the AST -- used for constant folding, hoisting, etc.
 // Interface RewriteStage provides default methods that creates new instances of te provided AST node while recursively calling
