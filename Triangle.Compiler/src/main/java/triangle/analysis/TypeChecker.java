@@ -13,8 +13,10 @@ import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Set;
 
 import static triangle.repr.Type.*;
 
@@ -511,9 +513,17 @@ final class TypeChecker {
             case TypeSig.ArrayTypeSig(int size, TypeSig elementTypeSig) -> new Type.ArrayType(size, resolveType(elementTypeSig));
             case TypeSig.RecordTypeSig recordType -> {
                 List<Type.RecordType.FieldType> resolvedFieldTypes = new ArrayList<>();
+                Set<String> seenFieldNames = new HashSet<>();
                 for (TypeSig.RecordTypeSig.FieldType field : recordType.fieldTypes()) {
+                    String fieldName = field.fieldName();
+
+                    if (seenFieldNames.contains(fieldName)) {
+                        throw new SemanticException.DuplicateRecordTypeField(field);
+                    }
+
+                    seenFieldNames.add(fieldName);
                     Type.RecordType.FieldType resolvedField = new Type.RecordType.FieldType(
-                            field.fieldName(), resolveType(field.fieldTypeSig()));
+                            fieldName, resolveType(field.fieldTypeSig()));
                     resolvedFieldTypes.add(resolvedField);
                 }
 

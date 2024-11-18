@@ -283,13 +283,8 @@ public final class SemanticAnalyzer {
 
             switch (declaration) {
                 case ConstDeclaration constDeclaration -> {
-                    try {
-                        analyze(constDeclaration.value());
-                        terms.add(constDeclaration.name(), new Binding(true, constDeclaration));
-                    } catch (SemanticException.DuplicateRecordTypeField e) {
-                        // rethrow duplicate record fields with added source position info
-                        throw new SemanticException.DuplicateRecordTypeField(constDeclaration.sourcePosition(), e.getFieldType());
-                    }
+                    analyze(constDeclaration.value());
+                    terms.add(constDeclaration.name(), new Binding(true, constDeclaration));
                 }
                 case Declaration.FuncDeclaration funcDeclaration -> {
                     // function must be bound in its own definition, to allow recursion
@@ -299,9 +294,6 @@ public final class SemanticAnalyzer {
                         terms.enterNewScope(null);
                         bindParameters(funcDeclaration.parameters());
                         analyze(funcDeclaration.expression());
-                    } catch (SemanticException.DuplicateRecordTypeField e) {
-                        // rethrow duplicate record fields with added source position info
-                        throw new SemanticException.DuplicateRecordTypeField(funcDeclaration.sourcePosition(), e.getFieldType());
                     } catch (SemanticException e) {
                         errors.add(e);
                         // we can continue binding other declarations
