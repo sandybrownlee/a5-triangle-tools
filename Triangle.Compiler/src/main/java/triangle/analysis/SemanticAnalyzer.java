@@ -294,7 +294,7 @@ public final class SemanticAnalyzer {
                     // function must be bound in its own definition, to allow recursion
                     terms.add(funcDeclaration.name(), new Binding(false, funcDeclaration));
 
-                    if (staticDepth == Machine.maxRoutineLevel - 1) {
+                    if (staticDepth == Machine.maxRoutineLevel) {
                         throw new SemanticException.NestingDepthExceeded(funcDeclaration.sourcePosition());
                     }
 
@@ -329,7 +329,7 @@ public final class SemanticAnalyzer {
                     // proc must be visible in its own definition
                     terms.add(procDeclaration.name(), new Binding(false, procDeclaration));
 
-                    if (staticDepth == Machine.maxRoutineLevel - 1) {
+                    if (staticDepth == Machine.maxRoutineLevel) {
                         throw new SemanticException.NestingDepthExceeded(procDeclaration.sourcePosition());
                     }
 
