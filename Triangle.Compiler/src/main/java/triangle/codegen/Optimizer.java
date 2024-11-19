@@ -30,6 +30,11 @@ public class Optimizer {
         return hoister.hoist(program);
     }
 
+    public static Statement eliminateDeadCode(Statement program) {
+        DeadCodeEliminator deadCodeEliminator = new DeadCodeEliminator();
+        return deadCodeEliminator.eliminateDeadCode(program);
+    }
+
     // TODO: this is O(instructions.size()^2), use union-find here
     public static List<Instruction> threadJumps(List<Instruction> instructions) {
         Map<Instruction.LABEL, Instruction.LABEL> threadable = new HashMap<>();

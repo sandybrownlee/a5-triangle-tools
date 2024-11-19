@@ -144,6 +144,7 @@ final class TypeChecker {
                     errors.add(e);
                 }
             }
+            case Statement.NoopStatement _ -> { }
         }
     }
 

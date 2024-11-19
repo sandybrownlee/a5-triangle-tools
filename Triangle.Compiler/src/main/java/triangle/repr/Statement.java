@@ -197,4 +197,12 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
 
     }
 
+    public static final class NoopStatement extends Statement {
+
+        public static final NoopStatement NOOP_STATEMENT = new NoopStatement();
+
+        private NoopStatement() { }
+
+    }
+
 }

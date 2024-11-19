@@ -160,6 +160,7 @@ public final class SemanticAnalyzer {
                 }
             }
             case Statement.WhileStatement whileStatement -> visitLoop(whileStatement.condition(), whileStatement.body());
+            case Statement.NoopStatement _ -> { }
         }
     }
 

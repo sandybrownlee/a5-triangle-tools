@@ -111,6 +111,8 @@ public class Compiler {
             program = Optimizer.hoist(program);
         }
 
+        program = Optimizer.eliminateDeadCode(program);
+
         List<Instruction> ir = irGenerator.generateIR(program);
 
         ir = Optimizer.threadJumps(ir);

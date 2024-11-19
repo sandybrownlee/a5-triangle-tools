@@ -4,5 +4,4 @@ spec:
     maxint must be in stdenv
     true, false must be in stdenv
 maybe have a symbol class?
-dead code elim
 maybe do constant propagation?

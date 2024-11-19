@@ -240,6 +240,9 @@ public class IRGenerator {
 
                 return block;
             }
+            case Statement.NoopStatement _ -> {
+                return block;
+            }
         }
     }
 
