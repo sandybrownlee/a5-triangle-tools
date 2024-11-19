@@ -425,20 +425,20 @@ public class IRGenerator {
         }
 
         SymbolTable<Callable, Void>.DepthLookup lookup = funcAddresses.lookupWithDepth(funcName);
-        Register nonLocalsLink = getDisplayRegister(lookup.depth());
-
         switch (lookup.t()) {
             case Callable.DynamicCallable(int stackOffset) -> {
                 //  LOAD addressSize stackOffset[nonLocalsLink]          <- load static link
                 //  LOAD addressSize (stackOffset + 1)[nonLocalsLink]    <- load code addr
                 //  CALLI
 
+                Register nonLocalsLink = getDisplayRegister(lookup.depth());
                 block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset)));
                 block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset + 1)));
                 block.add(new Instruction.CALLI());
             }
             case Callable.PrimitiveCallable(Primitive primitive) -> block.add(Instruction.TAMInstruction.callPrim(primitive));
-            case Callable.StaticCallable(Instruction.LABEL label) -> block.add(new Instruction.CALL_LABEL(nonLocalsLink, label));
+            case Callable.StaticCallable(Instruction.LABEL label) -> block.add(
+                    new Instruction.CALL_LABEL(getDisplayRegister(lookup.depth()), label));
             case Callable.CompilerGenerated(List<Instruction> instructions) -> block.addAll(instructions);
         }
 
