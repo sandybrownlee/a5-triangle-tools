@@ -277,15 +277,24 @@ public final class SemanticAnalyzer {
     // analyze(Declaration) needs to throw SemanticException instead of merely adding errors to the list, because it does not
     // know to what point to "rewind" to to continue analysis
     private void bindDeclarations(List<Declaration> declarations) throws SemanticException {
-        Set<String> seenDeclarations = new HashSet<>();
+        Set<String> seenTerms = new HashSet<>();
+        Set<String> seenTypes = new HashSet<>();
         for (Declaration declaration : declarations) {
-            if (seenDeclarations.contains(declaration.name())) {
-                throw new SemanticException.DuplicateDeclaration(declaration.sourcePosition(), declaration);
+            if (declaration instanceof TypeDeclaration) {
+                if (seenTypes.contains(declaration.name())) {
+                    throw new SemanticException.DuplicateDeclaration(declaration.sourcePosition(), declaration);
+                }
+
+                seenTypes.add(declaration.name());
+            } else {
+                if (seenTerms.contains(declaration.name())) {
+                    throw new SemanticException.DuplicateDeclaration(declaration.sourcePosition(), declaration);
+                }
+                seenTerms.add(declaration.name());
             }
 
-            seenDeclarations.add(declaration.name());
-
             switch (declaration) {
+
                 case ConstDeclaration constDeclaration -> {
                     analyze(constDeclaration.value());
                     terms.add(constDeclaration.name(), new Binding(true, constDeclaration));

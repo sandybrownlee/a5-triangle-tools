@@ -44,19 +44,12 @@ import static triangle.repr.Type.*;
 // i.e, the canonical form of a record type has its fields sorted in alphabetical order
 // We are guaranteed, due to not allowing duplicate record fields that this canonical form is unique
 
-// TODO: terms and types need different namespace
-
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 final class TypeChecker {
 
-    private final List<SemanticException> errors        = new ArrayList<>();
-    private final SymbolTable<Type, Void> resolvedTypes = new SymbolTable<>(StdEnv.STD_TYPES, null);
-
-    {
-        StdEnv.STD_TERMS.forEach(resolvedTypes::add);
-    }
-
-    TypeChecker() { }
+    private final List<SemanticException> errors = new ArrayList<>();
+    private final SymbolTable<Type, Void> terms  = new SymbolTable<>(StdEnv.STD_TERMS, null);
+    private final SymbolTable<Type, Void> types  = new SymbolTable<>(StdEnv.STD_TYPES, null);
 
     List<SemanticException> getErrors() {
         return errors;
@@ -97,7 +90,8 @@ final class TypeChecker {
             }
             case Statement.LetStatement letStatement -> {
                 try {
-                    resolvedTypes.enterNewScope(null);
+                    terms.enterNewScope(null);
+                    types.enterNewScope(null);
 
                     for (Declaration declaration : letStatement.declarations()) {
                         try {
@@ -109,7 +103,8 @@ final class TypeChecker {
 
                     checkAndAnnotate(letStatement.statement());
                 } finally {
-                    resolvedTypes.exitScope();
+                    terms.exitScope();
+                    types.exitScope();
                 }
             }
             case Statement.LoopWhileStatement loopWhileStatement -> {
@@ -155,7 +150,7 @@ final class TypeChecker {
     private void checkAndAnnotate(Expression expression) throws SemanticException {
         switch (expression) {
             case Expression.BinaryOp binOp -> {
-                Type opT = resolvedTypes.lookup(binOp.operator().name());
+                Type opT = terms.lookup(binOp.operator().name());
 
                 checkAndAnnotate(binOp.leftOperand());
                 checkAndAnnotate(binOp.rightOperand());
@@ -197,7 +192,7 @@ final class TypeChecker {
                 binOp.setType(funcType.returnType());
             }
             case Expression.FunCall funCall -> {
-                Type fT = resolvedTypes.lookup(funCall.func().name());
+                Type fT = terms.lookup(funCall.func().name());
 
                 if (!(fT instanceof PrimType.FuncType(List<Type> paramTypes, Type returnType))) {
                     throw new SemanticException.TypeError(funCall.sourcePosition(), fT, "function");
@@ -245,14 +240,16 @@ final class TypeChecker {
                 ifExpression.setType(lT);
             }
             case Expression.LetExpression letExpression -> {
-                resolvedTypes.enterNewScope(null);
+                terms.enterNewScope(null);
+                types.enterNewScope(null);
 
                 for (Declaration declaration : letExpression.declarations()) {
                     bindDeclaration(declaration);
                 }
                 checkAndAnnotate(letExpression.expression());
 
-                resolvedTypes.exitScope();
+                terms.exitScope();
+                types.exitScope();
 
                 letExpression.setType(letExpression.expression().getType().baseType());
             }
@@ -291,7 +288,7 @@ final class TypeChecker {
                 sequenceExpression.setType(sequenceExpression.expression().getType().baseType());
             }
             case Expression.UnaryOp unaryOp -> {
-                Type opT = resolvedTypes.lookup(unaryOp.operator().name());
+                Type opT = terms.lookup(unaryOp.operator().name());
 
                 checkAndAnnotate(unaryOp.operand());
 
@@ -346,7 +343,7 @@ final class TypeChecker {
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 try {
-                    basicIdentifier.setType(resolvedTypes.lookup(basicIdentifier.name()));
+                    basicIdentifier.setType(terms.lookup(basicIdentifier.name()));
                 } catch (NoSuchElementException e) {
                     // even though TypeCheck runs after SemanticAnalyzer, we may still have undeclared uses, because
                     // SemanticAnalyzer does not check if field accesses of a record are valid (it doesn't have the necessary
@@ -364,15 +361,15 @@ final class TypeChecker {
                     throw new SemanticException.TypeError(recordAccess.sourcePosition(), rT, "record");
                 }
 
-                resolvedTypes.enterNewScope(null);
+                terms.enterNewScope(null);
 
                 for (Type.RecordType.FieldType fieldType : recordType.fieldTypes()) {
-                    resolvedTypes.add(fieldType.fieldName(), fieldType.fieldType());
+                    terms.add(fieldType.fieldName(), fieldType.fieldType());
                 }
 
                 checkAndAnnotate(recordAccess.field());
 
-                resolvedTypes.exitScope();
+                terms.exitScope();
 
                 Type fT = recordAccess.field().getType().baseType();
                 recordAccess.setType(fT);
@@ -382,7 +379,7 @@ final class TypeChecker {
 
     private void annotateArgument(final Argument argument) throws SemanticException {
         Type aT = switch (argument) {
-            case Argument.FuncArgument funcArgument -> resolvedTypes.lookup(funcArgument.func().name());
+            case Argument.FuncArgument funcArgument -> terms.lookup(funcArgument.func().name());
             case Argument.VarArgument varArgument -> {
                 checkAndAnnotate(varArgument.var());
                 yield varArgument.var().getType();
@@ -426,7 +423,7 @@ final class TypeChecker {
                 // we cant really catch a semantic exception here, since we don't have even a declared type to bind this
                 // constant to and continue typechecking with
                 checkAndAnnotate(constDeclaration.value());
-                resolvedTypes.add(constDeclaration.name(), constDeclaration.value().getType().baseType());
+                terms.add(constDeclaration.name(), constDeclaration.value().getType().baseType());
             }
             case Declaration.FuncDeclaration funcDeclaration -> {
                 // type check and annotate all the parameters
@@ -438,13 +435,14 @@ final class TypeChecker {
 
                 // optimistically bind the function name to the (resolved) type that it is declared to be
                 Type declaredReturnType = resolveType(funcDeclaration.returnTypeSig());
-                resolvedTypes.add(funcDeclaration.name(), new PrimType.FuncType(paramTypes, declaredReturnType));
+                terms.add(funcDeclaration.name(), new PrimType.FuncType(paramTypes, declaredReturnType));
 
                 try {
-                    resolvedTypes.enterNewScope(null);
+                    terms.enterNewScope(null);
+                    types.enterNewScope(null);
 
                     for (Parameter parameter : funcDeclaration.parameters()) {
-                        resolvedTypes.add(parameter.name(), parameter.getType().baseType());
+                        terms.add(parameter.name(), parameter.getType().baseType());
                     }
 
                     checkAndAnnotate(funcDeclaration.expression());
@@ -459,7 +457,8 @@ final class TypeChecker {
                     // no need to rethrow, we can continue processing other declarations
                 } finally {
                     // treat this function as having the (resolved) type that it is declared to be
-                    resolvedTypes.exitScope();
+                    types.exitScope();
+                    terms.exitScope();
                 }
             }
             case Declaration.ProcDeclaration procDeclaration -> {
@@ -471,27 +470,29 @@ final class TypeChecker {
                 }
 
                 // optimistically bind the procedure name to the (resolved) type that it is declared to be
-                resolvedTypes.add(procDeclaration.name(), new PrimType.FuncType(paramTypes, VOID_TYPE));
+                terms.add(procDeclaration.name(), new PrimType.FuncType(paramTypes, VOID_TYPE));
 
-                resolvedTypes.enterNewScope(null);
+                terms.enterNewScope(null);
+                types.enterNewScope(null);
 
                 for (Parameter parameter : procDeclaration.parameters()) {
-                    resolvedTypes.add(parameter.name(), parameter.getType());
+                    terms.add(parameter.name(), parameter.getType());
                 }
 
                 // since its a statement, it knows how to catch and resume typechecking by itself
                 checkAndAnnotate(procDeclaration.statement());
 
-                resolvedTypes.exitScope();
+                types.exitScope();
+                terms.exitScope();
 
                 // we can continue processing other declarations, and treat this procedure as having the (resolved) type
                 // that it is declared to be
             }
-            case Declaration.TypeDeclaration typeDeclaration -> resolvedTypes.add(
+            case Declaration.TypeDeclaration typeDeclaration -> types.add(
                     typeDeclaration.name(), resolveType(typeDeclaration.typeSig()));
             case Declaration.VarDeclaration varDeclaration -> {
                 Type vT = resolveType(varDeclaration.declaredType());
-                resolvedTypes.add(varDeclaration.name(), vT);
+                terms.add(varDeclaration.name(), vT);
                 varDeclaration.setType(vT);
             }
         }
@@ -533,7 +534,7 @@ final class TypeChecker {
             }
             case TypeSig.BasicTypeSig basicType -> {
                 try {
-                    yield resolvedTypes.lookup(basicType.name());
+                    yield types.lookup(basicType.name());
                 } catch (NoSuchElementException _) {
                     throw new SemanticException.UndeclaredUse(basicType);
                 }
