@@ -38,13 +38,17 @@ import com.sampullara.cli.Argument;
  */
 public class Compiler {
 
+	@Argument(alias = "sf", description = "source of file", required = true)
+	 private static String sourceFile;
 	/** The filename for the object program, normally obj.tam. */
-	@Argument(alias = "objectName", description = "name of the object to be output", required = false)
-	static String objectName = "obj.tam";
-	@Argument(alias = "showTree", description = "show AST representation after compilation?", required = false)
-	static boolean showTree = false;
-	@Argument(alias = "folding", description = "enable folding optimisations?", required = false)
-	static boolean folding = false;
+	@Argument(alias = "o", description = "name of the object to be output", required = false)
+	private static String objectName = "obj.tam";
+	@Argument(alias = "st", description = "show AST representation after compilation?", required = false)
+	private static boolean showTree = false;
+	@Argument(alias = "f", description = "enable folding optimisations?", required = false)
+	private static boolean folding = false;
+	@Argument(alias = "sta", description = "show tree after tree optimisations?", required = false)
+	private static boolean showTreeAfter = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -60,25 +64,21 @@ public class Compiler {
 	/**
 	 * Compile the source program to TAM machine code.
 	 *
-	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
-	 * @param showingAST   true iff the AST is to be displayed after contextual
-	 *                     analysis
-	 * @param showingTable true iff the object description details are to be
+	 * @var showingTable true iff the object description details are to be
 	 *                     displayed during code generation (not currently
 	 *                     implemented).
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram() {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
-
+		System.out.println("Compiling program: " + sourceFile + "...");
 		System.out.println("Syntactic Analysis ...");
-		SourceFile source = SourceFile.ofPath(sourceName);
+		SourceFile source = SourceFile.ofPath(sourceFile);
 
 		if (source == null) {
-			System.out.println("Can't access source file " + sourceName);
+			System.out.println("Can't access source file " + sourceFile);
 			System.exit(1);
 		}
 
@@ -98,16 +98,18 @@ public class Compiler {
 			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
-			if (showingAST) {
+			if (showTree) {
 				drawer.draw(theAST);
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+			if (showTreeAfter) {
+				drawer.draw(theAST);
+			}
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
+				encoder.encodeRun(theAST, false); // 3rd pass
 			}
 		}
 
@@ -128,33 +130,12 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		Args.parseOrExit(Compiler.class, args);
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
-
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		var compiledOK = compileProgram();
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
 		}
 	}
 }
