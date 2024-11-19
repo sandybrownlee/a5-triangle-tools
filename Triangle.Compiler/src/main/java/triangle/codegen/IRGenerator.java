@@ -54,7 +54,7 @@ public class IRGenerator {
         // |
         builtins.put("|", new Callable.CompilerGenerated(List.of(
                 new Instruction.LOADL(100),
-                Instruction.TAMInstruction.callPrim(Primitive.MULT)
+                new Instruction.CALL_PRIM(Primitive.MULT)
         )));
     }
 
@@ -426,7 +426,7 @@ public class IRGenerator {
                 block.add(new Instruction.LOAD(Machine.addressSize, new Instruction.Address(nonLocalsLink, stackOffset + 1)));
                 block.add(new Instruction.CALLI());
             }
-            case Callable.PrimitiveCallable(Primitive primitive) -> block.add(Instruction.TAMInstruction.callPrim(primitive));
+            case Callable.PrimitiveCallable(Primitive primitive) -> block.add(new Instruction.CALL_PRIM(primitive));
             case Callable.StaticCallable(Instruction.LABEL label) -> block.add(
                     new Instruction.CALL_LABEL(getDisplayRegister(lookup.depth()), label));
             case Callable.CompilerGenerated(List<Instruction> instructions) -> block.addAll(instructions);
@@ -599,9 +599,9 @@ public class IRGenerator {
                 block.add(new Instruction.LOADL(
                         ((Type.ArrayType) arraySubscript.array().getType().baseType()).elementType().size()));
                 // CALL Primitive.MULT, to get offset
-                block.add(Instruction.TAMInstruction.callPrim(Primitive.MULT));
+                block.add(new Instruction.CALL_PRIM(Primitive.MULT));
                 // CALL Primitive.ADD, to add offset to address of root
-                block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
+                block.add(new Instruction.CALL_PRIM(Primitive.ADD));
                 return block;
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
@@ -635,8 +635,8 @@ public class IRGenerator {
 
                 block.addAll(generate(arraySubscript.subscript()));
                 block.add(new Instruction.LOADL(elemSize));
-                block.add(Instruction.TAMInstruction.callPrim(Primitive.MULT));
-                block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
+                block.add(new Instruction.CALL_PRIM(Primitive.MULT));
+                block.add(new Instruction.CALL_PRIM(Primitive.ADD));
             }
             case Expression.Identifier.BasicIdentifier basicIdentifier -> { }
             // our parser guarantees this
@@ -660,7 +660,7 @@ public class IRGenerator {
         // bump address on the stack by `offset`, if needed
         if (offset > 0) {
             block.add(new Instruction.LOADL(offset));
-            block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
+            block.add(new Instruction.CALL_PRIM(Primitive.ADD));
         }
 
         // now, the top of the stack contains the base address for record.accessedField
@@ -673,8 +673,8 @@ public class IRGenerator {
 
                 block.addAll(generate(arraySubscript.subscript()));
                 block.add(new Instruction.LOADL(elemSize));
-                block.add(Instruction.TAMInstruction.callPrim(Primitive.MULT));
-                block.add(Instruction.TAMInstruction.callPrim(Primitive.ADD));
+                block.add(new Instruction.CALL_PRIM(Primitive.MULT));
+                block.add(new Instruction.CALL_PRIM(Primitive.ADD));
 
                 return block;
             }

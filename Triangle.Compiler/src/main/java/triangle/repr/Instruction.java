@@ -3,21 +3,11 @@ package triangle.repr;
 import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 
-public sealed interface Instruction
-        permits Instruction.CALL_LABEL, Instruction.JUMPIF_LABEL, Instruction.JUMP_LABEL, Instruction.LABEL,
-                Instruction.LOADA_LABEL, Instruction.TAMInstruction {
+public sealed interface Instruction {
 
     // since our IR is a strict superset of TAM instructions, model that fact with a simple nested sealed interface
     // any consumer of Instruction that is only interested in final TAM instructions can simply depend on this interface
-    sealed interface TAMInstruction extends Instruction
-            permits CALL, CALLI, HALT, JUMP, JUMPI, JUMPIF, LOAD, LOADA, LOADI, LOADL, POP, PUSH, RETURN, STORE, STOREI, UNUSED {
-
-        // return the CALL instruction appropriate for calling the given Primitive
-        static TAMInstruction callPrim(Primitive primitive) {
-            // use anything as static link for primitive calls, it doesn't matter
-            return new Instruction.CALL(Register.SB, new Address(Register.PB, primitive.ordinal()));
-        }
-
+    sealed interface TAMInstruction extends Instruction {
         // unused fields are set to 0
         // in the interest of performance, some of the overrides of this method cast an int value to a short which will
         // silently fail if the int value exceeds short's width; however, the rest of the compiler should ensure no such value
@@ -278,6 +268,8 @@ public sealed interface Instruction
     record JUMPIF_LABEL(int value, LABEL label) implements Instruction { }
 
     record CALL_LABEL(Register staticLink, LABEL label) implements Instruction { }
+
+    record CALL_PRIM(Primitive p) implements Instruction { }
 
     // d[r], in TAM terminology
 
