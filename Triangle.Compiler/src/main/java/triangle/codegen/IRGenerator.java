@@ -103,9 +103,7 @@ public class IRGenerator {
 
                 // discard results of ExpressionStatements, since they are intended to be used only for side-effects
                 int resultSize = expressionStatement.expression().getType().size();
-                if (resultSize > 0) {
-                    block.add(new Instruction.POP(0, resultSize));
-                }
+                block.add(new Instruction.POP(0, resultSize));
                 return block;
             }
             case Statement.AssignStatement assignStatement -> {
@@ -156,10 +154,7 @@ public class IRGenerator {
 
                 // let body is generated in the new scope containing all our definitions
                 block.addAll(generate(letStatement.statement()));
-
-                if (totalAllocated > 0) {
-                    block.add(new Instruction.POP(0, totalAllocated));
-                }
+                block.add(new Instruction.POP(0, totalAllocated));
 
                 return block;
             }
@@ -302,10 +297,7 @@ public class IRGenerator {
                 block.addAll(generate(letExpression.expression()));
 
                 int resultSize = letExpression.expression().getType().size();
-
-                if (totalAllocated > 0) {
-                    block.add(new Instruction.POP(resultSize, totalAllocated));
-                }
+                block.add(new Instruction.POP(resultSize, totalAllocated));
 
                 return block;
             }
