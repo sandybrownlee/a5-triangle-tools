@@ -112,6 +112,7 @@ public class Compiler {
         }
 
         List<Instruction> ir = irGenerator.generateIR(program);
+        ir = Optimizer.threadJumps(ir);
         List<Instruction.TAMInstruction> objectCode = Optimizer.backpatch(ir);
 
         codeGen.write(objectCode);
