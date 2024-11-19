@@ -47,6 +47,7 @@ public interface RewriteStage {
                     new Statement.WhileStatement(rewrite(whileStatement.condition()),
                                                  rewrite(whileStatement.body()))
                                  .withAnnotationsOf(whileStatement);
+        case Statement.NoopStatement noopStatement -> noopStatement;
         };
     }
 
@@ -72,7 +73,7 @@ public interface RewriteStage {
                                                  rewrite(letExpression.expression()))
                                   .withAnnotationsOf(letExpression);
             case Expression.LitArray litArray ->
-                    new Expression.LitArray(litArray.elements().stream().map(this::rewrite).toList());
+                    new Expression.LitArray(litArray.elements().stream().map(this::rewrite).toList()).withAnnotationsOf(litArray);
             case Expression.LitBool litBool -> litBool;
             case Expression.LitChar litChar -> litChar;
             case Expression.LitInt litInt -> litInt;
