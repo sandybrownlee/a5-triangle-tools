@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 // TODO: tests for IRGen
-// TODO: when we know that an identifier's location is statically derivable (does not contain array with non-constant
-//  subscript) we can special-case the generateStore/Fetch methods to be more efficient
 public class IRGenerator {
 
     static final Map<String, Callable> builtins = new HashMap<>();
