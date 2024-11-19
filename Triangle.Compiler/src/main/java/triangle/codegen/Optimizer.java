@@ -125,13 +125,21 @@ public class Optimizer {
         return combined;
     }
 
-    // backpatch the instruction list to resolve all labels, primitive calls, etc.
+    // TODO: split these functions up
+    //  backpatch the instruction list to resolve all labels, primitive calls, redundant instruction etc.
     public static List<Instruction.TAMInstruction> backpatch(final List<Instruction> instructions) {
         Map<Instruction.LABEL, Integer> labelLocations = new HashMap<>();
 
         int offset = 0;
         for (int i = 0; i < instructions.size(); i++) {
             Instruction instruction = instructions.get(i);
+
+            // remove redundant instructions
+            if (instruction instanceof Instruction.POP(int resultWords, int popCount) && resultWords == 0 && popCount == 0) {
+                offset += 1;
+                continue;
+            }
+
             if (instruction instanceof Instruction.LABEL label) {
                 labelLocations.put(label, i - offset);
                 offset += 1;
@@ -150,6 +158,7 @@ public class Optimizer {
         for (Instruction instruction : instructions) {
             switch (instruction) {
                 case Instruction.LABEL _ -> { }
+                case Instruction.POP(int resultWords, int popCount) when resultWords == 0 && popCount == 0 -> { }
                 case Instruction.CALL_LABEL(Register staticLink, Instruction.LABEL label) -> patchedInstructions.add(
                         new Instruction.CALL(staticLink, toCodeAddress.apply(label)));
                 case Instruction.JUMPIF_LABEL(int value, Instruction.LABEL label) -> patchedInstructions.add(
@@ -163,7 +172,6 @@ public class Optimizer {
                 case Instruction.TAMInstruction tamInstruction -> patchedInstructions.add(tamInstruction);
             }
         }
-
         return patchedInstructions;
     }
 }
