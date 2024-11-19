@@ -27,6 +27,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -37,9 +39,11 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "objectName", description = "name of the object to be output", required = false)
 	static String objectName = "obj.tam";
-	
+	@Argument(alias = "showTree", description = "show AST representation after compilation?", required = false)
 	static boolean showTree = false;
+	@Argument(alias = "folding", description = "enable folding optimisations?", required = false)
 	static boolean folding = false;
 
 	private static Scanner scanner;
