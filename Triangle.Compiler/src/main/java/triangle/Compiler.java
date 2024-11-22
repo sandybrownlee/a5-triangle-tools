@@ -107,9 +107,9 @@ public class Compiler {
 			}
 			if (folding) {
 					theAST.visit(new ConstantFolder());
-			}
-			if (showTreeAfter) {
-				drawer.draw(theAST);
+				if (showTreeAfter) {
+					drawer.draw(theAST);
+				}
 			}
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
