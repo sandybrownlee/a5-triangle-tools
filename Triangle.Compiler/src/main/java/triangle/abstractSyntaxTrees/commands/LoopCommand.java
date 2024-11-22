@@ -22,18 +22,20 @@ import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class WhileCommand extends Command {
+public class LoopCommand extends Command {
 
-	public WhileCommand(Expression eAST, Command cAST, SourcePosition position) {
+	public LoopCommand(Command cAST1, Expression eAST, Command cAST2, SourcePosition position) {
 		super(position);
+		C1 = cAST1;
 		E = eAST;
-		C = cAST;
+		C2 = cAST2;
 	}
 
 	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitWhileCommand(this, arg);
+		return v.visitLoopCommand(this, arg);
 	}
 
 	public Expression E;
-	public final Command C;
+	public final Command C1;
+	public final Command C2;
 }

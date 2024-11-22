@@ -36,14 +36,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*; // changed to * commands since the parser should know about all commands within the language anyways
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -363,6 +356,17 @@ public class Parser {
 				Command cAST = parseSingleCommand();
 				finish(commandPos);
 				commandAST = new WhileCommand(eAST, cAST, commandPos);
+			}
+			break;
+			case LOOP: {
+				acceptIt();
+				Command cAST1 = parseSingleCommand();
+				accept(Token.Kind.WHILE);
+				Expression eAST = parseExpression();
+				accept(Token.Kind.DO);
+				Command cAST2 = parseSingleCommand();
+				finish(commandPos);
+				commandAST = new LoopCommand(cAST1, eAST, cAST2, commandPos);
 			}
 			break;
 
