@@ -128,6 +128,13 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 	@Override
 	public Void visitLoopCommand(LoopCommand ast, Void arg) {
+		// immediately visit
+		ast.C1.visit(this);
+
+		var eType = ast.E.visit(this);
+		checkAndReportError(eType.equals(StdEnvironment.booleanType), "boolean expression expected here", ast.E);
+
+		ast.C2.visit(this);
 		return null;
 	}
 
