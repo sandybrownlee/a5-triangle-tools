@@ -291,10 +291,27 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+
+					// literal for the power
+					IntegerLiteral intLit = new IntegerLiteral("2", commandPos);
+					IntegerExpression intExp = new IntegerExpression(intLit, commandPos);
+					// wrapped in VnameExpression
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					// define operator
+					Operator op = new Operator("*", commandPos);
+					// assemble binary expression
+					Expression eAST = new BinaryExpression(vne, op, vne, commandPos);
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				} else {
+			
+						accept(Token.Kind.BECOMES);
+						Expression eAST = parseExpression();
+						finish(commandPos);
+						commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
