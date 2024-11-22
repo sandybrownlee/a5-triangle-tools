@@ -31,52 +31,84 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
 	}
+	@Test
+	public void testIsLetter() {
+		assertFalse(Scanner.isLetter('0'));
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('A'));
+		assertFalse(Scanner.isLetter('\n'));
+	}
 	
 	@Test
 	public void testIsOperator() {
 		assertTrue(Scanner.isOperator('*'));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('&'));
 		assertTrue(Scanner.isOperator('/'));
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('^'));
+		assertFalse(Scanner.isOperator('.'));
+		assertFalse(Scanner.isOperator(' '));
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+		assertFalse(Scanner.isOperator('\t'));
+		assertTrue(Scanner.isOperator('\\'));
 	}
-	
-	
+
 	/* these tests all try to compile example programs... */
 	
 	@Test
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+
+	// tests "**" case in scanner
+	@Test
+	public void testSquare() {
+		compileExpectSuccess("/square.tri");
+	}
 
 	@Test
-	public void testHiNewComment() {
-		compileExpectFailure("/hi-newcomment.tri");
+	public void testIncrement() {
+		compileExpectFailure("/increment.tri");
 	}
-	
 
-	@Test
-	public void testHiNewComment2() {
-		compileExpectFailure("/hi-newcomment2.tri");
-	}
-	
+
+
 
 	@Test
 	public void testBarDemo() {
 		compileExpectFailure("/bardemo.tri");
 	}
-	
+
 
 	@Test
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
+
+
+
+	// most efficient way to cover most test routines?
+	@Test
+	public void testDirectories() { compileExpectSuccess("/directories.tri");}
+
+	// covers func parseDeclaration
+	@Test
+	public void testFunctions() { compileExpectSuccess("/functions.tri");}
+
+	// covers proc parseDeclaration
+	@Test
+	public void testProcedural() { compileExpectSuccess("/procedural.tri");}
+
 	
 	
 	

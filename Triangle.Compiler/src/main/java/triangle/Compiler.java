@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -45,10 +46,12 @@ public class Compiler {
 	private static String objectName = "obj.tam";
 	@Argument(alias = "st", description = "show AST representation after compilation?", required = false)
 	private static boolean showTree = false;
-	@Argument(alias = "f", description = "enable folding optimisations?", required = false)
+	@Argument(alias = "fo", description = "enable folding optimisations?", required = false)
 	private static boolean folding = false;
-	@Argument(alias = "sta", description = "show tree after tree optimisations?", required = false)
+	@Argument(alias = "ta", description = "show tree after tree optimisations?", required = false)
 	private static boolean showTreeAfter = false;
+	@Argument(alias = "stats", description = "show tree after tree optimisations?", required = false)
+	private static boolean showStatistics = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -57,6 +60,7 @@ public class Compiler {
 	private static Emitter emitter;
 	private static ErrorReporter reporter;
 	private static Drawer drawer;
+	private static SummaryVisitor summaryVisitor;
 
 	/** The AST representing the source program. */
 	private static Program theAST;
@@ -102,7 +106,7 @@ public class Compiler {
 				drawer.draw(theAST);
 			}
 			if (folding) {
-				theAST.visit(new ConstantFolder());
+					theAST.visit(new ConstantFolder());
 			}
 			if (showTreeAfter) {
 				drawer.draw(theAST);
@@ -110,6 +114,10 @@ public class Compiler {
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, false); // 3rd pass
+			}
+			if (showStatistics) {
+				SummaryVisitor summaryVisitor = new SummaryVisitor();
+				summaryVisitor.countStats(theAST);
 			}
 		}
 
