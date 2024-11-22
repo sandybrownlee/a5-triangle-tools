@@ -73,6 +73,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.syntacticAnalyzer.SourcePosition;
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -573,25 +574,51 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		ast.V.visit(this);
 		return null;
 	}
-
+	// task 7
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
 		// the only case we know how to deal with for now is two IntegerExpressions
 		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+
+			// handling comparison operation folding + the initial add
+			// if else statements since switch requires primitive types although performance cost trade-offs are likely negligible especially at such a small scale
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}
+			else if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 == int2;
+			}
+			else if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			}
+			else if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			}
+			else if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			}
+			else if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			}
+			else if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			}
+
+			SourcePosition pos = node1.getPosition();
 
 			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), pos);
+				IntegerExpression ie = new IntegerExpression(il, pos);
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				// avoids duplication of code by assigning value of bID based on shorthand if notation for cleaner code, we can simply just check if it evaluates to true - thank you for providing an example of how to use this in Compiler.java with System.exit() method
+				Identifier bID = new Identifier(foldedValue.toString(), node1.getPosition());
+				bID.decl = foldedValue.toString().equals("true") ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+				SimpleVname SVn = new SimpleVname(bID, pos);
+                return new VnameExpression(SVn, pos);
 			}
 		}
 
