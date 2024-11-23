@@ -1,7 +1,5 @@
-<<<<<<< HEAD
-=======
 /*
- * @(#)WhileCommand.java                       
+ * @(#)RepeatCommand.java                       
  * 
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  * 
@@ -18,7 +16,6 @@
  * of the authors.
  */
 
->>>>>>> f7b86a0427edcc2f17d808482e39fc93ef35de73
 package triangle.abstractSyntaxTrees.commands;
 
 import triangle.abstractSyntaxTrees.expressions.Expression;

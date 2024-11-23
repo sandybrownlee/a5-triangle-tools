@@ -17,8 +17,6 @@
  */
 
 package triangle.syntacticAnalyzer;
-import java.util.ArrayList;
-import java.util.List;
 import triangle.ErrorReporter;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.abstractSyntaxTrees.actuals.ActualParameter;
@@ -42,9 +40,9 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
-import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;

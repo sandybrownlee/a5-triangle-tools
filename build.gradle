@@ -2,6 +2,10 @@ apply plugin: 'java'
 
 sourceCompatibility = 17
 
+repositories {
+    mavenCentral()
+}
+
 subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
@@ -15,4 +19,7 @@ jar {
 
 
   from subprojects.sourceSets.main.output
+}
+dependencies {
+  implementation 'commons-cli:commons-cli:1.4'
 }

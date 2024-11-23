@@ -25,7 +25,7 @@ public final class Scanner {
 
 	private char currentChar;
 	private StringBuffer currentSpelling;
-	ArrayList<Integer> digitBuilder = new ArrayList<>();
+	private ArrayList<Integer> digitBuilder = new ArrayList<>();
 	private boolean currentlyScanningToken;
 
 	private boolean isLetter(char c) {
@@ -174,15 +174,50 @@ break;
 		case '7':
 		case '8':
 		case '9':
-			takeIt();
-			while (isDigit(currentChar))
-				takeIt();
-			return Token.Kind.INTLITERAL;
+			digitBuilder.clear();
+    		digitBuilder.add(currentChar - '0');
+    		takeIt();
+
+    		// Continue building the integer
+    		while (isDigit(currentChar)) {
+        	digitBuilder.add(currentChar - '0');
+        	takeIt();
+    		}
+
+    	// Check for '**' to square the integer
+    		if (currentChar == '*') {
+        		takeIt();
+				if (currentChar == '*') {
+            		takeIt();
+					// Build the integer value from digitBuilder
+            		Integer actualDigit = 0;
+            		for (int digit : digitBuilder) {
+                		actualDigit = actualDigit * 10 + digit; 
+            		}
+
+            		// Square the integer
+            		actualDigit = actualDigit * actualDigit;
+
+            		// Update currentSpelling with the squared value
+					currentSpelling.setLength(0);
+            		currentSpelling.append(actualDigit);
+					System.out.println(digitBuilder.size());
+            		return Token.Kind.INTLITERAL;
+        		} 
+			}
+			else{
+				return Token.Kind.INTLITERAL;
+			}
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
+		case '*':
+			takeIt();
+			if(currentChar == '*'){
+				takeIt();
+				return Token.Kind.OPERATOR;
+			}
 		case '=':
 		case '<':
 		case '>':
@@ -255,26 +290,28 @@ break;
 			takeIt();
 			return Token.Kind.RCURLY;
 		case '|':
-//ensuring the digit builder is empty
+			//ensuring the digit builder is empty
 			digitBuilder.clear();	
-takeIt();		
-//checks if the next character is an Int	
+			takeIt();		
+			//checks if the next character is an Int	
 			if(!isDigit(currentChar)){
  				return Token.Kind.OPERATOR;
-
-}	
-//iterates through the Ints following the '|' adding them to the digit builder
+				}	
+			//iterates through the Ints following the '|' adding them to the digit builder
 			while (isDigit(currentChar)){
 				digitBuilder.add(currentChar-'0');
 				takeIt();
-}
-				int actualDigit = 0;
-//creates a single Int value out of each digit
+				}
+			Integer actualDigit = 0;
+			//creates a single Int value out of each digit
 			for(int digit : digitBuilder){
 				actualDigit=actualDigit*10+digit;
-		}	
+			}		
 			actualDigit=actualDigit*100;
-			currentSpelling.append(actualDigit);					return Token.Kind.INTLITERAL;
+			currentSpelling.setLength(0);
+			currentSpelling.append(actualDigit);			
+			return Token.Kind.INTLITERAL;
+
 
 		case SourceFile.EOT:
 			return Token.Kind.EOT;

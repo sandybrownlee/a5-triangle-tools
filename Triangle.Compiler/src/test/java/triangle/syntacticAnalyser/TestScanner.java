@@ -47,6 +47,12 @@ public class TestScanner {
 	public void testAdd() {
 		compileExpectSuccess("/add.tri");
 	}
+	@Test
+	public void testSquared() {
+		compileExpectSuccess("/squared.tri");
+	}
+
+
 
 	
 	
