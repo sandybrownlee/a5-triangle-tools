@@ -108,6 +108,7 @@ public class Compiler {
 			if (folding) {
 					theAST.visit(new ConstantFolder());
 				if (showTreeAfter) {
+					showTree = true; // I forgot that checking !showTree after for system.exit is comparing true || false, therefore exiting when trying to draw folded tree
 					drawer.draw(theAST);
 				}
 			}

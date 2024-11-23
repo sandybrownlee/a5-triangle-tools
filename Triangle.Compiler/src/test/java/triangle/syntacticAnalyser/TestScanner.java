@@ -63,65 +63,29 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('\\'));
 	}
 
-	/* these tests all try to compile example programs... */
-	
-	@Test
-	public void testHi() {
-		compileExpectSuccess("/hi.tri");
-	}
-
-	// tests "**" case in scanner as described under task 3
-	@Test
-	public void testSquare() {
-		compileExpectSuccess("/square.tri");
-	}
 
 	@Test
-	public void testBooleansToFold() {
-		compileExpectSuccess("/booleans-to-fold.tri");
-	}
-
-	@Test
-	public void testAddDeep() {
+	public void testExpectedSuccessfulCompilation() {
 		compileExpectSuccess("/adddeep.tri");
+		compileExpectSuccess("/booleans-to-fold.tri");
+		compileExpectSuccess("/procedural.tri");
+		compileExpectSuccess("/directories.tri");
+		compileExpectSuccess("/functions.tri");
+		compileExpectSuccess("/square.tri");
+		compileExpectSuccess("/hi.tri");
+		compileExpectSuccess("/nesting.tri");
+		compileExpectSuccess("/procedures.tri");
+		compileExpectSuccess("/while-to-hoist.tri");
 	}
 
-	@Test
-	public void testIncrement() {
-		compileExpectFailure("/increment.tri");
-	}
-
-
-
 
 	@Test
-	public void testBarDemo() {
+	public void testExpectedFailedCompilation() {
 		compileExpectFailure("/bardemo.tri");
-	}
-
-
-	@Test
-	public void testRepeatUntil() {
+		compileExpectFailure("/increment.tri");
 		compileExpectFailure("/repeatuntil.tri");
 	}
 
-
-
-	// most efficient way to cover most test routines?
-	@Test
-	public void testDirectories() { compileExpectSuccess("/directories.tri");}
-
-	// covers func parseDeclaration
-	@Test
-	public void testFunctions() { compileExpectSuccess("/functions.tri");}
-
-	// covers proc parseDeclaration
-	@Test
-	public void testProcedural() { compileExpectSuccess("/procedural.tri");}
-
-	
-	
-	
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
 		// which adds the programs directory to the list of places Java can easily find files

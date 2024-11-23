@@ -280,13 +280,16 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		// If both child nodes are not null; return a folded version of this
 		// BinaryExpression
 		// Otherwise, at least one child node isn't constant (foldable) so just replace
-		// the
-		// foldable child nodes with their folded equivalent and return null
-		if (replacement1 != null && replacement2 != null) {
-			return foldBinaryExpression(replacement1, replacement2, ast.O);
-		} else if (replacement1 != null) {
+		// the foldable child nodes with their folded equivalent and return null
+		//&& (replacement1 instanceof IntegerLiteral && replacement2 instanceof IntegerLiteral)
+
+		if ((replacement1 != null && replacement2 != null) ) {
+			return foldBinaryExpression(replacement1, replacement2, ast.O); // either an integer expression, or vname expression
+		}
+		else if (replacement1 != null) {
 			ast.E1 = (Expression) replacement1;
-		} else if (replacement2 != null) {
+		}
+		else if (replacement2 != null) {
 			ast.E2 = (Expression) replacement2;
 		}
 
@@ -611,7 +614,8 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
-			} else if (foldedValue instanceof Boolean) {
+			}
+			else if (foldedValue instanceof Boolean) {
 				// avoids duplication of code by assigning value of bID based on shorthand if notation for cleaner code, we can simply just check if it evaluates to true - thank you for providing an example of how to use this in Compiler.java with System.exit() method
 				Identifier booleanIdentifier = new Identifier(foldedValue.toString(), node1.getPosition());
 				booleanIdentifier.decl = foldedValue.toString().equals("true") ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;

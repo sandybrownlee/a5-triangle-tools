@@ -25,6 +25,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 
 import triangle.abstractSyntaxTrees.Program;
+import triangle.optimiser.ConstantFolder;
 
 public class Drawer {
 
@@ -52,9 +53,11 @@ public class Drawer {
 		// DrawingTree, which is structurally the same as the AST but is decorated
 		// with coordinates (and has only DrawingTree objects as nodes)
 		// Each DrawingTree object knows how to paint itself, so it's passed to a
-		// DrawerPanel and DrawerFrame for display 
+		// DrawerPanel and DrawerFrame for display
+
 		LayoutVisitor layout = new LayoutVisitor(fontMetrics);
 		theDrawing = (DrawingTree) theAST.visit(layout, null);
+
 		theDrawing.position(new Point(2048, 10));
 
 		frame.setVisible(true);
