@@ -77,6 +77,16 @@ public class TestScanner {
 	}
 
 	@Test
+	public void testBooleansToFold() {
+		compileExpectSuccess("/booleans-to-fold.tri");
+	}
+
+	@Test
+	public void testAddDeep() {
+		compileExpectSuccess("/adddeep.tri");
+	}
+
+	@Test
 	public void testIncrement() {
 		compileExpectFailure("/increment.tri");
 	}
