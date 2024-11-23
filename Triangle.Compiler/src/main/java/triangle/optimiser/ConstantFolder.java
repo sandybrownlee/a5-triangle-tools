@@ -606,19 +606,19 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				foldedValue = int1 <= int2;
 			}
 
-			SourcePosition pos = node1.getPosition();
-
 			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), pos);
-				IntegerExpression ie = new IntegerExpression(il, pos);
+				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
+				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
 				// avoids duplication of code by assigning value of bID based on shorthand if notation for cleaner code, we can simply just check if it evaluates to true - thank you for providing an example of how to use this in Compiler.java with System.exit() method
-				Identifier bID = new Identifier(foldedValue.toString(), node1.getPosition());
-				bID.decl = foldedValue.toString().equals("true") ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
-				SimpleVname SVn = new SimpleVname(bID, pos);
-                return new VnameExpression(SVn, pos);
+				Identifier booleanIdentifier = new Identifier(foldedValue.toString(), node1.getPosition());
+				booleanIdentifier.decl = foldedValue.toString().equals("true") ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+				SimpleVname simpleVname = new SimpleVname(booleanIdentifier, node1.getPosition());
+				VnameExpression Vname = new VnameExpression(simpleVname, node1.getPosition());
+				Vname.type = StdEnvironment.booleanType;
+				return Vname;
 			}
 		}
 

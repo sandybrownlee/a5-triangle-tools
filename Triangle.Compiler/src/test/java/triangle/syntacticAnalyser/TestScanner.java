@@ -70,7 +70,7 @@ public class TestScanner {
 		compileExpectSuccess("/hi.tri");
 	}
 
-	// tests "**" case in scanner
+	// tests "**" case in scanner as described under task 3
 	@Test
 	public void testSquare() {
 		compileExpectSuccess("/square.tri");
