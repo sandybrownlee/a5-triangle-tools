@@ -12,5 +12,4 @@ begin
   end
   while a < 5 do
   	put('b');
-  
-end
+   end

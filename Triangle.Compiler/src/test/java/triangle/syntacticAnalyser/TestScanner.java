@@ -80,7 +80,8 @@ public class TestScanner {
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+
+
 
 	@Test
 	public void testHiNewComment() {

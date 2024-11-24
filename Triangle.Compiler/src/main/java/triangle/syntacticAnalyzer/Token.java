@@ -55,7 +55,7 @@ final class Token {
 
 		// reserved words - keep in alphabetical order for ease of maintenance...
 		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), OF("of"),
-		PROC("proc"), RECORD("record"), THEN("then"), TYPE("type"), VAR("var"), WHILE("while"),
+		PROC("proc"), RECORD("record"), THEN("then"), TYPE("type"), VAR("var"), WHILE("while"), LOOP("loop"),
 
 		// punctuation...
 		DOT("."), COLON(":"), SEMICOLON(";"), COMMA(","), BECOMES(":="), IS("~"),
@@ -82,13 +82,12 @@ final class Token {
 	    public static Kind fromSpelling(String spelling) {
 	    	boolean isRW = false;
 	    	for (Kind kind: Kind.values()) {
-	    		if (kind == firstReservedWord) {
-	    			isRW = true;
-	    		}
-	    		
-	    		if (isRW && kind.spelling.equals(spelling)) {
-	    			return kind;
-	    		}
+				if (kind == firstReservedWord || kind == secondReservedWord) {
+					isRW = true;
+				}
+				if (isRW && kind.spelling.equals(spelling)) {
+					return kind;
+				}
 	    		
 	    		if (kind == lastReservedWord) {
 	    			// if we get here, we've not found a match, so break and return failure
@@ -98,7 +97,7 @@ final class Token {
 	    	return Kind.IDENTIFIER;
 	    }
 	    
-	    private final static Kind firstReservedWord = ARRAY, lastReservedWord = WHILE;
+	    private final static Kind firstReservedWord = ARRAY, secondReservedWord = WHILE, lastReservedWord = LOOP;
 	}
 
 }
