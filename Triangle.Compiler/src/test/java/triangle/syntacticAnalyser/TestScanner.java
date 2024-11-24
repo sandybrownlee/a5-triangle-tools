@@ -49,7 +49,7 @@ public class TestScanner {
 	}
 	@Test
 	public void testSquared() {
-		compileExpectSuccess("/squared.tri");
+		compileExpectSuccess("/square.tri");
 	}
 
 

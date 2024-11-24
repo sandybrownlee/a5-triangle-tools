@@ -18,6 +18,7 @@
 
 package triangle.codeGenerator;
 
+import main.java.triangle.codeGenerator.entities.BarPrimitiveRoutine;
 import triangle.ErrorReporter;
 import triangle.StdEnvironment;
 import triangle.abstractMachine.Machine;
@@ -731,6 +732,8 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 	 */
 	private final void elaborateStdEnvironment() {
 		tableDetailsReqd = false;
+		StdEnvironment.barDecl.entity = new BarPrimitiveRoutine();
+		
 		elaborateStdConst(StdEnvironment.falseDecl, Machine.falseRep);
 		elaborateStdConst(StdEnvironment.trueDecl, Machine.trueRep);
 		elaborateStdPrimRoutine(StdEnvironment.notDecl, Primitive.NOT);

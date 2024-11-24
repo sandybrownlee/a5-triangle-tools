@@ -174,50 +174,14 @@ break;
 		case '7':
 		case '8':
 		case '9':
-			digitBuilder.clear();
-    		digitBuilder.add(currentChar - '0');
-    		takeIt();
-
-    		// Continue building the integer
-    		while (isDigit(currentChar)) {
-        	digitBuilder.add(currentChar - '0');
-        	takeIt();
-    		}
-
-    	// Check for '**' to square the integer
-    		if (currentChar == '*') {
-        		takeIt();
-				if (currentChar == '*') {
-            		takeIt();
-					// Build the integer value from digitBuilder
-            		Integer actualDigit = 0;
-            		for (int digit : digitBuilder) {
-                		actualDigit = actualDigit * 10 + digit; 
-            		}
-
-            		// Square the integer
-            		actualDigit = actualDigit * actualDigit;
-
-            		// Update currentSpelling with the squared value
-					currentSpelling.setLength(0);
-            		currentSpelling.append(actualDigit);
-					System.out.println(digitBuilder.size());
-            		return Token.Kind.INTLITERAL;
-        		} 
+			takeIt();
+    		while(isDigit(currentChar)){
+				takeIt();
 			}
-			else{
 				return Token.Kind.INTLITERAL;
-			}
-
 		case '+':
 		case '-':
 		case '/':
-		case '*':
-			takeIt();
-			if(currentChar == '*'){
-				takeIt();
-				return Token.Kind.OPERATOR;
-			}
 		case '=':
 		case '<':
 		case '>':
@@ -289,28 +253,18 @@ break;
 		case '}':
 			takeIt();
 			return Token.Kind.RCURLY;
+		case '*':
+			takeIt();
+			if(currentChar == '*'){
+				return Token.Kind.OPERATOR;
+			}
+			else{
+				return Token.Kind.OPERATOR;
+			}
+
 		case '|':
-			//ensuring the digit builder is empty
-			digitBuilder.clear();	
-			takeIt();		
-			//checks if the next character is an Int	
-			if(!isDigit(currentChar)){
- 				return Token.Kind.OPERATOR;
-				}	
-			//iterates through the Ints following the '|' adding them to the digit builder
-			while (isDigit(currentChar)){
-				digitBuilder.add(currentChar-'0');
-				takeIt();
-				}
-			Integer actualDigit = 0;
-			//creates a single Int value out of each digit
-			for(int digit : digitBuilder){
-				actualDigit=actualDigit*10+digit;
-			}		
-			actualDigit=actualDigit*100;
-			currentSpelling.setLength(0);
-			currentSpelling.append(actualDigit);			
-			return Token.Kind.INTLITERAL;
+			takeIt();
+			return Token.Kind.OPERATOR;
 
 
 		case SourceFile.EOT:
