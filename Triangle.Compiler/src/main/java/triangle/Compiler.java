@@ -26,6 +26,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -51,6 +52,9 @@ public class Compiler {
 
 	@Argument(alias = "a", description = "Show the abstract syntax tree after folding")
     private static boolean showTreeAfter = false;
+
+	@Argument(alias = "s", description = "show stats", required = false)
+	private static boolean showStats = false;
 	
 	
 
@@ -62,6 +66,7 @@ public class Compiler {
 	private static Emitter emitter;
 	private static ErrorReporter reporter;
 	private static Drawer drawer;
+	private static SummaryVisitor summaryVisitor;
 
 	/** The AST representing the source program. */
 	private static Program theAST;
@@ -79,7 +84,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -113,11 +118,25 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
+			if (showTreeAfter) {
+				drawer.draw(theAST);
+			}
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
+			// Integration of SummaryVisitor to analyze and display statistics.
+            if (showStats) {
+                // Create and use an instance of SummaryVisitor to analyze the AST.
+                SummaryVisitor summaryVisitor = new SummaryVisitor();
+
+                // Traverse the AST with the SummaryVisitor.
+                theAST.visit(summaryVisitor, null);
+
+                // Display the statistics collected by the SummaryVisitor.
+                System.out.println(summaryVisitor.generateSummary());
+            }
 		}
 
 		boolean successful = (reporter.getNumErrors() == 0);
@@ -138,16 +157,11 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [-t] [-f] [-a]");
-			System.exit(1);
-		}
-		
 		Args.parseOrExit(Compiler.class, args);
 
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		var compiledOK = compileProgram(sourceName, objectName, showTree, false, showStats);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);

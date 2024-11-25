@@ -77,6 +77,11 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
+
+	@Test
+    public void testSquareOperator() {
+        compileExpectSuccess("/square.tri");
+    }
 	
 	
 	
