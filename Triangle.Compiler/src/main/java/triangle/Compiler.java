@@ -25,6 +25,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -51,6 +52,9 @@ public class Compiler {
 
 	@Argument(alias = "treeAfter", description = "to show the tree after folding is complete", required = false)
 	static boolean showTreeAfter = false;
+
+	@Argument(alias = "stat", description = "statistics for the binary expressions, if commands, and while commands", required = false)
+	static boolean statistic = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -109,6 +113,12 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+			}
+			if (statistic) {
+				SummaryVisitor summaryVisitor = new SummaryVisitor();
+				theAST.visit(summaryVisitor);
+				System.out.println("Visitor statistics ...");
+				System.out.print(summaryVisitor.SummaryStatistics());
 			}
 			
 			if (reporter.getNumErrors() == 0) {
