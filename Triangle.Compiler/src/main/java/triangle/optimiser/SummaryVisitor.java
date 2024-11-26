@@ -7,12 +7,9 @@ import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
 import triangle.abstractSyntaxTrees.expressions.Expression;
 
-/**
- * The SummaryVisitor class extends the ConstantFolder functionality and is 
- * designed to both optimize the Abstract Syntax Tree (AST) through constant folding 
- * and collect statistics about specific constructs within the program, such as the 
- * count of binary expressions, if commands, and while commands.
- */
+
+ // The SummaryVisitor class extends the ConstantFolder functionality 
+ 
 public class SummaryVisitor extends ConstantFolder {
 
     // Counters to keep track of occurrences of specific constructs in the AST.
@@ -20,10 +17,6 @@ public class SummaryVisitor extends ConstantFolder {
     private int ifCmdCount = 0;
     private int whileCmdCount = 0;
 
-    /**
-     * Initiates the traversal of the AST to count and collect statistics.
-     * Outputs the results directly to the console.
-     */
 	public void countStats(Program ast) {
         // The visit method traverses the entire AST, delegating work to overridden visit methods.
 		ast.visit(this);
@@ -34,11 +27,9 @@ public class SummaryVisitor extends ConstantFolder {
         System.out.println("Number of While Commands: " + whileCmdCount);
     }
 
-    /**
-     * Generates a summary of the collected statistics as a formatted string.
-     * This method was added to provide a more flexible reporting option,
-     * enabling the results to be logged, stored, or displayed in a UI.
-     */
+    
+    // Generates a summary of the collected statistics as a formatted string.
+     
     public String generateSummary() {
         StringBuilder summary = new StringBuilder();
         summary.append("Number of Binary Expressions: ").append(binaryExprCount).append("\n");
@@ -47,10 +38,7 @@ public class SummaryVisitor extends ConstantFolder {
         return summary.toString();
     }
 
-    /**
-     * Processes a binary expression node, performing constant folding if possible
-     * and counting the occurrence of the binary expression.
-     */
+    // Overridden visit methods to process specific nodes in the AST.
 	@Override
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
         // Visit the left and right subexpressions recursively.
@@ -79,9 +67,7 @@ public class SummaryVisitor extends ConstantFolder {
         return null;
 	}
 
-    /**
-     * Processes an if command node, counting the occurrence and optimizing its condition.
-     */
+    
 	@Override
     public AbstractSyntaxTree visitIfCommand(IfCommand ast, Void arg) {
         // Visit the commands associated with the "then" and "else" branches.
@@ -100,9 +86,7 @@ public class SummaryVisitor extends ConstantFolder {
         return null;
     }
 
-    /**
-     * Processes a while command node, counting the occurrence and optimizing its condition.
-     */
+    
 	@Override
     public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
         // Visit the body of the while loop.

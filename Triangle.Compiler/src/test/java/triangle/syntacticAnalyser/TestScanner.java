@@ -34,16 +34,30 @@ public class TestScanner {
 	
 	@Test
 	public void testIsOperator() {
-		assertTrue(Scanner.isOperator('*'));
-		assertTrue(Scanner.isOperator('/'));
-		assertTrue(Scanner.isOperator('?'));
-		assertTrue(Scanner.isOperator('+'));
-		assertTrue(Scanner.isOperator('-'));
-		assertFalse(Scanner.isOperator('a'));
-		assertFalse(Scanner.isOperator('Z'));
-		assertFalse(Scanner.isOperator('1'));
-		assertFalse(Scanner.isOperator(';'));
-		assertFalse(Scanner.isOperator('\n'));
+
+		// all operators
+		assertTrue(Scanner.isOperator('<'));
+        assertTrue(Scanner.isOperator('='));
+        assertTrue(Scanner.isOperator('>'));
+        assertTrue(Scanner.isOperator('+'));
+        assertTrue(Scanner.isOperator('-'));
+        assertTrue(Scanner.isOperator('*'));
+        assertTrue(Scanner.isOperator('/'));
+
+		//non-operators
+		assertFalse(Scanner.isOperator(' '));
+        assertFalse(Scanner.isOperator('\n'));
+	}
+	@Test
+    public void testIsLetter() {
+		assertTrue(Scanner.isLetter('a'));
+        assertTrue(Scanner.isLetter('Z'));
+        assertTrue(Scanner.isLetter('m'));
+
+		assertFalse(Scanner.isLetter('1'));
+        assertFalse(Scanner.isLetter('+'));
+        assertFalse(Scanner.isLetter(' '));
+        assertFalse(Scanner.isLetter('\n'));
 	}
 	
 	

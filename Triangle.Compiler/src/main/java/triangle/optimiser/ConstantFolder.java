@@ -16,9 +16,11 @@ import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
+import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -495,6 +497,25 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 		return null;
 	}
+
+	@Override
+    public AbstractSyntaxTree visitLoopCommand(LoopCommand ast, Void arg) {
+		// Visit the first command (C1)
+		ast.C1.visit(this);
+
+		// Visit the condition expression (E)
+		AbstractSyntaxTree conditionReplacement = ast.E.visit(this);
+		Command newC2 = ast.C2;
+		if (conditionReplacement != null) {
+			Expression newE = (Expression) conditionReplacement;
+			return new LoopCommand(ast.C1, newE, newC2, ast.getPosition());
+		}
+	
+		// Visit the second command (C2)
+		ast.C2.visit(this);
+	
+		return null;
+    }
 
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
