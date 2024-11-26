@@ -20,11 +20,16 @@ public class TestScanner {
 
 	@Test
 	public void testIsDigit() {
-		assertTrue(Scanner.isDigit('0'));
-		assertTrue(Scanner.isDigit('1'));
-		assertTrue(Scanner.isDigit('5'));
-		assertTrue(Scanner.isDigit('8'));
-		assertTrue(Scanner.isDigit('9'));
+        assertTrue(Scanner.isDigit('0'));
+        assertTrue(Scanner.isDigit('1'));
+        assertTrue(Scanner.isDigit('2'));
+        assertTrue(Scanner.isDigit('3'));
+        assertTrue(Scanner.isDigit('4'));
+        assertTrue(Scanner.isDigit('5'));
+        assertTrue(Scanner.isDigit('6'));
+        assertTrue(Scanner.isDigit('7'));
+        assertTrue(Scanner.isDigit('8'));
+        assertTrue(Scanner.isDigit('9'));
 		assertFalse(Scanner.isDigit('a'));
 		assertFalse(Scanner.isDigit('Z'));
 		assertFalse(Scanner.isDigit('&'));
@@ -44,7 +49,50 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+
+		assertTrue(Scanner.isOperator('\\')); // notDecl
+		assertTrue(Scanner.isOperator('<')); // lessDecl
+		assertTrue(Scanner.isOperator('>')); // greaterDecl
+		assertTrue(Scanner.isOperator('=')); // equalDecl
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('^'));
+
 	}
+
+    @Test
+    public void testIsLetter() {
+        // lowercase letters
+        assertTrue(Scanner.isLetter('a'));
+        assertTrue(Scanner.isLetter('b'));
+        assertTrue(Scanner.isLetter('c'));
+        assertTrue(Scanner.isLetter('d'));
+        assertTrue(Scanner.isLetter('e'));
+        assertTrue(Scanner.isLetter('v'));
+        assertTrue(Scanner.isLetter('w'));
+        assertTrue(Scanner.isLetter('x'));
+        assertTrue(Scanner.isLetter('y'));
+        assertTrue(Scanner.isLetter('z'));
+
+        // uppercase letters
+        assertTrue(Scanner.isLetter('A'));
+        assertTrue(Scanner.isLetter('B'));
+        assertTrue(Scanner.isLetter('C'));
+        assertTrue(Scanner.isLetter('D'));
+        assertTrue(Scanner.isLetter('E'));
+        assertTrue(Scanner.isLetter('V'));
+        assertTrue(Scanner.isLetter('W'));
+        assertTrue(Scanner.isLetter('X'));
+        assertTrue(Scanner.isLetter('Y'));
+        assertTrue(Scanner.isLetter('Z'));
+
+        assertFalse(Scanner.isLetter('1'));
+        assertFalse(Scanner.isLetter('&'));
+        assertFalse(Scanner.isLetter(';'));
+        assertFalse(Scanner.isLetter('\n'));
+
+    }
 
 
 	/* these tests all try to compile example programs... */
