@@ -1,5 +1,5 @@
 /*
- * @(#)WhileCommand.java                       
+ * @(#)LoopWhileDoCommand.java                       
  * 
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  * 
@@ -24,7 +24,7 @@
  
  public class LoopWhileDoCommand extends Command {
  
-     public LoopWhileDoCommand(Expression eAST, Command c1AST, Command c2AST, SourcePosition position) {
+     public LoopWhileDoCommand(Command c1AST, Expression eAST,  Command c2AST, SourcePosition position) {
          super(position);
          C1 = c1AST;
          E = eAST;

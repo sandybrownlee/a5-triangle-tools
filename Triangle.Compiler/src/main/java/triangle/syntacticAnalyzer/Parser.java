@@ -363,7 +363,7 @@ public class Parser {
 		}
 			break;
 		
-		case LOOP:{
+		case LOOP: {
 			acceptIt();
 			Command c1AST = parseSingleCommand();
 			accept(Token.Kind.WHILE);
@@ -371,7 +371,7 @@ public class Parser {
 			accept(Token.Kind.DO);
 			Command c2AST = parseSingleCommand();
 			finish(commandPos);
-			commandAST = new LoopWhileDoCommand(eAST, c1AST, c2AST, commandPos);
+			commandAST = new LoopWhileDoCommand(c1AST, eAST, c2AST, commandPos);
 		}
 			break;
 
