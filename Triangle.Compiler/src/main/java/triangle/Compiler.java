@@ -38,12 +38,12 @@
  public class Compiler {
  
 	 /** The filename for the object program, normally obj.tam. */
-	 static String objectName = "obj.tam";
+	 public static String objectName = "obj.tam";
 	 
-	 static boolean showTree = false;
-	 static boolean folding = false;
-	 static boolean showTreeAfter = false;
-	 static boolean showStats = false;
+	 public static boolean showTree = false;
+	 public static boolean folding = false;
+	 public static boolean showTreeAfter = false;
+	 public static boolean showStats = false;
  
 	 private static Scanner scanner;
 	 private static Parser parser;
@@ -69,7 +69,7 @@
 	  * @return true iff the source program is free of compile-time errors, otherwise
 	  *         false.
 	  */
-	 static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	 static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showingStats) {
  
 		 System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
  
@@ -108,17 +108,17 @@
 					drawer.draw(theAST);
 				 }
 			 }
-			 
-			 if (reporter.getNumErrors() == 0) {
-				 System.out.println("Code Generation ...");
-				 encoder.encodeRun(theAST, showingTable); // 3rd pass
-			 }
 
-			 if(showStats)
+			 if(showingStats)
 			 {
 				SummaryVisitor summaryV = new SummaryVisitor();
 				theAST.visit(summaryV);
 				System.out.println(summaryV.toString());
+			 }
+			 
+			 if (reporter.getNumErrors() == 0) {
+				 System.out.println("Code Generation ...");
+				 encoder.encodeRun(theAST, showingTable); // 3rd pass
 			 }
 		 }
  
@@ -142,7 +142,7 @@
 	 public static void main(String[] args) {
  
 		 if (args.length < 1) {
-			 System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			 System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding] [showStats]");
 			 System.exit(1);
 		 }
 		 
@@ -150,7 +150,7 @@
  
 		 String sourceName = args[0];
 		 
-		 var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		 var compiledOK = compileProgram(sourceName, objectName, showTree, false, showStats);
  
 		 if (!showTree) {
 			 System.exit(compiledOK ? 0 : 1);
@@ -159,6 +159,7 @@
 	 
 	 private static void parseArgs(String[] args) {
 		 for (String s : args) {
+			System.out.println(s);
 			 var sl = s.toLowerCase();
 			 if (sl.equals("tree")) {
 				 showTree = true;
@@ -166,9 +167,9 @@
 				 objectName = s.substring(3);
 			 } else if (sl.equals("folding")) {
 				 folding = true;
-			 }else if(sl.equals("treeAfterFolding")){
+			 }else if(sl.equals("treeafterfolding")){
 				showTreeAfter = true;	
-			 } else if(sl.equals("stats")){
+			 } else if(sl.equals("showstats")){
 				showStats = true;
 			 }
 		 }
