@@ -27,7 +27,8 @@
  import triangle.syntacticAnalyzer.Scanner;
  import triangle.syntacticAnalyzer.SourceFile;
  import triangle.treeDrawer.Drawer;
- import com.sampullara.cli.*;
+ import com.sampullara.cli.Args;
+ import com.sampullara.cli.Argument;
  /**
   * The main driver class for the Triangle compiler.
   *
@@ -41,6 +42,7 @@
 	 
 	 static boolean showTree = false;
 	 static boolean folding = false;
+	 static boolean showTreeAfter = false;
 	 static boolean showStats = false;
  
 	 private static Scanner scanner;
@@ -95,11 +97,16 @@
 			 // }
 			 System.out.println("Contextual Analysis ...");
 			 checker.check(theAST); // 2nd pass
-			 if (showingAST) {
+			 if (showingAST && !showTreeAfter) {
 				 drawer.draw(theAST);
 			 }
 			 if (folding) {
 				 theAST.visit(new ConstantFolder());
+
+				 if(showTreeAfter)
+				 {
+					drawer.draw(theAST);
+				 }
 			 }
 			 
 			 if (reporter.getNumErrors() == 0) {
@@ -159,6 +166,8 @@
 				 objectName = s.substring(3);
 			 } else if (sl.equals("folding")) {
 				 folding = true;
+			 }else if(sl.equals("treeAfterFolding")){
+				showTreeAfter = true;	
 			 } else if(sl.equals("stats")){
 				showStats = true;
 			 }
