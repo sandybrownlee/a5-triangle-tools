@@ -8,9 +8,9 @@ repositories {
     mavenCentral()
 }
 
-
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
+    implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
