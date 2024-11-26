@@ -6,13 +6,26 @@ subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+subprojects {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        implementation 'com.github.spullara.cli-parser:cli-parser:1.1.5' // Correct version of cli-parser
+        testImplementation 'junit:junit:4.13.2' // Ensure JUnit is available for testing
+    }
+}
+
+// Configure the JAR task
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-
-  from subprojects.sourceSets.main.output
+    from subprojects.sourceSets.main.output
 }
+
+
