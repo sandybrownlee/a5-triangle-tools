@@ -28,6 +28,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -53,6 +54,9 @@ public class Compiler {
 
     @Argument(alias = "ta", description = "to show the tree after folding is complete", required = false)
     static boolean showTreeAfter = false;
+
+    @Argument(alias="ss", description="Shows visitor stats of the program", required=false)
+    static boolean showStats = false;
 
     private static Scanner scanner;
     private static Parser parser;
@@ -111,6 +115,12 @@ public class Compiler {
             }
             if (folding) {
                 theAST.visit(new ConstantFolder());
+            }
+            if (showStats) {
+                SummaryVisitor sv = new SummaryVisitor();
+                theAST.visit(sv);
+                System.out.println("\nVisitor Stats ...");
+                System.out.println(sv.getStats());
             }
 
             if (reporter.getNumErrors() == 0) {
