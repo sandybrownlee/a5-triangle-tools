@@ -289,12 +289,27 @@ public class Parser {
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
 			} else {
-
 				Vname vAST = parseRestOfVname(iAST);
+				if(currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+
+					//first we wrapped the variable name in a VnameExpression
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					//then the operator will be *
+					Operator op = new Operator("*", commandPos);
+					//now we assemble the expressions into a BinaryExpression for the a*a
+					Expression eAst = new BinaryExpression(vne, op, vne, commandPos);
+					//this sets the last line of the command for debugging purposes
+					finish(commandPos);
+					//we need to make an assignment with a binary expression on the right
+					commandAST = new AssignCommand(vAST, eAst, commandPos);
+
+				} else {
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;

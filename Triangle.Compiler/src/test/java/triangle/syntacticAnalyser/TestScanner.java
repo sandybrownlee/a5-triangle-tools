@@ -77,6 +77,14 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
+
+	/**
+	 * Tests that the file square.trie compiles and runs successfully
+	 */
+	@Test
+	public void testSquare() {
+		compileExpectSuccess("/square.tri");
+	}
 	
 	
 	
