@@ -1,8 +1,8 @@
 /*
- * @(#)Encoder.java                       
- * 
+ * @(#)Encoder.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -42,6 +42,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -184,6 +185,18 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		return null;
 	}
+
+    @Override
+    public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+        var loopAddr = emitter.getNextInstrAddr();
+        ast.C1.visit(this, frame);
+        ast.E.visit(this, frame);
+        var jumpIfAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
+        ast.C2.visit(this, frame);
+        emitter.emit(OpCode.JUMP, Machine.falseRep, Register.CB, loopAddr);
+        emitter.patch(jumpIfAddr);
+        return null;
+    }
 
 	// Expressions
 	@Override
@@ -563,7 +576,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		if (frame == null) { // in this case, we're just using the frame to wrap up the size
 			frame = Frame.Initial;
 		}
-		
+
 		var offset = frame.getSize();
 		int fieldSize;
 		if (ast.entity == null) {
@@ -711,9 +724,9 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 
 	/**
 	 * in the following we associate the primitive routines (Primitive.*)
-	 * and the primitive types (Machine.*) in the abstract machine with 
-	 * the relevant std env declarations. 
-	 * The primitive routines are listed in Table C3 (P411) of the PLPJ book, 
+	 * and the primitive types (Machine.*) in the abstract machine with
+	 * the relevant std env declarations.
+	 * The primitive routines are listed in Table C3 (P411) of the PLPJ book,
 	 * and Table 3 of the Triangle guide
 	 */
 	private final void elaborateStdEnvironment() {

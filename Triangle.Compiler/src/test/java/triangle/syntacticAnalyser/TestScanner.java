@@ -135,6 +135,10 @@ public class TestScanner {
 		compileExpectSuccess("/square.tri");
 	}
 
+    @Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
 
 
 	private void compileExpectSuccess(String filename) {

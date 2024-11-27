@@ -1,8 +1,8 @@
 /*
- * @(#)LayoutVisitor.java                       
- * 
+ * @(#)LayoutVisitor.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -37,6 +37,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -161,6 +162,14 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		var d1 = ast.E.visit(this);
 		var d2 = ast.C.visit(this);
 		return layoutBinary("WhileCom.", d1, d2);
+	}
+
+    @Override
+	public DrawingTree visitLoopWhileCommand(LoopWhileCommand ast, Void obj) {
+		var d1 = ast.C1.visit(this);
+		var d2 = ast.E.visit(this);
+		var d3 = ast.C2.visit(this);
+		return layoutTernary("LoopWhileCom.", d1, d2,d3);
 	}
 
 	// Expressions
