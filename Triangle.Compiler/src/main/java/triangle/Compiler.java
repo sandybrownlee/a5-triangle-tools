@@ -41,7 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
-// TODO: replace ErrorReporter with robust logging
 public class Compiler {
 
     @Argument(description = "The name of the file to store the object code into") private static String objectName = "obj.tam";
