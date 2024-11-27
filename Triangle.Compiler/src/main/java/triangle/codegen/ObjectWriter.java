@@ -6,11 +6,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.List;
 
-public final class TAMBinaryWriter {
+public final class ObjectWriter {
 
     private final DataOutputStream outputStream;
 
-    public TAMBinaryWriter(DataOutputStream outputStream) {
+    public ObjectWriter(DataOutputStream outputStream) {
         this.outputStream = outputStream;
     }
 
