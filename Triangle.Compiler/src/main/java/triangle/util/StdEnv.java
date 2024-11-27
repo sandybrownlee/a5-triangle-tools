@@ -1,5 +1,6 @@
 package triangle.util;
 
+import triangle.abstractMachine.Primitive;
 import triangle.repr.Type;
 
 import java.util.HashMap;
@@ -10,6 +11,9 @@ import java.util.Set;
 import static triangle.repr.Type.*;
 
 public final class StdEnv {
+
+    // TAM primitives
+    public static final Map<String, Primitive> PRIMITIVES = new HashMap<>();
 
     public static final Map<String, Type> STD_TERMS = new HashMap<>();
 
@@ -45,6 +49,51 @@ public final class StdEnv {
 
     //@formatter:off
     static {
+        PRIMITIVES.putAll(
+                Map.of(
+                        "id", Primitive.ID,
+                        "\\", Primitive.NOT,
+                        "/\\", Primitive.AND,
+                        "\\/", Primitive.OR
+                ));
+
+        PRIMITIVES.putAll(
+                Map.of(
+                        "succ", Primitive.SUCC,
+                        "pred", Primitive.PRED,
+                        "neg", Primitive.NEG,
+                        "+", Primitive.ADD,
+                        "-", Primitive.SUB,
+                        "*", Primitive.MULT,
+                        "/", Primitive.DIV,
+                        "//", Primitive.MOD
+                )
+        );
+
+        PRIMITIVES.putAll(
+                Map.of(
+                        "<", Primitive.LT,
+                        "<=", Primitive.LE,
+                        ">=", Primitive.GE,
+                        ">", Primitive.GT,
+                        "=", Primitive.EQ,
+                        "\\=", Primitive.NE
+                ));
+
+        PRIMITIVES.putAll(
+                Map.of(
+                        "eol", Primitive.EOL,
+                        "eof", Primitive.EOF,
+                        "get", Primitive.GET,
+                        "put", Primitive.PUT,
+                        "geteol", Primitive.GETEOL,
+                        "puteol", Primitive.PUTEOL,
+                        "getint", Primitive.GETINT,
+                        "putint", Primitive.PUTINT,
+                        "new", Primitive.NEW,
+                        "dispose", Primitive.DISPOSE
+                ));
+
         STD_TERMS.putAll(
                 Map.of(
                         "\\/", RELATION,

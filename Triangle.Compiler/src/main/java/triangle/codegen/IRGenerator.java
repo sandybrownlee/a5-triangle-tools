@@ -11,6 +11,7 @@ import triangle.repr.Parameter;
 import triangle.repr.Parameter.VarParameter;
 import triangle.repr.Statement;
 import triangle.repr.Type;
+import triangle.util.StdEnv;
 import triangle.util.SymbolTable;
 
 import java.util.ArrayList;
@@ -19,38 +20,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 
-// TODO: tests for IRGen
 public class IRGenerator {
 
     static final Map<String, Callable> builtins = new HashMap<>();
 
     static {
-        // TODO: fill up
-        // TODO: StdEnv should have a Map<String, Primitive> and we should build callables from it here
-        // TAM primitives
-        builtins.put("=", new Callable.PrimitiveCallable(Primitive.EQ));
-        builtins.put("<", new Callable.PrimitiveCallable(Primitive.LT));
-        builtins.put(">", new Callable.PrimitiveCallable(Primitive.GT));
-        builtins.put(">=", new Callable.PrimitiveCallable(Primitive.GE));
-        builtins.put("<=", new Callable.PrimitiveCallable(Primitive.LE));
-        builtins.put("-", new Callable.PrimitiveCallable(Primitive.SUB));
-        builtins.put("+", new Callable.PrimitiveCallable(Primitive.ADD));
-        builtins.put("*", new Callable.PrimitiveCallable(Primitive.MULT));
-        builtins.put("/", new Callable.PrimitiveCallable(Primitive.DIV));
-        builtins.put("\\", new Callable.PrimitiveCallable(Primitive.NOT));
-        builtins.put("/\\", new Callable.PrimitiveCallable(Primitive.AND));
-        builtins.put("\\/", new Callable.PrimitiveCallable(Primitive.OR));
-        builtins.put("//", new Callable.PrimitiveCallable(Primitive.MOD));
-        builtins.put("getint", new Callable.PrimitiveCallable(Primitive.GETINT));
-        builtins.put("put", new Callable.PrimitiveCallable(Primitive.PUT));
-        builtins.put("putint", new Callable.PrimitiveCallable(Primitive.PUTINT));
-        builtins.put("puteol", new Callable.PrimitiveCallable(Primitive.PUTEOL));
-        builtins.put("eol", new Callable.PrimitiveCallable(Primitive.EOL));
-        builtins.put("get", new Callable.PrimitiveCallable(Primitive.GET));
-        builtins.put("\\=", new Callable.PrimitiveCallable(Primitive.NE));
-        builtins.put("geteol", new Callable.PrimitiveCallable(Primitive.GETEOL));
+        StdEnv.PRIMITIVES.forEach((k,v) -> builtins.put(k, new Callable.PrimitiveCallable(v)));
 
-        // Compiler generated operations (++, --, etc)
+        // Compiler generated operations
         // |
         builtins.put("|", new Callable.CompilerGenerated(List.of(
                 new Instruction.LOADL(100),
