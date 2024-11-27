@@ -24,8 +24,8 @@ import com.sampullara.cli.Argument;
 import triangle.analysis.Desugarer;
 import triangle.analysis.SemanticAnalyzer;
 import triangle.analysis.TypeChecker;
+import triangle.codegen.TAMBinaryWriter;
 import triangle.codegen.CodeGen;
-import triangle.codegen.IRGenerator;
 import triangle.repr.Instruction;
 import triangle.codegen.Optimizer;
 import triangle.parsing.Parser;
@@ -82,8 +82,8 @@ public class Compiler {
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
         Desugarer desugarer = new Desugarer();
         TypeChecker typeChecker = new TypeChecker();
-        IRGenerator irGenerator = new IRGenerator();
-        CodeGen codeGen = new CodeGen(new DataOutputStream(outputStream));
+        CodeGen codeGen = new CodeGen();
+        TAMBinaryWriter TAMBinaryWriter = new TAMBinaryWriter(new DataOutputStream(outputStream));
 
         Statement program = parser.parseProgram();
 
@@ -129,14 +129,14 @@ public class Compiler {
 
         program = Optimizer.eliminateDeadCode(program);
 
-        List<Instruction> ir = irGenerator.generateIR(program);
+        List<Instruction> ir = codeGen.generateInstructions(program);
 
         ir = Optimizer.threadJumps(ir);
         ir = Optimizer.combineInstructions(ir);
 
         List<Instruction.TAMInstruction> objectCode = Optimizer.backpatch(ir);
 
-        codeGen.write(objectCode);
+        TAMBinaryWriter.write(objectCode);
     }
 
 }
