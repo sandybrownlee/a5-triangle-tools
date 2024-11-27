@@ -586,6 +586,12 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}
+			if (o.decl == StdEnvironment.trueDecl) { //checks if the declared is a true
+				foldedValue = true; //sets the fold value as true
+			}
+			if (o.decl == StdEnvironment.falseDecl) { //checks if the declared is a false
+				foldedValue = false; //sets the fold value as false
+			}
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
@@ -593,7 +599,13 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				String Boolean = (boolean) foldedValue ? "true" : "false"; //sets the Boolean to either true or false depending on the foldedValue
+				Identifier BooleanIdent = new Identifier(Boolean, node1.getPosition()); //makes a new Identifier called BooleanIdent containing spelling and position of it
+				BooleanIdent.decl = (boolean) foldedValue ? StdEnvironment.trueDecl : StdEnvironment.falseDecl; //sets the declaration of it to either true of false, depending on the folded value
+				SimpleVname svn = new SimpleVname(BooleanIdent, node1.getPosition()); //wrappers the identifier
+				VnameExpression ve = new VnameExpression(svn, node1.getPosition()); //wraps it into an expression
+
+				return ve; //returns the expression
 			}
 		}
 
