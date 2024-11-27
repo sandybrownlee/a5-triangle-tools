@@ -1,5 +1,5 @@
 /*
-  * @(#)Compiler.java                       
+ * @(#)Compiler.java                       
  * 
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  * 
@@ -18,6 +18,12 @@
 
 package triangle;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -37,10 +43,14 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+
 	static String objectName = "obj.tam";
-	
 	static boolean showTree = false;
 	static boolean folding = false;
+	static boolean showTreeAfter = false;
+
+
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -125,32 +135,48 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		//if no arguments presented, displays the usage of the parser.
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+            System.out.println("Usage: tc filename [-o outputfilename] [-t] [-f] [-s]");
+            System.exit(1);
+        }
+
+		//initialising the options object
+		Options options = new Options();
+		//option builder to create the object Name option
+		options.addOption(Option.builder("o")
+		.hasArg(true)
+		.argName("objectName")
+		.desc("Name of the object being compiled")
+		.build());
+		
+		//creating the options for the cli parser
+		options.addOption(new Option("t","showTree",false, "Show the syntax tree"));
+		options.addOption(new Option("f","folding",false, "Enable or disable folding"));
+		options.addOption(new Option("s","showTreeAfter",false, "Show the tree after folding"));
+
+		CommandLineParser parser = new DefaultParser();
+		
+		try{
+			CommandLine cmd = parser.parse(options,args);
+			if(cmd.hasOption("o")){					//checks if a name value was provided, if so objectName is set to the file name
+				objectName=cmd.getOptionValue("o");
+			}
+			//checks if the option values are provided, if not they remain false
+			showTree = cmd.hasOption("t");
+			folding = cmd.hasOption("f");
+			showTreeAfter=cmd.hasOption("s");
+		
+			String sourceName=cmd.getArgs()[0];
+			boolean success= compileProgram(sourceName, objectName, showTree, showTreeAfter);
+
+		}
+		catch(ParseException e){
+			System.out.println("Command line parsing failed: " + e.getMessage());
 			System.exit(1);
 		}
-		
-		parseArgs(args);
-
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
+			
+	
 	}
 	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
 }

@@ -3,6 +3,8 @@ package triangle.syntacticAnalyser;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
@@ -11,6 +13,7 @@ import triangle.ErrorReporter;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
+
 
 public class TestScanner {
 
@@ -48,13 +51,65 @@ public class TestScanner {
 		compileExpectSuccess("/add.tri");
 	}
 	@Test
-	public void testSquared() {
-		compileExpectSuccess("/square.tri");
+	public void testSquare() {
+		compileExpectFailure("/square.tri");
+	}
+	@Test
+	public void testIsOperator(){
+		SourceFile source = SourceFile.fromResource("/testDigOp.txt");
+		Scanner scanner = new Scanner(source);
+		String operators = "+-*/=<>\\&@%^?|";
+		String nonOperators = "12345abcde{}[].,~()";
+		char currentChar = ' ';
+		Integer trueCount = 0;
+		Integer falseCount= 0;
+		
+			for(int i = 0; i<operators.length(); i++){
+				currentChar = operators.charAt(i);
+				if(scanner.testIsOperator(currentChar)){
+					trueCount++;
+				}
+			}
+			for(int i = 0; i<nonOperators.length(); i++){
+				currentChar = nonOperators.charAt(i);
+				if(!scanner.testIsOperator(currentChar)){
+					falseCount++;
+				}
+			}
+		
+		assertEquals("Failed to count correct number of operators",(Integer)14,trueCount);
+		assertEquals("Failed to count correct number of non-operators",(Integer)19,falseCount);
+	}
+
+	@Test
+	public void testIsDigit(){
+		SourceFile source = SourceFile.fromResource("/testDigOp.txt");
+		Scanner scanner = new Scanner(source);
+		String letters = "abcDEF";
+		String nonLetter = "01234{}[].,~()$+-*><@# ;'";
+		char currentChar = ' ';
+		Integer trueCount = 0;
+		Integer falseCount= 0;
+		
+		for(int i = 0; i<letters.length(); i++){
+			currentChar = letters.charAt(i);
+			if(scanner.testIsLetter(currentChar)){
+				trueCount++;
+			}
+		}
+		for(int i = 0; i<nonLetter.length(); i++){
+			currentChar = nonLetter.charAt(i);
+			if(!scanner.testIsLetter(currentChar)){
+				falseCount++;
+			}
+		}
+
+		assertEquals("Failed to count correct number of letters",(Integer)6, trueCount);
+		assertEquals("Failed to count correct number of non-letters",(Integer)25,falseCount);
 	}
 
 
 
-	
 	
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")

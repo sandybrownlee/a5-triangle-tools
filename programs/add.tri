@@ -10,18 +10,18 @@ begin
  putint(x*y);
  puteol();
  if x=y
-  then put('S');
+  then put('S')
  else
  if x=y
-  then put('a');
+  then put('a')
  else
  if x=y
-  then put('m');
+  then put('m')
  else
  if x=y
-  then put('e');
+  then put('e')
  else
  if x=y
-  then put('!');
+  then put('!')
  else
 end

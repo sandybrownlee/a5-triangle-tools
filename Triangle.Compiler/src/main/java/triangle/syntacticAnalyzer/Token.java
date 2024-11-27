@@ -18,7 +18,7 @@
 
 package triangle.syntacticAnalyzer;
 
-final class Token {
+ final class Token {
 
 	protected Kind kind;
 	protected String spelling;
@@ -47,6 +47,7 @@ final class Token {
 		return "Kind=" + kind + ", spelling=" + spelling + ", position=" + position;
 	}
 
+
 	// Token classes...
 
 	public enum Kind {
@@ -71,7 +72,7 @@ final class Token {
 	    private Kind(String spelling) {
 	        this.spelling = spelling;
 	    }
-	    
+
 	    /**
 	     * iterate over the reserved words above to find the one with a given spelling
 	     * need to specify firstReservedWord and lastReservedWord (inclusive) for this

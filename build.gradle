@@ -1,4 +1,5 @@
 apply plugin: 'java'
+apply plugin: 'jacoco'
 
 sourceCompatibility = 17
 
@@ -22,4 +23,11 @@ jar {
 }
 dependencies {
   implementation 'commons-cli:commons-cli:1.4'
+}
+
+test{
+  finalizedBy jacocoTestReport
+}
+jacocoTestReport{
+  dependsOn test
 }

@@ -24,6 +24,7 @@ import triangle.abstractMachine.Register;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Frame;
+import triangle.codeGenerator.entities.FetchableEntity;
 
 public class UnknownValue extends RuntimeEntity implements FetchableEntity {
 

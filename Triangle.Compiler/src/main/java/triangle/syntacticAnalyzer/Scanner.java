@@ -179,6 +179,8 @@ break;
 				takeIt();
 			}
 				return Token.Kind.INTLITERAL;
+
+		case '*':
 		case '+':
 		case '-':
 		case '/':
@@ -190,6 +192,7 @@ break;
 		case '@':
 		case '%':
 		case '^':
+		
 		case '?':
 			takeIt();
 			while (isOperator(currentChar))
@@ -253,14 +256,6 @@ break;
 		case '}':
 			takeIt();
 			return Token.Kind.RCURLY;
-		case '*':
-			takeIt();
-			if(currentChar == '*'){
-				return Token.Kind.OPERATOR;
-			}
-			else{
-				return Token.Kind.OPERATOR;
-			}
 
 		case '|':
 			takeIt();
@@ -275,7 +270,14 @@ break;
 			return Token.Kind.ERROR;
 		}
 	}
-
+	//public method to allow access to isDigit method during testing
+	public boolean testIsLetter(char c){
+		return isLetter(c);
+	}
+	//public method to allow access to isOperator method during testing
+	public boolean testIsOperator(char c){
+		return isOperator(c);
+	}
 	public Token scan() {
 		Token tok;
 		SourcePosition pos;
