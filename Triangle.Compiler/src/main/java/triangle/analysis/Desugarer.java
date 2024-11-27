@@ -16,7 +16,7 @@ import triangle.repr.Statement.AssignStatement;
 import java.util.List;
 
 // Desugars ++ and **
-class Desugarer implements RewriteStage {
+public class Desugarer implements RewriteStage {
 
     private int fresh = 0;
 

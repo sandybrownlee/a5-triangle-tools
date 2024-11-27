@@ -45,40 +45,40 @@ import static triangle.repr.Type.*;
 // We are guaranteed, due to not allowing duplicate record fields that this canonical form is unique
 
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
-final class TypeChecker {
+public final class TypeChecker {
 
     private final List<SemanticException> errors = new ArrayList<>();
     private final SymbolTable<Type, Void> terms  = new SymbolTable<>(StdEnv.STD_TERMS, null);
     private final SymbolTable<Type, Void> types  = new SymbolTable<>(StdEnv.STD_TYPES, null);
 
-    List<SemanticException> getErrors() {
+    public List<SemanticException> getErrors() {
         return errors;
     }
 
-    void checkAndAnnotate(Statement statement) {
+    public void typecheck(Statement statement) {
         // statements never introduce new bindings (outside their own bodies) so we can always recover from semantic exceptions
         // and continue typechecking the rest of the program
         switch (statement) {
             case Statement.AssignStatement assignStatement -> {
                 try {
-                    checkAndAnnotate(assignStatement.expression());
-                    checkAndAnnotate(assignStatement.identifier());
+                    typecheck(assignStatement.expression());
+                    typecheck(assignStatement.identifier());
                 } catch (SemanticException e) {
                     errors.add(e);
                 }
             }
             case Statement.ExpressionStatement expressionStatement -> {
                 try {
-                    checkAndAnnotate(expressionStatement.expression());
+                    typecheck(expressionStatement.expression());
                 } catch (SemanticException e) {
                     errors.add(e);
                 }
             }
             case Statement.IfStatement ifStatement -> {
                 try {
-                    checkAndAnnotate(ifStatement.condition());
-                    ifStatement.consequent().ifPresent(this::checkAndAnnotate);
-                    ifStatement.alternative().ifPresent(this::checkAndAnnotate);
+                    typecheck(ifStatement.condition());
+                    ifStatement.consequent().ifPresent(this::typecheck);
+                    ifStatement.alternative().ifPresent(this::typecheck);
 
                     Type cT = ifStatement.condition().getType().baseType();
                     if (!(cT instanceof Type.PrimType.BoolType)) {
@@ -101,7 +101,7 @@ final class TypeChecker {
                         }
                     }
 
-                    checkAndAnnotate(letStatement.statement());
+                    typecheck(letStatement.statement());
                 } finally {
                     terms.exitScope();
                     types.exitScope();
@@ -111,7 +111,7 @@ final class TypeChecker {
                 try {
                     typeCheckLoop(
                             loopWhileStatement.sourcePosition(), loopWhileStatement.condition(), loopWhileStatement.loopBody());
-                    checkAndAnnotate(loopWhileStatement.doBody());
+                    typecheck(loopWhileStatement.doBody());
                 } catch (SemanticException e) {
                     errors.add(e);
                 }
@@ -134,7 +134,7 @@ final class TypeChecker {
             }
             case Statement.StatementBlock statementBlock -> {
                 for (Statement stmt : statementBlock.statements()) {
-                    checkAndAnnotate(stmt);
+                    typecheck(stmt);
                 }
             }
             case Statement.WhileStatement whileStatement -> {
@@ -148,13 +148,13 @@ final class TypeChecker {
         }
     }
 
-    private void checkAndAnnotate(Expression expression) throws SemanticException {
+    private void typecheck(Expression expression) throws SemanticException {
         switch (expression) {
             case Expression.BinaryOp binOp -> {
                 Type opT = terms.lookup(binOp.operator());
 
-                checkAndAnnotate(binOp.leftOperand());
-                checkAndAnnotate(binOp.rightOperand());
+                typecheck(binOp.leftOperand());
+                typecheck(binOp.rightOperand());
 
                 // I special-case the equality operations because they are the ONLY polymorphic functions and I do not have enough
                 //  time to implement full polymorphism
@@ -219,17 +219,17 @@ final class TypeChecker {
 
                 funCall.setType(returnType);
             }
-            case Expression.Identifier identifier -> checkAndAnnotate(identifier);
+            case Expression.Identifier identifier -> typecheck(identifier);
             case Expression.IfExpression ifExpression -> {
-                checkAndAnnotate(ifExpression.condition());
+                typecheck(ifExpression.condition());
 
                 Type cT = ifExpression.condition().getType().baseType();
                 if (!(cT instanceof PrimType.BoolType)) {
                     throw new SemanticException.TypeError(ifExpression.sourcePosition(), cT, BOOL_TYPE);
                 }
 
-                checkAndAnnotate(ifExpression.consequent());
-                checkAndAnnotate(ifExpression.alternative());
+                typecheck(ifExpression.consequent());
+                typecheck(ifExpression.alternative());
 
                 // ensure the two branches are equal types
                 Type lT = ifExpression.consequent().getType().baseType();
@@ -247,7 +247,7 @@ final class TypeChecker {
                 for (Declaration declaration : letExpression.declarations()) {
                     bindDeclaration(declaration);
                 }
-                checkAndAnnotate(letExpression.expression());
+                typecheck(letExpression.expression());
 
                 terms.exitScope();
                 types.exitScope();
@@ -256,12 +256,12 @@ final class TypeChecker {
             }
             case Expression.LitArray litArray -> {
                 Expression first = litArray.elements().getFirst();
-                checkAndAnnotate(first);
+                typecheck(first);
 
                 // expected type for the rest of the elements
                 Type exT = first.getType().baseType();
                 for (Expression element : litArray.elements()) {
-                    checkAndAnnotate(element);
+                    typecheck(element);
                     Type eT = element.getType().baseType();
                     if (!eT.equals(exT)) {
                         throw new SemanticException.TypeError(element.sourcePosition(), exT, eT);
@@ -276,7 +276,7 @@ final class TypeChecker {
             case Expression.LitRecord litRecord -> {
                 List<RecordType.FieldType> fieldTypes = new ArrayList<>();
                 for (Expression.LitRecord.RecordField field : litRecord.fields()) {
-                    checkAndAnnotate(field.value());
+                    typecheck(field.value());
                     Type fT = field.value().getType();
                     fieldTypes.add(new RecordType.FieldType(field.name(), fT));
                 }
@@ -284,14 +284,14 @@ final class TypeChecker {
                 litRecord.setType(new RecordType(fieldTypes));
             }
             case Expression.SequenceExpression sequenceExpression -> {
-                checkAndAnnotate(sequenceExpression.statement());
-                checkAndAnnotate(sequenceExpression.expression());
+                typecheck(sequenceExpression.statement());
+                typecheck(sequenceExpression.expression());
                 sequenceExpression.setType(sequenceExpression.expression().getType().baseType());
             }
             case Expression.UnaryOp unaryOp -> {
                 Type opT = terms.lookup(unaryOp.operator());
 
-                checkAndAnnotate(unaryOp.operand());
+                typecheck(unaryOp.operand());
 
                 if (!(opT instanceof PrimType.FuncType funcType)) {
                     throw new SemanticException.TypeError(unaryOp.sourcePosition(), opT, "function");
@@ -317,13 +317,13 @@ final class TypeChecker {
         }
     }
 
-    private void checkAndAnnotate(Expression.Identifier identifier) throws SemanticException {
+    private void typecheck(Expression.Identifier identifier) throws SemanticException {
         switch (identifier) {
             case Expression.Identifier.ArraySubscript arraySubscript -> {
                 // arraySubscript(array : [e], subscript : Integer) : e
 
-                checkAndAnnotate(arraySubscript.array());
-                checkAndAnnotate(arraySubscript.subscript());
+                typecheck(arraySubscript.array());
+                typecheck(arraySubscript.subscript());
 
                 Type aT = arraySubscript.array().getType().baseType();
                 if (!(aT instanceof Type.ArrayType arrayType)) {
@@ -355,7 +355,7 @@ final class TypeChecker {
             case Expression.Identifier.RecordAccess recordAccess -> {
                 // recordAccess(record : {... field : t ...}, field : _) : t
 
-                checkAndAnnotate(recordAccess.record());
+                typecheck(recordAccess.record());
 
                 Type rT = recordAccess.record().getType().baseType();
                 if (!(rT instanceof Type.RecordType recordType)) {
@@ -368,7 +368,7 @@ final class TypeChecker {
                     terms.add(fieldType.fieldName(), fieldType.fieldType());
                 }
 
-                checkAndAnnotate(recordAccess.field());
+                typecheck(recordAccess.field());
 
                 terms.exitScope();
 
@@ -382,11 +382,11 @@ final class TypeChecker {
         Type aT = switch (argument) {
             case Argument.FuncArgument funcArgument -> terms.lookup(funcArgument.func().name());
             case Argument.VarArgument varArgument -> {
-                checkAndAnnotate(varArgument.var());
+                typecheck(varArgument.var());
                 yield varArgument.var().getType();
             }
             case Expression expression -> {
-                checkAndAnnotate(expression);
+                typecheck(expression);
                 yield expression.getType();
             }
         };
@@ -423,7 +423,7 @@ final class TypeChecker {
             case Declaration.ConstDeclaration constDeclaration -> {
                 // we cant really catch a semantic exception here, since we don't have even a declared type to bind this
                 // constant to and continue typechecking with
-                checkAndAnnotate(constDeclaration.value());
+                typecheck(constDeclaration.value());
                 terms.add(constDeclaration.name(), constDeclaration.value().getType().baseType());
             }
             case Declaration.FuncDeclaration funcDeclaration -> {
@@ -446,7 +446,7 @@ final class TypeChecker {
                         terms.add(parameter.name(), parameter.getType().baseType());
                     }
 
-                    checkAndAnnotate(funcDeclaration.expression());
+                    typecheck(funcDeclaration.expression());
 
                     // if expressions inferred type does not match our (optimistic) assumption
                     Type eT = funcDeclaration.expression().getType().baseType();
@@ -481,7 +481,7 @@ final class TypeChecker {
                 }
 
                 // since its a statement, it knows how to catch and resume typechecking by itself
-                checkAndAnnotate(procDeclaration.statement());
+                typecheck(procDeclaration.statement());
 
                 types.exitScope();
                 terms.exitScope();
@@ -500,14 +500,14 @@ final class TypeChecker {
     }
 
     private void typeCheckLoop(SourcePosition sourcePos, Expression condition, Statement body) throws SemanticException {
-        checkAndAnnotate(condition);
+        typecheck(condition);
 
         Type cT = condition.getType().baseType();
         if (!(cT instanceof PrimType.BoolType)) {
             throw new SemanticException.TypeError(sourcePos, cT, BOOL_TYPE);
         }
 
-        checkAndAnnotate(body);
+        typecheck(body);
     }
 
     private Type resolveType(final TypeSig typeSig) throws SemanticException {

@@ -36,8 +36,6 @@ import java.util.Set;
 //  func/proc parameters are only ever supplied with arguments marked func/proc
 //  var parameters are only ever supplied with arguments marked var
 
-// TODO: SemanticAnalyzer.analyzeAndType needs to be split across mutliple classes
-
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 public final class SemanticAnalyzer {
 
@@ -65,8 +63,6 @@ public final class SemanticAnalyzer {
 
     private final SymbolTable<Binding, Void> terms       = new SymbolTable<>(null);
     private final List<SemanticException>    errors      = new ArrayList<>();
-    private final TypeChecker                typeChecker = new TypeChecker();
-    private final Desugarer                  desugarer   = new Desugarer();
     private       int                        staticDepth = 0;
 
     {
@@ -78,20 +74,8 @@ public final class SemanticAnalyzer {
         return errors;
     }
 
-    public Statement analyzeAndType(Statement program) {
+    public void analyzeAndType(Statement program) {
         analyze(program);
-
-        if (!this.errors.isEmpty()) {
-            System.err.println("Semantic analysis found errors, not proceeding with type checking");
-            return program;
-        }
-
-        program = desugarer.desugar(program);
-
-        typeChecker.checkAndAnnotate(program);
-        errors.addAll(typeChecker.getErrors());
-
-        return program;
     }
 
     private void analyze(final Statement statement) {

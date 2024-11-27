@@ -21,7 +21,9 @@ package triangle;
 
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
+import triangle.analysis.Desugarer;
 import triangle.analysis.SemanticAnalyzer;
+import triangle.analysis.TypeChecker;
 import triangle.codegen.CodeGen;
 import triangle.codegen.IRGenerator;
 import triangle.repr.Instruction;
@@ -79,6 +81,8 @@ public class Compiler {
     throws IOException, SyntaxError {
         Parser parser = new Parser(inputStream);
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+        Desugarer desugarer = new Desugarer();
+        TypeChecker typeChecker = new TypeChecker();
         IRGenerator irGenerator = new IRGenerator();
         CodeGen codeGen = new CodeGen(new DataOutputStream(outputStream));
 
@@ -98,10 +102,21 @@ public class Compiler {
         }
 
         // explicitly-typed AST
-        program = semanticAnalyzer.analyzeAndType(program);
+        semanticAnalyzer.analyzeAndType(program);
 
         if (!semanticAnalyzer.getErrors().isEmpty()) {
+            System.err.println("Semantic analysis found errors, not proceeding with type checking");
             semanticAnalyzer.getErrors().forEach(System.err::println);
+            return;
+        }
+
+        program = desugarer.rewrite(program);
+
+        typeChecker.typecheck(program);
+
+        if (!typeChecker.getErrors().isEmpty()) {
+            System.err.println("Type checker found errors, not proceeding with compilation");
+            typeChecker.getErrors().forEach(System.err::println);
             return;
         }
 
