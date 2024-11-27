@@ -603,7 +603,6 @@ public class IRGenerator {
         }
     }
 
-    // TODO: simplify record access
     private List<Instruction> generateRecordAccess(Expression.Identifier.RecordAccess recordAccess) {
         List<Instruction> block = new ArrayList<>();
 

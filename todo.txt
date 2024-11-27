@@ -1,6 +1,3 @@
 implement SummaryVisitor
-spec:
-    maxint must be in stdenv
-    true, false must be in stdenv
 maybe have a symbol class?
 maybe do constant propagation?
