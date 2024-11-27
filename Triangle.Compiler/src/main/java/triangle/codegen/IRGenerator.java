@@ -72,7 +72,6 @@ public class IRGenerator {
         List<Instruction> ir = generate(statement);
         ir.add(new Instruction.HALT());
         ir.addAll(compgen);
-        ir.forEach(System.out::println);
         return ir;
     }
 
