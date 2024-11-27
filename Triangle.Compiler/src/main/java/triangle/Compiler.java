@@ -40,7 +40,7 @@ import com.sampullara.cli.Argument;
 public class Compiler {
 
 	@Argument(alias = "sf", description = "source of file", required = true)
-	 private static String sourceFile;
+	 private static String sourceFile = "programs/hi.tri";
 	/** The filename for the object program, normally obj.tam. */
 	@Argument(alias = "o", description = "name of the object to be output", required = false)
 	private static String objectName = "obj.tam";
@@ -93,6 +93,7 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		summaryVisitor = new SummaryVisitor();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -117,7 +118,6 @@ public class Compiler {
 				encoder.encodeRun(theAST, false); // 3rd pass
 			}
 			if (showStatistics) {
-				SummaryVisitor summaryVisitor = new SummaryVisitor();
 				summaryVisitor.countStats(theAST);
 			}
 		}

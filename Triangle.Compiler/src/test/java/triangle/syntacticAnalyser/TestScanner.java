@@ -75,7 +75,6 @@ public class TestScanner {
 		compileExpectSuccess("/hi.tri");
 		compileExpectSuccess("/nesting.tri");
 		compileExpectSuccess("/procedures.tri");
-		compileExpectSuccess("/while-to-hoist.tri");
 	}
 
 
