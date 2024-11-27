@@ -22,17 +22,27 @@ import java.util.function.Supplier;
 
 public class IRGenerator {
 
-    static final Map<String, Callable> builtins = new HashMap<>();
+    static final         Map<String, Callable> builtins   = new HashMap<>();
+    // contains all compiler generated operations
+    private static final List<Instruction>     compgen    = new ArrayList<>();
+    // the label number immediately succeeding the last label number used for compiler generated operations, i.e., the label
+    // number from which user code labels should start
+    private static       int                   compgenEnd = 0;
 
     static {
-        StdEnv.PRIMITIVES.forEach((k,v) -> builtins.put(k, new Callable.PrimitiveCallable(v)));
+        StdEnv.PRIMITIVES.forEach((k, v) -> builtins.put(k, new Callable.PrimitiveCallable(v)));
 
         // Compiler generated operations
         // |
-        builtins.put("|", new Callable.CompilerGenerated(List.of(
+        Instruction.LABEL bar = new Instruction.LABEL(compgenEnd++);
+        compgen.addAll(List.of(
+                bar,
+                new Instruction.LOAD(Machine.integerSize, new Instruction.Address(Register.LB, Machine.integerSize * -1)),
                 new Instruction.LOADL(100),
-                new Instruction.CALL_PRIM(Primitive.MULT)
-        )));
+                new Instruction.CALL_PRIM(Primitive.MULT),
+                new Instruction.RETURN(Machine.integerSize, 1)
+        ));
+        builtins.put("|", new Callable.StaticCallable(bar));
     }
 
     static Register getDisplayRegister(final int depth) {
@@ -51,7 +61,7 @@ public class IRGenerator {
     private final SymbolTable<Callable, Void>   funcAddresses = new SymbolTable<>(builtins, null);
     private final SymbolTable<Integer, Integer> localVars     = new SymbolTable<>(0);
     private final Supplier<Instruction.LABEL>   labelSupplier = new Supplier<>() {
-        private int i = 0;
+        private int i = compgenEnd;
 
         @Override public Instruction.LABEL get() {
             return new Instruction.LABEL(i++);
@@ -61,6 +71,8 @@ public class IRGenerator {
     public List<Instruction> generateIR(Statement statement) {
         List<Instruction> ir = generate(statement);
         ir.add(new Instruction.HALT());
+        ir.addAll(compgen);
+        ir.forEach(System.out::println);
         return ir;
     }
 
@@ -366,8 +378,6 @@ public class IRGenerator {
                             block.add(new Instruction.LOADA(new Instruction.Address(nonLocalsLink, 0)));
                             block.add(new Instruction.LOADA_LABEL(label));
                         }
-                        // [instructions]
-                        case Callable.CompilerGenerated(List<Instruction> instructions) -> block.addAll(instructions);
                     }
                 }
                 // load address of var argument
@@ -409,7 +419,6 @@ public class IRGenerator {
             case Callable.PrimitiveCallable(Primitive primitive) -> block.add(new Instruction.CALL_PRIM(primitive));
             case Callable.StaticCallable(Instruction.LABEL label) -> block.add(
                     new Instruction.CALL_LABEL(getDisplayRegister(lookup.depth()), label));
-            case Callable.CompilerGenerated(List<Instruction> instructions) -> block.addAll(instructions);
         }
 
         return block;
@@ -705,7 +714,7 @@ public class IRGenerator {
 
     // represents things that may be the target of CALL/CALLI instructions
     sealed interface Callable
-            permits Callable.CompilerGenerated, Callable.DynamicCallable, Callable.PrimitiveCallable, Callable.StaticCallable {
+            permits Callable.DynamicCallable, Callable.PrimitiveCallable, Callable.StaticCallable {
 
         // a callable whose location is known statically
         record StaticCallable(Instruction.LABEL label) implements Callable { }
@@ -715,11 +724,6 @@ public class IRGenerator {
 
         // a primitive call
         record PrimitiveCallable(Primitive primitive) implements Callable { }
-
-        // TODO: we shouldnt generate instructions repeatedly like this; have a List<Instruction> of compiler generated
-        //  routines and use StaticCallable instead
-        // a sequence of compiler generated instructions which can directly be inlined
-        @Deprecated record CompilerGenerated(List<Instruction> instructions) implements Callable { }
 
     }
 
