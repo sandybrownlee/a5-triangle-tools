@@ -167,7 +167,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':
@@ -182,7 +181,17 @@ public final class Scanner {
 			while (isOperator(currentChar))
 				takeIt();
 			return Token.Kind.OPERATOR;
-
+			
+		case '*':
+		    takeIt(); // Consume the first '*'
+		    if (currentChar == '*') { // Check to see if the next character is also '*'
+		        takeIt(); // Consume the second '*'
+		        if (debug) System.out.println("Recognized '**' as STARSTAR token");
+		        return Token.Kind.STARSTAR; // Return the STARSTAR token kind
+		        
+		    }
+		    return Token.Kind.OPERATOR; // If not '**', treat it as a single '*'
+		    
 		case '\'':
 			takeIt();
 			takeIt(); // the quoted character

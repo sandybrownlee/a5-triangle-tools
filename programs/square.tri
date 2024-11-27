@@ -1,0 +1,6 @@
+let a: integer in
+begin
+    a := 5;
+    a**;
+    putint(a);  -- Expected output: 25
+end

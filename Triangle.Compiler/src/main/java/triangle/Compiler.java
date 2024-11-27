@@ -88,6 +88,8 @@ public class Compiler {
 		}
 
 		scanner = new Scanner(source);
+		scanner.enableDebugging();
+		System.out.println("Debugging enabled for Scanner.");
 		reporter = new ErrorReporter(false);
 		parser = new Parser(scanner, reporter);
 		checker = new Checker(reporter);
@@ -133,7 +135,8 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-		
+		StdEnvironment.initialize();
+
 		Args.parseOrExit(Compiler.class, args);
 		
 		if (args.length == 0) {

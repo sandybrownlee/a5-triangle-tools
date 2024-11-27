@@ -21,7 +21,7 @@ package triangle.abstractSyntaxTrees.expressions;
 import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
-
+import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 public class BinaryExpression extends Expression {
 
 	public BinaryExpression(Expression e1AST, Operator oAST, Expression e2AST, SourcePosition position) {
@@ -30,6 +30,13 @@ public class BinaryExpression extends Expression {
 		E1 = e1AST;
 		E2 = e2AST;
 	}
+	// New constructor that takes BinaryOperatorDeclaration
+    public BinaryExpression(Expression e1AST, Expression e2AST, BinaryOperatorDeclaration operatorDecl, SourcePosition position) {
+        super(position);
+        O = operatorDecl.O; // Extract operator from BinaryOperatorDeclaration
+        E1 = e1AST;
+        E2 = e2AST;
+    }
 
 	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> v, TArg arg) {
 		return v.visitBinaryExpression(this, arg);
