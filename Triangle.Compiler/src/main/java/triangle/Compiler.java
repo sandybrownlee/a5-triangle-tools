@@ -31,6 +31,7 @@ import triangle.codegen.Optimizer;
 import triangle.parsing.Parser;
 import triangle.parsing.SyntaxError;
 import triangle.repr.Statement;
+import triangle.util.ASTPrinter;
 import triangle.util.SummaryVisitor;
 
 import java.io.DataOutputStream;
@@ -52,6 +53,8 @@ public class Compiler {
     @Argument(description = "Turn on loop hoisting") private static boolean hoisting;
 
     @Argument(description = "Show summary stats") private static boolean showStats;
+
+    @Argument(description = "Show tree after folding") private static boolean showTree;
 
     public static void main(String[] args) {
         Args.parseOrExit(Compiler.class, args);
@@ -121,6 +124,10 @@ public class Compiler {
 
         if (constantFolding) {
             program = Optimizer.foldConstants(program);
+
+            if (showTree) {
+                System.out.println(ASTPrinter.prettyPrint(program));
+            }
         }
 
         if (hoisting) {
