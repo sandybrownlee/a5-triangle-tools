@@ -48,7 +48,7 @@ public class Compiler {
 	@Argument(alias = "st", description = "show AST representation after compilation?", required = false)
 	private static boolean showTree = false;
 	@Argument(alias = "fo", description = "enable folding optimisations?", required = false)
-	private static boolean folding = false;
+	public static boolean folding = false;
 	@Argument(alias = "ta", description = "show tree after tree optimisations / hoisting?", required = false)
 	private static boolean showTreeAfter = false;
 	@Argument(alias = "stats", description = "show statistics? (after folding)", required = false)

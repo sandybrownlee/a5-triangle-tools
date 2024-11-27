@@ -1,5 +1,6 @@
 package triangle.optimiser;
 
+import triangle.Compiler;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.abstractSyntaxTrees.commands.*;
@@ -34,12 +35,15 @@ public class SummaryVisitor extends ConstantFolder {
 		// Otherwise, at least one child node isn't constant (foldable) so just replace
 		// the
 		// foldable child nodes with their folded equivalent and return null
-		if (replacement1 != null && replacement2 != null) {
-			return foldBinaryExpression(replacement1, replacement2, ast.O);
-		} else if (replacement1 != null) {
-			ast.E1 = (Expression) replacement1;
-		} else if (replacement2 != null) {
-			ast.E2 = (Expression) replacement2;
+
+		if (Compiler.folding) {
+			if (replacement1 != null && replacement2 != null) {
+				return foldBinaryExpression(replacement1, replacement2, ast.O);
+			} else if (replacement1 != null) {
+				ast.E1 = (Expression) replacement1;
+			} else if (replacement2 != null) {
+				ast.E2 = (Expression) replacement2;
+			}
 		}
 		// if we get here, we can't fold any higher than this level
 		return null;
