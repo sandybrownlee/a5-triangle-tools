@@ -13,7 +13,7 @@ import triangle.repr.Statement;
 
 // ConstantFolder maintains type annotations, but may discard source position annotations
 // ConstantFolder does not fold across function calls
-class ConstantFolder implements RewriteStage {
+@SuppressWarnings("DanglingJavadoc") class ConstantFolder implements RewriteStage {
 
     // number of folds above which to try another folding pass since we want to perform multiple passes of constant folding
     // the key observation is that if the number of folds performed in a single pass is quite high, it is more likely that

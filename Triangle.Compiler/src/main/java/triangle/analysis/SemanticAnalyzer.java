@@ -308,9 +308,11 @@ public final class SemanticAnalyzer {
                     }
                 }
                 case TypeDeclaration typeDeclaration -> {
-                    if (typeDeclaration.typeSig() instanceof TypeSig.RecordTypeSig recordTypeSig) {
+                    if (typeDeclaration.typeSig() instanceof TypeSig.RecordTypeSig(
+                            List<TypeSig.RecordTypeSig.FieldType> fieldTypes
+                    )) {
                         Set<String> seenFieldNames = new HashSet<>();
-                        for (TypeSig.RecordTypeSig.FieldType fieldType : recordTypeSig.fieldTypes()) {
+                        for (TypeSig.RecordTypeSig.FieldType fieldType : fieldTypes) {
                             if (seenFieldNames.contains(fieldType.fieldName())) {
                                 throw new SemanticException.DuplicateRecordTypeField(fieldType);
                             }

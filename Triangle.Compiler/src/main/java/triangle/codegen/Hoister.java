@@ -26,7 +26,7 @@ import java.util.function.Supplier;
 //          enclosing the hoisted loop, to make the hoisting valid
 class Hoister implements RewriteStage {
 
-    // takes a SourcePosition and creates a label prefix that can uniquely identify the hoisted expressions upto a single loop
+    // takes a SourcePosition and creates a label prefix that can uniquely identify the hoisted expressions up to a single loop
     // statement
     private static final Function<SourcePosition, String> freshName = sourcePos -> sourcePos.lineNo() + "_" + sourcePos.colNo();
 

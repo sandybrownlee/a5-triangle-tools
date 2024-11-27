@@ -170,14 +170,14 @@ public final class TypeChecker {
                     return;
                 }
 
-                if (!(opT instanceof PrimType.FuncType funcType)) {
+                if (!(opT instanceof PrimType.FuncType(List<Type> argTypes, Type returnType))) {
                     throw new SemanticException.TypeError(binOp.sourcePosition(), opT, "function");
                 }
 
                 // left-operand type
                 Type lT = binOp.leftOperand().getType().baseType();
                 // expected left-operand type
-                @SuppressWarnings("SequencedCollectionMethodCanBeUsed") Type exLT = funcType.argTypes().get(0);
+                @SuppressWarnings("SequencedCollectionMethodCanBeUsed") Type exLT = argTypes.get(0);
                 if (!(lT.equals(exLT))) {
                     throw new SemanticException.TypeError(binOp.leftOperand().sourcePosition(), lT, exLT);
                 }
@@ -185,12 +185,12 @@ public final class TypeChecker {
                 // right-operand type
                 Type rT = binOp.leftOperand().getType().baseType();
                 // expected right-operand type
-                @SuppressWarnings("SequencedCollectionMethodCanBeUsed") Type exRT = funcType.argTypes().get(0);
+                @SuppressWarnings("SequencedCollectionMethodCanBeUsed") Type exRT = argTypes.get(0);
                 if (!(rT.equals(exRT))) {
                     throw new SemanticException.TypeError(binOp.rightOperand().sourcePosition(), rT, exRT);
                 }
 
-                binOp.setType(funcType.returnType());
+                binOp.setType(returnType);
             }
             case Expression.FunCall funCall -> {
                 Type fT = terms.lookup(funCall.func().name());
@@ -293,19 +293,19 @@ public final class TypeChecker {
 
                 typecheck(unaryOp.operand());
 
-                if (!(opT instanceof PrimType.FuncType funcType)) {
+                if (!(opT instanceof PrimType.FuncType(List<Type> argTypes, Type returnType))) {
                     throw new SemanticException.TypeError(unaryOp.sourcePosition(), opT, "function");
                 }
 
                 // operand type
                 Type t = unaryOp.operand().getType().baseType();
                 // expected operand type
-                @SuppressWarnings("SequencedCollectionMethodCanBeUsed") Type exT = funcType.argTypes().get(0);
+                @SuppressWarnings("SequencedCollectionMethodCanBeUsed") Type exT = argTypes.get(0);
                 if (!(t.equals(exT))) {
                     throw new SemanticException.TypeError(unaryOp.operand().sourcePosition(), t, exT);
                 }
 
-                unaryOp.setType(funcType.returnType());
+                unaryOp.setType(returnType);
             }
         }
 
@@ -358,13 +358,13 @@ public final class TypeChecker {
                 typecheck(recordAccess.record());
 
                 Type rT = recordAccess.record().getType().baseType();
-                if (!(rT instanceof Type.RecordType recordType)) {
+                if (!(rT instanceof RecordType(List<RecordType.FieldType> fieldTypes))) {
                     throw new SemanticException.TypeError(recordAccess.sourcePosition(), rT, "record");
                 }
 
                 terms.enterNewScope(null);
 
-                for (Type.RecordType.FieldType fieldType : recordType.fieldTypes()) {
+                for (Type.RecordType.FieldType fieldType : fieldTypes) {
                     terms.add(fieldType.fieldName(), fieldType.fieldType());
                 }
 

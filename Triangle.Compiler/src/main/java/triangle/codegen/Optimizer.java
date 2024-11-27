@@ -81,7 +81,7 @@ public class Optimizer {
     }
 
     // this is quite ad-hoc right now
-    public static List<Instruction> combineInstructions(List<Instruction> instructions) {
+    @SuppressWarnings("DanglingJavadoc") public static List<Instruction> combineInstructions(List<Instruction> instructions) {
         List<Instruction> combined = new ArrayList<>();
 
         for (int i = 0; i < instructions.size() - 2; i++) {
@@ -115,6 +115,7 @@ public class Optimizer {
         }
 
         combined.add(instructions.get(instructions.size() - 2));
+        //noinspection SequencedCollectionMethodCanBeUsed
         combined.add(instructions.get(instructions.size() - 1));
 
         return combined;
@@ -171,15 +172,11 @@ public class Optimizer {
             }
         }
 
-        // @formatter:off
         // so I don't have to type 'new Address ...' repeatedly
-        Function<Instruction.LABEL, Instruction.Address> toCodeAddress = label -> new Instruction.Address(
+        return label -> new Instruction.Address(
                 Register.CB,
                 labelLocations.get(label)
         );
-        // @formatter:on
-
-        return toCodeAddress;
     }
 
 }
