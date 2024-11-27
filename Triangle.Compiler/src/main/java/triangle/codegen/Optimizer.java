@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-// TODO: cleanup, move instruction combining and jump threading somewhere else
 public class Optimizer {
 
     // need to ensure combined primitive calls don't overflow
@@ -35,7 +34,7 @@ public class Optimizer {
         return deadCodeEliminator.eliminateDeadCode(program);
     }
 
-    // TODO: this is O(instructions.size()^2), use union-find here
+    // thread unconditional jumps, to reduce some code bloat.
     public static List<Instruction> threadJumps(List<Instruction> instructions) {
         Map<Instruction.LABEL, Instruction.LABEL> threadable = new HashMap<>();
 
@@ -125,7 +124,6 @@ public class Optimizer {
         return combined;
     }
 
-    // TODO: split these functions up
     //  backpatch the instruction list to resolve all labels, primitive calls, redundant instruction etc.
     public static List<Instruction.TAMInstruction> backpatch(final List<Instruction> instructions) {
         Map<Instruction.LABEL, Integer> labelLocations = new HashMap<>();
