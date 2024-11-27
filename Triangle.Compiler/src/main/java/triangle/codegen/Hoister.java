@@ -69,7 +69,6 @@ class Hoister implements RewriteStage {
         @Override public Statement rewrite(final Statement statement) {
             if (statement instanceof Statement.AssignStatement assignStatement) {
                 // have to assume, for complex identifiers, that if any part of the identifier is mutated, then the whole thing is
-                // TODO: there may be a way to only hoist the parts of complex expressions that are actually modified
                 mutated.add(assignStatement.identifier().root().name());
             }
 
