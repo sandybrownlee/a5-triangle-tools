@@ -75,6 +75,7 @@ public class TestScanner {
 		compileExpectSuccess("/hi.tri");
 		compileExpectSuccess("/nesting.tri");
 		compileExpectSuccess("/procedures.tri");
+		compileExpectSuccess("/while-to-hoist.tri"); // this is kind of bait in that it its only testing without -hoist as an argument
 	}
 
 

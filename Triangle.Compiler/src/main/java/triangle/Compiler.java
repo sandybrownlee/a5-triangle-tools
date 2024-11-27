@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.HoistVisitor;
 import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
@@ -48,10 +49,12 @@ public class Compiler {
 	private static boolean showTree = false;
 	@Argument(alias = "fo", description = "enable folding optimisations?", required = false)
 	private static boolean folding = false;
-	@Argument(alias = "ta", description = "show tree after tree optimisations?", required = false)
+	@Argument(alias = "ta", description = "show tree after tree optimisations / hoisting?", required = false)
 	private static boolean showTreeAfter = false;
-	@Argument(alias = "stats", description = "show tree after tree optimisations?", required = false)
+	@Argument(alias = "stats", description = "show statistics? (after folding)", required = false)
 	private static boolean showStatistics = false;
+	@Argument(alias = "hoist", description = "enable while do loop hoisting?", required = false)
+	private static boolean hoistingEnabled = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -119,6 +122,13 @@ public class Compiler {
 			}
 			if (showStatistics) {
 				summaryVisitor.countStats(theAST);
+			}
+			if (hoistingEnabled) {
+				theAST.visit(new HoistVisitor());
+				if (showTreeAfter) {
+					showTree = true;
+					drawer.draw(theAST);
+				}
 			}
 		}
 
