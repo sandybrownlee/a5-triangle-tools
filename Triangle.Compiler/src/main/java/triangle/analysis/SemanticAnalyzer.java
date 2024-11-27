@@ -35,6 +35,7 @@ import java.util.Set;
 //  no duplicate fields in record types
 //  func/proc parameters are only ever supplied with arguments marked func/proc
 //  var parameters are only ever supplied with arguments marked var
+//  static nesting depth is not exceeded
 
 // WARNING: this class uses exception as control flow; this is to allow checking to resume from a known "safe point"
 public final class SemanticAnalyzer {
@@ -61,9 +62,8 @@ public final class SemanticAnalyzer {
         }
     }
 
-    private final SymbolTable<Binding, Void> terms       = new SymbolTable<>(null);
-    private final List<SemanticException>    errors      = new ArrayList<>();
-    private       int                        staticDepth = 0;
+    private final SymbolTable<Binding, Void> terms = new SymbolTable<>(null);
+    private final List<SemanticException>    errors = new ArrayList<>();
 
     {
         // populate initial scope with terms from stdenv
@@ -121,11 +121,9 @@ public final class SemanticAnalyzer {
                 Statement stmt = letStatement.statement();
 
                 try {
-                    terms.enterNewScope(null);
                     bindDeclarations(declarations);
                     // analyze the statement in the new environment
                     analyze(stmt);
-                    terms.exitScope();
                 } catch (SemanticException e) {
                     errors.add(e);
                 }
@@ -187,10 +185,8 @@ public final class SemanticAnalyzer {
                 List<Declaration> declarations = letExpression.declarations();
                 Expression expr = letExpression.expression();
 
-                terms.enterNewScope(null);
                 bindDeclarations(declarations);
                 analyze(expr);
-                terms.exitScope();
             }
             case LitArray litArray -> {
                 for (Expression value : litArray.elements()) {
@@ -289,13 +285,8 @@ public final class SemanticAnalyzer {
                     // function must be bound in its own definition, to allow recursion
                     terms.add(funcDeclaration.name(), new Binding(false, funcDeclaration));
 
-                    if (staticDepth == Machine.maxRoutineLevel) {
-                        throw new SemanticException.NestingDepthExceeded(funcDeclaration.sourcePosition());
-                    }
-
                     try {
                         terms.enterNewScope(null);
-                        staticDepth++;
                         bindParameters(funcDeclaration.parameters());
                         analyze(funcDeclaration.expression());
                     } catch (SemanticException e) {
@@ -303,7 +294,6 @@ public final class SemanticAnalyzer {
                         // we can continue binding other declarations
                     } finally {
                         // treat this function as being bound
-                        staticDepth--;
                         terms.exitScope();
                     }
                 }
@@ -326,12 +316,7 @@ public final class SemanticAnalyzer {
                     // proc must be visible in its own definition
                     terms.add(procDeclaration.name(), new Binding(false, procDeclaration));
 
-                    if (staticDepth == Machine.maxRoutineLevel) {
-                        throw new SemanticException.NestingDepthExceeded(procDeclaration.sourcePosition());
-                    }
-
                     try {
-                        staticDepth++;
                         terms.enterNewScope(null);
                         bindParameters(procDeclaration.parameters());
                         analyze(procDeclaration.statement());
@@ -340,7 +325,6 @@ public final class SemanticAnalyzer {
                         // continue processing other declarations
                     } finally {
                         // treat this proc as being bound
-                        staticDepth--;
                         terms.exitScope();
                     }
                 }
@@ -362,7 +346,12 @@ public final class SemanticAnalyzer {
 
     private Binding lookup(final BasicIdentifier basicIdentifier) throws SemanticException {
         try {
-            return terms.lookup(basicIdentifier.name());
+            SymbolTable<Binding, Void>.DepthLookup lookup = terms.lookupWithDepth(basicIdentifier.name());
+            if (lookup.depth() > Machine.maxRoutineLevel) {
+                throw new SemanticException.NestingDepthExceeded(basicIdentifier.sourcePosition());
+            }
+
+            return lookup.t();
         } catch (NoSuchElementException e) {
             throw new SemanticException.UndeclaredUse(basicIdentifier.sourcePosition(), basicIdentifier);
         }
