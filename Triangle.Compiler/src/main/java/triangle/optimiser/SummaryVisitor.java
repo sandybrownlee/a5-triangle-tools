@@ -471,6 +471,17 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+	@Override
+	public AbstractSyntaxTree visitDoWhileDoCommand(DoWhileDoCommand ast, Void arg) {
+		ast.C1.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		ast.C2.visit(this);
+		return null;
+	}
+
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {

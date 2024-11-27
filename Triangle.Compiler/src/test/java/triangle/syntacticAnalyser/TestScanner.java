@@ -164,6 +164,11 @@ public class TestScanner {
 	public void testSquare() {
 		compileExpectSuccess("/square.tri");
 	}
+
+	@Test
+	public void testDoWhileDo() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
 	
 	
 	
