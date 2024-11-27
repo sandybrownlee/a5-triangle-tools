@@ -27,6 +27,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -37,10 +39,17 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "o", description = "file ", required = false)
 	static String objectName = "obj.tam";
-	
+
+	@Argument(alias = "s", description = "Statistic to compute for the values", required = false)
 	static boolean showTree = false;
+
+	@Argument(alias = "f", description = "Statistic to compute for the values", required = false)
 	static boolean folding = false;
+
+	@Argument(alias = "t", description = "Statistic to compute for the values", required = false)
+	static boolean showAfterTree = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -125,12 +134,14 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		Compiler compiler = new Compiler();
+
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
+
+		Args.parseOrExit(compiler, args);
 
 		String sourceName = args[0];
 		
@@ -138,19 +149,6 @@ public class Compiler {
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
 		}
 	}
 }
