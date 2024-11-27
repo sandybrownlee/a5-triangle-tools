@@ -109,7 +109,7 @@ public class Compiler {
             return;
         }
 
-        program = desugarer.rewrite(program);
+        program = desugarer.visit(program);
 
         typeChecker.typecheck(program);
 

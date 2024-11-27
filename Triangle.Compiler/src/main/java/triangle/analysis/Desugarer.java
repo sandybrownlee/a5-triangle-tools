@@ -9,19 +9,19 @@ import triangle.repr.Expression.LetExpression;
 import triangle.repr.Expression.LitInt;
 import triangle.repr.Expression.SequenceExpression;
 import triangle.repr.Expression.UnaryOp;
-import triangle.repr.RewriteStage;
+import triangle.repr.Visitor;
 import triangle.repr.Statement;
 import triangle.repr.Statement.AssignStatement;
 
 import java.util.List;
 
 // Desugars ++ and **
-public class Desugarer implements RewriteStage {
+public class Desugarer implements Visitor {
 
     private int fresh = 0;
 
-    @Override public Expression rewrite(final Expression expression) {
-        Expression rewritten = RewriteStage.super.rewrite(expression);
+    @Override public Expression visit(final Expression expression) {
+        Expression rewritten = Visitor.super.visit(expression);
 
         // if "++"
         if (rewritten instanceof UnaryOp unaryOp && unaryOp.operator().equals("++")) {
@@ -60,7 +60,7 @@ public class Desugarer implements RewriteStage {
     }
 
     Statement desugar(Statement program) {
-        return rewrite(program);
+        return visit(program);
     }
 
 }

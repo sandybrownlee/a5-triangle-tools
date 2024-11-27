@@ -5,7 +5,7 @@ import triangle.repr.Expression;
 import triangle.repr.Expression.LitBool;
 import triangle.repr.Expression.LitChar;
 import triangle.repr.Expression.LitInt;
-import triangle.repr.RewriteStage;
+import triangle.repr.Visitor;
 import triangle.repr.Statement;
 
 // OCaml equivalents of rewrite rules are provided as //// comments for ease of understanding, with
@@ -13,7 +13,7 @@ import triangle.repr.Statement;
 
 // ConstantFolder maintains type annotations, but may discard source position annotations
 // ConstantFolder does not fold across function calls
-@SuppressWarnings("DanglingJavadoc") class ConstantFolder implements RewriteStage {
+@SuppressWarnings("DanglingJavadoc") class ConstantFolder implements Visitor {
 
     // number of folds above which to try another folding pass since we want to perform multiple passes of constant folding
     // the key observation is that if the number of folds performed in a single pass is quite high, it is more likely that
@@ -34,10 +34,10 @@ import triangle.repr.Statement;
     private int foldCount = 0;
 
     //// open Char in
-    @Override public Expression rewrite(final Expression expression) {
-        Expression folded = RewriteStage.super.rewrite(expression);
+    @Override public Expression visit(final Expression expression) {
+        Expression folded = Visitor.super.visit(expression);
 
-        return switch (RewriteStage.super.rewrite(expression)) {
+        return switch (Visitor.super.visit(expression)) {
             case Expression.BinaryOp binaryOp -> foldBinaryOp(binaryOp);
             case Expression.FunCall funCall -> {
                 //// ("chr", LitInt x) -> LitChar (code x)
@@ -66,7 +66,7 @@ import triangle.repr.Statement;
         // repeatedly fold while the number of folds performed in last pass is above threshold, reset foldCount after each pass
         do {
             foldCount = 0;
-            statement = RewriteStage.super.rewrite(statement);
+            statement = Visitor.super.visit(statement);
             totalFolds += foldCount;
         } while (foldCount >= FOLD_THRESHOLD && totalFolds <= FOLD_LIMIT);
 
