@@ -14,11 +14,6 @@ import java.util.function.Function;
 
 public class Optimizer {
 
-    // need to ensure combined primitive calls don't overflow
-    private static boolean inRange(int x) {
-        return x >= (Machine.maxintRep * -1) && x <= Machine.maxintRep;
-    }
-
     public static Statement foldConstants(Statement program) {
         ConstantFolder constantFolder = new ConstantFolder();
         return constantFolder.fold(program);
@@ -42,7 +37,8 @@ public class Optimizer {
             Instruction cur = instructions.get(i);
             Instruction next = instructions.get(i + 1);
 
-            if (cur instanceof Instruction.LABEL curLabel && next instanceof Instruction.JUMP_LABEL(Instruction.LABEL jumpedLabel)) {
+            if (cur instanceof Instruction.LABEL curLabel &&
+                next instanceof Instruction.JUMP_LABEL(Instruction.LABEL jumpedLabel)) {
                 threadable.put(curLabel, jumpedLabel);
             }
         }
@@ -93,18 +89,18 @@ public class Optimizer {
             Instruction next = instructions.get(i + 1);
             Instruction next2 = instructions.get(i + 2);
 
-            //// [LOADL x, LOADL y, CALL_PRIM add, ...] when inRange(x + y) -> [LOADL x + y, ...]
+            //// [LOADL x, LOADL y, CALL_PRIM add, ...] when inRange(x + y) -> [LOADL x+y, ...]
             if (cur instanceof Instruction.LOADL(int x) &&
                 next instanceof Instruction.LOADL(int y) &&
                 next2 instanceof Instruction.CALL_PRIM(Primitive p) &&
                 p == Primitive.ADD &&
                 inRange(x + y)
-                ) {
+            ) {
                 combined.add(new Instruction.LOADL(x + y));
                 continue;
             }
 
-            //// [LOADL x, LOADL y, CALL_PRIM mult, ...] when inRange(x * y) -> [LOADL x * y, ...]
+            //// [LOADL x, LOADL y, CALL_PRIM mult, ...] when inRange(x * y) -> [LOADL x*y, ...]
             if (cur instanceof Instruction.LOADL(int x) &&
                 next instanceof Instruction.LOADL(int y) &&
                 next2 instanceof Instruction.CALL_PRIM(Primitive p) &&
@@ -126,6 +122,37 @@ public class Optimizer {
 
     //  backpatch the instruction list to resolve all labels, primitive calls, redundant instruction etc.
     public static List<Instruction.TAMInstruction> backpatch(final List<Instruction> instructions) {
+        Function<Instruction.LABEL, Instruction.Address> toCodeAddress = generateLabelToAddressMapper(instructions);
+
+        List<Instruction.TAMInstruction> patchedInstructions = new ArrayList<>();
+        for (Instruction instruction : instructions) {
+            switch (instruction) {
+                case Instruction.LABEL _ -> { }
+                case Instruction.POP(int resultWords, int popCount) when resultWords == 0 && popCount == 0 -> { }
+                case Instruction.CALL_LABEL(Register staticLink, Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.CALL(staticLink, toCodeAddress.apply(label)));
+                case Instruction.JUMPIF_LABEL(int value, Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.JUMPIF(value, toCodeAddress.apply(label)));
+                case Instruction.JUMP_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.JUMP(toCodeAddress.apply(label)));
+                case Instruction.LOADA_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
+                        new Instruction.LOADA(toCodeAddress.apply(label)));
+                case Instruction.CALL_PRIM(Primitive p) -> patchedInstructions.add(
+                        new Instruction.CALL(Register.SB, new Instruction.Address(Register.PB, p.ordinal())));
+                case Instruction.TAMInstruction tamInstruction -> patchedInstructions.add(tamInstruction);
+            }
+        }
+        return patchedInstructions;
+    }
+
+    // need to ensure combined primitive calls don't overflow
+    private static boolean inRange(int x) {
+        return x >= (Machine.maxintRep * -1) && x <= Machine.maxintRep;
+    }
+
+    private static Function<Instruction.LABEL, Instruction.Address> generateLabelToAddressMapper(
+            final List<Instruction> instructions
+    ) {
         Map<Instruction.LABEL, Integer> labelLocations = new HashMap<>();
 
         int offset = 0;
@@ -152,24 +179,7 @@ public class Optimizer {
         );
         // @formatter:on
 
-        List<Instruction.TAMInstruction> patchedInstructions = new ArrayList<>();
-        for (Instruction instruction : instructions) {
-            switch (instruction) {
-                case Instruction.LABEL _ -> { }
-                case Instruction.POP(int resultWords, int popCount) when resultWords == 0 && popCount == 0 -> { }
-                case Instruction.CALL_LABEL(Register staticLink, Instruction.LABEL label) -> patchedInstructions.add(
-                        new Instruction.CALL(staticLink, toCodeAddress.apply(label)));
-                case Instruction.JUMPIF_LABEL(int value, Instruction.LABEL label) -> patchedInstructions.add(
-                        new Instruction.JUMPIF(value, toCodeAddress.apply(label)));
-                case Instruction.JUMP_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
-                        new Instruction.JUMP(toCodeAddress.apply(label)));
-                case Instruction.LOADA_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
-                        new Instruction.LOADA(toCodeAddress.apply(label)));
-                case Instruction.CALL_PRIM(Primitive p) -> patchedInstructions.add(
-                        new Instruction.CALL(Register.SB, new Instruction.Address(Register.PB, p.ordinal())));
-                case Instruction.TAMInstruction tamInstruction -> patchedInstructions.add(tamInstruction);
-            }
-        }
-        return patchedInstructions;
+        return toCodeAddress;
     }
+
 }
