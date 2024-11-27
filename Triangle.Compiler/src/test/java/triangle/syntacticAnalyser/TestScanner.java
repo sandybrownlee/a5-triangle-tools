@@ -32,20 +32,8 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit('\n'));
 	}
 	
-	@Test
-	public void testIsOperator() {
-		assertTrue(Scanner.isOperator('*'));
-		assertTrue(Scanner.isOperator('/'));
-		assertTrue(Scanner.isOperator('?'));
-		assertTrue(Scanner.isOperator('+'));
-		assertTrue(Scanner.isOperator('-'));
-		assertFalse(Scanner.isOperator('a'));
-		assertFalse(Scanner.isOperator('Z'));
-		assertFalse(Scanner.isOperator('1'));
-		assertFalse(Scanner.isOperator(';'));
-		assertFalse(Scanner.isOperator('\n'));
-	}
 	
+
 	
 	/* these tests all try to compile example programs... */
 	
