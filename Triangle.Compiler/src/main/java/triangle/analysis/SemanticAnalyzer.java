@@ -169,6 +169,7 @@ public final class SemanticAnalyzer {
     private void analyze(final Expression expression) throws SemanticException {
         switch (expression) {
             case BinaryOp binop -> {
+                lookup(new BasicIdentifier(binop.operator()).withAnnotationsOf(binop));
                 analyze(binop.leftOperand());
                 analyze(binop.rightOperand());
             }
@@ -235,7 +236,7 @@ public final class SemanticAnalyzer {
                 }
             }
             case UnaryOp unaryOp -> {
-                lookup(unaryOp.operator());
+                lookup(new BasicIdentifier(unaryOp.operator()).withAnnotationsOf(unaryOp));
                 analyze(unaryOp.operand());
             }
             case LitBool _ -> { }

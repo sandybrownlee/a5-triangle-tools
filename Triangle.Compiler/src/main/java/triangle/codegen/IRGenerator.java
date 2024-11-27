@@ -254,7 +254,7 @@ public class IRGenerator {
                 //  generateCall(op, [lOperand, rOperand])
 
                 return generateCall(
-                        binaryOp.operator().name(),
+                        binaryOp.operator(),
                         List.of(binaryOp.leftOperand(), binaryOp.rightOperand())
                 );
             }
@@ -331,7 +331,7 @@ public class IRGenerator {
             }
             case Expression.UnaryOp unaryOp -> {
                 // generateCall(op, [operand])
-                block.addAll(generateCall(unaryOp.operator().name(), List.of(unaryOp.operand())));
+                block.addAll(generateCall(unaryOp.operator(), List.of(unaryOp.operand())));
                 return block;
             }
             case Expression.SequenceExpression sequenceExpression -> {

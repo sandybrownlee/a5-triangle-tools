@@ -54,7 +54,7 @@ public interface RewriteStage {
     default Expression rewrite(Expression expression) {
         return switch (expression) {
             case Expression.BinaryOp binaryOp ->
-                    new Expression.BinaryOp(rewrite(binaryOp.operator()),
+                    new Expression.BinaryOp(binaryOp.operator(),
                                             rewrite(binaryOp.leftOperand()),
                                             rewrite(binaryOp.rightOperand()))
                                   .withAnnotationsOf(binaryOp);
@@ -86,7 +86,7 @@ public interface RewriteStage {
                                                       rewrite(sequenceExpression.expression()))
                                   .withAnnotationsOf(sequenceExpression);
             case Expression.UnaryOp unaryOp ->
-                    new Expression.UnaryOp(rewrite(unaryOp.operator()),
+                    new Expression.UnaryOp(unaryOp.operator(),
                                            rewrite(unaryOp.operand()))
                                   .withAnnotationsOf(unaryOp);
         };

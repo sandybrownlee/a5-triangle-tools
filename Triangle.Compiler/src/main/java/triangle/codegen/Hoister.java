@@ -174,7 +174,7 @@ class Hoister implements RewriteStage {
             return switch (hoisted) {
                 case Expression.BinaryOp binaryOp -> {
                     // we want early returns, to minimize unused computations
-                    if (!PURE_OPS.contains(binaryOp.operator().name())) {
+                    if (!PURE_OPS.contains(binaryOp.operator())) {
                         yield binaryOp;
                     }
 
@@ -195,7 +195,7 @@ class Hoister implements RewriteStage {
                     yield new BasicIdentifier(newName).withType(binaryOp.getType());
                 }
                 case Expression.UnaryOp unaryOp -> {
-                    if (!PURE_OPS.contains(unaryOp.operator().name())) {
+                    if (!PURE_OPS.contains(unaryOp.operator())) {
                         yield unaryOp;
                     }
 

@@ -213,15 +213,15 @@ sealed public abstract class Expression extends Argument implements Annotatable.
 
     public static final class UnaryOp extends Expression {
 
-        private final Identifier.BasicIdentifier operator;
-        private final Expression                 operand;
+        private final String     operator;
+        private final Expression operand;
 
-        public UnaryOp(Identifier.BasicIdentifier operator, Expression operand) {
+        public UnaryOp(String operator, Expression operand) {
             this.operator = operator;
             this.operand = operand;
         }
 
-        public Identifier.BasicIdentifier operator() {
+        public String operator() {
             return operator;
         }
 
@@ -233,18 +233,17 @@ sealed public abstract class Expression extends Argument implements Annotatable.
 
     public static final class BinaryOp extends Expression {
 
-        // TODO: maybe migrate operator type to String?
-        private final Identifier.BasicIdentifier operator;
-        private final Expression                 leftOperand;
-        private final Expression                 rightOperand;
+        private final String     operator;
+        private final Expression leftOperand;
+        private final Expression rightOperand;
 
-        public BinaryOp(Identifier.BasicIdentifier operator, Expression leftOperand, Expression rightOperand) {
+        public BinaryOp(String operator, Expression leftOperand, Expression rightOperand) {
             this.operator = operator;
             this.leftOperand = leftOperand;
             this.rightOperand = rightOperand;
         }
 
-        public Identifier.BasicIdentifier operator() {
+        public String operator() {
             return operator;
         }
 
@@ -254,10 +253,6 @@ sealed public abstract class Expression extends Argument implements Annotatable.
 
         public Expression rightOperand() {
             return rightOperand;
-        }
-
-        public enum BINOPS {
-            OR, AND, LTE, GTE, GT, LT, NOT, SUB, ADD, MUL, DIV, MOD, EQ, NEQ
         }
 
     }

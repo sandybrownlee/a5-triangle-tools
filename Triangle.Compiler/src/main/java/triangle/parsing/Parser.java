@@ -53,8 +53,8 @@ import java.util.Set;
 
 public class Parser {
 
-    private static final Set<Token.Kind> EXPRESSION_FIRST_SET = new HashSet<>();
-    private static final Set<Token.Kind> STATEMENT_FIRST_SET = new HashSet<>();
+    private static final Set<Token.Kind> EXPRESSION_FIRST_SET  = new HashSet<>();
+    private static final Set<Token.Kind> STATEMENT_FIRST_SET   = new HashSet<>();
     private static final Set<Token.Kind> DECLARATION_FIRST_SET = new HashSet<>();
 
     // manual transitive closure for FIRST sets of ident, expr, and stmt
@@ -62,14 +62,16 @@ public class Parser {
         DECLARATION_FIRST_SET.addAll(Set.of(Token.Kind.CONST, Token.Kind.VAR, Token.Kind.PROC, Token.Kind.FUNC, Token.Kind.TYPE));
 
         EXPRESSION_FIRST_SET.addAll(
-                Set.of(Token.Kind.INTLITERAL, Token.Kind.CHARLITERAL, Token.Kind.LBRACK, Token.Kind.LBRACE, Token.Kind.LPAREN,
-                       Token.Kind.LET, Token.Kind.IF, Token.Kind.IDENTIFIER, Token.Kind.OPERATOR, Token.Kind.FALSE,
-                       Token.Kind.TRUE
+                Set.of(
+                        Token.Kind.INTLITERAL, Token.Kind.CHARLITERAL, Token.Kind.LBRACK, Token.Kind.LBRACE, Token.Kind.LPAREN,
+                        Token.Kind.LET, Token.Kind.IF, Token.Kind.IDENTIFIER, Token.Kind.OPERATOR, Token.Kind.FALSE,
+                        Token.Kind.TRUE
                 ));
 
         STATEMENT_FIRST_SET.addAll(
-                Set.of(Token.Kind.BEGIN, Token.Kind.LET, Token.Kind.IF, Token.Kind.WHILE, Token.Kind.LOOP, Token.Kind.REPEAT,
-                       Token.Kind.IDENTIFIER
+                Set.of(
+                        Token.Kind.BEGIN, Token.Kind.LET, Token.Kind.IF, Token.Kind.WHILE, Token.Kind.LOOP, Token.Kind.REPEAT,
+                        Token.Kind.IDENTIFIER
                 ));
         STATEMENT_FIRST_SET.addAll(EXPRESSION_FIRST_SET);
     }
@@ -177,15 +179,14 @@ public class Parser {
                 if (nextToken.getKind() == Token.Kind.OPERATOR) {
                     String operatorString = ((TextToken) nextToken).getText();
                     SourcePosition start = shift(Token.Kind.OPERATOR);
-                    Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(operatorString).withSourcePosition(start);
 
                     if (EXPRESSION_FIRST_SET.contains(nextToken.getKind())) {
                         Expression secondExpression = parseExpression();
-                        BinaryOp binaryOp = new BinaryOp(operator, identifier, secondExpression).withSourcePosition(start);
+                        BinaryOp binaryOp = new BinaryOp(operatorString, identifier, secondExpression).withSourcePosition(start);
                         yield new ExpressionStatement(binaryOp).withSourcePosition(start);
                     }
 
-                    yield new ExpressionStatement(new UnaryOp(operator, identifier).withSourcePosition(start));
+                    yield new ExpressionStatement(new UnaryOp(operatorString, identifier).withSourcePosition(start));
                 }
 
                 Expression e = parseIfCall(identifier);
@@ -268,9 +269,8 @@ public class Parser {
             case OPERATOR -> {
                 String operatorText = ((TextToken) nextToken).getText();
                 SourcePosition start = shift(Token.Kind.OPERATOR);
-                Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(operatorText).withSourcePosition(start);
                 Expression expression = parseExpression();
-                yield new UnaryOp(operator, expression).withSourcePosition(start);
+                yield new UnaryOp(operatorText, expression).withSourcePosition(start);
             }
 
             default -> throw new SyntaxError(nextToken);
@@ -279,14 +279,13 @@ public class Parser {
         if (nextToken.getKind() == Token.Kind.OPERATOR) {
             String operatorText = ((TextToken) nextToken).getText();
             SourcePosition start = shift(Token.Kind.OPERATOR);
-            Identifier.BasicIdentifier operator = new Identifier.BasicIdentifier(operatorText).withSourcePosition(start);
 
             if (EXPRESSION_FIRST_SET.contains(nextToken.getKind())) {
                 Expression secondExpression = parseExpression();
-                return new BinaryOp(operator, firstExpression, secondExpression).withSourcePosition(start);
+                return new BinaryOp(operatorText, firstExpression, secondExpression).withSourcePosition(start);
             }
 
-            return new UnaryOp(operator, firstExpression).withSourcePosition(start);
+            return new UnaryOp(operatorText, firstExpression).withSourcePosition(start);
         }
 
         return firstExpression;

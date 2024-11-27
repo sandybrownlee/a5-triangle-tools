@@ -105,7 +105,7 @@ public final class ASTPrinter {
         return switch (expression) {
             case Expression.BinaryOp binaryOp -> String.format(
                     "(BINOP %s %s %s)",
-                    prettyPrint(binaryOp.operator()),
+                    binaryOp.operator(),
                     prettyPrint(binaryOp.leftOperand()),
                     prettyPrint(binaryOp.rightOperand())
             );
@@ -138,7 +138,7 @@ public final class ASTPrinter {
             );
             case Expression.UnaryOp unaryOp -> String.format(
                     "(UNARYOP %s %s)",
-                    prettyPrint(unaryOp.operator()),
+                    unaryOp.operator(),
                     prettyPrint(unaryOp.operand())
             );
             case Expression.LitBool litBool -> Boolean.toString(litBool.value());

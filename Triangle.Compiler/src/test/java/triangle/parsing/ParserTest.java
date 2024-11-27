@@ -82,30 +82,30 @@ public class ParserTest {
             // EXPR = 4 + RIGHT_0
             BinaryOp expr = (BinaryOp) ((ExpressionStatement) program).expression();
             LitInt four = (LitInt) expr.leftOperand();
-            BasicIdentifier add = expr.operator();
+            String add = expr.operator();
 
             // RIGHT_0 = 3 * RIGHT_1
             BinaryOp right_0 = (BinaryOp) expr.rightOperand();
             LitInt three = (LitInt) right_0.leftOperand();
-            BasicIdentifier mul = right_0.operator();
+            String mul = right_0.operator();
 
             // RIGHT_1 = 5 / RIGHT_2
             BinaryOp right_1 = (BinaryOp) right_0.rightOperand();
             LitInt five = (LitInt) right_1.leftOperand();
-            BasicIdentifier div = right_1.operator();
+            String div = right_1.operator();
 
             // RIGHT_2 = 8 // 2
             BinaryOp right_2 = (BinaryOp) right_1.rightOperand();
             LitInt eight = (LitInt) right_2.leftOperand();
-            BasicIdentifier mod = right_2.operator();
+            String mod = right_2.operator();
             LitInt two = (LitInt) right_2.rightOperand();
 
             // asserts everything is what we expected it to be
 
-            assertEquals("+", add.name());
-            assertEquals("*", mul.name());
-            assertEquals("/", div.name());
-            assertEquals("//", mod.name());
+            assertEquals("+", add);
+            assertEquals("*", mul);
+            assertEquals("/", div);
+            assertEquals("//", mod);
 
             assertEquals(4, four.value());
             assertEquals(3, three.value());

@@ -83,7 +83,7 @@ class ConstantFolder implements RewriteStage {
 
         //@formatter:off
         //// match binaryOp with
-        return switch (new T(binaryOp.operator().name(), binaryOp.leftOperand(), binaryOp.rightOperand())) {
+        return switch (new T(binaryOp.operator(), binaryOp.leftOperand(), binaryOp.rightOperand())) {
             //// Bop ("+", e, LitInt 0) -> e
             case T(String op, Expression e, LitInt litInt) when op.equals("+") && litInt.value() == 0 -> e;
             //// Bop ("+", LitInt 0, e) -> e
@@ -155,7 +155,7 @@ class ConstantFolder implements RewriteStage {
         record T(String op, Expression e) { }
 
         //// match unaryOp with
-        return switch (new T(unaryOp.operator().name(), unaryOp.operand())) {
+        return switch (new T(unaryOp.operator(), unaryOp.operand())) {
             //// Op ("++", LitInt x) when inRange (x + 1) -> LitInt (x + 1)
             case T(String op, LitInt x) when op.equals("++") && inRange(x.value() + 1) -> new LitInt(x.value() + 1);
             //// Op ("--", LitInt x) when inRange (x - 1) -> LitInt (x - 1)

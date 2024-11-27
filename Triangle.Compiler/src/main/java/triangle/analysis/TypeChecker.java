@@ -151,14 +151,14 @@ final class TypeChecker {
     private void checkAndAnnotate(Expression expression) throws SemanticException {
         switch (expression) {
             case Expression.BinaryOp binOp -> {
-                Type opT = terms.lookup(binOp.operator().name());
+                Type opT = terms.lookup(binOp.operator());
 
                 checkAndAnnotate(binOp.leftOperand());
                 checkAndAnnotate(binOp.rightOperand());
 
                 // I special-case the equality operations because they are the ONLY polymorphic functions and I do not have enough
                 //  time to implement full polymorphism
-                if (binOp.operator().name().equals("=") || binOp.operator().name().equals("\\=")) {
+                if (binOp.operator().equals("=") || binOp.operator().equals("\\=")) {
                     // just make sure that left and right operands are the same type
                     Type lT = binOp.leftOperand().getType().baseType();
                     Type rT = binOp.leftOperand().getType().baseType();
@@ -289,7 +289,7 @@ final class TypeChecker {
                 sequenceExpression.setType(sequenceExpression.expression().getType().baseType());
             }
             case Expression.UnaryOp unaryOp -> {
-                Type opT = terms.lookup(unaryOp.operator().name());
+                Type opT = terms.lookup(unaryOp.operator());
 
                 checkAndAnnotate(unaryOp.operand());
 
