@@ -58,7 +58,7 @@ public class Compiler {
         sourceName = "programs/test.tri";
 
         try {
-            compileProgram(new FileInputStream(sourceName), new FileOutputStream(objectName));
+            compileProgram(new FileInputStream(sourceName), new FileOutputStream(objectName), constantFolding, hoisting);
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             e.printStackTrace();
@@ -74,7 +74,9 @@ public class Compiler {
         }
     }
 
-    static void compileProgram(InputStream inputStream, final FileOutputStream outputStream) throws IOException, SyntaxError {
+    static void compileProgram(
+            InputStream inputStream, final FileOutputStream outputStream, boolean constantFolding, boolean hoisting)
+    throws IOException, SyntaxError {
         Parser parser = new Parser(inputStream);
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
         IRGenerator irGenerator = new IRGenerator();
