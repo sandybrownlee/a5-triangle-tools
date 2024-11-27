@@ -39,13 +39,36 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
 	}
-	
+
+	@Test
+	public void testIsLetter(){
+		for (char c = 'a'; c <= 'z'; c++) {
+			assertTrue(Scanner.isLetter(c));
+		}
+		for (char c = 'A'; c <= 'Z'; c++) {
+			assertTrue(Scanner.isLetter(c));
+		}
+
+		assertFalse(Scanner.isLetter('1'));
+		assertFalse(Scanner.isLetter('*'));
+		assertFalse(Scanner.isLetter('&'));
+		assertFalse(Scanner.isLetter(' '));
+		assertFalse(Scanner.isLetter('\n'));
+	}
 	
 	/* these tests all try to compile example programs... */
 	
@@ -79,8 +102,9 @@ public class TestScanner {
 	}
 
 	@Test
-	public void testSquaredNumber(){compileExpectSuccess("/square.tri");}
-	
+	public void testSquaredNumber(){
+		compileExpectSuccess("/square.tri");}
+
 	
 	
 	private void compileExpectSuccess(String filename) {
