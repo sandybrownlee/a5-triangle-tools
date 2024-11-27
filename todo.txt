@@ -1,3 +1,0 @@
-implement SummaryVisitor
-maybe have a symbol class?
-maybe do constant propagation?

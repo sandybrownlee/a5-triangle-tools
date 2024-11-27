@@ -92,7 +92,6 @@ final class Lexer {
                 yield nextToken();
             }
 
-            // TODO: should block comments be nestable?
             case '$' -> {
                 do {
                     read();
