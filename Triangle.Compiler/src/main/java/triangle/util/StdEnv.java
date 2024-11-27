@@ -5,6 +5,7 @@ import triangle.repr.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static triangle.repr.Type.*;
 
@@ -13,17 +14,34 @@ public final class StdEnv {
     public static final Map<String, Type> STD_TERMS = new HashMap<>();
 
     //@formatter:off
-    public static final  Map<String, Type> STD_TYPES         =
+    public static final  Map<String, Type> STD_TYPES =
             Map.of(
                     "Integer", INT_TYPE,
                     "Char", CHAR_TYPE,
                     "Boolean", BOOL_TYPE
             );
+
+    // binary/unary operations known to be pure
+    public static final  Set<String> PURE_OPS = Set.of(
+            "\\/",
+            "/\\",
+            "<=",
+            ">=",
+            ">",
+            "<",
+            "\\",
+            "-",
+            "+",
+            "*",
+            "/",
+            "//",
+            "|"
+    );
     //@formatter:on
 
     private static final Type RELATION            = new Type.PrimType.FuncType(List.of(BOOL_TYPE, BOOL_TYPE), BOOL_TYPE);
     private static final Type BINARY_INT_RELATION = new Type.PrimType.FuncType(List.of(INT_TYPE, INT_TYPE), BOOL_TYPE);
-    private static final Type BINARY_INT_FUNC     = new Type.PrimType.FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);
+    private static final Type BINARY_INT_FUNC     = new Type.PrimType.FuncType(List.of(INT_TYPE, INT_TYPE), INT_TYPE);//@formatter:off
 
     //@formatter:off
     static {

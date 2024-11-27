@@ -7,6 +7,7 @@ import triangle.repr.Expression.Identifier.BasicIdentifier;
 import triangle.repr.RewriteStage;
 import triangle.repr.SourcePosition;
 import triangle.repr.Statement;
+import triangle.util.StdEnv;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -24,25 +25,6 @@ import java.util.function.Supplier;
 //          basic identifier accesses. ExpressionHoister provides a list of declarations that must be performed, in a scope
 //          enclosing the hoisted loop, to make the hoisting valid
 class Hoister implements RewriteStage {
-
-    //@formatter:off
-    // TODO: StdEnv should store purity annotations
-    private static final Set<String> PURE_OPS = Set.of(
-            "\\/",
-            "/\\",
-            "<=",
-            ">=",
-            ">",
-            "<",
-            "\\",
-            "-",
-            "+",
-            "*",
-            "/",
-            "//",
-            "|"
-    );
-    //@formatter:on
 
     // takes a SourcePosition and creates a label prefix that can uniquely identify the hoisted expressions upto a single loop
     // statement
@@ -174,7 +156,7 @@ class Hoister implements RewriteStage {
             return switch (hoisted) {
                 case Expression.BinaryOp binaryOp -> {
                     // we want early returns, to minimize unused computations
-                    if (!PURE_OPS.contains(binaryOp.operator())) {
+                    if (!StdEnv.PURE_OPS.contains(binaryOp.operator())) {
                         yield binaryOp;
                     }
 
@@ -195,7 +177,7 @@ class Hoister implements RewriteStage {
                     yield new BasicIdentifier(newName).withType(binaryOp.getType());
                 }
                 case Expression.UnaryOp unaryOp -> {
-                    if (!PURE_OPS.contains(unaryOp.operator())) {
+                    if (!StdEnv.PURE_OPS.contains(unaryOp.operator())) {
                         yield unaryOp;
                     }
 
