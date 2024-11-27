@@ -8,7 +8,7 @@ let
     func q() : Integer ~ (7 * (4 + 3) / 12) + 4;
 
     ! wont fold
-    proc p(x : Integer) ~ x + 5;
+    proc r(x : Integer) ~ x + 5;
 
  in
     ! folds arg
