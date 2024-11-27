@@ -140,6 +140,11 @@ public class TestScanner {
 		compileExpectSuccess("/loopwhile.tri");
 	}
 
+    @Test
+	public void testBooleanFolding() {
+		compileExpectSuccess("/booleans-to-fold.tri");
+	}
+
 
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
