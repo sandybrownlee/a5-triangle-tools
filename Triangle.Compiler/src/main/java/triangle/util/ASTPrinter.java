@@ -56,6 +56,7 @@ public final class ASTPrinter {
                     prettyPrint(whileStatement.condition()),
                     prettyPrint(whileStatement.body())
             );
+            case Statement.NoopStatement noopStatement -> "NOOP";
         };
     }
 

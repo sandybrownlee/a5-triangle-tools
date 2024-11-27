@@ -43,8 +43,9 @@ public class SemanticAnalyzerTest {
     }
 
     @Test public void testDuplicateRecordTypeField() throws SyntaxError, IOException {
-        assertTrue(analyzeExpectException("let type R ~ record a : Integer, a : Char end in 1}",
-                                          SemanticException.DuplicateRecordTypeField.class
+        assertTrue(analyzeExpectException(
+                "let type R ~ record a : Integer, a : Char end in 1}",
+                SemanticException.DuplicateRecordTypeField.class
         ));
     }
 
@@ -53,14 +54,16 @@ public class SemanticAnalyzerTest {
     }
 
     @Test public void testDuplicateDeclaration() throws SyntaxError, IOException {
-        assertTrue(analyzeExpectException("let var x : Integer; var x : Integer in x",
-                                          SemanticException.DuplicateDeclaration.class
+        assertTrue(analyzeExpectException(
+                "let var x : Integer; var x : Integer in x",
+                SemanticException.DuplicateDeclaration.class
         ));
     }
 
     @Test public void testDuplicateParameter() throws SyntaxError, IOException {
-        assertTrue(analyzeExpectException("let proc p(x : Integer, x : Integer) ~ puteol() in 1",
-                                          SemanticException.DuplicateParameter.class
+        assertTrue(analyzeExpectException(
+                "let proc p(x : Integer, x : Integer) ~ puteol() in 1",
+                SemanticException.DuplicateParameter.class
         ));
     }
 
@@ -69,28 +72,33 @@ public class SemanticAnalyzerTest {
     }
 
     @Test public void testInvalidArgument() throws SyntaxError, IOException {
-        assertTrue(analyzeExpectException("let proc p(var x : Integer) ~ puteol(); var x : Integer in p(x)",
-                                          SemanticException.InvalidArgument.class
+        assertTrue(analyzeExpectException(
+                "let proc p(var x : Integer) ~ puteol(); var x : Integer in p(x)",
+                SemanticException.InvalidArgument.class
         ));
     }
 
     @Test public void testNestingDepthExceeded() throws SyntaxError, IOException {
-        assertTrue(analyzeExpectException("""
-                                          let proc p() ~
-                                              let proc p() ~
-                                                  let proc p() ~
-                                                      let proc p() ~
-                                                          let proc p() ~
-                                                              let proc p() ~
-                                                                  let proc p() ~ puteol();
-                                                                   in puteol();
-                                                               in puteol();
-                                                           in puteol();
-                                                       in puteol();
-                                                   in puteol();
-                                               in puteol();
-                                           in puteol();
-                                          """, SemanticException.NestingDepthExceeded.class));
+        assertTrue(analyzeExpectException(
+                """
+                let proc p1() ~
+                    let proc p2() ~
+                        let proc p3() ~
+                            let proc p4() ~
+                                let proc p5() ~
+                                    let proc p6() ~
+                                        let proc p7() ~
+                                            let proc p8() ~ p1()
+                                            in p8();
+                                         in p7();
+                                     in p6();
+                                 in p5();
+                             in p4();
+                         in p3();
+                     in p2();
+                 in p1();
+                """, SemanticException.NestingDepthExceeded.class
+        ));
     }
 
 }
