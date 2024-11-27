@@ -337,8 +337,8 @@ public final class TypeChecker {
 
                 // arr[0] has type arr.elementType if arr is not a ref
                 // type RefOf(arr.elementType) if arr is a RefOf(refType)
-                Type eT = arraySubscript.array().getType() instanceof Type.RefOf ? new Type.RefOf(arrayType.elementType()) :
-                          arrayType.elementType();
+                Type elemT = arrayType.elementType();
+                Type eT = arraySubscript.array().getType().isRef() ? new Type.RefOf(elemT) : elemT;
 
                 arraySubscript.setType(eT);
             }

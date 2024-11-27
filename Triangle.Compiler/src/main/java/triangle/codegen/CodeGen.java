@@ -482,8 +482,7 @@ public class CodeGen {
             }
             // load address of var argument
             // if the argument provided is already an address, then dont dereference it here needlessly
-            case Argument.VarArgument varArgument -> generateRuntimeLocation(
-                    varArgument.var(), varArgument.getType() instanceof Type.RefOf);
+            case Argument.VarArgument varArgument -> generateRuntimeLocation(varArgument.var(), varArgument.getType().isRef());
             // just evaluate expr and leave it on stack
             case Expression expressionArg -> generate(expressionArg);
         }
@@ -499,7 +498,7 @@ public class CodeGen {
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 Instruction.Address address = lookupAddress(basicIdentifier);
 
-                if (basicIdentifier.getType() instanceof Type.RefOf) {
+                if (basicIdentifier.getType().isRef()) {
                     generateRuntimeLocation(identifier, true);
                     program.add(new Instruction.LOADI(size));
                 } else {
@@ -525,7 +524,7 @@ public class CodeGen {
             case Expression.Identifier.BasicIdentifier basicIdentifier -> {
                 Instruction.Address address = lookupAddress(basicIdentifier);
 
-                if (basicIdentifier.getType() instanceof Type.RefOf) {
+                if (basicIdentifier.getType().isRef()) {
                     generateRuntimeLocation(identifier, true);
                     program.add(new Instruction.STOREI(size));
                 } else {
@@ -562,7 +561,7 @@ public class CodeGen {
                 program.add(new Instruction.LOADA(address));
 
                 // if its a identifier is already a reference, then "dereference" it
-                if (dereferencing && basicIdentifier.getType() instanceof Type.RefOf) {
+                if (dereferencing && basicIdentifier.getType().isRef()) {
                     program.add(new Instruction.LOADI(Machine.addressSize));
                 }
             }
@@ -600,7 +599,7 @@ public class CodeGen {
                 break;
             }
 
-            assert !(fieldType.fieldType() instanceof Type.RefOf);
+            assert !(fieldType.fieldType().isRef());
             offset += fieldType.fieldType().size();
         }
 

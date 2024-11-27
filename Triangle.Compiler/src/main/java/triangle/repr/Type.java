@@ -25,6 +25,8 @@ sealed public interface Type {
         return this;
     }
 
+    default boolean isRef() { return this instanceof RefOf; }
+
     sealed interface PrimType extends Type
             permits PrimType.FuncType, PrimType.BoolType, PrimType.IntType, PrimType.CharType,
                     PrimType.VoidType {
