@@ -577,14 +577,68 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		ast.V.visit(this);
 		return null;
 	}
+
+	/**
+	 // assistance function for foldBooleanExpression.
+	 public AbstractSyntaxTree unwrapIdentifier(AbstractSyntaxTree ast) {
+	 VnameExpression vNameAST = (VnameExpression) ast;
+	 SimpleVname simpleVnameAST = (SimpleVname) vNameAST.V;
+	 return simpleVnameAST.I.decl;
+	 }
+
+	 // started work on how to fold booleans further such that => b := true; if b \/ ((1+2)=3) would resolve to "if true" - but then realised this is a little out of scope, but folding is cool :)
+	 // didn't fully implement this as I caught myself doing more work than is required for the assignment.
+	 public AbstractSyntaxTree foldBooleanExpression(AbstractSyntaxTree ast1, AbstractSyntaxTree ast2, Operator o) {
+	 boolean b1 = Boolean.parseBoolean(unwrapIdentifier(ast1).toString());
+	 boolean b2 = Boolean.parseBoolean(unwrapIdentifier(ast2).toString());
+
+	 Identifier foldedValue;
+	 Identifier foldedValue1 = new Identifier("true", ast1.getPosition());
+	 Identifier foldedValue2 = new Identifier("false", ast2.getPosition());
+
+	 foldedValue = b1 || b2 ? foldedValue1  : foldedValue2;
+
+
+	 return foldedValue;
+	 }
+	 **/
+
+	// task 7
+	public AbstractSyntaxTree IdentifierAsVname(Object foldedValue, SourcePosition pos) {
+		Identifier booleanIdentifier = new Identifier(foldedValue.toString(), pos);
+		booleanIdentifier.decl = foldedValue.toString().equals("true") ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+		SimpleVname simpleVname = new SimpleVname(booleanIdentifier, pos);
+		VnameExpression Vname = new VnameExpression(simpleVname, pos);
+		Vname.type = StdEnvironment.booleanType;
+		return Vname;
+	}
+
+
 	// task 7
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
 		// the only case we know how to deal with for now is two IntegerExpressions
+		Object foldedValue = getFoldedValue(node1, node2, o);
+		if (foldedValue instanceof Integer) {
+			IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
+			IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+			ie.type = StdEnvironment.integerType;
+			return ie;
+		}
+		else if (foldedValue instanceof Boolean) {
+			// avoids duplication of code by assigning value of bID based on shorthand if notation for cleaner code, we can simply just check if it evaluates to true - thank you for providing an example of how to use this in Compiler.java with System.exit() method
+			return IdentifierAsVname(foldedValue, node1.getPosition());
+		}
+		// any unhandled situation (i.e., not foldable) is ignored
+		return null;
+	}
+
+	private Object getFoldedValue(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
+
+		Object foldedValue = null;
+
 		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
-			Object foldedValue = null;
-
 			// handling comparison operation folding + the initial add
 			// if else statements since switch requires primitive types although performance cost trade-offs are likely negligible especially at such a small scale
 			if (o.decl == StdEnvironment.addDecl) {
@@ -608,25 +662,18 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			else if (o.decl == StdEnvironment.notgreaterDecl) {
 				foldedValue = int1 <= int2;
 			}
-
-			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-				ie.type = StdEnvironment.integerType;
-				return ie;
-			}
-			else if (foldedValue instanceof Boolean) {
-				// avoids duplication of code by assigning value of bID based on shorthand if notation for cleaner code, we can simply just check if it evaluates to true - thank you for providing an example of how to use this in Compiler.java with System.exit() method
-				Identifier booleanIdentifier = new Identifier(foldedValue.toString(), node1.getPosition());
-				booleanIdentifier.decl = foldedValue.toString().equals("true") ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
-				SimpleVname simpleVname = new SimpleVname(booleanIdentifier, node1.getPosition());
-				VnameExpression Vname = new VnameExpression(simpleVname, node1.getPosition());
-				Vname.type = StdEnvironment.booleanType;
-				return Vname;
-			}
+			return foldedValue;
 		}
-
-		// any unhandled situation (i.e., not foldable) is ignored
+		/**
+		 * not implemented
+		 *
+		 else if ((node1 instanceof VnameExpression) && (node2 instanceof VnameExpression)) {
+		 if (o.decl == StdEnvironment.addDecl) {
+		 foldBooleanExpression(node1, node2, o);
+		 }
+		 }
+		 **/
+		// errored out or not relevant to us.
 		return null;
 	}
 
