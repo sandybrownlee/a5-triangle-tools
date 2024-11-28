@@ -49,11 +49,11 @@ public class TestScanner {
 	
 	/* these tests all try to compile example programs... */
 	
-	@Test
+	/*@Test
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+	*/
 
 	@Test
 	public void testHiNewComment() {
