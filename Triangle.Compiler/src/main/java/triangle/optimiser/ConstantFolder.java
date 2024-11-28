@@ -577,9 +577,29 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+
+
+			//add additional folding for boolean operators
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
+			} else if (o.decl == StdEnvironment.subtractDecl) {
+				foldedValue = int1 - int2;
+			} else if (o.decl == StdEnvironment.multiplyDecl && int2 != 0){
+				foldedValue = int1 * int2;
+			} else if (o.decl == StdEnvironment.divideDecl) {
+				foldedValue = int1 / int2;
+			} else if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 == int2;
+			} else if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			} else if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			} else if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			}else if (o.decl == StdEnvironment.greaterDecl){
+				foldedValue = int1 > int2;
+			}else if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
 			}
 
 			if (foldedValue instanceof Integer) {
@@ -588,7 +608,26 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				//handle folded boolean values
+				boolean boolResut = (Boolean)foldedValue; //cast folded value to a boolean
+				Identifier id;
+				if(boolResut){
+					//if the result is true, create an identifier "true"
+					id = new Identifier("true", node1.getPosition());
+					id.decl =StdEnvironment.trueDecl;
+				}else{
+					//if the result is false, create an identifier "false"
+					id = new Identifier("false", node1.getPosition());
+                    id.decl = StdEnvironment.falseDecl;
+				}
+				//wrap identifier as simpleVname
+				SimpleVname vname = new SimpleVname(id, node1.getPosition());
+				//wrap the VimpleVname in a VnameExpression
+				VnameExpression vnameExpression = new VnameExpression(vname, node1.getPosition());
+				//set the expression type to boolean
+				vnameExpression.type = StdEnvironment.booleanType;
+				//return the folded expression as a VnameExpression representing the boolean value
+				return vnameExpression;
 			}
 		}
 
