@@ -54,8 +54,23 @@ public class HoistVisitor extends ConstantFolder {
 		if (currentlyHoisting && currentlyInLoop) {
 			if (canHoistExpression(replacement1)) {
 				return ast; // if the left side of the expression doesn't appear
-			}
-			if (replacement2 instanceof BinaryExpression) {
+			} else if (replacement1 instanceof BinaryExpression binaryExpression1 && replacement2 instanceof BinaryExpression binaryExpression2) {
+				AbstractSyntaxTree node1 = binaryExpression1.E1;
+				AbstractSyntaxTree node2 = binaryExpression1.E2;
+
+				AbstractSyntaxTree node3 = binaryExpression2.E1;
+				AbstractSyntaxTree node4 = binaryExpression2.E2;
+
+				if (canHoistBinaryExpression(node1, node2) && canHoistBinaryExpression(node3, node4)) {
+					return ast;
+				}
+			} else if (replacement1 instanceof BinaryExpression) {
+				AbstractSyntaxTree node1 = ((BinaryExpression) replacement1).E1;
+				AbstractSyntaxTree node2 = ((BinaryExpression) replacement1).E2;
+				if (canHoistBinaryExpression(node1, node2)) {
+					return replacement1;
+				}
+			} else if (replacement2 instanceof BinaryExpression) {
 				AbstractSyntaxTree node1 = ((BinaryExpression) replacement2).E1;
 				AbstractSyntaxTree node2 = ((BinaryExpression) replacement2).E2;
 				if (canHoistBinaryExpression(node1, node2)) {
@@ -96,26 +111,8 @@ public class HoistVisitor extends ConstantFolder {
 	 * @return
 	 */
 	public boolean canHoistBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2) {
-		if (node1 instanceof VnameExpression vnameExpression && node2 instanceof VnameExpression vnameExpression2) { // an example would be "b := b + (c + y); ! c+y can be hoisted"
-			AbstractSyntaxTree sVname1 = vnameExpression.V.visit(this);
-			AbstractSyntaxTree sVname2 = vnameExpression2.V.visit(this);
-
-			// we want to grab the variables spelling to check against the table and so express it as a simple vName,
-			// there is probably opportunity to replace this with the equivalent of  Vname v = new SimpleVName()
-			// simpleVname works because we literally just want access to the Identifier present within the wrapper class.
-			SimpleVname realsVname1 = (SimpleVname) sVname1;
-			String spelling = realsVname1.I.spelling;
-			Declaration d = idTable.retrieve(spelling, false);
-
-			// there's definitely a bug in here because I previously had
-			// realsVanme2 = (SimpleVname) sVname1
-			// it should be fine with this logic I imagine?
-
-			SimpleVname realsVname2 = (SimpleVname) sVname2;
-			spelling = realsVname2.I.spelling;
-			Declaration d2 = idTable.retrieve(spelling, false);
-
-			return d == null && d2 == null;
+		if (node1 instanceof VnameExpression && node2 instanceof VnameExpression) { // an example would be "b := b + (c + y); ! c+y can be hoisted"
+			return canHoistExpression(node1) && canHoistExpression(node2);
 		}
 		// allows the hoisting of binary expressions within binary expressions - there's probably a better way to recursively do this an example would be "b := b + (c + 4); ! c+4 can be hoisted"
 		else if (node1 instanceof VnameExpression && node2 instanceof IntegerExpression) { // to add a type of statement to be recursively checked, we can simply just check either node vs canHoistExpression()
