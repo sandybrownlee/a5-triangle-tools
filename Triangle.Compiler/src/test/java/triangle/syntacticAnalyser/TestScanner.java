@@ -39,11 +39,50 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+	}
+
+	@Test
+    public void testIsLetter() {
+		//loop through upper case letters
+		for(char c ='A'; c <='Z'; c++){
+			assertTrue(Scanner.isLetter(c));
+		}
+
+		//loop through lower case letters
+		for(char c ='a'; c <='z'; c++){
+			assertTrue(Scanner.isLetter(c));
+		}
+
+		// Test invalid cases
+		assertFalse(Scanner.isLetter('0'));  // Number
+		assertFalse(Scanner.isLetter('9'));  // Number
+		assertFalse(Scanner.isLetter('&'));  // Special character
+		assertFalse(Scanner.isLetter(';'));  // Special character
+		assertFalse(Scanner.isLetter(' '));  // Whitespace
+		assertFalse(Scanner.isLetter('\n')); // new line character
+
+		assertFalse(Scanner.isLetter('@'));  // Character just before 'A' in ASCII chart
+		assertFalse(Scanner.isLetter('['));  // Character just after 'Z' in ASCII chart
+		assertFalse(Scanner.isLetter('`'));  // Character just before 'a' in ASCII chart
+		assertFalse(Scanner.isLetter('{'));  // Character just after 'z' in ASCII chart
+
+
+
 	}
 	
 	

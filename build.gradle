@@ -1,5 +1,7 @@
 apply plugin: 'java'
 
+
+
 sourceCompatibility = 17
 
 subprojects.each { subproject ->
@@ -21,6 +23,6 @@ jar {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-
     from subprojects.sourceSets.main.output
 }
+

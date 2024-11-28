@@ -3,6 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle-Tools.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle-Tools.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.iml" filepath="$PROJECT_DIR$/.idea/modules/Triangle.Compiler/Triangle-Tools.Triangle.Compiler.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/a5-triangle-tools-assignment.Triangle-Tools.iml" filepath="$PROJECT_DIR$/.idea/modules/a5-triangle-tools-assignment.Triangle-Tools.iml" />
       <module fileurl="file://$PROJECT_DIR$/Triangle.Compiler/triangle-compiler.iml" filepath="$PROJECT_DIR$/Triangle.Compiler/triangle-compiler.iml" />
     </modules>
   </component>

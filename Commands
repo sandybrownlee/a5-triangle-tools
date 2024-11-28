@@ -1,0 +1,7 @@
+COMPILE PROGRAM:
+
+java -cp build/libs/Triangle-Tools.jar triangle.Compiler programs/square.tri -o square.tam
+
+RUN PROGRAM:
+java -cp build/libs/Triangle-Tools.jar triangle.abstractMachine.Interpreter square.tam
+
