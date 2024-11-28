@@ -86,14 +86,10 @@ public class Compiler {
                 }
             }
             if(showStats){
-                SummaryVisitor sv = new SummaryVisitor();
+                SummaryVisitor sv = new SummaryVisitor(); //instantiate a new SummaryVisitorClass
                 sv.visitProgram(theAST, null); // Generate summary statistics.
-                sv.printSummary();
-
-
+                sv.printSummary(); // print the summary
             }
-
-
             if (reporter.getNumErrors() == 0) {
                 System.out.println("Code Generation ...");
                 encoder.encodeRun(theAST, showingTable); // 3rd pass

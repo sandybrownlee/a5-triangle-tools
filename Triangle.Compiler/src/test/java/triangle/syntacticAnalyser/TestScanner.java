@@ -121,6 +121,12 @@ public class TestScanner {
 	public void testSquareExpression(){
 		compileExpectSuccess("/square.tri");
 	}
+
+	//test loop while commands work
+	@Test
+    public void testLoopWhile(){
+        compileExpectSuccess("/loopwhile.tri");
+    }
 	
 	
 	

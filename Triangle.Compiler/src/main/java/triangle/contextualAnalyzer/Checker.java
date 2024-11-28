@@ -33,13 +33,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstantDeclaration;
@@ -174,6 +168,24 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
 		ast.C.visit(this);
+
+		return null;
+	}
+
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Void unused) {
+		//check the first command block of the loop
+		ast.C1.visit(this, null);
+
+        //check the condition and check its type
+		TypeDenoter conditionType = ast.E.visit(this, null);
+
+		//ensure the condition is of boolean type, if not report an error
+		if(!conditionType.equals(StdEnvironment.booleanType)){
+			reporter.reportError("While loop condition is not a boolean expression", ast.E.toString(),  ast.E.getPosition());
+		}
+		//visit the second command block of the loop
+		ast.C2.visit(this, null);
 
 		return null;
 	}

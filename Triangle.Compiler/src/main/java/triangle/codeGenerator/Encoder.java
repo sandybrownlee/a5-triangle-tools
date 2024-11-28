@@ -37,13 +37,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -172,6 +166,27 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.patch(jumpAddr);
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
+
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		//get the instructions address for where the loop begins
+		var loopStartLabel = emitter.getNextInstrAddr();
+
+		//generate code for first block of loop
+		ast.C1.visit(this,frame);
+		//generate code for the loops condition
+		ast.E.visit(this,frame);
+		//jump instruction to exit if the condition is false
+		var loopExitLabel = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
+		//generate code for second block of loop
+		ast.C2.visit(this, frame);
+		//emitter to jump back to start of loop
+		emitter.emit(OpCode.JUMP,loopStartLabel);
+		//patch the jump instruction to exit loop when condition is false
+		emitter.patch(loopExitLabel);
+
 		return null;
 	}
 

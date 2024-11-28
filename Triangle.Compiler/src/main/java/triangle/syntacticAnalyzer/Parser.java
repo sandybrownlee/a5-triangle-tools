@@ -262,9 +262,25 @@ public class Parser {
         start(commandPos);
 
         switch (currentToken.kind) {
+            case LOOP: // handle loop keyword
+                acceptIt(); // consume loop t
+                //parse the first command block before the condition
+                Command C1 = parseCommand();
+                //ensure the while keyword is present and consume
+                accept(Token.Kind.WHILE);
+                //parse the loops conditional expression
+                Expression E = parseExpression();
+                //ensure the do keyword is present and consume
+                accept(Token.Kind.DO);
+                //parse the second command block after the condition
+                Command C2 = parseCommand();
+
+                //construct the AST syntax tree for LoopWhileCommand
+                commandAST = new LoopWhileCommand(C1, E, C2, commandPos);
+                break;
+
             case IDENTIFIER: {
                 Identifier iAST = parseIdentifier();
-
 
                 if (currentToken.kind == Token.Kind.STARSTAR) {
 

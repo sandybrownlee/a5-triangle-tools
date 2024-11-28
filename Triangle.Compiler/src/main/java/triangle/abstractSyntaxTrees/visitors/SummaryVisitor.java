@@ -20,6 +20,7 @@ implements ProgramVisitor<Void, Void>,
         DeclarationVisitor<Void, Void>,
         VnameVisitor<Void, Void>
 {
+    //counters for constructs
     private int ifCommandCount = 0;
     private int whileCommandCount = 0;
     private int binaryExpressionCount = 0;
@@ -32,7 +33,7 @@ implements ProgramVisitor<Void, Void>,
         return null;
     }
 
-    //visit each command
+    //visit if command, increment counter and visit its components
     @Override
     public Void visitIfCommand(IfCommand ast, Void arg) {
         ifCommandCount++;
@@ -44,7 +45,7 @@ implements ProgramVisitor<Void, Void>,
 
     }
 
-    //visit each command
+    //visit while command, increment the count and visit its components
     @Override
     public Void visitWhileCommand(WhileCommand ast, Void arg) {
         whileCommandCount++;
@@ -54,6 +55,13 @@ implements ProgramVisitor<Void, Void>,
 
     }
 
+    //visit loop-while command
+    @Override
+    public Void visitLoopWhileCommand(LoopWhileCommand ast, Void unused) {
+        return null;
+    }
+
+    //visit sequential commands - series of commands that execute in sequence
     @Override
     public Void visitSequentialCommand(SequentialCommand ast, Void arg) {
         ast.C1.visit(this, arg); //visit
@@ -62,6 +70,7 @@ implements ProgramVisitor<Void, Void>,
     }
 
 
+    //visit let command, visiting its declaration and body.
     @Override
     public Void visitLetCommand(LetCommand ast, Void arg) {
         ast.D.visit(this, arg); // Visit the declaration
@@ -69,11 +78,13 @@ implements ProgramVisitor<Void, Void>,
         return null;
     }
 
+    //visit an assignment command
     @Override
     public Void visitAssignCommand(AssignCommand ast, Void arg) {
         ast.E.visit(this, arg); // Visit the expression being assigned
         return null;
     }
+
 
     @Override
     public Void visitCallCommand(CallCommand ast, Void unused) {
@@ -90,7 +101,7 @@ implements ProgramVisitor<Void, Void>,
         return null;
     }
 
-    //visit each command
+    //visit a binary expression, increment the count and visit its operands
     @Override
     public Void visitBinaryExpression(BinaryExpression ast, Void arg) {
         binaryExpressionCount++;
@@ -135,19 +146,21 @@ implements ProgramVisitor<Void, Void>,
     }
 
 
+    //visit a unary expression and its operands.
     @Override
     public Void visitUnaryExpression(UnaryExpression ast, Void arg) {
         ast.E.visit(this, arg); // Visit the operand
         return null;
     }
 
+    //visit a vname expression and its variable name
     @Override
     public Void visitVnameExpression(VnameExpression ast, Void arg) {
         ast.V.visit(this, arg); // Visit the variable name
         return null;
     }
 
-    // Declarations
+    // visit sequential declaration and its components
     @Override
     public Void visitSequentialDeclaration(SequentialDeclaration ast, Void arg) {
         ast.D1.visit(this, arg); // Visit the first declaration
@@ -175,6 +188,7 @@ implements ProgramVisitor<Void, Void>,
         return null;
     }
 
+    //visit a constant declaration and its assigned expression
     @Override
     public Void visitConstDeclaration(ConstDeclaration ast, Void arg) {
         ast.E.visit(this, arg); // Visit the assigned expression
@@ -190,19 +204,19 @@ implements ProgramVisitor<Void, Void>,
     public Void visitProcDeclaration(ProcDeclaration ast, Void unused) {
         return null;
     }
-
-    // Additional traversal methods for completeness
     @Override
     public Void visitSimpleVname(SimpleVname ast, Void arg) {
         return null; // No further nodes to visit
     }
 
+    //visit a dot name and its parent object
     @Override
     public Void visitDotVname(DotVname ast, Void arg) {
         ast.V.visit(this, arg); // Visit the parent object
         return null;
     }
 
+    //visit subscript vname and its components
     @Override
     public Void visitSubscriptVname(SubscriptVname ast, Void arg) {
         ast.E.visit(this, arg); // Visit the subscript expression
