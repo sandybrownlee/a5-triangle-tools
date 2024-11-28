@@ -90,8 +90,6 @@ public class HoistVisitor extends ConstantFolder {
 		return false;
 	}
 
-
-
 	@Override
 	public AbstractSyntaxTree visitVnameExpression(VnameExpression ast, Void arg) {
 		ast.V.visit(this);
@@ -130,7 +128,6 @@ public class HoistVisitor extends ConstantFolder {
 				// we know that this new identifier is going to be of integer type, and we assign it a name of temp + number of constants so that
 				// if there is more than 1 value to hoist in a single loop we avoid duplication (in triangle's case complete omission of these variables).
 				Identifier id = new Identifier("temp"+numberOfConstants, pos);
-				id.type = StdEnvironment.integerType;
 				numberOfConstants++;
 
 				// we now need to create a variable wrapper (vname expression) to create an assignment command with.
