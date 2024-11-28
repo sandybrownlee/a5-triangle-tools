@@ -67,14 +67,32 @@ public class TestScanner {
 	@Test
 	public void testExpectedSuccessfulCompilation() {
 		compileExpectSuccess("/adddeep.tri");
+		compileExpectSuccess("/arrays.tri");
+		compileExpectSuccess("/assignments.tri");
+		compileExpectSuccess("/bank.tri");
 		compileExpectSuccess("/booleans-to-fold.tri");
-		compileExpectSuccess("/procedural.tri");
+		compileExpectSuccess("/control.tri");
+		compileExpectSuccess("/deepnest.tri");
 		compileExpectSuccess("/directories.tri");
+		compileExpectSuccess("/errors.tri");//
+		compileExpectSuccess("/every.tri");
+		compileExpectSuccess("/factorials.tri");
 		compileExpectSuccess("/functions.tri");
-		compileExpectSuccess("/square.tri");
 		compileExpectSuccess("/hi.tri");
+		compileExpectSuccess("/hullo.tri");
+		compileExpectSuccess("/ifdemo.tri");
+		compileExpectSuccess("/loopwhile.tri");
+		compileExpectSuccess("/names.tri");
 		compileExpectSuccess("/nesting.tri");
+		compileExpectSuccess("/procedural.tri");
 		compileExpectSuccess("/procedures.tri");
+		compileExpectSuccess("/records.tri");
+		compileExpectSuccess("/repl.tri");
+		compileExpectSuccess("/simpleadding.tri");
+		compileExpectSuccess("/square.tri");
+		compileExpectSuccess("/triangle.tri");
+		compileExpectSuccess("/while.tri");
+		compileExpectSuccess("/while-longloop.tri");
 		compileExpectSuccess("/while-to-hoist.tri"); // this is kind of bait in that it its only testing without -hoist as an argument
 	}
 
