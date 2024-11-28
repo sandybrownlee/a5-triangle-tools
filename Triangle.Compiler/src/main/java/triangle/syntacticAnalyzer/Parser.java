@@ -318,35 +318,35 @@ public class Parser {
 		break;
 	}
 
-		case BEGIN:
+		case BEGIN:					//allows use of the standard begin-end tokens, as well as using begin to start the loop before the loop evaluation(C1)
 			acceptIt();
 
 			commandAST = parseCommand();
-			if(currentToken.kind == Token.Kind.WHILE){
+			if(currentToken.kind == Token.Kind.WHILE){	//loop evaluation
 				Command C1= commandAST;
-				Command C2= null;
-				accept(Token.Kind.WHILE);
+				Command C2= null; 
+				accept(Token.Kind.WHILE); // accept the WHILE token indicating the start of the loop condition
 
 				Expression eAST1 = parseExpression();
-				if(currentToken.kind==Token.Kind.DO){
+				if(currentToken.kind==Token.Kind.DO){	//if loop evaluation is true, Do will run
 				acceptIt();
 					while (currentToken.kind != Token.Kind.END) { // `END` marks the end of the loop
 						if(C2 == null){
-							parseCommand();
+							C2=parseCommand();//if C2 is empty, parse the next command
 						}
 						else{
-							new SequentialCommand(C2, parseCommand(), commandPos);
+							new SequentialCommand(C2, parseCommand(), commandPos); //if C2 is set, create a new sequential command, with C2 and the next command to be parsed
 						}
 					}
 				
 				eAST = parseExpression();
-				commandAST = new WhileDoCommand(C1, eAST, C2, commandPos);
+				commandAST = new WhileDoCommand(C1, eAST, C2, commandPos); //calls the whileDoCommand with the new values for C1,eAST,C2 and the command position
 				accept(Token.Kind.END);
 				}
 				break;
 			}
 			else{
-				accept(Token.Kind.END);
+				accept(Token.Kind.END);		//if not part of the while-do loop, and encounters end token
 				break;
 			}
 			

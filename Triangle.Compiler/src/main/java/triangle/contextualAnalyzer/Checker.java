@@ -190,11 +190,14 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		return null;
 	}
 	@Override
-	public Void visitWhileDoCommand(WhileDoCommand ast, Void arg) {
-		var eType = ast.E.visit(this);
+	public Void visitWhileDoCommand(WhileDoCommand ast, Void arg) { //tests the semantic accuracy of the WhileDoCommand AST
+		ast.C1.visit(this);		//checks the C1 node first(the first command before loop evaluation)
+		var eType = ast.E.visit(this);  //checks the E node first(loop evaluation)
+		
+		//Perform semantic error checking, ensure the expression E is of boolean type
+		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E); 
 
-		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
-		ast.C2.visit(this);
+		ast.C2.visit(this); //checks the C2 node first(the second command after loop evaluation)
 
 		return null;
 	}

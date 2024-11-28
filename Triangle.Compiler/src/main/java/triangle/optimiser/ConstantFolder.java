@@ -501,12 +501,12 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitWhileDoCommand(WhileDoCommand ast, Void arg) {
-		ast.C1.visit(this);
-		AbstractSyntaxTree replacement = ast.E.visit(this);
+		ast.C1.visit(this); //first loop command runs before the loop condition evaluation
+		AbstractSyntaxTree replacement = ast.E.visit(this); //loop condition check
 		if (replacement != null) {
-			ast.E = (Expression) replacement;
+			ast.E = (Expression) replacement; //if the condition is changed, update the loops condition
 		}
-		ast.C2.visit(this);
+		ast.C2.visit(this); //second command is ran after loop expression is evaluated
 		return null;
 	}
 
@@ -597,12 +597,19 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			}
 
 			if (foldedValue instanceof Integer) {
+				// Create IntegerLiteral and IntegerExpression for Integer values
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+				//assign integer object type
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				// Create BooleanLiteral and BooleanExpression for boolean values
+				BooleanLiteral bl = new BooleanLiteral(foldedValue.toString(), node1.getPosition());
+				BooleanExpression be = new BooleanExpression(bl, node1.getPosition());
+				//assign boolean object type
+				be.type = StdEnvironment.booleanType;
+				return be;
 			}
 		}
 
