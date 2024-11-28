@@ -64,13 +64,15 @@ public class HoistVisitor extends ConstantFolder {
 				if (canHoistBinaryExpression(node1, node2) && canHoistBinaryExpression(node3, node4)) {
 					return ast;
 				}
-			} else if (replacement1 instanceof BinaryExpression) {
+			}
+			else if (replacement1 instanceof BinaryExpression) {
 				AbstractSyntaxTree node1 = ((BinaryExpression) replacement1).E1;
 				AbstractSyntaxTree node2 = ((BinaryExpression) replacement1).E2;
 				if (canHoistBinaryExpression(node1, node2)) {
 					return replacement1;
 				}
-			} else if (replacement2 instanceof BinaryExpression) {
+			}
+			else if (replacement2 instanceof BinaryExpression) {
 				AbstractSyntaxTree node1 = ((BinaryExpression) replacement2).E1;
 				AbstractSyntaxTree node2 = ((BinaryExpression) replacement2).E2;
 				if (canHoistBinaryExpression(node1, node2)) {
