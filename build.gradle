@@ -1,31 +1,52 @@
-apply plugin: 'java'
+plugins {
+    id 'java'
+}
 
 sourceCompatibility = 17
 
-subprojects.each { subproject ->
-  evaluationDependsOn(subproject.path)
+repositories {
+    mavenCentral()
 }
 
-subprojects {
-    repositories {
-        mavenCentral()
-    }
-
-    dependencies {
-        implementation 'com.github.spullara.cli-parser:cli-parser:1.1.5' // Correct version of cli-parser
-        testImplementation 'junit:junit:4.13.2' // Ensure JUnit is available for testing
-    }
+dependencies {
+    implementation project(':Triangle.AbstractMachine') // Include AbstractMachine
+    implementation 'com.github.spullara.cli-parser:cli-parser:1.1.5'
+    testImplementation 'junit:junit:4.13.2'
 }
+
+// Gradle automatically detects the source structure in 'src/main/java'. No need to override 'sourceSets'.
 
 // Configure the JAR task
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 
+    manifest {
+        attributes(
+            'Main-Class': 'triangle.Compiler' // Ensure the main class is correct
+        )
+    }
+}
+
+// Create a fat JAR with all dependencies
+task fatJar(type: Jar) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archiveClassifier.set('all')
+
+    // Include runtime dependencies
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-    from subprojects.sourceSets.main.output
+    // Include all compiled classes
+    from {
+        sourceSets.main.output
+    }
+
+    manifest {
+        attributes(
+            'Main-Class': 'triangle.Compiler' // Ensure the main class is correct
+        )
+    }
+
+    with jar
 }
-
-
