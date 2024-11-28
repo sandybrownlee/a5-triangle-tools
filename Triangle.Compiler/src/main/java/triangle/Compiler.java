@@ -27,6 +27,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -36,11 +38,25 @@ import triangle.treeDrawer.Drawer;
  */
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+	/** The name of the file containing the source program.  */
+	@Argument(alias="s", required=true, description="name of file containing source program")
+	protected static String sourceName;
+
+	/** The name for the compiled object program, defaults to "obj.tam". */
+	@Argument(alias="o", required=false, description="the compiled Triangle program's name")
+	protected static String objectName = "obj.tam";
+
+	/** Enable constant folding for constant values. */
+	@Argument(alias="f", required=false, description="fold constant values when compiling")
+	protected static boolean folding;
+
+	/** Display the abstract syntax tree. */
+	@Argument(alias="sT", required=false, description="display the program's abstract syntax tree")
+	protected static boolean showTree;
+
+	/** Display the abstract syntax tree after applying constant folding. */
+	@Argument(alias="fsT", required=false, description="display the abstract syntax tree after applying constant folding")
+	protected static boolean showTreeAfter;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -51,24 +67,64 @@ public class Compiler {
 	private static Drawer drawer;
 
 	/** The AST representing the source program. */
-	private static Program theAST;
+	private static Program ast;
+
+
+
+	/**
+	 * Triangle compiler main program.
+	 *
+	 * @param args the only command-line argument to the program specifies the
+	 *             source filename.
+	 */
+	public static void main(String[] args) {
+
+		// parse each argument - exiting on error.
+		Args.parseOrExit(new Compiler(), args);
+
+		// compile and store result.
+		boolean compiledOK = compileProgram(
+				sourceName,
+				objectName,
+				folding,
+				showTree,
+				showTreeAfter,
+				false
+		);
+
+		if (!showTree) {
+			System.exit(compiledOK ? 0 : 1);
+		}
+	}
+
+
+
+
 
 	/**
 	 * Compile the source program to TAM machine code.
 	 *
-	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
-	 * @param showingAST   true iff the AST is to be displayed after contextual
-	 *                     analysis
-	 * @param showingTable true iff the object description details are to be
-	 *                     displayed during code generation (not currently
-	 *                     implemented).
-	 * @return true iff the source program is free of compile-time errors, otherwise
+	 * @param sourceName  the name of the file containing the source program.
+	 * @param objectName  the name of the file containing the object program.
+	 * @param folding 	  fold constant values when compiling program.
+	 * @param showAST     true if the AST is to be displayed after contextual
+	 *                    analysis
+	 * @param showTable   true if the object description details are to be
+	 *                    displayed during code generation (not currently
+	 *                    implemented).
+	 * @return true if the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
-
-		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
+	static boolean compileProgram(
+			String sourceName,
+			String objectName,
+			boolean folding,
+			boolean showAST,
+			boolean showTreeAfter,
+			boolean showTable
+	) {
+		System.out.printf("********** Triangle Compiler (Java Version %s) **********\n",
+				System.getProperty("java.version"));
 
 		System.out.println("Syntactic Analysis ...");
 		SourceFile source = SourceFile.ofPath(sourceName);
@@ -87,23 +143,30 @@ public class Compiler {
 		drawer = new Drawer();
 
 		// scanner.enableDebugging();
-		theAST = parser.parseProgram(); // 1st pass
+		ast = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
 			System.out.println("Contextual Analysis ...");
-			checker.check(theAST); // 2nd pass
-			if (showingAST) {
-				drawer.draw(theAST);
+			checker.check(ast); // 2nd pass
+			if (showAST) {
+				drawer.draw(ast);
 			}
 			if (folding) {
-				theAST.visit(new ConstantFolder());
+				ast.visit(new ConstantFolder());
 			}
-			
+			// show difference in AST after constant folding.
+			// print message if program compiled without folding.
+			if (showTreeAfter) {
+
+				if (folding) {
+					drawer.draw(ast);
+				}
+				else {
+					System.out.println("No folded AST to display, program was compiled without constant folding");
+				}
+			}
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
+				encoder.encodeRun(ast, showTable); // 3rd pass
 			}
 		}
 
@@ -117,30 +180,9 @@ public class Compiler {
 		return successful;
 	}
 
-	/**
-	 * Triangle compiler main program.
-	 *
-	 * @param args the only command-line argument to the program specifies the
-	 *             source filename.
-	 */
-	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
+	@Deprecated
 	private static void parseArgs(String[] args) {
 		for (String s : args) {
 			var sl = s.toLowerCase();
