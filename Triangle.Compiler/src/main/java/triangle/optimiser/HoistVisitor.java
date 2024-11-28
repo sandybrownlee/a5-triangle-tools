@@ -50,9 +50,17 @@ public class HoistVisitor extends ConstantFolder {
 		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
 		ast.O.visit(this);
 
+		// this doesn't allow the hoisting of binary expressions where i.e. "b:=b + (c+y)", where c and y are invariants,
 		if (currentlyHoisting && currentlyInLoop) {
-			if (canHoistExpression(replacement1) || canHoistExpression(replacement2)) {
-				return ast;
+			if (canHoistExpression(replacement1)) {
+				return ast; // if the left side of the expression doesn't appear
+			}
+			if (replacement2 instanceof BinaryExpression) {
+				AbstractSyntaxTree node1 = ((BinaryExpression) replacement2).E1;
+				AbstractSyntaxTree node2 = ((BinaryExpression) replacement2).E2;
+				if (canHoistBinaryExpression(node1, node2)) {
+					return replacement2;
+				}
 			}
 		}
 		return null;
@@ -76,9 +84,42 @@ public class HoistVisitor extends ConstantFolder {
 			SimpleVname realSimpleVname = (SimpleVname) simpleVname;
 			String spelling = realSimpleVname.I.spelling;
 			Declaration d = idTable.retrieve(spelling, false);
-			if (d == null) {
-				return true;
-			}
+            return d == null;
+		}
+		return false;
+	}
+
+	/**
+	 * This method returns true if both expressions within a binary expression are vNameExpressions and
+	 * @param node1
+	 * @param node2
+	 * @return
+	 */
+	public boolean canHoistBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2) {
+		if (node1 instanceof VnameExpression vnameExpression && node2 instanceof VnameExpression vnameExpression2) { // an example would be "b := b + (c + y); ! c+y can be hoisted"
+			AbstractSyntaxTree sVname1 = vnameExpression.V.visit(this);
+			AbstractSyntaxTree sVname2 = vnameExpression2.V.visit(this);
+
+			// we want to grab the variables spelling to check against the table and so express it as a simple vName,
+			// there is probably opportunity to replace this with the equivalent of  Vname v = new SimpleVName()
+			// simpleVname works because we literally just want access to the Identifier present within the wrapper class.
+			SimpleVname realsVname1 = (SimpleVname) sVname1;
+			String spelling = realsVname1.I.spelling;
+			Declaration d = idTable.retrieve(spelling, false);
+
+			// there's definitely a bug in here because I previously had
+			// realsVanme2 = (SimpleVname) sVname1
+			// it should be fine with this logic I imagine?
+
+			SimpleVname realsVname2 = (SimpleVname) sVname2;
+			spelling = realsVname2.I.spelling;
+			Declaration d2 = idTable.retrieve(spelling, false);
+
+			return d == null && d2 == null;
+		}
+		// allows the hoisting of binary expressions within binary expressions - there's probably a better way to recursively do this an example would be "b := b + (c + 4); ! c+4 can be hoisted"
+		else if (node1 instanceof VnameExpression && node2 instanceof IntegerExpression) { // to add a type of statement to be recursively checked, we can simply just check either node vs canHoistExpression()
+			return canHoistExpression(node1);
 		}
 		return false;
 	}
@@ -101,13 +142,13 @@ public class HoistVisitor extends ConstantFolder {
 
 		// while we're not actively hoisting we want to add identifiers present while inside of a loop,
 		if (!currentlyHoisting && currentlyInLoop) {
-			// we only care about variables
-			if (vAST.variable) {
-				String spelling = vAST.I.spelling;
-				Declaration d = new VarDeclaration(vAST.I, vAST.type, ast.getPosition());
+				// we only care about variables
+				if (vAST.variable) {
+					String spelling = vAST.I.spelling;
+					Declaration d = new VarDeclaration(vAST.I, vAST.type, ast.getPosition());
 
-				idTable.enter(spelling, d);
-			}
+					idTable.enter(spelling, d);
+				}
 		}
 		else if (currentlyHoisting && currentlyInLoop) {
 			// nullability check as binary expression evaluation can and will return null if there is no invariant present in the current assignment.
@@ -191,9 +232,7 @@ public class HoistVisitor extends ConstantFolder {
 		if (letCommand != null) {
 			return new SequentialCommand(createSequentialCommand(pos), letCommand, pos);
 		}
-		else {
-			return new EmptyCommand(pos);
-		}
+		return new EmptyCommand(pos);
 	}
 
 
