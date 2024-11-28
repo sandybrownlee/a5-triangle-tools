@@ -148,6 +148,11 @@ public final class Scanner {
 			takeIt();
 			while (isLetter(currentChar) || isDigit(currentChar))
 				takeIt();
+			String spelling = currentSpelling.toString();
+			if (spelling.equals("loop")) return Token.Kind.LOOP;
+			if (spelling.equals("while")) return Token.Kind.WHILE;
+			if (spelling.equals("do")) return Token.Kind.DO;
+		
 			return Token.Kind.IDENTIFIER;
 
 		case '0':

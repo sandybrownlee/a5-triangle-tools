@@ -1,16 +1,14 @@
-apply plugin: 'java'
-apply plugin: 'application'
-apply plugin: 'jacoco'
-
-sourceCompatibility = 17
+plugins {
+    id 'java'
+    id 'application'
+    id 'jacoco'
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    implementation project(':Triangle.AbstractMachine')
-    implementation 'com.github.spullara.cli-parser:cli-parser:1.1.5' // Correct version of cli-parser
     testImplementation 'junit:junit:4.13.2'
 }
 
@@ -18,13 +16,17 @@ application {
     mainClass = 'triangle.Compiler'
 }
 
-// Allow access to programs for unit tests
 sourceSets.test.resources.srcDir file("$rootDir/programs")
 
 test {
-    finalizedBy jacocoTestReport // Ensure Jacoco report generation
-}
-jacocoTestReport {
-    dependsOn test // Tests are required to run before generating the report
+    useJUnit() // Ensure JUnit is set as the test framework
+    finalizedBy jacocoTestReport // Ensure Jacoco report generation runs after tests
 }
 
+jacocoTestReport {
+    dependsOn test // Ensure tests run before the report is generated
+    reports {
+        xml.required.set(true) // Enable XML report
+        html.required.set(true) // Enable HTML report
+    }
+}

@@ -79,7 +79,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
-
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
@@ -570,6 +570,23 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		ast.V.visit(this);
 		return null;
 	}
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+	    AbstractSyntaxTree replacement = ast.E.visit(this);
+	    Expression newE = ast.E;
+
+	    if (replacement != null) {
+	        newE = (Expression) replacement; 
+	    }
+
+	    ast.C1.visit(this);
+	    ast.C2.visit(this);
+
+	    
+	    return new LoopWhileCommand(ast.C1, newE, ast.C2, ast.getPosition());
+	}
+
+
 
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
 		// the only case we know how to deal with for now is two IntegerExpressions

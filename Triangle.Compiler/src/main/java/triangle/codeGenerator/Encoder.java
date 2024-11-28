@@ -117,7 +117,7 @@ import triangle.codeGenerator.entities.TypeRepresentation;
 import triangle.codeGenerator.entities.UnknownAddress;
 import triangle.codeGenerator.entities.UnknownRoutine;
 import triangle.codeGenerator.entities.UnknownValue;
-
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		ActualParameterSequenceVisitor<Frame, Integer>, ArrayAggregateVisitor<Frame, Integer>,
 		CommandVisitor<Frame, Void>, DeclarationVisitor<Frame, Integer>, ExpressionVisitor<Frame, Integer>,
@@ -184,6 +184,21 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		return null;
 	}
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+	    // Execute the pre-loop command C1
+	    ast.C1.visit(this, frame);
+	    int loopAddr = emitter.getNextInstrAddr();
+	    ast.E.visit(this, frame);
+	    int exitJumpAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);	
+	    ast.C2.visit(this, frame);
+	    emitter.emit(OpCode.JUMP, Register.CB, loopAddr);
+	    emitter.patch(exitJumpAddr);
+
+	    return null;
+	}
+
+
 
 	// Expressions
 	@Override

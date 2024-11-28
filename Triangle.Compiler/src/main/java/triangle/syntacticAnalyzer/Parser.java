@@ -86,7 +86,7 @@ import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.StdEnvironment;
-
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 public class Parser {
 
 	private Scanner lexicalAnalyser;
@@ -354,7 +354,18 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
-
+		case LOOP: { // New case for 'loop'
+	        acceptIt(); // Consume 'loop'
+	        Command C1 = parseSingleCommand(); // Parse C1
+	        accept(Token.Kind.WHILE); // Consume 'while'
+	        Expression E = parseExpression(); // Parse the expression E
+	        accept(Token.Kind.DO); // Consume 'do'
+	        Command C2 = parseSingleCommand(); // Parse C2
+	        finish(commandPos);
+	        commandAST = new LoopWhileCommand(C1, E, C2, commandPos); // Create LoopWhileCommand node
+	    }
+	        break;
+	     
 		case SEMICOLON:
 		case END:
 		case ELSE:
