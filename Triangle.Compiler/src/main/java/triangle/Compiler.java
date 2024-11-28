@@ -51,6 +51,10 @@ public class Compiler {
 	@Argument(description = "Apply constant folding optimisation")
 	static boolean folding = false;
 
+	/** Flag to display AST after folding optimisations */
+	@Argument(description = "Display AST after folding optimisations. This option is ignored if folding optimisation is disabled.")
+	static boolean showTreeAfter = false;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -109,6 +113,10 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+
+				if (showTreeAfter) {
+					drawer.draw(theAST);
+				}
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -138,7 +146,7 @@ public class Compiler {
 		var remainingArgs = Args.parseOrExit(Compiler.class, args);
 
 		if (remainingArgs.isEmpty()) {
-			System.out.println("Usage: tc filename [-objectName (-o) outputfilename] [-showTree] [-folding]");
+			System.out.println("Usage: tc filename [-objectName (-o) outputfilename] [-showTree] [-folding] [-showTreeAfter]");
 			System.exit(1);
 		}
 
