@@ -39,21 +39,74 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
 	}
-	
-	
-	/* these tests all try to compile example programs... */
+
+    @Test
+    public void testIsLetteer(){
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('b'));
+		assertTrue(Scanner.isLetter('c'));
+		assertTrue(Scanner.isLetter('d'));
+		assertTrue(Scanner.isLetter('e'));
+		assertTrue(Scanner.isLetter('f'));
+		assertTrue(Scanner.isLetter('g'));
+		assertTrue(Scanner.isLetter('h'));
+		assertTrue(Scanner.isLetter('i'));
+		assertTrue(Scanner.isLetter('j'));
+		assertTrue(Scanner.isLetter('k'));
+		assertTrue(Scanner.isLetter('l'));
+		assertTrue(Scanner.isLetter('m'));
+		assertTrue(Scanner.isLetter('n'));
+		assertTrue(Scanner.isLetter('o'));
+		assertTrue(Scanner.isLetter('p'));
+		assertTrue(Scanner.isLetter('q'));
+		assertTrue(Scanner.isLetter('r'));
+		assertTrue(Scanner.isLetter('s'));
+		assertTrue(Scanner.isLetter('t'));
+		assertTrue(Scanner.isLetter('u'));
+		assertTrue(Scanner.isLetter('v'));
+		assertTrue(Scanner.isLetter('w'));
+		assertTrue(Scanner.isLetter('x'));
+		assertTrue(Scanner.isLetter('y'));
+		assertTrue(Scanner.isLetter('z'));
+		assertTrue(Scanner.isLetter('A'));
+		assertTrue(Scanner.isLetter('B'));
+		assertTrue(Scanner.isLetter('C'));
+		assertTrue(Scanner.isLetter('D'));
+		assertTrue(Scanner.isLetter('Z'));
+		assertFalse(Scanner.isLetter('@'));
+		assertFalse(Scanner.isLetter('|'));
+		assertFalse(Scanner.isLetter('`'));
+		assertFalse(Scanner.isOperator('{'));
+	}
+
+
+		/* these tests all try to compile example programs... */
 	
 	@Test
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+
+	@Test
+	public void testSquare() {
+		compileExpectSuccess("/SquareTest.tri");
+	}
+
 
 	@Test
 	public void testHiNewComment() {
