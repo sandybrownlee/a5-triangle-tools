@@ -63,7 +63,10 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('\\'));
 	}
 
-
+	/**
+	 * A list of known to successfully compile programs.
+	 * This could realistically just be a massive map of input streams, and we just exclude them based on type
+	 */
 	@Test
 	public void testExpectedSuccessfulCompilation() {
 		compileExpectSuccess("/adddeep.tri");
@@ -94,6 +97,9 @@ public class TestScanner {
 		compileExpectSuccess("/while.tri");
 		compileExpectSuccess("/while-longloop.tri");
 		compileExpectSuccess("/while-to-hoist.tri"); // this is kind of bait in that it its only testing without -hoist as an argument
+		compileExpectSuccess("/extreme-hoist-baby.tri");
+		compileExpectSuccess("/extreme-hoist.tri");
+		compileExpectSuccess("/binary-expression-hoisting.tri");
 	}
 
 
