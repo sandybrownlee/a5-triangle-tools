@@ -6,6 +6,16 @@ subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+repositories {
+    maven {
+        url = uri("https://repo.maven.apache.org/maven2")
+    }
+}
+
+dependencies {
+    implementation "com.github.spullara.cli-parser:cli-parser:1.1.6"
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     
