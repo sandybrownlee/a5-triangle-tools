@@ -44,6 +44,17 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+		
+	@Test
+	public void testIsLetter() {	      
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('z'));
+		assertTrue(Scanner.isLetter('A'));
+		assertTrue(Scanner.isLetter('Z'));
+		assertFalse(Scanner.isLetter('1'));
+		assertFalse(Scanner.isLetter('@'));
+		assertFalse(Scanner.isLetter('*'));
+		assertFalse(Scanner.isLetter(' '));	
 	}
 	
 	
@@ -78,6 +89,16 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+	@Test
+	public void testMultiCharOperator() {
+	    // Multi-character operator '**'
+	    assertTrue(Scanner.isOperator("**"));
+	    
+	    // Single-character operators or invalid inputs
+	    assertFalse(Scanner.isOperator("*"));
+	    assertFalse(Scanner.isOperator("+"));
+	    assertFalse(Scanner.isOperator("x"));
+	}
 	
 	
 	private void compileExpectSuccess(String filename) {

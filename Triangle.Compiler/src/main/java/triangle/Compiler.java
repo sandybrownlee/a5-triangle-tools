@@ -18,6 +18,9 @@
 
 package triangle;
 
+import picocli.CommandLine;
+import picocli.CommandLine.Option;
+import picocli.CommandLine.Command;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -27,21 +30,25 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
-
 /**
  * The main driver class for the Triangle compiler.
  *
  * @version 2.1 7 Oct 2003
  * @author Deryck F. Brown
  */
-public class Compiler {
+public class Compiler implements Runnable{
 
 	/** The filename for the object program, normally obj.tam. */
 	static String objectName = "obj.tam";
 	
 	static boolean showTree = false;
 	static boolean folding = false;
+	
+	static boolean showTreeAfter = false;
 
+	  @CommandLine.Parameters(index = "0", description = "The Triangle source file to compile.")
+	    static String sourceName;
+	
 	private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
@@ -99,6 +106,9 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if (showTreeAfter) {
+					drawer.draw(theAST);
+				}
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -123,34 +133,17 @@ public class Compiler {
 	 * @param args the only command-line argument to the program specifies the
 	 *             source filename.
 	 */
-	public static void main(String[] args) {
-
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
-
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+	 public static void main(String[] args) {
+		 new CommandLine(new Compiler()).execute(args);
+		 var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		 
+		 if (!showTree) {
+			 System.exit(compiledOK ? 0 : 1);
+		 }
+	 }
+	 
+	 @Override
+	 public void run() {
+		 
+	 }
 }

@@ -41,6 +41,10 @@ public final class Scanner {
 		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
 				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
 	}
+	
+	public static boolean isMultipleCharOperator(String op) {
+		return op.equals("**");
+	}
 
 	///////////////////////////////////////////////////////////////////////////////
 
@@ -167,7 +171,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':
@@ -181,6 +184,14 @@ public final class Scanner {
 			takeIt();
 			while (isOperator(currentChar))
 				takeIt();
+			return Token.Kind.OPERATOR;
+			
+		case '*':
+			takeIt();
+			if (currentChar == '*') {
+				takeIt();
+				return Token.Kind.OPERATOR;
+			}
 			return Token.Kind.OPERATOR;
 
 		case '\'':

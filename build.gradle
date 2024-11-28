@@ -4,15 +4,31 @@ sourceCompatibility = 17
 
 subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
+
+
+  subproject.dependencies {
+        // Add the picocli dependency to all subprojects
+        implementation 'info.picocli:picocli:4.7.4'
+        annotationProcessor 'info.picocli:picocli-codegen:4.7.4' // Optional for annotation-based processing
+    }
 }
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
+    // Include runtime classpath into the JAR
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
+    // Include subproject outputs in the JAR
+    from subprojects.sourceSets.main.output
 
-  from subprojects.sourceSets.main.output
+    // Add the Main-Class attribute to the manifest
+    manifest {
+        attributes(
+            'Main-Class': 'triangle.Compiler'  // This points to your main class
+        )
+    }
 }
+
