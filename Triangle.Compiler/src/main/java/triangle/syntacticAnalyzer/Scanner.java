@@ -89,6 +89,17 @@ public final class Scanner {
 		}
 	}
 
+	private char peekChar() {
+		// Save the current position
+		char current = currentChar;
+		// Look ahead one character without advancing the scanner
+		char nextChar = sourceFile.getSource();
+		// Set the current position back to the original character
+		currentChar = current;
+		return nextChar;
+	}
+
+
 	private Token.Kind scanToken() {
 
 		switch (currentChar) {
@@ -168,6 +179,15 @@ public final class Scanner {
 		case '+':
 		case '-':
 		case '*':
+			if (peekChar() == '*') {  // Check for '**'
+				takeIt();  // Consume the first '*'
+				takeIt();  // Consume the second '*'
+				return (Token.Kind.SQUARE);  // Return the SQUARE token for '**'
+			} else {
+				// Regular '*' operator
+				takeIt();
+				return Token.Kind.OPERATOR;
+			}
 		case '/':
 		case '=':
 		case '<':
