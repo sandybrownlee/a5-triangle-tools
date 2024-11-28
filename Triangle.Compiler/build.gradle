@@ -5,13 +5,16 @@ apply plugin: 'jacoco'
 sourceCompatibility = 17
 
 repositories {
-    mavenCentral()
+    maven {
+        url = uri("https://repo.maven.apache.org/maven2")
+    }
 }
 
 
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation "com.github.spullara.cli-parser:cli-parser:1.1.6"
 }
 
 application {
