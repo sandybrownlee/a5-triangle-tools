@@ -18,6 +18,7 @@
 
 package triangle;
 
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -28,19 +29,28 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
 
+import com.sampullara.cli.Args;
+
+import java.util.List;
+
 /**
  * The main driver class for the Triangle compiler.
  *
  * @version 2.1 7 Oct 2003
  * @author Deryck F. Brown
+ * Also SMH
  */
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "objectName", description = "name of object", required = false)
 	static String objectName = "obj.tam";
-	
+	@Argument(alias = "showTree", description = "display tree flag", required = false)
 	static boolean showTree = false;
+	@Argument(alias = "folding", description = "loop optimisation flag", required = false)
 	static boolean folding = false;
+	@Argument(alias = "showTreeAfter", description = "display tree flag after folding", required = false)
+	static boolean showTreeAfter = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -99,6 +109,9 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if(showTreeAfter){
+					drawer.draw(theAST);
+				}
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -125,14 +138,21 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+		List<String> unparsed = Args.parseOrExit(Compiler.class, args);
+		if (unparsed.size() != 1) { // The only unparsed arg should be the filename
+			// Args.usage(Compiler.class); Cannot use this, does not display the filename requirement
+			System.out.println("******************************");
+			System.out.println("Usage:");
+			System.out.println("  FileName");
+			System.out.println("  -objectName (-objectName) [String] name of object (obj.tam)");
+			System.out.println("  -showTree (-showTree) [flag] display tree flag");
+			System.out.println("  -folding (-folding) [flag] loop optimisation flag");
+			System.out.println("  -showTreeAfter (-showTreeAfter) [flag] display tree flag after folding");
+			System.out.println("******************************");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
 
-		String sourceName = args[0];
+		String sourceName = unparsed.get(0);
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
@@ -141,16 +161,16 @@ public class Compiler {
 		}
 	}
 	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+	//private static void parseArgs(String[] args) {
+	//	for (String s : args) {
+	//		var sl = s.toLowerCase();
+	//		if (sl.equals("tree")) {
+	//			showTree = true;
+	//		} else if (sl.startsWith("-o=")) {
+	//			objectName = s.substring(3);
+	//		} else if (sl.equals("folding")) {
+	//			folding = true;
+	//		}
+	//	}
+	//}
 }

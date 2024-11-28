@@ -1,0 +1,14 @@
+let
+    var a: Integer
+in
+begin
+    a := 2;
+
+    putint(a);
+   	puteol();
+
+    a** ;
+
+    putint(a);
+   	puteol();
+end
