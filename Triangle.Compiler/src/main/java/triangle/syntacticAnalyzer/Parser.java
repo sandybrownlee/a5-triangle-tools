@@ -457,14 +457,21 @@ public class Parser {
 
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
-			if (currentToken.kind == Token.Kind.LPAREN) {
+			if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+				acceptIt();
+				Expression right = parsePrimaryExpression();
+				finish(expressionPos);
+				expressionAST = new BinaryExpression(iAST, right, "**", expressionPos);
+			} 
+			else if (currentToken.kind == Token.Kind.LPAREN){
 				acceptIt();
 				ActualParameterSequence apsAST = parseActualParameterSequence();
 				accept(Token.Kind.RPAREN);
 				finish(expressionPos);
 				expressionAST = new CallExpression(iAST, apsAST, expressionPos);
-
-			} else {
+			}
+			
+			else {
 				Vname vAST = parseRestOfVname(iAST);
 				finish(expressionPos);
 				expressionAST = new VnameExpression(vAST, expressionPos);
