@@ -30,6 +30,12 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit('&'));
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
+
+		//assertTrue(Scanner.isDigit('2'));
+		//assertTrue(Scanner.isDigit('3'));
+		//assertTrue(Scanner.isDigit('4'));
+		//assertTrue(Scanner.isDigit('6'));
+		//assertTrue(Scanner.isDigit('7'));
 	}
 	
 	@Test
@@ -44,6 +50,16 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+		
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('?'));
 	}
 	
 	
