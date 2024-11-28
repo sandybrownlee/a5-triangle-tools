@@ -20,7 +20,6 @@ public class HoistVisitor extends ConstantFolder {
 	private boolean currentlyInLoop = false;
 	private int numberOfConstants = 0;
 	Stack<AbstractSyntaxTree> stack = new Stack<>();
-	Stack<LetCommand> letStack = new Stack<>();
 
 	@Override
 	public AbstractSyntaxTree visitSimpleVname(SimpleVname ast, Void arg) {
