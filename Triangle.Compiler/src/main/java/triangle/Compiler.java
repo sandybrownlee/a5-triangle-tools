@@ -24,6 +24,8 @@ import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+
+//import main.java.triangle.abstractSyntaxTrees.visitors.SummaryVisitor;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -48,6 +50,7 @@ public class Compiler {
 	static boolean showTree = false;
 	static boolean folding = false;
 	static boolean showTreeAfter = false;
+	static boolean showStats = false;
 
 
 
@@ -110,7 +113,12 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+			if(showStats){
+				//SummaryVisitor summaryVisitor = new SummaryVisitor();
+                //theAST.visit(summaryVisitor, null); // visits the summaryVisitor class
+                //System.out.println(summaryVisitor.printSummary()); //displays the string format of the summary stats
+			}
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -137,7 +145,7 @@ public class Compiler {
 
 		//if no arguments presented, displays the usage of the parser.
 		if (args.length < 1) {
-            System.out.println("Usage: tc filename [-o outputfilename] [-t] [-f] [-s]");
+            System.out.println("Usage: tc filename [-o outputfilename] [-t] [-f] [-a] [-s]");
             System.exit(1);
         }
 
@@ -153,7 +161,8 @@ public class Compiler {
 		//creating the options for the cli parser
 		options.addOption(new Option("t","showTree",false, "Show the syntax tree"));
 		options.addOption(new Option("f","folding",false, "Enable or disable folding"));
-		options.addOption(new Option("s","showTreeAfter",false, "Show the tree after folding"));
+		options.addOption(new Option("a","showTreeAfter",false, "Show the tree after folding"));
+		options.addOption(new Option("s","showStats",false, "Show the number of visits to ASTs"));
 
 		CommandLineParser parser = new DefaultParser();
 		
@@ -162,11 +171,12 @@ public class Compiler {
 			if(cmd.hasOption("o")){					//checks if a name value was provided, if so objectName is set to the file name
 				objectName=cmd.getOptionValue("o");
 			}
-			//checks if the option values are provided, if not they remain false
+			//checks if the option values are provided, if not they remain disabled
 			showTree = cmd.hasOption("t");
 			folding = cmd.hasOption("f");
-			showTreeAfter=cmd.hasOption("s");
-		
+			showTreeAfter=cmd.hasOption("a");
+			showStats=cmd.hasOption("s");
+
 			String sourceName=cmd.getArgs()[0];
 			boolean success= compileProgram(sourceName, objectName, showTree, showTreeAfter);
 

@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.WhileDoCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -273,6 +274,7 @@ public class Parser {
 
 	Command parseSingleCommand() throws SyntaxError {
 		Command commandAST = null; // in case there's a syntactic error
+		Expression eAST = null;
 
 		SourcePosition commandPos = new SourcePosition();
 		start(commandPos);
@@ -281,6 +283,7 @@ public class Parser {
 
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
+		
 			if (currentToken.kind == Token.Kind.LPAREN) {
 				acceptIt();
 				ActualParameterSequence apsAST = parseActualParameterSequence();
@@ -299,7 +302,7 @@ public class Parser {
 					// the operator will be a * (each operator is just defined by its spelling)
 					Operator op = new Operator("*", commandPos);
 					// now we assemble the expressions into a BinaryExpression for the a * 1
-					Expression eAST = new BinaryExpression(vne, op, vne, commandPos);
+					eAST = new BinaryExpression(vne, op, vne, commandPos);
 					// this sets the last line of the command for debugging purposes
 					finish(commandPos);
 					// we need to make an assignment, with a binary expression on the right
@@ -307,7 +310,7 @@ public class Parser {
 }			
 				else {
 					accept(Token.Kind.BECOMES);
-					Expression eAST = parseExpression();
+					eAST = parseExpression();
 					finish(commandPos);
 					commandAST = new AssignCommand(vAST, eAST, commandPos);
 				}
@@ -317,10 +320,36 @@ public class Parser {
 
 		case BEGIN:
 			acceptIt();
-			commandAST = parseCommand();
-			accept(Token.Kind.END);
-			break;
 
+			commandAST = parseCommand();
+			if(currentToken.kind == Token.Kind.WHILE){
+				Command C1= commandAST;
+				Command C2= null;
+				accept(Token.Kind.WHILE);
+
+				Expression eAST1 = parseExpression();
+				if(currentToken.kind==Token.Kind.DO){
+				acceptIt();
+					while (currentToken.kind != Token.Kind.END) { // `END` marks the end of the loop
+						if(C2 == null){
+							parseCommand();
+						}
+						else{
+							new SequentialCommand(C2, parseCommand(), commandPos);
+						}
+					}
+				
+				eAST = parseExpression();
+				commandAST = new WhileDoCommand(C1, eAST, C2, commandPos);
+				accept(Token.Kind.END);
+				}
+				break;
+			}
+			else{
+				accept(Token.Kind.END);
+				break;
+			}
+			
 		case LET: {
 			acceptIt();
 			Declaration dAST = parseDeclaration();
@@ -333,7 +362,7 @@ public class Parser {
 
 		case IF: {
 			acceptIt();
-			Expression eAST = parseExpression();
+			eAST = parseExpression();
 			accept(Token.Kind.THEN);
 			Command c1AST = parseSingleCommand();
 			accept(Token.Kind.ELSE);
@@ -345,7 +374,7 @@ public class Parser {
 
 		case WHILE: {
 			acceptIt();
-			Expression eAST = parseExpression();
+			eAST = parseExpression();
 			accept(Token.Kind.DO);
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
@@ -359,10 +388,9 @@ public class Parser {
     	        		command = parseCommand();
     				}
     			accept(Token.Kind.UNTIL);
-			Expression eAST = parseExpression();
+			eAST = parseExpression();
     			commandAST = new RepeatCommand(eAST, command,commandPos);
 			break;
-			
 
 		case SEMICOLON:
 		case END:

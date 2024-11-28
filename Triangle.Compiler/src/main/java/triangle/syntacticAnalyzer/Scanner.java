@@ -272,11 +272,11 @@ break;
 	}
 	//public method to allow access to isDigit method during testing
 	public boolean testIsLetter(char c){
-		return isLetter(c);
+		return isLetter(c); //passing the currentChar from testIsLetter to isLetter()
 	}
 	//public method to allow access to isOperator method during testing
 	public boolean testIsOperator(char c){
-		return isOperator(c);
+		return isOperator(c); //passing the currentChar from testIsOperator to isOperator()
 	}
 	public Token scan() {
 		Token tok;

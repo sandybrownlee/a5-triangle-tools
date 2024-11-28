@@ -52,8 +52,14 @@ public class TestScanner {
 	}
 	@Test
 	public void testSquare() {
-		compileExpectFailure("/square.tri");
+		compileExpectSuccess("/square.tri");
 	}
+
+	@Test
+	public void testWhileDo() {
+		compileExpectSuccess("/While-longloop.tri");
+	}
+
 	@Test
 	public void testIsOperator(){
 		SourceFile source = SourceFile.fromResource("/testDigOp.txt");
@@ -64,7 +70,7 @@ public class TestScanner {
 		Integer trueCount = 0;
 		Integer falseCount= 0;
 		
-			for(int i = 0; i<operators.length(); i++){
+			for(int i = 0; i<operators.length(); i++){ //iterates through operator string, and passing it to Isoperator():expects true
 				currentChar = operators.charAt(i);
 				if(scanner.testIsOperator(currentChar)){
 					trueCount++;
@@ -72,7 +78,7 @@ public class TestScanner {
 			}
 			for(int i = 0; i<nonOperators.length(); i++){
 				currentChar = nonOperators.charAt(i);
-				if(!scanner.testIsOperator(currentChar)){
+				if(!scanner.testIsOperator(currentChar)){ //iterates through non-operator string, and passing it to Isoperator(): expects false
 					falseCount++;
 				}
 			}
@@ -91,13 +97,13 @@ public class TestScanner {
 		Integer trueCount = 0;
 		Integer falseCount= 0;
 		
-		for(int i = 0; i<letters.length(); i++){
+		for(int i = 0; i<letters.length(); i++){ //iterates through the letters string and passing it to isLetter(): expects true
 			currentChar = letters.charAt(i);
 			if(scanner.testIsLetter(currentChar)){
 				trueCount++;
 			}
 		}
-		for(int i = 0; i<nonLetter.length(); i++){
+		for(int i = 0; i<nonLetter.length(); i++){ //iterates through the non-letters string and passing it to isLetter(): expects false
 			currentChar = nonLetter.charAt(i);
 			if(!scanner.testIsLetter(currentChar)){
 				falseCount++;
