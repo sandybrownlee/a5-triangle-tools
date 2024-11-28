@@ -29,6 +29,8 @@ import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
+import triangle.abstractSyntaxTrees.visitors.SummaryVisitor;
+
 
 
 /**
@@ -38,6 +40,9 @@ import com.sampullara.cli.Argument;
  * @author Deryck F. Brown
  */
 public class Compiler {
+	
+	@Argument(alias = "showStats", description = "Show program statistics", required = false)
+	static boolean showStats = false;
 
 	/** The filename for the object program, normally obj.tam. */
 	@Argument(alias = "o", description = "Output file name", required = false)
@@ -112,10 +117,18 @@ public class Compiler {
 				theAST.visit(new ConstantFolder());
 			}
 			
-			if (reporter.getNumErrors() == 0) {
-				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
-			}
+			
+			if (showStats) {
+	            System.out.println("Generating summary statistics...");
+	            SummaryVisitor summaryVisitor = new SummaryVisitor();
+	            theAST.visit(summaryVisitor, null);
+	            summaryVisitor.printSummary();
+	        }
+
+	        if (reporter.getNumErrors() == 0) {
+	            System.out.println("Code Generation ...");
+	            encoder.encodeRun(theAST, showingTable); // 3rd pass
+	        }
 		}
 
 		boolean successful = (reporter.getNumErrors() == 0);

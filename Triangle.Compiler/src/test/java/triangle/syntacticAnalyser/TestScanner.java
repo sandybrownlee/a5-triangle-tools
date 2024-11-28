@@ -32,7 +32,50 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit('\n'));
 	}
 	
-	
+	@Test
+	public void testIsOperator() {
+		assertTrue(Scanner.isOperator('*'));
+		assertTrue(Scanner.isOperator('/'));
+		assertTrue(Scanner.isOperator('?'));
+		assertTrue(Scanner.isOperator('+'));
+		assertTrue(Scanner.isOperator('-'));
+		assertFalse(Scanner.isOperator('a'));
+		assertFalse(Scanner.isOperator('Z'));
+		assertFalse(Scanner.isOperator('1'));
+		assertFalse(Scanner.isOperator(';'));
+		assertFalse(Scanner.isOperator('\n'));
+	}
+	@Test
+	public void testIsOperatorAdditional() {
+	    // Valid operators
+	    assertTrue(Scanner.isOperator('+'));
+	    assertTrue(Scanner.isOperator('-'));
+	    assertTrue(Scanner.isOperator('*'));
+	    assertTrue(Scanner.isOperator('/'));
+	    assertTrue(Scanner.isOperator('&'));
+	    assertTrue(Scanner.isOperator('@'));
+	    
+	    // Invalid operators
+	    assertFalse(Scanner.isOperator('a'));
+	    assertFalse(Scanner.isOperator('1'));
+	    assertFalse(Scanner.isOperator('!'));
+	}
+
+	@Test
+	public void testIsLetterAdditional() {
+	    // Valid letters
+	    assertTrue(Scanner.isLetter('A'));
+	    assertTrue(Scanner.isLetter('Z'));
+	    assertTrue(Scanner.isLetter('a'));
+	    assertTrue(Scanner.isLetter('z'));
+	    
+	    // Invalid letters
+	    assertFalse(Scanner.isLetter('1'));
+	    assertFalse(Scanner.isLetter('0'));
+	    assertFalse(Scanner.isLetter('@'));
+	    assertFalse(Scanner.isLetter('#'));
+	    assertFalse(Scanner.isLetter('\n'));
+	}
 
 	
 	/* these tests all try to compile example programs... */
