@@ -20,8 +20,8 @@ public class Desugarer implements RewriteStage {
 
     private int fresh = 0;
 
-    @Override public Expression visit(final Expression expression) {
-        Expression rewritten = RewriteStage.super.visit(expression);
+    @Override public Expression rewrite(final Expression expression) {
+        Expression rewritten = RewriteStage.super.rewrite(expression);
 
         // if "++"
         if (rewritten instanceof UnaryOp unaryOp && unaryOp.operator().equals("++")) {
@@ -57,7 +57,7 @@ public class Desugarer implements RewriteStage {
     }
 
     public Statement desugar(Statement program) {
-        return visit(program);
+        return rewrite(program);
     }
 
 }

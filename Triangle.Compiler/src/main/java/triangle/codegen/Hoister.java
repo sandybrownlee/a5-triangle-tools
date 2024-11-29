@@ -31,7 +31,7 @@ class Hoister implements RewriteStage {
     private static final Function<SourcePosition, String> freshName = sourcePos -> sourcePos.lineNo() + "_" + sourcePos.colNo();
 
     //@formatter:off
-    @Override public Statement visit(final Statement statement) {
+    @Override public Statement rewrite(final Statement statement) {
         return switch (statement) {
             case Statement.WhileStatement ws ->
                     hoistLoop(freshName.apply(ws.sourcePosition()), ws.condition(), ws.body()).hoist(ws);
@@ -41,13 +41,13 @@ class Hoister implements RewriteStage {
                 hoistLoop(freshName.apply(rws.sourcePosition()), rws.condition(), rws.body()).hoist(rws);
             case Statement.LoopWhileStatement lws ->
                 hoistLoop(freshName.apply(lws.sourcePosition()), lws.condition(), lws.loopBody(), lws.doBody()).hoist(lws);
-            default -> RewriteStage.super.visit(statement);
+            default -> RewriteStage.super.rewrite(statement);
         };
     }
     //@formatter:on
 
     Statement hoist(Statement program) {
-        return visit(program);
+        return rewrite(program);
     }
 
     private ExpressionHoister hoistLoop(String freshName, Expression condition, Statement... bodies) {
@@ -66,16 +66,16 @@ class Hoister implements RewriteStage {
 
         private final Set<String> mutated = new HashSet<>();
 
-        @Override public Statement visit(final Statement statement) {
+        @Override public Statement rewrite(final Statement statement) {
             if (statement instanceof Statement.AssignStatement assignStatement) {
                 // have to assume, for complex identifiers, that if any part of the identifier is mutated, then the whole thing is
                 mutated.add(assignStatement.identifier().root().name());
             }
 
-            return RewriteStage.super.visit(statement);
+            return RewriteStage.super.rewrite(statement);
         }
 
-        @Override public Expression visit(final Expression expression) {
+        @Override public Expression rewrite(final Expression expression) {
             // assume any argument passed as var is mutated
             if (expression instanceof Expression.FunCall funCall) {
                 for (Argument argument : funCall.arguments()) {
@@ -85,15 +85,15 @@ class Hoister implements RewriteStage {
                 }
             }
 
-            return RewriteStage.super.visit(expression);
+            return RewriteStage.super.rewrite(expression);
         }
 
         private void addMutationsOf(Statement statement) {
-            visit(statement);
+            rewrite(statement);
         }
 
         private void addMutationsOf(Expression expression) {
-            visit(expression);
+            rewrite(expression);
         }
 
         private InvarianceChecker usageChecker() {
@@ -106,16 +106,16 @@ class Hoister implements RewriteStage {
 
             private boolean loopInvariant = true;
 
-            @Override public BasicIdentifier visit(final BasicIdentifier identifier) {
+            @Override public BasicIdentifier rewrite(final BasicIdentifier identifier) {
                 if (mutated.contains(identifier.name())) {
                     loopInvariant = false;
                 }
 
-                return RewriteStage.super.visit(identifier);
+                return RewriteStage.super.rewrite(identifier);
             }
 
             private void check(Expression expression) {
-                visit(expression);
+                rewrite(expression);
             }
 
             private void reset() {
@@ -149,8 +149,8 @@ class Hoister implements RewriteStage {
             this.labelPrefix = labelPrefix;
         }
 
-        @Override public Expression visit(final Expression expression) {
-            Expression hoisted = RewriteStage.super.visit(expression);
+        @Override public Expression rewrite(final Expression expression) {
+            Expression hoisted = RewriteStage.super.rewrite(expression);
 
             return switch (hoisted) {
                 case Expression.BinaryOp binaryOp -> {
@@ -218,7 +218,7 @@ class Hoister implements RewriteStage {
         }
 
         private Statement hoist(Statement statement) {
-            Statement hoisted = RewriteStage.super.visit(statement);
+            Statement hoisted = RewriteStage.super.rewrite(statement);
 
             return new Statement.LetStatement(hoistedExpressions, hoisted);
         }

@@ -8,11 +8,11 @@ import triangle.repr.Statement;
 class DeadCodeEliminator implements RewriteStage {
 
     Statement eliminateDeadCode(Statement program) {
-        return visit(program);
+        return rewrite(program);
     }
 
-    @Override public Statement visit(final Statement statement) {
-        Statement eliminated = RewriteStage.super.visit(statement);
+    @Override public Statement rewrite(final Statement statement) {
+        Statement eliminated = RewriteStage.super.rewrite(statement);
 
         return switch (eliminated) {
             case Statement.IfStatement ifS when ifS.condition() instanceof Expression.LitBool litBool ->
@@ -28,8 +28,8 @@ class DeadCodeEliminator implements RewriteStage {
         };
     }
 
-    @Override public Expression visit(final Expression expression) {
-        Expression eliminated = RewriteStage.super.visit(expression);
+    @Override public Expression rewrite(final Expression expression) {
+        Expression eliminated = RewriteStage.super.rewrite(expression);
 
         if (eliminated instanceof Expression.IfExpression ifExpression &&
             ifExpression.condition() instanceof Expression.LitBool litBool) {

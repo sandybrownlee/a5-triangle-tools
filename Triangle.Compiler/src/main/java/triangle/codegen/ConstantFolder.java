@@ -34,10 +34,10 @@ import triangle.repr.Statement;
     private int foldCount = 0;
 
     //// open Char in
-    @Override public Expression visit(final Expression expression) {
-        Expression folded = RewriteStage.super.visit(expression);
+    @Override public Expression rewrite(final Expression expression) {
+        Expression folded = RewriteStage.super.rewrite(expression);
 
-        return switch (RewriteStage.super.visit(expression)) {
+        return switch (RewriteStage.super.rewrite(expression)) {
             case Expression.BinaryOp binaryOp -> foldBinaryOp(binaryOp);
             case Expression.FunCall funCall -> {
                 //// ("chr", LitInt x) -> LitChar (code x)
@@ -66,7 +66,7 @@ import triangle.repr.Statement;
         // repeatedly fold while the number of folds performed in last pass is above threshold, reset foldCount after each pass
         do {
             foldCount = 0;
-            statement = RewriteStage.super.visit(statement);
+            statement = RewriteStage.super.rewrite(statement);
             totalFolds += foldCount;
         } while (foldCount >= FOLD_THRESHOLD && totalFolds <= FOLD_LIMIT);
 

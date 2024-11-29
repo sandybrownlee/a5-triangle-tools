@@ -11,7 +11,7 @@ public class SummaryVisitor implements RewriteStage {
     private int binaryOps = 0;
 
     public Summary generateSummary(Statement program) {
-        visit(program);
+        rewrite(program);
 
         Summary summary = new Summary(whileStatements, ifStatements, binaryOps);
 
@@ -23,7 +23,7 @@ public class SummaryVisitor implements RewriteStage {
         return summary;
     }
 
-    @Override public Statement visit(final Statement statement) {
+    @Override public Statement rewrite(final Statement statement) {
         if (statement instanceof Statement.WhileStatement) {
             whileStatements++;
         }
@@ -32,15 +32,15 @@ public class SummaryVisitor implements RewriteStage {
             ifStatements++;
         }
 
-        return RewriteStage.super.visit(statement);
+        return RewriteStage.super.rewrite(statement);
     }
 
-    @Override public Expression visit(final Expression expression) {
+    @Override public Expression rewrite(final Expression expression) {
         if (expression instanceof Expression.BinaryOp) {
             binaryOps++;
         }
 
-        return RewriteStage.super.visit(expression);
+        return RewriteStage.super.rewrite(expression);
     }
 
     public record Summary(int whileStatements, int ifStatements, int binaryOps) { }
