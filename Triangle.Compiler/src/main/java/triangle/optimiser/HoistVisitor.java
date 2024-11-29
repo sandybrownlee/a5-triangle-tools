@@ -8,7 +8,6 @@ import triangle.abstractSyntaxTrees.declarations.*;
 import triangle.abstractSyntaxTrees.expressions.*;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
-import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.contextualAnalyzer.IdentificationTable;
 import triangle.syntacticAnalyzer.SourcePosition;
 
@@ -20,7 +19,8 @@ public class HoistVisitor extends ConstantFolder {
 	private boolean currentlyHoisting = false;
 	private boolean currentlyInLoop = false;
 	private int numberOfConstants = 0;
-	Stack<AbstractSyntaxTree> stack = new Stack<>();
+	Stack<AbstractSyntaxTree> preDeclarationStack = new Stack<>();
+	Stack<AbstractSyntaxTree> postDeclarationStack = new Stack<>();
 
 	@Override
 	public AbstractSyntaxTree visitSimpleVname(SimpleVname ast, Void arg) {
@@ -176,7 +176,7 @@ public class HoistVisitor extends ConstantFolder {
 		else if (currentlyHoisting && currentlyInLoop) {
 			// nullability check as binary expression evaluation can and will return null if there is no invariant present in the current assignment.
 			if (replacement != null) {
-				// logic for creating an expression to hoist and pushing to the stack.
+				// logic for creating an expression to hoist and pushing to the preDeclarationStack.
 				// there's honestly no need for this pos assignment here other than to reduce the number of calls
 				// within the code as I genuinely don't know whether it matters or not other than for error messages, but it's impossible to predict the new position
 				// where the assignments, etc will end up in the tree as this is recursively doing this DFS.
@@ -197,7 +197,7 @@ public class HoistVisitor extends ConstantFolder {
 				// we can pass simplevname as the vname since its just a sub-class, and then the expression which would be assigned normally
 				// i.e. "C+2"
 				AssignCommand assignmentToInject = new AssignCommand(newVar, e, pos);
-				stack.push(assignmentToInject);
+				preDeclarationStack.push(assignmentToInject);
 
 				// now we need to replace the existing expression with the identifier as a vNameExpression
 				VnameExpression vEAST = new VnameExpression(newVar, ast.E.getPosition());
@@ -221,45 +221,78 @@ public class HoistVisitor extends ConstantFolder {
 		if (currentlyHoisting) {
 			if (node2 instanceof WhileCommand) {
 				SourcePosition pos = ast.getPosition();
-				Command sequentialSubTreeToInject = createSequentialCommand(pos);
+				Declaration sequentialDeclaration = createSequentialDeclaration(pos);
+				SequentialCommand sequentialSubTreeToInject;
+				Command assignCommands = createSequentialCommand(pos);
+				sequentialSubTreeToInject = new SequentialCommand(assignCommands, ast.C2, pos);
+				LetCommand letCommand = new LetCommand(sequentialDeclaration, sequentialSubTreeToInject, pos);
 				// we now have a let command and access to the while command, to place these together we wrap them in a sequential command
 				// we now set the parent tree equal to the combined let trees in sequential command form
-				sequentialSubTreeToInject = new SequentialCommand(sequentialSubTreeToInject, ast.C2, pos);
+
 
 
 				// and then to add this back to the tree, we pass a new sequential command which contains the updated subtree
 				// and the rest of the tree on the left as we're doing DFS algorithms to figure out the program layout.
-				return new SequentialCommand(ast.C1, sequentialSubTreeToInject, pos);
+				return new SequentialCommand(ast.C1, letCommand, pos);
 			}
 		}
 		return null;
 	}
 
-	public LetCommand createLetCommand() {
-		// grab the statement to hoist from the top of the stack
-		// this assignment command should be something like "temp" = C + 2 in the while hoist .tri program
-		if (stack.isEmpty()) {
-			return null;
-		}
-		AssignCommand assignmentToInject = (AssignCommand) stack.pop();
-
-		// To create a let command, we need a variable declaration, which we can create from the assignment command
-		SimpleVname sAST = (SimpleVname) assignmentToInject.V;
-		Identifier id = sAST.I;
-		// we create a variable, "temp" for example, and then wrap it inside a let command.
-		VarDeclaration var = new VarDeclaration(id, StdEnvironment.integerType, assignmentToInject.getPosition());
-		return new LetCommand(var, assignmentToInject, assignmentToInject.getPosition());
-	}
-
 	public Command createSequentialCommand(SourcePosition pos) {
-
-		LetCommand letCommand = createLetCommand();
-		if (letCommand != null) {
-			return new SequentialCommand(createSequentialCommand(pos), letCommand, pos);
+		AssignCommand assignCommand = (AssignCommand) createAssignmentCommand(pos);
+		if (assignCommand != null) {
+			return new SequentialCommand(createSequentialCommand(pos), assignCommand, pos);
 		}
 		return new EmptyCommand(pos);
 	}
 
+	public Command createAssignmentCommand(SourcePosition pos) {
+		if (postDeclarationStack.isEmpty()) {
+			return null;
+		}
+        return (AssignCommand) postDeclarationStack.pop();
+	}
+
+
+	/**
+	 * Below is possible solutions to the problem of Let commands & sequential commands rather than sequential declarations
+	 * @param pos
+	 * @return
+	 */
+	public Declaration createSequentialDeclaration(SourcePosition pos) {
+
+		VarDeclaration varDeclaration = null;
+		if (preDeclarationStack.size() == 1) {
+			varDeclaration = createVarDeclaration();
+			return varDeclaration;
+		}
+		if (preDeclarationStack.size() == 2) {
+			varDeclaration = createVarDeclaration();
+			VarDeclaration varDeclaration2 = createVarDeclaration();
+
+			return new SequentialDeclaration(varDeclaration, varDeclaration2, pos);
+		}
+		else {
+			varDeclaration = createVarDeclaration();
+			return new SequentialDeclaration(createSequentialDeclaration(pos), varDeclaration, pos);
+		}
+	}
+
+	public VarDeclaration createVarDeclaration() {
+		if (preDeclarationStack.isEmpty()) {
+			return null;
+		}
+
+		AssignCommand assignmentToInject = (AssignCommand) preDeclarationStack.pop();
+		SourcePosition pos = assignmentToInject.getPosition();
+		postDeclarationStack.push(assignmentToInject);
+
+		// we create a variable, "temp" for example, and then wrap it inside a let command.
+		SimpleVname sAST = (SimpleVname) assignmentToInject.V;
+		Identifier id = sAST.I;
+		return new VarDeclaration(id, id.type, pos);
+	}
 
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {

@@ -116,20 +116,24 @@ public class Compiler {
 					drawer.draw(theAST);
 				}
 			}
-			if (reporter.getNumErrors() == 0) {
-				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, false); // 3rd pass
-			}
+
 			if (showStatistics) {
 				summaryVisitor.countStats(theAST);
 			}
+
 			checker.check(theAST); // 3rd pass
+
 			if (hoistingEnabled) {
 				theAST.visit(new HoistVisitor());
 				if (showTreeAfter) {
 					showTree = true;
 					drawer.draw(theAST);
 				}
+			}
+			checker.check(theAST);
+			if (reporter.getNumErrors() == 0) {
+				System.out.println("Code Generation ...");
+				encoder.encodeRun(theAST, false); // 3rd pass
 			}
 		}
 
