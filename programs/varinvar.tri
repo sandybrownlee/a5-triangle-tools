@@ -1,0 +1,48 @@
+! tests passing var arguments as var arguments
+
+let
+    var x : array 3 of array 3 of Integer;
+
+    proc putintln(n : Integer) ~ begin putint(n); puteol(); end;
+
+    proc p(var x : array 3 of array 3 of Integer) ~
+        let var n : Integer;
+            proc q(var x : array 3 of Integer, var n : Integer) ~
+                begin
+                    n := x[1] + 1 + n;
+                    x[1] := n + n;
+                end
+         in begin
+                n := 0;
+                q(var x[0], var n);
+                q(var x[1], var n);
+                q(var x[2], var n);
+                q(var x[0], var n);
+                q(var x[1], var n);
+                q(var x[2], var n);
+            end
+in
+begin
+    p(var x);
+    putintln(x[0][0]);
+    putintln(x[0][1]);
+    putintln(x[0][2]);
+    putintln(x[1][0]);
+    putintln(x[1][1]);
+    putintln(x[1][2]);
+    putintln(x[2][0]);
+    putintln(x[2][1]);
+    putintln(x[2][2]);
+end
+
+$
+0
+12
+0
+0
+22
+0
+0
+36
+0
+$

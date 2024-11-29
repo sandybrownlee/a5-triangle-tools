@@ -1,8 +1,9 @@
 /*
- * @(#)Compiler.java                       
- * 
+ * @(#)Compiler.java
+ *
+ * Revisions and updates (c) 2024 Zaraksh Rahman. zar00024@students.stir.ac.uk
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -18,139 +19,137 @@
 
 package triangle;
 
-import triangle.abstractSyntaxTrees.Program;
-import triangle.codeGenerator.Emitter;
-import triangle.codeGenerator.Encoder;
-import triangle.contextualAnalyzer.Checker;
-import triangle.optimiser.ConstantFolder;
-import triangle.syntacticAnalyzer.Parser;
-import triangle.syntacticAnalyzer.Scanner;
-import triangle.syntacticAnalyzer.SourceFile;
-import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+import triangle.analysis.Desugarer;
+import triangle.analysis.SemanticAnalyzer;
+import triangle.analysis.TypeChecker;
+import triangle.codegen.ObjectWriter;
+import triangle.codegen.CodeGen;
+import triangle.repr.Instruction;
+import triangle.codegen.Optimizer;
+import triangle.parsing.Parser;
+import triangle.parsing.SyntaxError;
+import triangle.repr.Statement;
+import triangle.util.ASTPrinter;
+import triangle.util.SummaryVisitor;
 
-/**
- * The main driver class for the Triangle compiler.
- *
- * @version 2.1 7 Oct 2003
- * @author Deryck F. Brown
- */
+import java.io.DataOutputStream;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.List;
+
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+    @Argument(description = "The name of the file to store the object code into") private static String objectName = "obj.tam";
 
-	private static Scanner scanner;
-	private static Parser parser;
-	private static Checker checker;
-	private static Encoder encoder;
-	private static Emitter emitter;
-	private static ErrorReporter reporter;
-	private static Drawer drawer;
+    @Argument(description = "The name of the source file to compile", required = true) private static String sourceName;
 
-	/** The AST representing the source program. */
-	private static Program theAST;
+    // needs to be package private to allow CompilerTest to work
+    @Argument(description = "Turn on constant folding") static boolean folding;
 
-	/**
-	 * Compile the source program to TAM machine code.
-	 *
-	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
-	 * @param showingAST   true iff the AST is to be displayed after contextual
-	 *                     analysis
-	 * @param showingTable true iff the object description details are to be
-	 *                     displayed during code generation (not currently
-	 *                     implemented).
-	 * @return true iff the source program is free of compile-time errors, otherwise
-	 *         false.
-	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+    // needs to be package private to allow CompilerTest to work
+    @Argument(description = "Turn on loop hoisting") static boolean hoisting;
 
-		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
+    @Argument(description = "Show summary stats") private static boolean showStats;
 
-		System.out.println("Syntactic Analysis ...");
-		SourceFile source = SourceFile.ofPath(sourceName);
+    @Argument(description = "Show AST") private static boolean showTree;
 
-		if (source == null) {
-			System.out.println("Can't access source file " + sourceName);
-			System.exit(1);
-		}
+    @Argument(description = "Show tree after folding") private static boolean showTreeAfter;
 
-		scanner = new Scanner(source);
-		reporter = new ErrorReporter(false);
-		parser = new Parser(scanner, reporter);
-		checker = new Checker(reporter);
-		emitter = new Emitter(reporter);
-		encoder = new Encoder(emitter, reporter);
-		drawer = new Drawer();
+    public static void main(String[] args) {
+        Args.parseOrExit(Compiler.class, args);
 
-		// scanner.enableDebugging();
-		theAST = parser.parseProgram(); // 1st pass
-		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
-			System.out.println("Contextual Analysis ...");
-			checker.check(theAST); // 2nd pass
-			if (showingAST) {
-				drawer.draw(theAST);
-			}
-			if (folding) {
-				theAST.visit(new ConstantFolder());
-			}
-			
-			if (reporter.getNumErrors() == 0) {
-				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
-			}
-		}
+        try {
+            compileProgram(new FileInputStream(sourceName), new FileOutputStream(objectName));
+        } catch (FileNotFoundException e) {
+            System.err.println("Could not open file: " + sourceName);
+            e.printStackTrace();
+            System.exit(1);
+        } catch (IOException e) {
+            System.err.println("IOException while compiling: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (SyntaxError e) {
+            System.err.println("SyntaxError while compiling: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
 
-		boolean successful = (reporter.getNumErrors() == 0);
-		if (successful) {
-			emitter.saveObjectProgram(objectName);
-			System.out.println("Compilation was successful.");
-		} else {
-			System.out.println("Compilation was unsuccessful.");
-		}
-		return successful;
-	}
+    static void compileProgram(
+            InputStream inputStream, final FileOutputStream outputStream)
+    throws IOException, SyntaxError {
+        Parser parser = new Parser(inputStream);
+        SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
+        Desugarer desugarer = new Desugarer();
+        TypeChecker typeChecker = new TypeChecker();
+        CodeGen codeGen = new CodeGen();
+        ObjectWriter ObjectWriter = new ObjectWriter(new DataOutputStream(outputStream));
 
-	/**
-	 * Triangle compiler main program.
-	 *
-	 * @param args the only command-line argument to the program specifies the
-	 *             source filename.
-	 */
-	public static void main(String[] args) {
+        Statement program = parser.parseProgram();
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
+        if (showTree) {
+            System.out.println(ASTPrinter.prettyPrint(program));
+        }
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+        // need to show stats *before* any desugaring, else counts will not be correct
+        if (showStats) {
+            SummaryVisitor summaryVisitor = new SummaryVisitor();
+            if (summaryVisitor.generateSummary(program) instanceof SummaryVisitor.Summary(
+                    int whileStatements, int ifStatements, int binaryOps
+            )) {
+                System.out.println("Summary: ");
+                System.out.println("While Statements: " + whileStatements);
+                System.out.println("If Statements: " + ifStatements);
+                System.out.println("Binary Ops: " + binaryOps);
+            }
+        }
 
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+        // explicitly-typed AST
+        semanticAnalyzer.analyzeAndType(program);
+
+        if (!semanticAnalyzer.getErrors().isEmpty()) {
+            System.err.println("Semantic analysis found errors, not proceeding with type checking");
+            semanticAnalyzer.getErrors().forEach(System.err::println);
+            return;
+        }
+
+        program = desugarer.desugar(program);
+
+        typeChecker.typecheck(program);
+
+        if (!typeChecker.getErrors().isEmpty()) {
+            System.err.println("Type checker found errors, not proceeding with compilation");
+            typeChecker.getErrors().forEach(System.err::println);
+            return;
+        }
+
+        if (folding) {
+            program = Optimizer.foldConstants(program);
+
+            if (showTreeAfter) {
+                System.out.println(ASTPrinter.prettyPrint(program));
+            }
+        }
+
+        if (hoisting) {
+            program = Optimizer.hoist(program);
+        }
+
+        program = Optimizer.eliminateDeadCode(program);
+
+        List<Instruction> ir = codeGen.generateInstructions(program);
+
+        ir = Optimizer.threadJumps(ir);
+        ir = Optimizer.combineInstructions(ir);
+
+        List<Instruction.TAMInstruction> objectCode = Optimizer.resolveLabels(ir);
+
+        ObjectWriter.write(objectCode);
+    }
+
 }

@@ -1,12 +1,10 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-sourceCompatibility = 17
-
 dependencies {
-	implementation project(':Triangle.AbstractMachine')
+    implementation project(':Triangle.AbstractMachine')
 }
 
 application {
-	mainClass = 'Triangle.AbstractMachine.Disassembler'
+    mainClass = 'triangle.abstractMachine.Disassembler'
 }

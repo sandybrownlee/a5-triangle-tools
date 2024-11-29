@@ -1,0 +1,45 @@
+let
+    type R ~ record x : Char,
+                    n : Integer,
+                    a : array 2 of record x : Integer,
+                                          y : Integer
+                                   end,
+                    r : record a : Integer,
+                               x : Integer
+                        end
+             end;
+
+    proc putchareol(c : Char) ~ begin put(c); puteol(); end;
+    proc putinteol(n : Integer) ~ begin putint(n); puteol(); end;
+    proc putreol(r : R) ~
+        begin
+            putchareol(r.x);
+            putinteol(r.n);
+            putinteol(r.a[0].x);
+            putinteol(r.a[0].y);
+            putinteol(r.a[1].x);
+            putinteol(r.a[1].y);
+            putinteol(r.r.a);
+            putinteol(r.r.x);
+            puteol();
+        end;
+
+    var r : R;
+    var n : Integer;
+ in
+    begin
+        getint(var n);
+        putreol(r);
+        r.x := 'A';
+        putreol(r);
+        r.n := 11;
+        putreol(r);
+        r.a[n].x := 22;
+        putreol(r);
+        r.a[n].y := 33;
+        putreol(r);
+        r.r.a := 66;
+        putreol(r);
+        r.r.x := 77;
+        putreol(r);
+    end

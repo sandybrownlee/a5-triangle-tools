@@ -1,0 +1,14 @@
+let
+    proc putintln(x : Integer) ~ begin putint(x); puteol(); end;
+    proc apply(proc p(x : Integer), q : Integer) ~
+        let proc ap(proc p(x : Integer)) ~ p(q)
+         in begin
+                ap(proc p);
+                q := q * 2;
+                ap(proc p);
+            end
+in
+begin
+    apply(proc putintln, 12893);
+    put(chr(65));
+end

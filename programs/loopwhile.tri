@@ -1,0 +1,13 @@
+let var i : Integer
+ in begin
+        i := 10;
+        loop
+            put('A')
+        while (i > 0) do
+            begin
+                put('B');
+                puteol();
+                i := i - 1
+            end
+    end
+

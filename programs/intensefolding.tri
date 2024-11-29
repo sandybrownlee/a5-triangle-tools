@@ -1,0 +1,11 @@
+let var i : Integer in
+begin
+    i := 0;
+    while i <= 100 do
+    begin
+        putint(3 + 4 * 6 // 4 + 3 - 2 + 8 * 4);
+        putint(3 + 4 * 6 // 4 + 3 - 2 + 8 * 4);
+        putint(3 + 4 * 6 // 4 + 3 - 2 + 8 * 4);
+        i++;
+    end
+end

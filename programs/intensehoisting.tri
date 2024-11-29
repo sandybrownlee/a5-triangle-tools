@@ -1,0 +1,16 @@
+let var a : Integer;
+    var b : Integer;
+    var c : Integer;
+    var i : Integer in
+begin
+    i := 0;
+    a := 4;
+    b := 10;
+    c := 16;
+    while i <= 100 do
+    begin
+        putint((a * c + (a * c) - a // c) + b);
+        putint((a * c + (a * c) - a // c) + b);
+        i++;
+    end
+end
