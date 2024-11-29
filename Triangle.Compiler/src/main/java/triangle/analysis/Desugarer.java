@@ -32,11 +32,8 @@ public class Desugarer implements RewriteStage {
                 return new SequenceExpression(assignStatement, identifier).withSourcePosition(unaryOp.sourcePosition());
             }
 
-            BasicIdentifier generated = new BasicIdentifier("rw_increment_" + fresh++);
-            // let const <generated_name> ~ unaryop.operand() in <generated_name> + 1
-            List<Declaration> declarations = List.of(new ConstDeclaration(generated.name(), unaryOp.operand()));
-            Expression letExpression = new BinaryOp("+", generated, new LitInt(1));
-            return new LetExpression(declarations, letExpression).withSourcePosition(unaryOp.sourcePosition());
+            // unaryop.operand() + 1
+            return new BinaryOp("+", unaryOp.operand(), new LitInt(1));
         }
 
         // if "**"
@@ -48,8 +45,8 @@ public class Desugarer implements RewriteStage {
                 return new SequenceExpression(assignStatement, identifier).withSourcePosition(unaryOp.sourcePosition());
             }
 
+            // must not duplicate expression, in case it has side-effects
             BasicIdentifier generated = new BasicIdentifier("rw_square_" + fresh++);
-            // must not duplicate expression in const declaration, in case it has side-effects
             List<Declaration> declarations = List.of(new ConstDeclaration(generated.name(), unaryOp.operand()));
             // let const <generated_name> ~ unaryop.operand() in <generated_name> * <generated_name>
             Expression letExpression = new BinaryOp("*", generated, generated);
