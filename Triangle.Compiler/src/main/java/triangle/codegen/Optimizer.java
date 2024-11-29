@@ -121,29 +121,29 @@ public class Optimizer {
         return combined;
     }
 
-    //  backpatch the instruction list to resolve all labels, primitive calls, redundant instruction etc.
-    public static List<Instruction.TAMInstruction> backpatch(final List<Instruction> instructions) {
+    //  resolve all labels, primitive calls, redundant instruction etc.
+    public static List<Instruction.TAMInstruction> resolveLabels(final List<Instruction> instructions) {
         Function<Instruction.LABEL, Instruction.Address> toCodeAddress = generateLabelToAddressMapper(instructions);
 
-        List<Instruction.TAMInstruction> patchedInstructions = new ArrayList<>();
+        List<Instruction.TAMInstruction> resolved = new ArrayList<>();
         for (Instruction instruction : instructions) {
             switch (instruction) {
                 case Instruction.LABEL _ -> { }
                 case Instruction.POP(int resultWords, int popCount) when resultWords == 0 && popCount == 0 -> { }
-                case Instruction.CALL_LABEL(Register staticLink, Instruction.LABEL label) -> patchedInstructions.add(
+                case Instruction.CALL_LABEL(Register staticLink, Instruction.LABEL label) -> resolved.add(
                         new Instruction.CALL(staticLink, toCodeAddress.apply(label)));
-                case Instruction.JUMPIF_LABEL(int value, Instruction.LABEL label) -> patchedInstructions.add(
+                case Instruction.JUMPIF_LABEL(int value, Instruction.LABEL label) -> resolved.add(
                         new Instruction.JUMPIF(value, toCodeAddress.apply(label)));
-                case Instruction.JUMP_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
+                case Instruction.JUMP_LABEL(Instruction.LABEL label) -> resolved.add(
                         new Instruction.JUMP(toCodeAddress.apply(label)));
-                case Instruction.LOADA_LABEL(Instruction.LABEL label) -> patchedInstructions.add(
+                case Instruction.LOADA_LABEL(Instruction.LABEL label) -> resolved.add(
                         new Instruction.LOADA(toCodeAddress.apply(label)));
-                case Instruction.CALL_PRIM(Primitive p) -> patchedInstructions.add(
+                case Instruction.CALL_PRIM(Primitive p) -> resolved.add(
                         new Instruction.CALL(Register.SB, new Instruction.Address(Register.PB, p.ordinal())));
-                case Instruction.TAMInstruction tamInstruction -> patchedInstructions.add(tamInstruction);
+                case Instruction.TAMInstruction tamInstruction -> resolved.add(tamInstruction);
             }
         }
-        return patchedInstructions;
+        return resolved;
     }
 
     // need to ensure combined primitive calls don't overflow

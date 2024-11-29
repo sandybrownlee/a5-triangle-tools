@@ -141,7 +141,7 @@ public class Compiler {
         ir = Optimizer.threadJumps(ir);
         ir = Optimizer.combineInstructions(ir);
 
-        List<Instruction.TAMInstruction> objectCode = Optimizer.backpatch(ir);
+        List<Instruction.TAMInstruction> objectCode = Optimizer.resolveLabels(ir);
 
         ObjectWriter.write(objectCode);
     }
