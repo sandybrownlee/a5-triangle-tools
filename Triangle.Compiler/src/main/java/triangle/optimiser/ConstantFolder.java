@@ -19,6 +19,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -496,6 +497,17 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+    @Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+		ast.C1.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+        ast.C2.visit(this);
+		return null;
+	}
+
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
@@ -572,28 +584,42 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
-		// the only case we know how to deal with for now is two IntegerExpressions
-		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
-			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
-			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
-			Object foldedValue = null;
-			
-			if (o.decl == StdEnvironment.addDecl) {
-				foldedValue = int1 + int2;
-			}
+        // the only case we know how to deal with for now is two IntegerExpressions
+        if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
+            int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
+            int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
+            Object foldedValue = null;
 
-			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-				ie.type = StdEnvironment.integerType;
-				return ie;
-			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
-			}
-		}
+            if (o.decl == StdEnvironment.addDecl) {
+                foldedValue = int1 + int2;
+            }
+            // check decl is true or false
+            else if (o.decl == StdEnvironment.trueDecl) {
+                foldedValue = true;
+            } else if (o.decl == StdEnvironment.falseDecl) {
+                foldedValue = false;
+            }
 
-		// any unhandled situation (i.e., not foldable) is ignored
-		return null;
-	}
+            if (foldedValue instanceof Integer) {
+                IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
+                IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+                ie.type = StdEnvironment.integerType;
+                return ie;
+            } else if (foldedValue instanceof Boolean) {
+                String spelling = (boolean) foldedValue ? "true" : "false"; // set spelling based on condition
+                Identifier bool = new Identifier(spelling, node1.getPosition()); // create the identifier
+                bool.decl = (boolean) foldedValue ? StdEnvironment.trueDecl : StdEnvironment.falseDecl; // set the decl based on condition
+
+                SimpleVname sVname = new SimpleVname(bool, node1.getPosition()); // wrap in simple v name
+                VnameExpression ve = new VnameExpression(sVname, node1.getPosition()); // wrap sVname in vName expression
+
+                return ve;
+
+            }
+        }
+
+        // any unhandled situation (i.e., not foldable) is ignored
+        return null;
+    }
 
 }

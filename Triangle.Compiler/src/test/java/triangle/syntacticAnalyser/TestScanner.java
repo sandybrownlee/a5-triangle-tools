@@ -10,28 +10,36 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import triangle.ErrorReporter;
+import triangle.abstractSyntaxTrees.Program;
+import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.HoistVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 
 public class TestScanner {
-	
+
 	/* some individual unit tests for helper methods in Scanner */
 
 	@Test
 	public void testIsDigit() {
-		assertTrue(Scanner.isDigit('0'));
-		assertTrue(Scanner.isDigit('1'));
-		assertTrue(Scanner.isDigit('5'));
-		assertTrue(Scanner.isDigit('8'));
-		assertTrue(Scanner.isDigit('9'));
+        assertTrue(Scanner.isDigit('0'));
+        assertTrue(Scanner.isDigit('1'));
+        assertTrue(Scanner.isDigit('2'));
+        assertTrue(Scanner.isDigit('3'));
+        assertTrue(Scanner.isDigit('4'));
+        assertTrue(Scanner.isDigit('5'));
+        assertTrue(Scanner.isDigit('6'));
+        assertTrue(Scanner.isDigit('7'));
+        assertTrue(Scanner.isDigit('8'));
+        assertTrue(Scanner.isDigit('9'));
 		assertFalse(Scanner.isDigit('a'));
 		assertFalse(Scanner.isDigit('Z'));
 		assertFalse(Scanner.isDigit('&'));
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
 	}
-	
+
 	@Test
 	public void testIsOperator() {
 		assertTrue(Scanner.isOperator('*'));
@@ -44,60 +52,134 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+
+		assertTrue(Scanner.isOperator('\\')); // notDecl
+		assertTrue(Scanner.isOperator('<')); // lessDecl
+		assertTrue(Scanner.isOperator('>')); // greaterDecl
+		assertTrue(Scanner.isOperator('=')); // equalDecl
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('^'));
+
 	}
-	
-	
+
+    @Test
+    public void testIsLetter() {
+        // lowercase letters
+        assertTrue(Scanner.isLetter('a'));
+        assertTrue(Scanner.isLetter('b'));
+        assertTrue(Scanner.isLetter('c'));
+        assertTrue(Scanner.isLetter('d'));
+        assertTrue(Scanner.isLetter('e'));
+        assertTrue(Scanner.isLetter('v'));
+        assertTrue(Scanner.isLetter('w'));
+        assertTrue(Scanner.isLetter('x'));
+        assertTrue(Scanner.isLetter('y'));
+        assertTrue(Scanner.isLetter('z'));
+
+        // uppercase letters
+        assertTrue(Scanner.isLetter('A'));
+        assertTrue(Scanner.isLetter('B'));
+        assertTrue(Scanner.isLetter('C'));
+        assertTrue(Scanner.isLetter('D'));
+        assertTrue(Scanner.isLetter('E'));
+        assertTrue(Scanner.isLetter('V'));
+        assertTrue(Scanner.isLetter('W'));
+        assertTrue(Scanner.isLetter('X'));
+        assertTrue(Scanner.isLetter('Y'));
+        assertTrue(Scanner.isLetter('Z'));
+
+        assertFalse(Scanner.isLetter('1'));
+        assertFalse(Scanner.isLetter('&'));
+        assertFalse(Scanner.isLetter(';'));
+        assertFalse(Scanner.isLetter('\n'));
+
+    }
+
+
 	/* these tests all try to compile example programs... */
-	
+
 	@Test
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+
 
 	@Test
 	public void testHiNewComment() {
 		compileExpectFailure("/hi-newcomment.tri");
 	}
-	
+
 
 	@Test
 	public void testHiNewComment2() {
 		compileExpectFailure("/hi-newcomment2.tri");
 	}
-	
+
 
 	@Test
 	public void testBarDemo() {
 		compileExpectFailure("/bardemo.tri");
 	}
-	
+
 
 	@Test
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
-	
-	
-	
+
+
+    /**
+     * Test that the square shotcut command (a**) compiles and runs
+     */
+    @Test
+	public void testSquareShortcutCommand() {
+		compileExpectSuccess("/square.tri");
+	}
+
+    @Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
+
+    @Test
+	public void testBooleanFolding() {
+		compileExpectSuccess("/booleans-to-fold.tri");
+	}
+
+    @Test
+    public void testHoisting1() {
+        compileExpectSuccess("/hoist1.tri");
+    }
+
+    @Test
+    public void testHoisting2() {
+        compileExpectSuccess("/hoist2.tri");
+    }
+
+
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
 		// which adds the programs directory to the list of places Java can easily find files
-		// getResource() below searches for a file, which is in /programs 
+		// getResource() below searches for a file, which is in /programs
 		//SourceFile source = SourceFile.ofPath(this.getClass().getResource(filename).getFile().toString());
 		SourceFile source = SourceFile.fromResource(filename);
-		
+
 		Scanner scanner = new Scanner(source);
 		ErrorReporter reporter = new ErrorReporter(true);
 		Parser parser = new Parser(scanner, reporter);
-		
-		parser.parseProgram();
-		
+
+        parser.parseProgram();
+		// Program theAst = parser.parseProgram();
+        // theAst.visit(new ConstantFolder());
+        // theAst.visit(new HoistVisitor());
+
 		// we should get to here with no exceptions
-		
+
 		assertEquals("Problem compiling " + filename, 0, reporter.getNumErrors());
 	}
-	
+
 	private void compileExpectFailure(String filename) {
 		//SourceFile source = SourceFile.ofPath(this.getClass().getResource(filename).getFile().toString());
 		SourceFile source = SourceFile.fromResource(filename);
@@ -111,7 +193,7 @@ public class TestScanner {
 				parser.parseProgram();
 			}
 		});
-		
+
 		// currently this program will fail
 		assertNotEquals("Problem compiling " + filename, 0, reporter.getNumErrors());
 	}

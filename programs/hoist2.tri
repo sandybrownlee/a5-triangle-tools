@@ -1,0 +1,41 @@
+! should print:
+! aaaaa
+! 5
+! 4
+! 2
+
+let
+  var a : Integer;
+  var b : Integer;
+  var c : Integer;
+  var d : Integer;
+  var e : Integer
+
+in
+begin
+  a := 0;
+  b := 1;
+  c := 2;
+  d := 56;
+  e := 69;
+  while a < 5 do
+  begin
+    put('a');
+    a := a + 1;
+    b := 2 + c; ! this could be hoisted
+    d := e + 1;
+    e := d + e;
+  end;
+
+  puteol();
+  putint(a);
+  puteol();
+  putint(b);
+  puteol();
+  putint(c);
+  puteol();
+  putint(d);
+  puteol();
+  putint(e);
+  puteol();
+end
