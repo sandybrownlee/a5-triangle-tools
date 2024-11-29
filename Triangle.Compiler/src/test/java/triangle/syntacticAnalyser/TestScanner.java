@@ -10,6 +10,9 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import triangle.ErrorReporter;
+import triangle.abstractSyntaxTrees.Program;
+import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.HoistVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -145,6 +148,16 @@ public class TestScanner {
 		compileExpectSuccess("/booleans-to-fold.tri");
 	}
 
+    @Test
+    public void testHoisting1() {
+        compileExpectSuccess("/hoist1.tri");
+    }
+
+    @Test
+    public void testHoisting2() {
+        compileExpectSuccess("/hoist2.tri");
+    }
+
 
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
@@ -157,7 +170,10 @@ public class TestScanner {
 		ErrorReporter reporter = new ErrorReporter(true);
 		Parser parser = new Parser(scanner, reporter);
 
-		parser.parseProgram();
+        parser.parseProgram();
+		// Program theAst = parser.parseProgram();
+        // theAst.visit(new ConstantFolder());
+        // theAst.visit(new HoistVisitor());
 
 		// we should get to here with no exceptions
 

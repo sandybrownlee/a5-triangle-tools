@@ -28,6 +28,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.HoistVisitor;
 import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
@@ -57,6 +58,9 @@ public class Compiler {
 
     @Argument(alias="ss", description="Shows visitor stats of the program", required=false)
     static boolean showStats = false;
+
+    @Argument(alias = "h", description = "hoists", required = false)
+    static boolean hoisting = false;
 
     private static Scanner scanner;
     private static Parser parser;
@@ -121,6 +125,10 @@ public class Compiler {
                 theAST.visit(sv);
                 System.out.println("\nVisitor Stats ...");
                 System.out.println(sv.getStats());
+            }
+            if (hoisting) {
+                theAST.visit(new ConstantFolder()); // do folding before hoisting
+                theAST.visit(new HoistVisitor());
             }
 
             if (reporter.getNumErrors() == 0) {
