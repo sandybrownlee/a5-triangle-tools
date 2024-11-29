@@ -724,7 +724,7 @@ public class Hoisting implements ActualParameterVisitor<Void, AbstractSyntaxTree
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
 		this.InsideWhileLoop= true; // this changes the condition to say it's inside the while loop
-		ConvertVariables(ast.C); //adds initial variables
+		ConvertVariables(ast.C); //adds variables
 		doHosting(ast.C); // calls the hosting method
 		ast.C.visit(this); //visits the body of the code
 		AbstractSyntaxTree replacement = ast.E.visit(this);

@@ -55,7 +55,7 @@ public class Compiler {
 	static boolean showTreeAfter = false;
 
 	@Argument(alias = "stat", description = "statistics for the binary expressions, if commands, and while commands", required = false)
-	static boolean statistic = false;
+	static boolean showStats = false;
 
 	@Argument(alias = "hoist", description = "hoisting option for the while method", required = false)
 	static boolean hoisting = false;
@@ -118,7 +118,7 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			if (statistic) {
+			if (showStats) {
 				SummaryVisitor summaryVisitor = new SummaryVisitor();
 				theAST.visit(summaryVisitor);
 				System.out.println("Visitor statistics ...");
