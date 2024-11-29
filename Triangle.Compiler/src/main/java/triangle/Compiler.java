@@ -52,8 +52,12 @@ public class Compiler {
 	static boolean folding = false;
 
 	/** Flag to display AST after folding optimisations */
-	@Argument(description = "Display AST after folding optimisations. This option is ignored if folding optimisation is disabled.")
+	@Argument(description = "Display AST after folding optimisations. This option is ignored if folding optimisation is disabled")
 	static boolean showTreeAfter = false;
+
+	/** Flag to display AST after folding optimisations */
+	@Argument(description = "Print stats about the programs AST")
+	static boolean showStats = false;
 
 
 	private static Scanner scanner;
@@ -132,6 +136,12 @@ public class Compiler {
 		} else {
 			System.out.println("Compilation was unsuccessful.");
 		}
+
+		if (showStats) {
+			SummaryVisitor summaryVisitor = new SummaryVisitor();
+			System.out.println("\n"+summaryVisitor.createSummary(theAST));
+		}
+
 		return successful;
 	}
 
@@ -146,7 +156,7 @@ public class Compiler {
 		var remainingArgs = Args.parseOrExit(Compiler.class, args);
 
 		if (remainingArgs.isEmpty()) {
-			System.out.println("Usage: tc filename [-objectName (-o) outputfilename] [-showTree] [-folding] [-showTreeAfter]");
+			System.out.println("Usage: tc filename [-objectName (-o) outputfilename] [-showTree] [-folding] [-showTreeAfter] [-showStats]");
 			System.exit(1);
 		}
 
