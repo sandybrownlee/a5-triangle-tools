@@ -39,11 +39,27 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('&'));
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+	}
+
+	@Test
+	public void testIsLetter() {
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('A'));
+		assertFalse(Scanner.isLetter('1'));
+		assertFalse(Scanner.isLetter('{'));
 	}
 	
 	
@@ -77,7 +93,19 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
-	
+
+	//Task 3b, unit test for squaring (a**)
+	@Test
+	public void testSquare() {
+		compileExpectSuccess("/square.tri");
+	}
+	/*Task 6b
+	added suitabler unit test for new loop
+	*/
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}	
 	
 	
 	private void compileExpectSuccess(String filename) {

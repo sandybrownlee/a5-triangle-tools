@@ -18,11 +18,14 @@
 
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -37,10 +40,22 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "o", description = "the name of the file with the object program.")
 	static String objectName = "obj.tam";
 	
+	@Argument(alias = "tree", description = "display the AST after passing Contextual Analysis.")
 	static boolean showTree = false;
+
+	@Argument(alias = "folding", description = "the AST after being folded.")
 	static boolean folding = false;
+
+	/*Task 5b
+	to show BinaryExpression, IfCommand and WhileCommand counts
+	*/
+	@Argument(alias = "stats", 
+		description = "to show BinaryExpression, IfCommand and WhileCommand counts")
+	static boolean stats = false;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -99,6 +114,16 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				//Task 2c
+				System.out.println("AST after being folded....");
+				drawer.draw(theAST);
+				showTree = true;
+			}
+			//Task 5b, add option to "showStats"
+			if (stats) {
+				SummaryVisitor summaryVisitor = new SummaryVisitor();
+				theAST.visit(summaryVisitor);
+				summaryVisitor.printStats();
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -125,6 +150,12 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		//Create a new Compiler instance
+		Compiler compiler = new Compiler();
+
+		//use cli-parser to parse the args into program
+		Args.parseOrExit(compiler, args);
+
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
@@ -150,6 +181,8 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			} else if (sl.equals("stats")) { //Task 5b, handle the new "showStats" option
+				stats = true;
 			}
 		}
 	}
