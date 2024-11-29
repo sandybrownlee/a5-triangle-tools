@@ -29,8 +29,7 @@ dependencies {
     implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.11.3'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-params', version: '5.11.3'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.11.3'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.11.3'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.11.3'
 }
 
 test {
