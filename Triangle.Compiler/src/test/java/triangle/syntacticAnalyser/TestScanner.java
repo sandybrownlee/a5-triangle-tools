@@ -171,6 +171,11 @@ public class TestScanner {
 	}
 
 	@Test
+	public void testBooleanFolding() {
+		compileExpectSuccess("/booleans-to-fold.tri");
+	}
+
+	@Test
 	public void testHoisting() {
 		compileExpectSuccess("/while-to-hoist.tri");
 	}

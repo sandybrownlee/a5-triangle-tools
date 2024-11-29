@@ -125,8 +125,8 @@ public class Compiler {
 				System.out.print(summaryVisitor.SummaryStatistics());
 			}
 			if (hoisting) {
-				theAST.visit(new ConstantFolder());
-				theAST.visit(new Hoisting());
+				theAST.visit(new ConstantFolder()); //complete the folding first
+				theAST.visit(new Hoisting()); //then perform hoisting
 			}
 			
 			if (reporter.getNumErrors() == 0) {
