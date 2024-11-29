@@ -1,18 +1,43 @@
 apply plugin: 'java'
+apply plugin: 'jacoco'
+
 
 sourceCompatibility = 17
 
 subprojects.each { subproject ->
-  evaluationDependsOn(subproject.path)
+    evaluationDependsOn(subproject.path)
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.6'
 }
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
+    from subprojects.sourceSets.main.output
+}
 
-  from subprojects.sourceSets.main.output
+test {
+
+
+    finalizedBy jacocoTestReport // report is always generated after tests run
+
+
+}
+
+jacocoTestReport {
+
+
+    dependsOn test // tests are required to run before generating the report
+
+
 }

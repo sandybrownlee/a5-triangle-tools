@@ -168,6 +168,12 @@ public final class Scanner {
 		case '+':
 		case '-':
 		case '*':
+			//Star star for squaring.
+			takeIt();
+			if (currentChar == '*') {
+				takeIt();
+				return Token.Kind.STARSTAR;
+			}
 		case '/':
 		case '=':
 		case '<':

@@ -1,16 +1,13 @@
 package triangle.syntacticAnalyser;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertThrows;
-
 import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
-
 import triangle.ErrorReporter;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
+
+import static org.junit.Assert.*;
 
 public class TestScanner {
 
@@ -21,9 +18,7 @@ public class TestScanner {
 	
 
 	@Test
-	public void testHiNewComment() {
-		compileExpectFailure("/hi-newcomment.tri");
-	}
+	public void testHiNewComment() {compileExpectFailure("/hi-newcomment.tri");}
 	
 
 	@Test
@@ -39,11 +34,26 @@ public class TestScanner {
 	
 
 	@Test
-	public void testRepeatUntil() {
-		compileExpectFailure("/repeatuntil.tri");
+	public void testRepeatUntil() {compileExpectFailure("/repeatuntil.tri");}
+	
+	@Test
+	public void testSquareCommand() {compileExpectSuccess("/square.tri");}
+
+	@Test
+	public void testLoopWhileCommand() {compileExpectFailure("/loopwhile.tri");}
+
+	@Test
+	public void testBooleansToFold() {compileExpectSuccess("/booleans-to-fold.tri");}
+
+
+	/*
+	@Test
+	public void testIsOperator(){
+		Scanner scanner = new Scanner(new StringReader(""));
+		assertTrue(scanner.isLetter('a'));
 	}
-	
-	
+
+	 */
 	
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
