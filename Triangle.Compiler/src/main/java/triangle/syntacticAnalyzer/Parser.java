@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -291,10 +292,41 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+				//Task 3a, square operation
+				if(currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+
+					//a** is equal to a = a * a
+					//vAST variable will be updated
+					// "commandPos" is the line number in the source of the current command.
+					//It will be reused for each new AST node made
+
+					//wrap the variable name in a VnameExpression for both operands
+					//will be the same number twice since it is being squared
+					VnameExpression leftOperand = new VnameExpression(vAST, commandPos);
+					VnameExpression rightOperand = new VnameExpression(vAST, commandPos);
+
+					//the operator will be a *
+					Operator op = new Operator("*", commandPos);
+
+					//assemble the expressions into a BinaryExpression for a*a
+					Expression eAST = new BinaryExpression(leftOperand, op, rightOperand, commandPos);
+
+					//set the last line of the command for debugging purposes
+					finish(commandPos);
+
+					//make an assignment, with a binary expression on the right (a=a*a)
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+				} else {
+
+					accept(Token.Kind.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+				}
 			}
 		}
 			break;
@@ -335,6 +367,30 @@ public class Parser {
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
+			break;
+
+		/*Task 6a 
+		implementation of Loop case for "loop while"
+		*/
+		case LOOP: {
+			acceptIt();
+
+			//parse the commands (equivalent to C1)
+			Command c1AST = parseCommand();
+			//accept the WHILE token 
+			accept(Token.Kind.WHILE);
+			//parse the expression (equivalent to E)
+			Expression eAST = parseExpression();
+			//accep the DO token
+			accept(Token.Kind.DO);
+			//parse the command (equivalent to C2)
+			Command c2AST = parseSingleCommand();
+
+			finish(commandPos);
+			//create new loopWhileCommand
+			commandAST = new LoopWhileCommand(c1AST, eAST, c2AST, commandPos);
+		}	
+
 			break;
 
 		case SEMICOLON:

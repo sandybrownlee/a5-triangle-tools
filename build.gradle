@@ -6,6 +6,20 @@ subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+/* Task 2a
+this tells Gradle where to find the dependencies
+*/
+repositories {
+    mavenCentral()
+}
+
+/* Task 2a
+Added dependency for cli-parser
+*/
+dependencies {
+    implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     

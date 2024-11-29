@@ -81,7 +81,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -92,6 +92,23 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	{
 
 	}
+
+/*Task 5a
+initialize the counters for the instance variables
+*/
+public int binaryExpressionCount = 0;
+public int ifCommandCount = 0;
+public int whileCommandCount = 0;
+
+/*Task 5a
+print the number of binary expressions,
+if and while commands
+*/
+public void printStats() {
+	System.out.println("Binary Expressions: " + binaryExpressionCount);
+	System.out.println("If Commands: " + ifCommandCount);
+	System.out.println("While Commands: " + whileCommandCount);
+}
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -276,6 +293,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
+		binaryExpressionCount++; //Task 5a, increment the counter for each expression visited
 		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
 		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
 		ast.O.visit(this);
@@ -464,6 +482,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIfCommand(IfCommand ast, Void arg) {
+		ifCommandCount++; //Task 5a, increment the counter for each command visited
 		ast.C1.visit(this);
 		ast.C2.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
@@ -489,6 +508,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
+		whileCommandCount++; //Task 5a, increment the counter for each command visited
 		ast.C.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
@@ -496,11 +516,14 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 		return null;
 	}
-
+	/*Task 6a
+	implementation of "loopWhileCommand
+	*/
 	@Override
 	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
 		ast.C1.visit(this);
 		ast.C2.visit(this);
+
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
@@ -592,28 +615,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
-			}
-
-			/*Task 7a
-			handling operater support (in order as in StdEnvironment)
-			*/
-			else if(o.decl == StdEnvironment.equalDecl) {
-				foldedValue = int1 == int2;
-
-			} else if(o.decl == StdEnvironment.unequalDecl) {
-				foldedValue = int1 != int2;
-
-			} else if(o.decl == StdEnvironment.lessDecl) {
-				foldedValue = int1 < int2;
-
-			} else if(o.decl == StdEnvironment.notlessDecl) {
-				foldedValue = int1 >= int2;
-
-			} else if(o.decl == StdEnvironment.greaterDecl) {
-				foldedValue = int1 > int2;
-
-			} else if(o.decl == StdEnvironment.notgreaterDecl) {
-				foldedValue = int1 <= int2;
 			}
 
 			if (foldedValue instanceof Integer) {
