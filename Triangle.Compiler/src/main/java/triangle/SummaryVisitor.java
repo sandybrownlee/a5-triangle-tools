@@ -1,4 +1,4 @@
-package triangle.optimiser;
+package triangle;
 
 import triangle.StdEnvironment;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
@@ -81,19 +81,21 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
-		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
-		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
-		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
-		IdentifierVisitor<Void, AbstractSyntaxTree>, LiteralVisitor<Void, AbstractSyntaxTree>,
-		OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
-		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
-		VnameVisitor<Void, AbstractSyntaxTree> {
-	{
+public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
+CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
+ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
+IdentifierVisitor<Void, AbstractSyntaxTree>, LiteralVisitor<Void, AbstractSyntaxTree>,
+OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
+RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
+VnameVisitor<Void, AbstractSyntaxTree>{
 
-	}
+    //counts for how many of each there are in a program
+    public int if_command_count = 0;
+    public int while_command_count = 0;
+    public int binary_expression_count = 0;
 
-	@Override
+    @Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
 		ast.I.visit(this);
 		ast.T.visit(this);
@@ -276,6 +278,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
+        binary_expression_count++;
 		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
 		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
 		ast.O.visit(this);
@@ -320,6 +323,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIfExpression(IfExpression ast, Void arg) {
+        if_command_count++;
 		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
 		if (replacement1 != null) {
 			ast.E1 = (Expression) replacement1;
@@ -489,6 +493,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
+        while_command_count++;
 		ast.C.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
@@ -610,4 +615,12 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+    //statistics to string
+    public String toString()
+    {
+        return "\n" + "Summary Statistics: " + "\n" 
+			  +"Number of Binary Expressions: " + binary_expression_count + "\n"
+              +"Number of If Commands: " + if_command_count + "\n"
+              +"Number of While Commands: " + while_command_count + "\n";
+    }
 }

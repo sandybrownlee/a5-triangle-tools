@@ -1,0 +1,23 @@
+let
+    var a : Integer;
+    var b : Integer;
+    var c : Integer
+in
+begin
+    a := 0;
+    b := 0;
+    c := 0;
+
+    loop 
+    begin
+        a := a + 1;
+        b := b + 1;
+        putint(a);
+        putint(b)
+    end
+    while c < 5 do
+    begin
+        c := c + 1;
+        putint(c)
+    end
+end

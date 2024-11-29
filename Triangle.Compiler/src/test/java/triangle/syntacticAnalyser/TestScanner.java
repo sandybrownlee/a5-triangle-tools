@@ -39,11 +39,33 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		//4(a) add tests for untested oprators
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+
+
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+	}
+
+	//4(a) - improved coverage for isLetters(char) by testing letters
+	@Test
+	public void testIsLetter()
+	{
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('P'));
+		assertTrue(Scanner.isLetter('F'));
+		assertTrue(Scanner.isLetter('z'));
+		assertFalse(Scanner.isLetter('.'));
 	}
 	
 	
@@ -78,6 +100,20 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+
+	//PART (3b) -> Test for (3a)
+	@Test
+	public void testSquare()
+	{
+		compileExpectSuccess("/square.tri");
+	}
+
+	//Part 6 -> Compile Test for loopwhile.tri
+	@Test
+	public void testLoopWhile()
+	{
+		compileExpectSuccess("/loopwhile.tri");
+	}
 	
 	
 	private void compileExpectSuccess(String filename) {

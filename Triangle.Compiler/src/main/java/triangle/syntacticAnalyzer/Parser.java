@@ -41,6 +41,7 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileDoCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -291,10 +292,35 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+				// PART (3) adding squaring functionality
+				//This treats when the `**` is present
+
+				//if token == ** -> go into if body
+				if(currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**"))
+				{
+					acceptIt();
+					
+					//variavle name gets wrapped in expression
+					VnameExpression vne = new VnameExpression(vAST, commandPos);
+					
+					//operator will be *, since we are multiplying
+					Operator op = new Operator("*", commandPos);
+
+					//binary expression e.g. a** -> a*a 
+					Expression eAST = new BinaryExpression(vne, op, vne, commandPos);
+
+					finish(commandPos);
+
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+				else //if not ** -> proceed
+				{
+					accept(Token.Kind.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -334,6 +360,18 @@ public class Parser {
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
+		}
+			break;
+		
+		case LOOP: {
+			acceptIt();
+			Command c1AST = parseSingleCommand();
+			accept(Token.Kind.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.Kind.DO);
+			Command c2AST = parseSingleCommand();
+			finish(commandPos);
+			commandAST = new LoopWhileDoCommand(c1AST, eAST, c2AST, commandPos);
 		}
 			break;
 
