@@ -582,18 +582,36 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
-			if (o.decl == StdEnvironment.addDecl) {
-				foldedValue = int1 + int2;
-			}
+
+			// Int output
+			if (o.decl == StdEnvironment.addDecl) foldedValue = int1 + int2;
+
+			// Boolean output
+			else if (o.decl == StdEnvironment.equalDecl)      foldedValue = int1 == int2;
+			else if (o.decl == StdEnvironment.unequalDecl)    foldedValue = int1 != int2;
+			else if (o.decl == StdEnvironment.lessDecl)       foldedValue = int1 < int2;
+			else if (o.decl == StdEnvironment.notgreaterDecl) foldedValue = int1 <= int2;
+			else if (o.decl == StdEnvironment.greaterDecl)    foldedValue = int1 > int2;
+			else if (o.decl == StdEnvironment.notlessDecl)    foldedValue = int1 >= int2;
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
-			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+			}
+
+			else if (foldedValue instanceof Boolean) {
+				Identifier boolIdentifier = new Identifier(foldedValue.toString(), node1.getPosition());
+
+				if ((Boolean) foldedValue) boolIdentifier.decl = StdEnvironment.trueDecl;
+				else boolIdentifier.decl = StdEnvironment.falseDecl;
+
+				SimpleVname vname = new SimpleVname(boolIdentifier, node1.getPosition());
+				VnameExpression expr = new VnameExpression(vname, node1.getPosition());
+				expr.type = StdEnvironment.booleanType;
+
+				return expr;
 			}
 		}
 
