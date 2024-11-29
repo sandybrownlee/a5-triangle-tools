@@ -124,6 +124,29 @@ class Hoister implements RewriteStage {
 
         }
 
+        // checks if an expression contains a function call, we cannot safely hoist function calls in the general case since they
+        // may be side-effectful
+        private static class ContainsFunCall implements RewriteStage {
+
+            private boolean containsFunCall = false;
+
+            @Override public Expression rewrite(Expression expression) {
+                if (expression instanceof Expression.FunCall) {
+                    containsFunCall = true;
+                }
+
+                return RewriteStage.super.rewrite(expression);
+            }
+
+            private boolean check(Expression expression) {
+                rewrite(expression);
+
+                boolean toReturn = containsFunCall;
+                containsFunCall = false;
+                return toReturn;
+            }
+        }
+
     }
 
     // given a InvarianceChecker and a (arbitrarily complex) AST node, replaces all hoistable sub-nodes with references to basic
@@ -133,6 +156,7 @@ class Hoister implements RewriteStage {
 
         private final MutationRecord.InvarianceChecker invarianceChecker;
         private final String                           labelPrefix;
+        private final MutationRecord.ContainsFunCall   containsFunCall = new MutationRecord.ContainsFunCall();
 
         private final List<Declaration> hoistedExpressions = new ArrayList<>();
         private final Supplier<String>  generateIdentifier = new Supplier<>() {
@@ -151,6 +175,11 @@ class Hoister implements RewriteStage {
 
         @Override public Expression rewrite(final Expression expression) {
             Expression hoisted = RewriteStage.super.rewrite(expression);
+
+            // we cannot safely hoist expressions function calls in the general case, since they may be side-effectful
+            if (containsFunCall.check(hoisted)) {
+                return hoisted;
+            }
 
             return switch (hoisted) {
                 case Expression.BinaryOp binaryOp -> {
