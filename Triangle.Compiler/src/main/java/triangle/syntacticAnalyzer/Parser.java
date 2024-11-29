@@ -35,6 +35,8 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
+// Import now command for task 6a
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.Command;
@@ -85,6 +87,10 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
+
+import static triangle.syntacticAnalyzer.Token.Kind.DO;
+import static triangle.syntacticAnalyzer.Token.Kind.WHILE;
+
 
 public class Parser {
 
@@ -281,7 +287,24 @@ public class Parser {
 
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
-			if (currentToken.kind == Token.Kind.LPAREN) {
+
+			// Task 3a Parse a** as a = a * a
+			if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+
+				acceptIt();
+
+				// Create AST for a = a * a
+				Vname vAST = new SimpleVname(iAST, commandPos); // Vname for the variable `a`
+
+				// Create the multiplication expression: a * a
+				Expression left = new VnameExpression(vAST, commandPos);
+				Expression right = new VnameExpression(vAST, commandPos);
+				Operator multOperator = new Operator("*", commandPos);
+				BinaryExpression squareExpr = new BinaryExpression(left, multOperator, right, commandPos);
+
+				// Create assignment command: a = a * a
+				commandAST = new AssignCommand(vAST, squareExpr, commandPos);
+			} else if (currentToken.kind == Token.Kind.LPAREN) {
 				acceptIt();
 				ActualParameterSequence apsAST = parseActualParameterSequence();
 				accept(Token.Kind.RPAREN);
@@ -330,14 +353,31 @@ public class Parser {
 		case WHILE: {
 			acceptIt();
 			Expression eAST = parseExpression();
-			accept(Token.Kind.DO);
+			accept(DO);
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
 
-		case SEMICOLON:
+			case LOOP: {
+				// accept the loop token
+				acceptIt();
+
+				// parse the commands
+				Command c1AST = parseCommand();
+				accept(WHILE);
+				Expression eAST = parseExpression();
+				accept(DO);
+				Command c2AST = parseSingleCommand();
+				finish(commandPos);
+				commandAST = new LoopWhileCommand(c1AST, eAST, c2AST, commandPos);
+
+			}
+			break;
+
+
+			case SEMICOLON:
 		case END:
 		case ELSE:
 		case IN:

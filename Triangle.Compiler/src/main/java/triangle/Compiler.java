@@ -18,16 +18,18 @@
 
 package triangle;
 
+import picocli.CommandLine;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor; // task 5.b
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
-
+import triangle.abstractSyntaxTrees.Program;
 /**
  * The main driver class for the Triangle compiler.
  *
@@ -36,12 +38,28 @@ import triangle.treeDrawer.Drawer;
  */
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
 
+
+		/** CLI Arguments class for Picocli parsing */
+		public static class CompilerArgs {
+			@CommandLine.Parameters(index = "0", description = "The source filename to compile.")
+			public String sourceName;
+
+			@CommandLine.Option(names = "-o", description = "The output filename.", defaultValue = "obj.tam")
+			public String objectName;
+
+			@CommandLine.Option(names = "--showTree", description = "Show the abstract syntax tree.")
+			public boolean showTree = false;
+
+			@CommandLine.Option(names = "--folding", description = "Enable constant folding.")
+			public boolean folding = false;
+
+			@CommandLine.Option(names = "--showTreeAfter", description = "Show the abstract syntax tree after folding.")
+			public boolean showTreeAfter = false;
+            //task 5b adding options show stats
+			@CommandLine.Option(names = "--showStats", description = "Summary statistics.")
+			public boolean showStats = false;
+		}
 	private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
@@ -60,13 +78,14 @@ public class Compiler {
 	 * @param objectName   the name of the file containing the object program.
 	 * @param showingAST   true iff the AST is to be displayed after contextual
 	 *                     analysis
+	 * @param showingTreeAfter true if the AST is to be displayed after constant folding.
 	 * @param showingTable true iff the object description details are to be
 	 *                     displayed during code generation (not currently
 	 *                     implemented).
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTreeAfter, boolean showStats, boolean showingTable) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -97,8 +116,19 @@ public class Compiler {
 			if (showingAST) {
 				drawer.draw(theAST);
 			}
-			if (folding) {
+			if (showingTreeAfter || showingAST) {
 				theAST.visit(new ConstantFolder());
+			}
+			if (showingTreeAfter) {
+				System.out.println("Abstract Syntax Tree after constant folding:");
+				drawer.draw(theAST);
+			}
+
+			// Task 5.b display the summary statistics if passed in the arguments
+			if(showStats) {
+				SummaryVisitor summaryVisitor = new SummaryVisitor();
+				theAST.visit(summaryVisitor);
+				summaryVisitor.printSummaryStats();
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -125,32 +155,31 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		CompilerArgs compilerArgs = new CompilerArgs();
+		CommandLine cmd = new CommandLine(compilerArgs);
 
-		if (!showTree) {
+		try {
+			// Parse the arguments using Picocli
+			cmd.parseArgs(args);
+
+			// Run the compiler using parsed arguments
+			boolean compiledOK = compileProgram(
+					compilerArgs.sourceName,
+					compilerArgs.objectName,
+					compilerArgs.showTree,
+					compilerArgs.showTreeAfter,
+					compilerArgs.showStats,
+					false // Currently, the 'showTable' option is not implemented
+			);
+
+			// Exit based on compilation success
 			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
+
+		} catch (CommandLine.ParameterException ex) {
+			System.err.println(ex.getMessage());
+			cmd.usage(System.out);
+			System.exit(1);
 		}
 	}
 }

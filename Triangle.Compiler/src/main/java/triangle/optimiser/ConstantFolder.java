@@ -14,6 +14,8 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
+//task 6a
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
@@ -440,6 +442,18 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		ast.T.visit(this);
 		return null;
 	}
+	// Task 6a
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+		ast.C1.visit(this);
+		ast.C2.visit(this);
+
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		return null;
+	}
 
 	@Override
 	public AbstractSyntaxTree visitAssignCommand(AssignCommand ast, Void arg) {
@@ -582,16 +596,52 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				foldedValue = int1 + int2;
 			}
 
+			// Task 7a
+			if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 == int2;
+			}
+			if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			}
+			if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			}
+			if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			}
+			if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			}
+			if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			}
+
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
+
+				// Task 7a handle boolean instance
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+
+				Identifier id = new Identifier(foldedValue.toString(), node1.getPosition());
+
+				if (foldedValue.toString().equalsIgnoreCase("true")) {
+					id.decl = StdEnvironment.trueDecl;
+				}
+				else {
+					id.decl = StdEnvironment.falseDecl;
+				}
+				SimpleVname simpVname = new SimpleVname(id, node1.getPosition());
+
+				VnameExpression varNameExp = new VnameExpression(simpVname, node1.getPosition());
+
+				varNameExp.type = StdEnvironment.booleanType;
+
+				return varNameExp;
 			}
 		}
-
 		// any unhandled situation (i.e., not foldable) is ignored
 		return null;
 	}
