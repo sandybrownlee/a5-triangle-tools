@@ -102,7 +102,6 @@ public class Compiler {
 		checker = new Checker(reporter);
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
-		drawer = new Drawer();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -112,13 +111,19 @@ public class Compiler {
 			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
+
 			if (showingAST) {
+				drawer = new Drawer();
 				drawer.draw(theAST);
 			}
+
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 
 				if (showTreeAfter) {
+					// Re instantiate drawer so if both pre and post folding trees are shown, they are different
+					// Otherwise, two windows will open which display the same folded tree
+					drawer = new Drawer();
 					drawer.draw(theAST);
 				}
 			}
