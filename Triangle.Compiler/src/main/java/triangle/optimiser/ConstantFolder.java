@@ -577,9 +577,15 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
-			if (o.decl == StdEnvironment.addDecl) {
-				foldedValue = int1 + int2;
+
+			switch (o.decl) {
+			case StdEnvironment.addlDecl:		foldedValue =   int1  + int2 ; break;
+			case StdEnvironment.equalDecl:		foldedValue =   int1 == int2 ; break;
+			case StdEnvironment.lessDecl:		foldedValue =   int1  < int2 ; break;
+			case StdEnvironment.notgreaterDecl:	foldedValue = !(int1  > int2); break;
+			case StdEnvironment.greaterDecl:	foldedValue =   int1  > int2 ; break;
+			case StdEnvironment.notlessDecl:	foldedValue = !(int1  < int2); break;
+			case StdEnvironment.unequalDecl:	foldedValue =   int1 != int2 ; break;
 			}
 
 			if (foldedValue instanceof Integer) {
@@ -588,7 +594,12 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				Identifier i = new Identifier(foldedValue ? "true" : "false", node1.getPosition());
+				i.decl = foldedValue ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+				SimpleVname sv = new SimpleVname(i, i.getPosition());
+				return (Vname)sv;
+			} else {
+				/* unhandled */
 			}
 		}
 

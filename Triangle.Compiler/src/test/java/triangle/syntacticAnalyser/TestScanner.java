@@ -20,11 +20,10 @@ public class TestScanner {
 
 	@Test
 	public void testIsDigit() {
-		assertTrue(Scanner.isDigit('0'));
-		assertTrue(Scanner.isDigit('1'));
-		assertTrue(Scanner.isDigit('5'));
-		assertTrue(Scanner.isDigit('8'));
-		assertTrue(Scanner.isDigit('9'));
+		for (int i = '0'; i <= '9'; i++) {
+			assertTrue(Scanner.isDigit((char)i));
+		}
+
 		assertFalse(Scanner.isDigit('a'));
 		assertFalse(Scanner.isDigit('Z'));
 		assertFalse(Scanner.isDigit('&'));
@@ -34,11 +33,20 @@ public class TestScanner {
 	
 	@Test
 	public void testIsOperator() {
-		assertTrue(Scanner.isOperator('*'));
-		assertTrue(Scanner.isOperator('/'));
-		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('*'));
+		assertTrue(Scanner.isOperator('/'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('?'));
+
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
