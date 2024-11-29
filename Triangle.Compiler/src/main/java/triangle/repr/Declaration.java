@@ -1,5 +1,7 @@
 package triangle.repr;
 
+import triangle.util.ASTVisitor;
+
 import java.util.List;
 
 sealed public abstract class Declaration implements Annotatable.SourceLocatable {
@@ -23,6 +25,8 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
         this.sourcePos = sourcePos;
     }
 
+    public abstract void visit(ASTVisitor visitor);
+
     public static final class ConstDeclaration extends Declaration {
 
         private final Expression value;
@@ -36,6 +40,9 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
             return value;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitConstDeclaration(this);
+        }
     }
 
     public static final class VarDeclaration extends Declaration implements Typeable {
@@ -60,6 +67,9 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
             return this.declaredType;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitVarDeclaration(this);
+        }
     }
 
     public static final class FuncDeclaration extends Declaration {
@@ -89,6 +99,9 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
             return expression;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitFuncDeclaration(this);
+        }
     }
 
     public static final class ProcDeclaration extends Declaration {
@@ -110,6 +123,9 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
             return statement;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitProcDeclaration(this);
+        }
     }
 
     public static final class TypeDeclaration extends Declaration {
@@ -123,6 +139,10 @@ sealed public abstract class Declaration implements Annotatable.SourceLocatable 
 
         public TypeSig typeSig() {
             return typeSig;
+        }
+
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitTypeDeclaration(this);
         }
 
     }

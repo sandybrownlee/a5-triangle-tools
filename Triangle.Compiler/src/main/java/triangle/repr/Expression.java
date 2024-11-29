@@ -1,5 +1,7 @@
 package triangle.repr;
 
+import triangle.util.ASTVisitor;
+
 import java.util.List;
 
 sealed public abstract class Expression extends Argument implements Annotatable.Typeable, Annotatable.SourceLocatable {
@@ -22,6 +24,8 @@ sealed public abstract class Expression extends Argument implements Annotatable.
     @Override public void setType(Type type) {
         this.type = type;
     }
+
+    public abstract void visit(ASTVisitor visitor);
 
     public sealed static abstract class Identifier extends Expression
             permits Identifier.BasicIdentifier, Identifier.RecordAccess, Identifier.ArraySubscript {
@@ -48,6 +52,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
                 return name;
             }
 
+            @Override public void visit(ASTVisitor visitor) {
+                visitor.visitBasicIdentifier(this);
+            }
         }
 
         public static final class RecordAccess extends Identifier {
@@ -72,6 +79,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
                 return field;
             }
 
+            @Override public void visit(ASTVisitor visitor) {
+                visitor.visitRecordAccess(this);
+            }
         }
 
         public static final class ArraySubscript extends Identifier {
@@ -96,6 +106,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
                 return subscript;
             }
 
+            @Override public void visit(ASTVisitor visitor) {
+                visitor.visitArraySubscript(this);
+            }
         }
 
     }
@@ -128,6 +141,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return value;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLitBool(this);
+        }
     }
 
     public static final class LitInt extends Expression {
@@ -158,6 +174,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return value;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLitInt(this);
+        }
     }
 
     public static final class LitChar extends Expression {
@@ -179,6 +198,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return value;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLitChar(this);
+        }
     }
 
     public static final class LitArray extends Expression {
@@ -193,6 +215,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return elements;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLitArray(this);
+        }
     }
 
     public static final class LitRecord extends Expression {
@@ -209,6 +234,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
 
         public record RecordField(String name, Expression value) { }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLitRecord(this);
+        }
     }
 
     public static final class UnaryOp extends Expression {
@@ -229,6 +257,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return operand;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitUnaryOp(this);
+        }
     }
 
     public static final class BinaryOp extends Expression {
@@ -255,6 +286,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return rightOperand;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitBinaryOp(this);
+        }
     }
 
     public static final class LetExpression extends Expression {
@@ -275,6 +309,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return expression;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLetExpression(this);
+        }
     }
 
     public static final class IfExpression extends Expression {
@@ -301,6 +338,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return alternative;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitIfExpression(this);
+        }
     }
 
     public static final class FunCall extends Expression {
@@ -321,6 +361,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return arguments;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitFunCall(this);
+        }
     }
 
     public static final class SequenceExpression extends Expression {
@@ -341,6 +384,9 @@ sealed public abstract class Expression extends Argument implements Annotatable.
             return expression;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitSequenceExpression(this);
+        }
     }
 
 }

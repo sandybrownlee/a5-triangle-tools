@@ -1,5 +1,7 @@
 package triangle.repr;
 
+import triangle.util.ASTVisitor;
+
 import java.util.List;
 
 sealed public abstract class Parameter implements Annotatable.Typeable, Annotatable.SourceLocatable {
@@ -24,6 +26,8 @@ sealed public abstract class Parameter implements Annotatable.Typeable, Annotata
         return sourcePos;
     }
 
+    public abstract void visit(ASTVisitor visitor);
+
     public String name() {
         return name;
     }
@@ -41,6 +45,9 @@ sealed public abstract class Parameter implements Annotatable.Typeable, Annotata
             return typeSig;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitValueParameter(this);
+        }
     }
 
     public static final class VarParameter extends Parameter {
@@ -56,6 +63,9 @@ sealed public abstract class Parameter implements Annotatable.Typeable, Annotata
             return typeSig;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitVarParameter(this);
+        }
     }
 
     public static final class FuncParameter extends Parameter {
@@ -77,6 +87,9 @@ sealed public abstract class Parameter implements Annotatable.Typeable, Annotata
             return returnTypeSig;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitFuncParameter(this);
+        }
     }
 
 }

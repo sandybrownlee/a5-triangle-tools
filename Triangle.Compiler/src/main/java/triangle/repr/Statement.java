@@ -1,5 +1,7 @@
 package triangle.repr;
 
+import triangle.util.ASTVisitor;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +17,8 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
         return sourcePos;
     }
 
+    public abstract void visit(ASTVisitor visitor);
+
     public static final class StatementBlock extends Statement {
 
         private final List<Statement> statements;
@@ -27,6 +31,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return statements;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitStatementBlock(this);
+        }
     }
 
     public static final class LetStatement extends Statement {
@@ -47,6 +54,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return statement;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLetStatement(this);
+        }
     }
 
     public static final class IfStatement extends Statement {
@@ -75,6 +85,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return alternative;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitIfStatement(this);
+        }
     }
 
     public static final class WhileStatement extends Statement {
@@ -95,6 +108,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return body;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitWhileStatement(this);
+        }
     }
 
     public static final class LoopWhileStatement extends Statement {
@@ -121,6 +137,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return doBody;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitLoopWhileStatement(this);
+        }
     }
 
     public static final class RepeatWhileStatement extends Statement {
@@ -141,6 +160,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return body;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitRepeatWhileStatement(this);
+        }
     }
 
     public static final class RepeatUntilStatement extends Statement {
@@ -161,6 +183,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return body;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitRepeatUntilStatement(this);
+        }
     }
 
     public static final class AssignStatement extends Statement {
@@ -181,6 +206,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return expression;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitAssignStatement(this);
+        }
     }
 
     public static final class ExpressionStatement extends Statement {
@@ -195,6 +223,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
             return expression;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitExpressionStatement(this);
+        }
     }
 
     public static final class NoopStatement extends Statement {
@@ -203,6 +234,9 @@ sealed public abstract class Statement implements Annotatable.SourceLocatable {
 
         private NoopStatement() { }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitNoopStatement(this);
+        }
     }
 
 }

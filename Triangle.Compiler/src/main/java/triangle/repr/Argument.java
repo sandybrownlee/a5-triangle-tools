@@ -1,5 +1,7 @@
 package triangle.repr;
 
+import triangle.util.ASTVisitor;
+
 sealed public abstract class Argument implements Annotatable.Typeable, Annotatable.SourceLocatable
         permits Argument.FuncArgument, Argument.VarArgument, Expression {
 
@@ -22,6 +24,8 @@ sealed public abstract class Argument implements Annotatable.Typeable, Annotatab
         return sourcePos;
     }
 
+    public abstract void visit(ASTVisitor visitor);
+
     public static final class VarArgument extends Argument {
 
         private final Expression.Identifier var;
@@ -34,6 +38,9 @@ sealed public abstract class Argument implements Annotatable.Typeable, Annotatab
             return var;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitVarArgument(this);
+        }
     }
 
     public static final class FuncArgument extends Argument {
@@ -48,6 +55,9 @@ sealed public abstract class Argument implements Annotatable.Typeable, Annotatab
             return func;
         }
 
+        @Override public void visit(ASTVisitor visitor) {
+            visitor.visitFuncArgument(this);
+        }
     }
 
 }
