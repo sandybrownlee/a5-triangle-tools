@@ -12,14 +12,14 @@ import triangle.abstractMachine.OpCode;
 import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
 
+/**
+ * This class holds the address of the next instruction is held in nextInstrAddr.
+ * The object code is generated directly into the TAM Code Store, starting at the CB register.
+ *
+ */
 public class Emitter {
 
-	// OBJECT CODE
 
-	// Implementation notes:
-	// Object code is generated directly into the TAM Code Store, starting at
-	// CB.
-	// The address of the next instruction is held in nextInstrAddr.
 
 	ErrorReporter errorReporter;
 
@@ -30,6 +30,9 @@ public class Emitter {
 		nextInstrAddr = Machine.CB;
 	}
 
+	/**
+	 * @return The address of the next instruction
+	 */
 	public int getNextInstrAddr() {
 		return nextInstrAddr;
 	}

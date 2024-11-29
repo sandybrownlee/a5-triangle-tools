@@ -8,6 +8,7 @@ import triangle.abstractSyntaxTrees.declarations.*;
 import triangle.abstractSyntaxTrees.expressions.*;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
+import triangle.abstractSyntaxTrees.vnames.Vname;
 import triangle.contextualAnalyzer.IdentificationTable;
 import triangle.syntacticAnalyzer.SourcePosition;
 
@@ -52,9 +53,19 @@ public class HoistVisitor extends ConstantFolder {
 
 		// this doesn't allow the hoisting of binary expressions where i.e. "b:=b + (c+y)", where c and y are invariants,
 		if (currentlyHoisting && currentlyInLoop) {
-			if (canHoistExpression(replacement1)) {
-				return ast; // if the left side of the expression doesn't appear
-			} else if (replacement1 instanceof BinaryExpression binaryExpression1 && replacement2 instanceof BinaryExpression binaryExpression2) {
+			if (replacement1 instanceof VnameExpression && replacement2 instanceof VnameExpression) {
+				if (canHoistExpression(replacement1) && canHoistExpression(replacement2)) {
+					return ast;
+				}
+			}
+			else if (replacement1 instanceof BinaryExpression binaryExpression2 && replacement2 instanceof IntegerExpression) {
+				AbstractSyntaxTree node1 = binaryExpression2.E1;
+				AbstractSyntaxTree node2 = binaryExpression2.E2;
+				if (canHoistBinaryExpression(node1, node2)) {
+					return ast;
+				}
+			}
+			else if (replacement1 instanceof BinaryExpression binaryExpression1 && replacement2 instanceof BinaryExpression binaryExpression2) {
 				AbstractSyntaxTree node1 = binaryExpression1.E1;
 				AbstractSyntaxTree node2 = binaryExpression1.E2;
 
@@ -65,18 +76,23 @@ public class HoistVisitor extends ConstantFolder {
 					return ast;
 				}
 			}
-			else if (replacement1 instanceof BinaryExpression) {
-				AbstractSyntaxTree node1 = ((BinaryExpression) replacement1).E1;
-				AbstractSyntaxTree node2 = ((BinaryExpression) replacement1).E2;
+			else if (replacement1 instanceof BinaryExpression binaryExpression1) {
+				AbstractSyntaxTree node1 = binaryExpression1.E1;
+				AbstractSyntaxTree node2 = binaryExpression1.E2;
 				if (canHoistBinaryExpression(node1, node2)) {
 					return replacement1;
 				}
 			}
-			else if (replacement2 instanceof BinaryExpression) {
-				AbstractSyntaxTree node1 = ((BinaryExpression) replacement2).E1;
-				AbstractSyntaxTree node2 = ((BinaryExpression) replacement2).E2;
+			else if (replacement2 instanceof BinaryExpression binaryExpression1) {
+				AbstractSyntaxTree node1 = binaryExpression1.E1;
+				AbstractSyntaxTree node2 = binaryExpression1.E2;
 				if (canHoistBinaryExpression(node1, node2)) {
 					return replacement2;
+				}
+			}
+			else if (replacement1 instanceof VnameExpression) {
+				if (canHoistExpression(replacement1)) {
+					return ast;
 				}
 			}
 		}
@@ -93,7 +109,7 @@ public class HoistVisitor extends ConstantFolder {
 	 */
 	public boolean canHoistExpression(AbstractSyntaxTree ast) {
 		if (ast instanceof VnameExpression vnameExpression) {
-            AbstractSyntaxTree simpleVname = vnameExpression.V.visit(this);
+			AbstractSyntaxTree simpleVname = vnameExpression.V.visit(this);
 
 			// we want to grab the variables spelling to check against the table and so express it as a simple vName,
 			// there is probably opportunity to replace this with the equivalent of  Vname v = new SimpleVName()
@@ -101,7 +117,12 @@ public class HoistVisitor extends ConstantFolder {
 			SimpleVname realSimpleVname = (SimpleVname) simpleVname;
 			String spelling = realSimpleVname.I.spelling;
 			Declaration d = idTable.retrieve(spelling, false);
-            return d == null;
+			return d == null;
+		}
+		else if (ast instanceof BinaryExpression binaryExpression) {
+			if (canHoistBinaryExpression(binaryExpression.E1, binaryExpression.E2)) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -119,6 +140,9 @@ public class HoistVisitor extends ConstantFolder {
 		// allows the hoisting of binary expressions within binary expressions - there's probably a better way to recursively do this an example would be "b := b + (c + 4); ! c+4 can be hoisted"
 		else if (node1 instanceof VnameExpression && node2 instanceof IntegerExpression) { // to add a type of statement to be recursively checked, we can simply just check either node vs canHoistExpression()
 			return canHoistExpression(node1);
+		}
+		else if (node1 instanceof BinaryExpression && node2 instanceof BinaryExpression) { // to add a type of statement to be recursively checked, we can simply just check either node vs canHoistExpression()
+			return canHoistExpression(node1) && canHoistExpression(node2);
 		}
 		return false;
 	}
@@ -141,13 +165,13 @@ public class HoistVisitor extends ConstantFolder {
 
 		// while we're not actively hoisting we want to add identifiers present while inside of a loop,
 		if (!currentlyHoisting && currentlyInLoop) {
-				// we only care about variables
-				if (vAST.variable) {
-					String spelling = vAST.I.spelling;
-					Declaration d = new VarDeclaration(vAST.I, vAST.type, ast.getPosition());
+			// we only care about variables
+			if (vAST.variable) {
+				String spelling = vAST.I.spelling;
+				Declaration d = new VarDeclaration(vAST.I, vAST.type, ast.getPosition());
 
-					idTable.enter(spelling, d);
-				}
+				idTable.enter(spelling, d);
+			}
 		}
 		else if (currentlyHoisting && currentlyInLoop) {
 			// nullability check as binary expression evaluation can and will return null if there is no invariant present in the current assignment.
@@ -162,6 +186,8 @@ public class HoistVisitor extends ConstantFolder {
 				// we know that this new identifier is going to be of integer type, and we assign it a name of temp + number of constants so that
 				// if there is more than 1 value to hoist in a single loop we avoid duplication (in triangle's case complete omission of these variables).
 				Identifier id = new Identifier("temp"+numberOfConstants, pos);
+				id.decl = e.type;
+				id.type = e.type;
 				numberOfConstants++;
 
 				// we now need to create a variable wrapper (vname expression) to create an assignment command with.
@@ -203,7 +229,7 @@ public class HoistVisitor extends ConstantFolder {
 
 				// and then to add this back to the tree, we pass a new sequential command which contains the updated subtree
 				// and the rest of the tree on the left as we're doing DFS algorithms to figure out the program layout.
-                return new SequentialCommand(ast.C1, sequentialSubTreeToInject, pos);
+				return new SequentialCommand(ast.C1, sequentialSubTreeToInject, pos);
 			}
 		}
 		return null;
@@ -271,4 +297,4 @@ public class HoistVisitor extends ConstantFolder {
 	 return foldedValue;
 	 }
 	 **/
-	}
+}

@@ -123,6 +123,7 @@ public class Compiler {
 			if (showStatistics) {
 				summaryVisitor.countStats(theAST);
 			}
+			checker.check(theAST); // 3rd pass
 			if (hoistingEnabled) {
 				theAST.visit(new HoistVisitor());
 				if (showTreeAfter) {
