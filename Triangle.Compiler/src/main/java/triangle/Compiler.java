@@ -139,7 +139,7 @@ public class Compiler {
 
 		if (showStats) {
 			SummaryVisitor summaryVisitor = new SummaryVisitor();
-			System.out.println("\n"+summaryVisitor.createSummary(theAST));
+			System.out.println("\n" + summaryVisitor.createSummary(theAST));
 		}
 
 		return successful;
@@ -164,7 +164,7 @@ public class Compiler {
 
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
-		if (!showTree) {
+		if (!(showTree || showTreeAfter)) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
