@@ -3,78 +3,29 @@ package triangle.optimiser;
 import triangle.StdEnvironment;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.Program;
-import triangle.abstractSyntaxTrees.actuals.ConstActualParameter;
-import triangle.abstractSyntaxTrees.actuals.EmptyActualParameterSequence;
-import triangle.abstractSyntaxTrees.actuals.FuncActualParameter;
-import triangle.abstractSyntaxTrees.actuals.MultipleActualParameterSequence;
-import triangle.abstractSyntaxTrees.actuals.ProcActualParameter;
-import triangle.abstractSyntaxTrees.actuals.SingleActualParameterSequence;
-import triangle.abstractSyntaxTrees.actuals.VarActualParameter;
+import triangle.abstractSyntaxTrees.actuals.*;
 import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
 import triangle.abstractSyntaxTrees.commands.*;
-import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
-import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
-import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
-import triangle.abstractSyntaxTrees.declarations.ProcDeclaration;
-import triangle.abstractSyntaxTrees.declarations.SequentialDeclaration;
-import triangle.abstractSyntaxTrees.declarations.UnaryOperatorDeclaration;
-import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
-import triangle.abstractSyntaxTrees.expressions.ArrayExpression;
-import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
-import triangle.abstractSyntaxTrees.expressions.CallExpression;
-import triangle.abstractSyntaxTrees.expressions.CharacterExpression;
-import triangle.abstractSyntaxTrees.expressions.EmptyExpression;
-import triangle.abstractSyntaxTrees.expressions.Expression;
-import triangle.abstractSyntaxTrees.expressions.IfExpression;
-import triangle.abstractSyntaxTrees.expressions.IntegerExpression;
-import triangle.abstractSyntaxTrees.expressions.LetExpression;
-import triangle.abstractSyntaxTrees.expressions.RecordExpression;
-import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
-import triangle.abstractSyntaxTrees.expressions.VnameExpression;
-import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
-import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
-import triangle.abstractSyntaxTrees.formals.FuncFormalParameter;
-import triangle.abstractSyntaxTrees.formals.MultipleFormalParameterSequence;
-import triangle.abstractSyntaxTrees.formals.ProcFormalParameter;
-import triangle.abstractSyntaxTrees.formals.SingleFormalParameterSequence;
-import triangle.abstractSyntaxTrees.formals.VarFormalParameter;
+import triangle.abstractSyntaxTrees.declarations.*;
+import triangle.abstractSyntaxTrees.expressions.*;
+import triangle.abstractSyntaxTrees.formals.*;
 import triangle.abstractSyntaxTrees.terminals.CharacterLiteral;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.terminals.IntegerLiteral;
 import triangle.abstractSyntaxTrees.terminals.Operator;
-import triangle.abstractSyntaxTrees.types.AnyTypeDenoter;
-import triangle.abstractSyntaxTrees.types.ArrayTypeDenoter;
-import triangle.abstractSyntaxTrees.types.BoolTypeDenoter;
-import triangle.abstractSyntaxTrees.types.CharTypeDenoter;
-import triangle.abstractSyntaxTrees.types.ErrorTypeDenoter;
-import triangle.abstractSyntaxTrees.types.IntTypeDenoter;
-import triangle.abstractSyntaxTrees.types.MultipleFieldTypeDenoter;
-import triangle.abstractSyntaxTrees.types.RecordTypeDenoter;
-import triangle.abstractSyntaxTrees.types.SimpleTypeDenoter;
-import triangle.abstractSyntaxTrees.types.SingleFieldTypeDenoter;
-import triangle.abstractSyntaxTrees.types.TypeDeclaration;
-import triangle.abstractSyntaxTrees.visitors.ActualParameterSequenceVisitor;
-import triangle.abstractSyntaxTrees.visitors.ActualParameterVisitor;
-import triangle.abstractSyntaxTrees.visitors.ArrayAggregateVisitor;
-import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
-import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
-import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.abstractSyntaxTrees.visitors.FormalParameterSequenceVisitor;
-import triangle.abstractSyntaxTrees.visitors.IdentifierVisitor;
-import triangle.abstractSyntaxTrees.visitors.LiteralVisitor;
-import triangle.abstractSyntaxTrees.visitors.OperatorVisitor;
-import triangle.abstractSyntaxTrees.visitors.ProgramVisitor;
-import triangle.abstractSyntaxTrees.visitors.RecordAggregateVisitor;
-import triangle.abstractSyntaxTrees.visitors.TypeDenoterVisitor;
-import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
+import triangle.abstractSyntaxTrees.types.*;
+import triangle.abstractSyntaxTrees.visitors.*;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+
+public class Hoisting implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -82,8 +33,293 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
 		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
 		VnameVisitor<Void, AbstractSyntaxTree> {
-	{
 
+
+	//checks if it's inside the while loop
+	boolean InsideWhileLoop = false;
+
+	//stores all assignments and expression from the file. This includes the initial assignments for the values
+	LinkedHashMap<AssignCommand, Boolean> Assignments = new LinkedHashMap<>();
+
+	/**
+	 * This method converts the ast into sequential commands, which
+	 * is passed to the recursive parsing method
+	 * @param C is the AbstractSyntaxTree from the visitWhileCommand method
+	 * @return null
+     */
+	public AbstractSyntaxTree ConvertVariables(AbstractSyntaxTree C) {
+		SequentialCommand sq = (SequentialCommand) C;
+		recursiveTreeTraversal(sq);
+		return null;
+	}
+
+	/**
+	 * This method recursively traverses the sequential command called SCommand. It adds the assignment
+	 * commands using the addToHoistHashMap() method, which adds it to the hashmap.
+	 * @param SCommand is the sequential command, which gets traversed through
+	 * @return null
+	 */
+	public AbstractSyntaxTree recursiveTreeTraversal(SequentialCommand SCommand) {
+		// this recursively traverses, if it's a sequential command
+		if (SCommand.C1 instanceof SequentialCommand sequentialCommand) {
+			recursiveTreeTraversal(sequentialCommand);
+		}
+		// this checks if it's an assigncommand, adding it to the hoist hashmap
+		if (SCommand.C2 instanceof AssignCommand a) {
+			addToHoistableHashMap(a);
+		}
+		return null;
+	}
+
+	/**
+	 * This method adds the assignment command to the hashmap. The method ensures
+	 * a structure of having the first expression eb the variable, and second one be the expression
+	 * @param ACommand is the assignment command passed
+	 */
+	public void addToHoistableHashMap(AssignCommand ACommand) {
+		// this swaps the order, making the variable e1, and the expression e2
+		if (ACommand.E instanceof BinaryExpression b && b.E2 instanceof VnameExpression) {
+			Expression tmp = b.E1;
+			b.E1 = b.E2;
+			b.E2 = tmp;
+		}
+		//this adds the assigncommand to the hoist hashmap
+		this.Assignments.put(ACommand, false);
+	}
+
+	/**
+	 * This method adds all variables before while loop to a hoist hashmap.
+	 * This is later used to replace the values of the variables.
+	 * @param A the assign command passed
+	 */
+	public void addVariablesToMap(AssignCommand A) {
+		//this adds the assigncommand to the hoist hashmap
+		this.Assignments.put(A, false);
+	}
+
+	/**
+	 * This method returns the SimpleVname of an assignment command passed
+	 * @param ACommand the assignment command passed
+	 * @return the SimpleVname of the assignment command
+	 */
+	public SimpleVname getSimpleVname(AssignCommand ACommand) {
+		//this adds the SimpleVname to the hoist hashmap
+		return (SimpleVname) ACommand.V;
+	}
+
+	/**
+	 * This method returns a BinaryExpression or a IntegerExpression of an
+	 * assignment command passed
+	 * @param ACommand the assignment command passed
+	 * @return the BinaryExpression or IntegerExpression of the assignment command
+	 */
+	public Expression getBinaryOrIntegerExpression(AssignCommand ACommand) {
+		//if the assign command is a BinaryExpression then return a BinaryExpression
+		if (ACommand.E instanceof BinaryExpression BExpression) {
+			return BExpression;
+		}
+		//else return a IntegerExpression
+		return (IntegerExpression) ACommand.E;
+	}
+
+	/**
+	 * This method returns the BinaryExpression as String. This uses the
+	 * BinaryExpression passed, and appends its contents to a StringBuffer,
+	 * which later gets returned. This returns the entire expression as a
+	 * whole, rather than needing to use E1, E2 and O to get the separate parts.
+	 * @param BinaryExp the BinaryExpression, which should be returned as a string
+	 * @return the full BinaryExpression as a string
+	 */
+	public String getBinaryExpressionString(BinaryExpression BinaryExp) {
+		//makes a new StringBuffer called BExpressions
+		StringBuffer BExpressions = new StringBuffer();
+
+		//gets the SimpleVName of the first part of the expression, and stores it as SVName
+		String SVName = ((SimpleVname) ((VnameExpression) BinaryExp.E1).V).I.spelling;
+
+		//if both parts are Variables then just return null, as its unhoistable
+		if (BinaryExp.E2 instanceof VnameExpression) {
+			return null;
+		}
+
+		//gets the IntegerExpression of the second part of the expression, and stores it as IExpression
+		String IExpression = ((IntegerExpression) BinaryExp.E2).IL.spelling;
+
+		//this appends each part, and the operator as well
+
+		BExpressions.append(SVName); // the variable name appended
+		BExpressions.append(BinaryExp.O.spelling); // the operator appended
+		BExpressions.append(IExpression); // the integer expression appended
+
+		//this returns it back as a string
+		return BExpressions.toString();
+	}
+
+	/**
+	 * This method verifies and checks if an entry into the Hashmap is hoitable. It checks this
+	 * by adding a few error type checks, and a loop. The loop is the main check, ensuring that
+	 * the expression can be hoisted and ensuring that it isn't dynamic, as that would make it
+	 * unhoistable.
+	 */
+	public void isHoistAble() {
+		// this loops through every entry in the hashmap
+		for (HashMap.Entry<AssignCommand, Boolean> e : Assignments.entrySet()) {
+
+			//this gets the current variables from the hashmap
+			AssignCommand ACommand = e.getKey();
+
+			//this checks if it is a IntegerExpression, skipping it as it doesn't need to be hoisted
+			if (getBinaryOrIntegerExpression(ACommand) instanceof IntegerExpression) {
+				continue;
+			}
+
+			//this gets lhs variable, which is an assignment variable
+			String AssignmentVariable = this.getSimpleVname(ACommand).I.spelling;
+
+			// this converts the binary expression to a string, checking if its null, as that would mean it doesn't need to be hoisted
+			String ExpressionToString = this.getBinaryExpressionString((BinaryExpression) getBinaryOrIntegerExpression(e.getKey()));
+			if (ExpressionToString == null) {
+				continue;
+			}
+
+			// this checks if binary expression doesn't contain the variable of the lhs variable
+			if (!ExpressionToString.contains(AssignmentVariable)) {
+
+				//these lines go through a for loop, checking if the variable in the
+				// expression has more than one once occurrence as an LHS variable, as
+				// this would indicate that it shouldn't be hoisted due to its dynamic behaviour
+				boolean flag = false;
+				for (AssignCommand AssignmentVariableCommand : Assignments.keySet()) {
+					if (ExpressionToString.contains(getSimpleVname(AssignmentVariableCommand).I.spelling)) {
+						if (flag) {
+							e.setValue(false);
+							break;
+						}
+						flag = true;
+					}
+					e.setValue(true);
+				}
+
+			}
+		}
+	}
+
+	/**
+	 * This method gets the value of the assignment variables, by using a for each loop, to get its location
+	 * @param variableName is the variable name that is being searched for in the hashmap
+	 * @return the key of the variable, providing access to the variables value
+	 */
+	public AssignCommand getAssignmentValue(String variableName) {
+		//this searches through entire hashmap
+		for (HashMap.Entry<AssignCommand, Boolean> AssignmentValue : Assignments.entrySet()) {
+			//this checks each key to find the variable we are searching for
+			if (getSimpleVname(AssignmentValue.getKey()).I.spelling.equals(variableName))
+				//when found, it returns the key hashmap key of it
+				return AssignmentValue.getKey();
+		}
+		return null;
+	}
+
+	/**
+	 * This method sets the value of the assignment. Following the same strucute as the get method,
+	 * it searches through the hashmap, trying to find the variable. When found, it will then assign
+	 * the hoisted expression to it.
+	 * @param integerExpression is the expression we would like to add to the variable
+	 * @param variableName is the variable name we are searching for
+	 */
+	public void setAssignmentValue(IntegerExpression integerExpression, String variableName) {
+		//this searches through entire hashmap
+		for (HashMap.Entry<AssignCommand, Boolean> AssignmentValue : Assignments.entrySet()) {
+			//this checks each key to find the variable we are searching for
+			if (getSimpleVname(AssignmentValue.getKey()).I.spelling.equals(variableName)) {
+				//when found, it sets the expression passed as the new expression, and then stops the loop
+				AssignmentValue.getKey().E = integerExpression;
+				break;
+			}
+		}
+	}
+
+	/**
+	 * This method completes the actual hoisting, by converting the hoisted variables
+	 * into integer expressions. The method includes some more error checks, as well
+	 * as the hoisted translations. It uses the hoisted hashmap to get all the
+	 * hoistable expressions, as they are labeled true by their boolean values.
+	 * @param C is the AbstractSyntaxtree passed
+	 * @return null
+	 */
+	public AbstractSyntaxTree doHosting(AbstractSyntaxTree C){
+
+		//checks if the expressions are hoistable
+		isHoistAble();
+
+		//this converts the variables to their values and replaces their expression in the tree
+		for (HashMap.Entry<AssignCommand, Boolean> e : Assignments.entrySet()) {
+			AssignCommand ACommand = e.getKey();
+
+			//this checks if the expression is already a direct assignment, as it doesn't need to hoisted
+			if (getBinaryOrIntegerExpression(ACommand) instanceof IntegerExpression || e.getValue() == false)
+				continue;
+
+			//this gets and stores the expression as a BinaryExpression
+			BinaryExpression BExpression = (BinaryExpression) getBinaryOrIntegerExpression(ACommand);
+
+			//this gets and stores the LHS variable using the getSimpleVname method, passing the assign command
+			SimpleVname LHSVariableName = getSimpleVname(ACommand);
+
+			//this checks if both of the expressions are IntegerExpressions already, requiring it to just be folded
+			if (BExpression.E1 instanceof IntegerExpression && BExpression.E2 instanceof IntegerExpression) {
+
+				//this folds the IntegerExpressions and sets the assignment value using the method call
+				IntegerExpression IExpression = (IntegerExpression) BExpression.visit(this);
+				ACommand.E = IExpression;
+				setAssignmentValue(IExpression, LHSVariableName.I.spelling);
+				continue;
+			}
+
+			//this checks if both of the expressions are VnameExpressions,requiring them to be translated,
+			// wrapped and then set as the assignment value
+			else if (BExpression.E1 instanceof VnameExpression && BExpression.E2 instanceof VnameExpression) {
+				//this gets the spelling of both variables
+				String RHSFirstVariable = ((SimpleVname) ((VnameExpression) BExpression.E1).V).I.spelling;
+				String RHSSecondVariable = ((SimpleVname) ((VnameExpression) BExpression.E2).V).I.spelling;
+
+				//this gets both of values of the variables, using the get method
+				AssignCommand RHSFirstAssignment = getAssignmentValue(RHSFirstVariable);
+				AssignCommand RHSSecondAssignment = getAssignmentValue(RHSSecondVariable);
+
+				//this wraps them as IntegerExpressions
+				IntegerExpression RHSFirstExpression = (IntegerExpression) RHSFirstAssignment.E;
+				IntegerExpression RHSSecondExpression = (IntegerExpression) RHSSecondAssignment.E;
+
+				//this replaces each expression with its associated variable value
+				BExpression.E1 = RHSFirstExpression;
+				BExpression.E2 = RHSSecondExpression;
+
+				//this folds the IntegerExpressions together and uses the set value method
+				// to set it as the lhs variables value
+				IntegerExpression IExpression = (IntegerExpression) BExpression.visit(this);
+				ACommand.E = IExpression;
+				setAssignmentValue(IExpression, LHSVariableName.I.spelling);
+				continue;
+			}
+
+			//if the expressions are variable name and a number, we only need to get the
+			// value of the variable. This follows the same steps as the other cases.
+			// It first gets the variable spelling and then uses the get method to get its value.
+			String RHSAllVariables = ((SimpleVname) ((VnameExpression) BExpression.E1).V).I.spelling;
+			AssignCommand rhsAssignCommand = getAssignmentValue(RHSAllVariables);
+
+			//we then wrap it as a IntegerExpression, and replace the variable name with its value
+			IntegerExpression RHSAllVariablesValue = (IntegerExpression) rhsAssignCommand.E;
+			BExpression.E1 = RHSAllVariablesValue;
+
+			//this folds the IntegerExpressions together and uses the set value method
+			// to set it as the lhs variables value
+			IntegerExpression IntegerExpression = (IntegerExpression) BExpression.visit(this);
+			ACommand.E = IntegerExpression;
+			setAssignmentValue(IntegerExpression, LHSVariableName.I.spelling);
+		}
+		return null;
 	}
 
 	@Override
@@ -441,6 +677,11 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
+		//this checks if assignment command is called inside the while loop
+		if (!InsideWhileLoop) {
+			//adds the assignments to the variable hashmap
+			addVariablesToMap(ast);
+		}
 		ast.V.visit(this);
 		return null;
 	}
@@ -482,7 +723,10 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
-		ast.C.visit(this);
+		this.InsideWhileLoop= true; // this changes the condition to say it's inside the while loop
+		ConvertVariables(ast.C); //adds variables
+		doHosting(ast.C); // calls the hosting method
+		ast.C.visit(this); //visits the body of the code
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
 			ast.E = (Expression) replacement;

@@ -37,13 +37,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -182,6 +176,24 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.patch(jumpAddr);
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
+
+	/**
+	 * This method encodes how the method should be read and work, depending on if the condition is true or not.
+	 * @param ast passes the abstract syntax tree of the DoWhileDoCommand
+	 * @param frame manages memory, registers, and variables
+	 * @return
+	 */
+	@Override
+	public Void visitDoWhileDoCommand(DoWhileDoCommand ast, Frame frame) {
+		var loopAddr = emitter.getNextInstrAddr(); //gets the address of the top of the loop
+		ast.C1.visit(this, frame);//generates and visits the block of code before the loop
+		ast.E.visit(this, frame); //generates and visits the expression of the loop
+		var jumpAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0); //evaluates the condition and returns the code address to the new instruction
+		ast.C2.visit(this, frame); //generates and visits the body of the loop
+		emitter.emit(OpCode.JUMP, Register.CB, loopAddr); //tells the machine to go back to the beginning of the loop
+		emitter.patch(jumpAddr); //determines if it should jump, depending on the condition
 		return null;
 	}
 
