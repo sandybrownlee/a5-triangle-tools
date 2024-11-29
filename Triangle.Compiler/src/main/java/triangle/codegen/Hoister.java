@@ -4,7 +4,7 @@ import triangle.repr.Argument;
 import triangle.repr.Declaration;
 import triangle.repr.Expression;
 import triangle.repr.Expression.Identifier.BasicIdentifier;
-import triangle.repr.Visitor;
+import triangle.repr.RewriteStage;
 import triangle.repr.SourcePosition;
 import triangle.repr.Statement;
 import triangle.util.StdEnv;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
 //      builds a ExpressionHoister, parameterized by the MutationRecord, which hoists expressions -- i.e, replaces them with
 //          basic identifier accesses. ExpressionHoister provides a list of declarations that must be performed, in a scope
 //          enclosing the hoisted loop, to make the hoisting valid
-class Hoister implements Visitor {
+class Hoister implements RewriteStage {
 
     // takes a SourcePosition and creates a label prefix that can uniquely identify the hoisted expressions up to a single loop
     // statement
@@ -41,7 +41,7 @@ class Hoister implements Visitor {
                 hoistLoop(freshName.apply(rws.sourcePosition()), rws.condition(), rws.body()).hoist(rws);
             case Statement.LoopWhileStatement lws ->
                 hoistLoop(freshName.apply(lws.sourcePosition()), lws.condition(), lws.loopBody(), lws.doBody()).hoist(lws);
-            default -> Visitor.super.visit(statement);
+            default -> RewriteStage.super.visit(statement);
         };
     }
     //@formatter:on
@@ -62,7 +62,7 @@ class Hoister implements Visitor {
 
     // given an (arbitrarily complex) AST node, builds a record of all the identifiers that are mutated (assigned to, or passed
     // as a var argument) in that node
-    private class MutationRecord implements Visitor {
+    private class MutationRecord implements RewriteStage {
 
         private final Set<String> mutated = new HashSet<>();
 
@@ -72,7 +72,7 @@ class Hoister implements Visitor {
                 mutated.add(assignStatement.identifier().root().name());
             }
 
-            return Visitor.super.visit(statement);
+            return RewriteStage.super.visit(statement);
         }
 
         @Override public Expression visit(final Expression expression) {
@@ -85,7 +85,7 @@ class Hoister implements Visitor {
                 }
             }
 
-            return Visitor.super.visit(expression);
+            return RewriteStage.super.visit(expression);
         }
 
         private void addMutationsOf(Statement statement) {
@@ -102,7 +102,7 @@ class Hoister implements Visitor {
 
         // given an (arbitrarily complex) AST node, calculates and stores whether or not the node is loop-invariant wrt the parent
         // MutationRecord is stateful (for performance reasons) -- i.e can be reset and run again on another expression
-        private class InvarianceChecker implements Visitor {
+        private class InvarianceChecker implements RewriteStage {
 
             private boolean loopInvariant = true;
 
@@ -111,7 +111,7 @@ class Hoister implements Visitor {
                     loopInvariant = false;
                 }
 
-                return Visitor.super.visit(identifier);
+                return RewriteStage.super.visit(identifier);
             }
 
             private void check(Expression expression) {
@@ -129,7 +129,7 @@ class Hoister implements Visitor {
     // given a InvarianceChecker and a (arbitrarily complex) AST node, replaces all hoistable sub-nodes with references to basic
     // identifiers and builds a record of all Declarations which need to be produced in an enclosing scope to make the hoisted
     // sub-nodes valid
-    private class ExpressionHoister implements Visitor {
+    private class ExpressionHoister implements RewriteStage {
 
         private final MutationRecord.InvarianceChecker invarianceChecker;
         private final String                           labelPrefix;
@@ -150,7 +150,7 @@ class Hoister implements Visitor {
         }
 
         @Override public Expression visit(final Expression expression) {
-            Expression hoisted = Visitor.super.visit(expression);
+            Expression hoisted = RewriteStage.super.visit(expression);
 
             return switch (hoisted) {
                 case Expression.BinaryOp binaryOp -> {
@@ -218,7 +218,7 @@ class Hoister implements Visitor {
         }
 
         private Statement hoist(Statement statement) {
-            Statement hoisted = Visitor.super.visit(statement);
+            Statement hoisted = RewriteStage.super.visit(statement);
 
             return new Statement.LetStatement(hoistedExpressions, hoisted);
         }

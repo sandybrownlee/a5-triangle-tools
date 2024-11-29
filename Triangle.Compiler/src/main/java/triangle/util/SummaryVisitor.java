@@ -1,10 +1,10 @@
 package triangle.util;
 
 import triangle.repr.Expression;
-import triangle.repr.Visitor;
+import triangle.repr.RewriteStage;
 import triangle.repr.Statement;
 
-public class SummaryVisitor implements Visitor {
+public class SummaryVisitor implements RewriteStage {
 
     private int whileStatements = 0;
     private int ifStatements = 0;
@@ -32,7 +32,7 @@ public class SummaryVisitor implements Visitor {
             ifStatements++;
         }
 
-        return Visitor.super.visit(statement);
+        return RewriteStage.super.visit(statement);
     }
 
     @Override public Expression visit(final Expression expression) {
@@ -40,7 +40,7 @@ public class SummaryVisitor implements Visitor {
             binaryOps++;
         }
 
-        return Visitor.super.visit(expression);
+        return RewriteStage.super.visit(expression);
     }
 
     public record Summary(int whileStatements, int ifStatements, int binaryOps) { }

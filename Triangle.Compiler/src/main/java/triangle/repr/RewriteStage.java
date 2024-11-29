@@ -1,13 +1,13 @@
 package triangle.repr;
 
-// A Visitor represents a stage of rewriting the AST -- used for constant folding, hoisting, etc.
-// Interface Visitor provides default methods that creates new instances of te provided AST node while recursively calling
+// A RewriteStage represents a stage of rewriting the AST -- used for constant folding, hoisting, etc.
+// Interface RewriteStage provides default methods that creates new instances of te provided AST node while recursively calling
 // rewrite on its subtrees. This allows implementers to only write rewriting definitions for the nodes that they are concerned
 // about
-// Implementers of Visitor must ensure that they maintain any annotations (that they intend to maintain), the interface
+// Implementers of RewriteStage must ensure that they maintain any annotations (that they intend to maintain), the interface
 // default methods maintain all annotations
 //@formatter:off
-public interface Visitor {
+public interface RewriteStage {
 
     default Statement visit(Statement statement) {
         return switch (statement) {

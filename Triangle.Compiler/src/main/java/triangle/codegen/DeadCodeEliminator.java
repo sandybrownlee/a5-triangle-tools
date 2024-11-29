@@ -1,18 +1,18 @@
 package triangle.codegen;
 
 import triangle.repr.Expression;
-import triangle.repr.Visitor;
+import triangle.repr.RewriteStage;
 import triangle.repr.Statement;
 
 // needs to run after constant folding
-class DeadCodeEliminator implements Visitor {
+class DeadCodeEliminator implements RewriteStage {
 
     Statement eliminateDeadCode(Statement program) {
         return visit(program);
     }
 
     @Override public Statement visit(final Statement statement) {
-        Statement eliminated = Visitor.super.visit(statement);
+        Statement eliminated = RewriteStage.super.visit(statement);
 
         return switch (eliminated) {
             case Statement.IfStatement ifS when ifS.condition() instanceof Expression.LitBool litBool ->
@@ -29,7 +29,7 @@ class DeadCodeEliminator implements Visitor {
     }
 
     @Override public Expression visit(final Expression expression) {
-        Expression eliminated = Visitor.super.visit(expression);
+        Expression eliminated = RewriteStage.super.visit(expression);
 
         if (eliminated instanceof Expression.IfExpression ifExpression &&
             ifExpression.condition() instanceof Expression.LitBool litBool) {
