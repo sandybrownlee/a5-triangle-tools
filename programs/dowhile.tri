@@ -1,0 +1,15 @@
+let
+  var a : Integer
+in
+begin
+  a := 0;
+  while a < 5 do
+  begin
+    putint(a);  
+    a := a + 1;
+    if a < 5 then
+      put(' ')
+    else
+      ; 
+  end
+end

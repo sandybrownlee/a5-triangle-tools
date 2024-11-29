@@ -42,6 +42,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -123,7 +124,7 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		CommandVisitor<Frame, Void>, DeclarationVisitor<Frame, Integer>, ExpressionVisitor<Frame, Integer>,
 		FormalParameterSequenceVisitor<Frame, Integer>, IdentifierVisitor<Frame, Void>, LiteralVisitor<Void, Void>,
 		OperatorVisitor<Frame, Void>, ProgramVisitor<Frame, Void>, RecordAggregateVisitor<Frame, Integer>,
-		TypeDenoterVisitor<Frame, Integer>, VnameVisitor<Frame, RuntimeEntity> {
+		TypeDenoterVisitor<Frame, Integer>, VnameVisitor<Frame, RuntimeEntity>{
 
 	// Commands
 	@Override
@@ -184,6 +185,36 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		return null;
 	}
+
+	@Override
+    public Void visitLoopCommand(LoopCommand ast, Frame frame) {
+        // Emit a jump instruction to skip the initial command (C1)
+        var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+
+        // Get the address of the next instruction (start of the loop)
+        var loopAddr = emitter.getNextInstrAddr();
+
+        // Visit the initial command (C1)
+        ast.C1.visit(this, frame);
+
+        // Patch the jump instruction to point to the start of the loop
+        emitter.patch(jumpAddr);
+
+        // Visit the condition expression (E)
+        ast.E.visit(this, frame);
+
+        // Emit a conditional jump instruction to execute the second command (C2) if the condition is true
+        emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+
+        // Visit the second command (C2)
+        ast.C2.visit(this, frame);
+
+        // Emit an unconditional jump instruction to repeat the loop
+        emitter.emit(OpCode.JUMP, 0, Register.CB, loopAddr);
+
+        return null;
+    }
+
 
 	// Expressions
 	@Override

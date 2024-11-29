@@ -38,6 +38,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -187,6 +188,22 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 		return null;
 	}
+
+	@Override
+    public Void visitLoopCommand(LoopCommand ast, Void arg) {
+        // Visit the first command 
+        ast.C1.visit(this);
+
+        // Visit the condition expression 
+        var eType = ast.E.visit(this);
+        checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expected ", ast.E);
+
+        // Visit the second command 
+        ast.C2.visit(this);
+
+        return null;
+    }
+
 
 	// Expressions
 
@@ -960,6 +977,8 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 				StdEnvironment.booleanType);
 		StdEnvironment.unequalDecl = declareStdBinaryOp("\\=", StdEnvironment.anyType, StdEnvironment.anyType,
 				StdEnvironment.booleanType);
+		
+
 
 	}
 }
