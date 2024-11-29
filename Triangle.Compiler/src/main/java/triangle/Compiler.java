@@ -25,6 +25,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.Hoisting;
 import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
@@ -55,6 +56,9 @@ public class Compiler {
 
 	@Argument(alias = "stat", description = "statistics for the binary expressions, if commands, and while commands", required = false)
 	static boolean statistic = false;
+
+	@Argument(alias = "hoist", description = "hoisting option for the while method", required = false)
+	static boolean hoisting = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -119,6 +123,10 @@ public class Compiler {
 				theAST.visit(summaryVisitor);
 				System.out.println("Visitor statistics ...");
 				System.out.print(summaryVisitor.SummaryStatistics());
+			}
+			if (hoisting) {
+				theAST.visit(new ConstantFolder());
+				theAST.visit(new Hoisting());
 			}
 			
 			if (reporter.getNumErrors() == 0) {
