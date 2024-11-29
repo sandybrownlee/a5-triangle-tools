@@ -401,6 +401,14 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
         return null;
     }
 
+    @Override
+    public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+        ast.PreCommand.visit(this);
+        ast.E.visit(this);
+        ast.PostCommand.visit(this);
+        return null;
+    }
+
     // TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
