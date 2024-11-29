@@ -622,6 +622,19 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
+				
+				Identifier id = new Identifier(foldedValue.toString(), node1.getPosition());
+
+				if(foldedValue.toString().equalsIgnoreCase("true"))
+					id.decl = StdEnvironment.trueDecl;
+				else 
+					id.decl = StdEnvironment.falseDecl;
+
+				SimpleVname svn = new SimpleVname(id, node1.getPosition());
+				VnameExpression vne = new VnameExpression(svn, node1.getPosition());
+
+				vne.type = StdEnvironment.booleanType;
+				return vne;
 				/* currently not handled! */
 			}
 		}
