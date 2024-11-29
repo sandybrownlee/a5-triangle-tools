@@ -33,6 +33,8 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
+//task 6a
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
@@ -120,6 +122,18 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	// Commands
 
 	// Always returns null. Does not use the given object.
+
+	// task 6a
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+		ast.C1.visit(this);
+		var eType = ast.E.visit(this);
+
+		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean exression expected here", ast.E);
+		ast.C2.visit(this);
+
+		return null;
+	}
 
 	@Override
 	public Void visitAssignCommand(AssignCommand ast, Void arg) {

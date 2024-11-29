@@ -15,7 +15,31 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 
 public class TestScanner {
-	
+
+	@Test
+	public void testIsLetter() {
+		// Lowercase letters
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('m'));
+		assertTrue(Scanner.isLetter('z'));
+
+		// Uppercase letters (Cover all boundaries)
+		assertTrue(Scanner.isLetter('A'));
+		assertTrue(Scanner.isLetter('M'));
+		assertTrue(Scanner.isLetter('Z'));
+
+		// Invalid cases
+		assertFalse(Scanner.isLetter('1'));  // Digit
+		assertFalse(Scanner.isLetter(' '));  // Whitespace
+		assertFalse(Scanner.isLetter('\n')); // Newline
+		assertFalse(Scanner.isLetter('&'));  // Special character
+		assertFalse(Scanner.isLetter('@'));  // Edge special character
+		assertFalse(Scanner.isLetter('['));  // Character just beyond 'Z'
+		assertFalse(Scanner.isLetter('`'));  // Character just before 'a'
+		assertFalse(Scanner.isLetter('{'));  // Character just after 'z'
+		assertFalse(Scanner.isLetter('\0')); // Null character
+	}
+
 	/* some individual unit tests for helper methods in Scanner */
 
 	@Test
@@ -31,19 +55,33 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
 	}
-	
+
 	@Test
 	public void testIsOperator() {
+		assertTrue(Scanner.isOperator('%'));
 		assertTrue(Scanner.isOperator('*'));
 		assertTrue(Scanner.isOperator('/'));
+		assertTrue(Scanner.isOperator('\\'));
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('^'));
+
+
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
+		assertFalse(Scanner.isOperator(' ')); // Space
 		assertFalse(Scanner.isOperator('\n'));
+		assertFalse(Scanner.isOperator('\0')); // Null character
+
+
 	}
 	
 	
@@ -71,7 +109,18 @@ public class TestScanner {
 	public void testBarDemo() {
 		compileExpectFailure("/bardemo.tri");
 	}
-	
+
+	// Task 3b test for square operation
+	@Test
+	public void testSquare() {
+		compileExpectSuccess("/taskBtest.tri");
+	}
+
+	// Task 6b test for new loop
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/taskBloop.tri");
+	}
 
 	@Test
 	public void testRepeatUntil() {

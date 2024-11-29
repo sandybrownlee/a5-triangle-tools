@@ -37,6 +37,8 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
+// import for task 6a
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
@@ -132,7 +134,25 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		encodeStore(ast.V, frame.expand(valSize), valSize);
 		return null;
 	}
+	// Task 6a
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+		var loopAddr = emitter.getNextInstrAddr();
 
+		// Start at the second command
+		ast.C2.visit(this, frame);
+		// Jump to the address of the next instruction (command 1)
+		emitter.patch(jumpAddr);
+
+		ast.C1.visit(this, frame);
+		ast.E.visit(this, frame);
+
+		// Goes to the next iteration of the loop
+		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+
+		return null;
+	}
 	@Override
 	public Void visitCallCommand(CallCommand ast, Frame frame) {
 		var argsSize = ast.APS.visit(this, frame);

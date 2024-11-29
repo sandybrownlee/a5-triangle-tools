@@ -1,9 +1,12 @@
 apply plugin: 'java'
 
-sourceCompatibility = 17
+sourceCompatibility = 11
 
 subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
+}
+repositories {
+    mavenCentral() // Task 2a Ensure all subprojects can access Maven Central
 }
 
 jar {
@@ -14,5 +17,11 @@ jar {
     }
 
 
-  from subprojects.sourceSets.main.output
+    from subprojects.sourceSets.main.output
 }
+
+    dependencies {
+            implementation 'info.picocli:picocli:4.7.6' // Add Picocli dependency for Triangle.Compiler
+
+    }
+
