@@ -85,7 +85,8 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
-
+import triangle.StdEnvironment;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 public class Parser {
 
 	private Scanner lexicalAnalyser;
@@ -281,6 +282,7 @@ public class Parser {
 
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
+			 System.out.println("Parsed identifier: " + iAST.spelling);
 			if (currentToken.kind == Token.Kind.LPAREN) {
 				acceptIt();
 				ActualParameterSequence apsAST = parseActualParameterSequence();
@@ -288,7 +290,23 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			}  // logic for handling "**"
+	        else if (currentToken.kind == Token.Kind.STARSTAR) { 
+	        	System.out.println("Parsing '**' operator for variable: " + iAST.spelling);
+	            acceptIt(); // Consume the '**' token
+	            
+
+	            Vname vAST = new SimpleVname(iAST, commandPos);
+	            Expression varExpr = new VnameExpression(vAST, commandPos);
+	            Expression squareExpr = new BinaryExpression(
+	            		varExpr, 
+	            		varExpr, 
+	            		StdEnvironment.multiplyDecl, 
+	            		commandPos
+	            		);
+	            commandAST = new AssignCommand(vAST, squareExpr, commandPos);
+	            finish(commandPos);
+	        } else {
 
 				Vname vAST = parseRestOfVname(iAST);
 				accept(Token.Kind.BECOMES);
@@ -336,7 +354,18 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
-
+		case LOOP: { // New case for 'loop'
+	        acceptIt(); // Consume 'loop'
+	        Command C1 = parseSingleCommand(); // Parse C1
+	        accept(Token.Kind.WHILE); // Consume 'while'
+	        Expression E = parseExpression(); // Parse the expression E
+	        accept(Token.Kind.DO); // Consume 'do'
+	        Command C2 = parseSingleCommand(); // Parse C2
+	        finish(commandPos);
+	        commandAST = new LoopWhileCommand(C1, E, C2, commandPos); // Create LoopWhileCommand node
+	    }
+	        break;
+	     
 		case SEMICOLON:
 		case END:
 		case ELSE:
@@ -618,6 +647,7 @@ public class Parser {
 			declarationAST = new VarDeclaration(iAST, tAST, declarationPos);
 		}
 			break;
+			
 
 		case PROC: {
 			acceptIt();

@@ -148,6 +148,11 @@ public final class Scanner {
 			takeIt();
 			while (isLetter(currentChar) || isDigit(currentChar))
 				takeIt();
+			String spelling = currentSpelling.toString();
+			if (spelling.equals("loop")) return Token.Kind.LOOP;
+			if (spelling.equals("while")) return Token.Kind.WHILE;
+			if (spelling.equals("do")) return Token.Kind.DO;
+		
 			return Token.Kind.IDENTIFIER;
 
 		case '0':
@@ -167,7 +172,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':
@@ -182,7 +186,17 @@ public final class Scanner {
 			while (isOperator(currentChar))
 				takeIt();
 			return Token.Kind.OPERATOR;
-
+			
+		case '*':
+		    takeIt(); // Consume the first '*'
+		    if (currentChar == '*') { // Check to see if the next character is also '*'
+		        takeIt(); // Consume the second '*'
+		        if (debug) System.out.println("Recognized '**' as STARSTAR token");
+		        return Token.Kind.STARSTAR; // Return the STARSTAR token kind
+		        
+		    }
+		    return Token.Kind.OPERATOR; // If not '**', treat it as a single '*'
+		    
 		case '\'':
 			takeIt();
 			takeIt(); // the quoted character

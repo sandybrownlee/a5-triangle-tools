@@ -1,0 +1,6 @@
+let
+    var z: Integer;
+in
+    if z < 5 then
+        while z > 0 do
+            z := z - 1

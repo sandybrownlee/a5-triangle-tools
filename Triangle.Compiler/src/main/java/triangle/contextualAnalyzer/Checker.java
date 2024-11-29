@@ -108,7 +108,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.syntacticAnalyzer.SourcePosition;
-
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 public final class Checker implements ActualParameterVisitor<FormalParameter, Void>,
 		ActualParameterSequenceVisitor<FormalParameterSequence, Void>, ArrayAggregateVisitor<Void, TypeDenoter>,
 		CommandVisitor<Void, Void>, DeclarationVisitor<Void, Void>, ExpressionVisitor<Void, TypeDenoter>,
@@ -187,6 +187,21 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 		return null;
 	}
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+	    // Check the first command (C1)
+	    ast.C1.visit(this);
+
+	    // Check that the expression E is of boolean type
+	    var eType = ast.E.visit(this);
+	    checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+
+	    // Check the second command (C2)
+	    ast.C2.visit(this);
+
+	    return null;
+	}
+
 
 	// Expressions
 

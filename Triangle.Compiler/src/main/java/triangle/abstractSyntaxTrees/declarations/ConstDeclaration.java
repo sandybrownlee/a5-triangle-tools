@@ -31,16 +31,23 @@ public class ConstDeclaration extends Declaration implements ConstantDeclaration
 		I = iAST;
 		E = eAST;
 	}
+	public ConstDeclaration(Identifier iAST, TypeDenoter typeAST, SourcePosition position) {
+        super(position);
+        I = iAST;
+        E = null; // No expression provided in this case
+        this.type = typeAST;
+    }
 
 	@Override
-	public TypeDenoter getType() {
-		return E.type;
-	}
-	
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitConstDeclaration(this, arg);
-	}
+    public TypeDenoter getType() {
+        return (E != null) ? E.type : type; // Return type from the expression or the directly assigned type
+    }
 
-	public final Identifier I;
-	public Expression E;
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
+        return v.visitConstDeclaration(this, arg);
+    }
+
+    public final Identifier I;
+    public Expression E; // Expression for the constant (optional)
+    public TypeDenoter type; // Direct type assignment for constants like false, true
 }

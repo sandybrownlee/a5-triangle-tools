@@ -27,6 +27,11 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+import triangle.abstractSyntaxTrees.visitors.SummaryVisitor;
+
+
 
 /**
  * The main driver class for the Triangle compiler.
@@ -35,12 +40,21 @@ import triangle.treeDrawer.Drawer;
  * @author Deryck F. Brown
  */
 public class Compiler {
+	
+	@Argument(alias = "showStats", description = "Show program statistics", required = false)
+	static boolean showStats = false;
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "o", description = "Output file name", required = false)
 	static String objectName = "obj.tam";
 	
+	@Argument(alias = "tree", description = "Display AST after contextual analysis", required = false)
 	static boolean showTree = false;
+	@Argument(alias = "folding", description = "Enable constant folding optimization", required = false)
 	static boolean folding = false;
+	
+	 @Argument(alias = "treeAfter", description = "Show tree after constant folding", required = false)
+	 private static boolean showTreeAfter = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -79,6 +93,8 @@ public class Compiler {
 		}
 
 		scanner = new Scanner(source);
+		scanner.enableDebugging();
+		System.out.println("Debugging enabled for Scanner.");
 		reporter = new ErrorReporter(false);
 		parser = new Parser(scanner, reporter);
 		checker = new Checker(reporter);
@@ -101,10 +117,18 @@ public class Compiler {
 				theAST.visit(new ConstantFolder());
 			}
 			
-			if (reporter.getNumErrors() == 0) {
-				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
-			}
+			
+			if (showStats) {
+	            System.out.println("Generating summary statistics...");
+	            SummaryVisitor summaryVisitor = new SummaryVisitor();
+	            theAST.visit(summaryVisitor, null);
+	            summaryVisitor.printSummary();
+	        }
+
+	        if (reporter.getNumErrors() == 0) {
+	            System.out.println("Code Generation ...");
+	            encoder.encodeRun(theAST, showingTable); // 3rd pass
+	        }
 		}
 
 		boolean successful = (reporter.getNumErrors() == 0);
@@ -124,16 +148,24 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		StdEnvironment.initialize();
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
+		Args.parseOrExit(Compiler.class, args);
 		
-		parseArgs(args);
+		if (args.length == 0) {
+	        System.out.println("Usage: tc <sourcefile> [--o=outputfile] [--tree] [--folding] [--treeAfter]");
+	        System.exit(1);
+	    }
 
 		String sourceName = args[0];
 		
+		System.out.println("Parsed arguments:");
+        System.out.println("Source file: " + sourceName);
+        System.out.println("Output file: " + objectName);
+        System.out.println("Show tree: " + showTree);
+        System.out.println("Enable constant folding: " + folding);
+        System.out.println("Show tree after folding: " + showTreeAfter);
+        
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
 		if (!showTree) {
@@ -141,16 +173,5 @@ public class Compiler {
 		}
 	}
 	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+	
 }

@@ -1,0 +1,59 @@
+! Test: LoopWhile construct with different cases
+proc main()
+   let
+      var i: Integer
+      var result: Integer
+   in
+      begin
+         ! Case 1: Simple iteration with summation
+         i := 0;
+         result := 0;
+
+         loop
+            putint(i); puteol;  ! Always runs
+         while i < 5
+         do
+            begin
+               result := result + i;
+               i := i + 1
+            end;
+
+         putint(result); puteol;  ! Expected output: 10 (sum of 0 to 4)
+
+         ! Case 2: Loop that never enters the "do" block
+         i := 10;
+         result := 0;
+
+         loop
+            putint(i); puteol;  ! Runs once
+         while i < 5
+         do
+            begin
+               result := result + i;
+               i := i + 1
+            end;
+
+         putint(result); puteol;  ! Expected output: 0
+
+         ! Case 3: Nested LoopWhile construct
+         var outer: Integer
+         var inner: Integer
+         outer := 0;
+
+         loop
+            begin
+               putstring("Outer: "); putint(outer); puteol;
+               inner := 0;
+
+               loop
+                  putstring("  Inner: "); putint(inner); puteol;
+               while inner < 2
+               do
+                  inner := inner + 1;
+
+               outer := outer + 1
+            end
+         while outer < 3
+         do
+            putstring("End of outer iteration"); puteol;
+      end

@@ -1,0 +1,5 @@
+let
+    var y: Integer;
+in
+    while y < 10 do
+        y := y * 2

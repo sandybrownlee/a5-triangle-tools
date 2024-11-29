@@ -96,7 +96,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
-
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		ActualParameterSequenceVisitor<Void, DrawingTree>, ArrayAggregateVisitor<Void, DrawingTree>,
 		CommandVisitor<Void, DrawingTree>, DeclarationVisitor<Void, DrawingTree>, ExpressionVisitor<Void, DrawingTree>,
@@ -162,6 +162,14 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		var d2 = ast.C.visit(this);
 		return layoutBinary("WhileCom.", d1, d2);
 	}
+	@Override
+	public DrawingTree visitLoopWhileCommand(LoopWhileCommand ast, Void obj) {
+	    var d1 = ast.E.visit(this); 
+	    var d2 = ast.C1.visit(this); 
+	    var d3 = ast.C2.visit(this); 
+	    return layoutTernary("LoopWhileCom.", d1, d2, d3);
+	}
+
 
 	// Expressions
 	@Override
