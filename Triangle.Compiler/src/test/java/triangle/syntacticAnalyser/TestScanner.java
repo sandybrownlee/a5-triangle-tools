@@ -30,6 +30,7 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit('&'));
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
+
 	}
 	
 	@Test
@@ -44,9 +45,33 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('?'));
 	}
 	
-	
+	@Test
+	public void testIsLetter() {
+
+		// boundary testing. Values just outside acceptable range
+		assertFalse(Scanner.isLetter('`'));  // grave accent is previous number in unicode table
+		assertFalse(Scanner.isLetter('{'));  // left bracket next value in unicode table.
+		assertFalse(Scanner.isLetter('@'));  // previous number in unicode table
+		assertFalse(Scanner.isLetter('['));  // next number in unicode table
+
+		// binary choice testing. Lower or upper case value in acceptable range.
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('A'));
+	}
+
+
 	/* these tests all try to compile example programs... */
 	
 	@Test
