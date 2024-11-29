@@ -110,7 +110,7 @@ public class Compiler {
             return;
         }
 
-        program = desugarer.visit(program);
+        program = desugarer.desugar(program);
 
         typeChecker.typecheck(program);
 

@@ -59,7 +59,7 @@ public class Desugarer implements Visitor {
         return rewritten;
     }
 
-    Statement desugar(Statement program) {
+    public Statement desugar(Statement program) {
         return visit(program);
     }
 
