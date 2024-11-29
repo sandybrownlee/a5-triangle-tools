@@ -59,8 +59,6 @@ public class Compiler {
     public static void main(String[] args) {
         Args.parseOrExit(Compiler.class, args);
 
-        sourceName = "programs/test.tri";
-
         try {
             compileProgram(new FileInputStream(sourceName), new FileOutputStream(objectName), constantFolding, hoisting);
         } catch (FileNotFoundException e) {
