@@ -47,7 +47,7 @@ public class CompilerTest {
             "/while-longloop.tri",})
     //@formatter:on
     @ParameterizedTest public void testCompile(String filename) {
-        Compiler.constantFolding = true;
+        Compiler.folding = true;
         Compiler.hoisting = true;
         Assertions.assertDoesNotThrow(() -> Compiler.compileProgram(
                 Compiler.class.getResourceAsStream(filename),

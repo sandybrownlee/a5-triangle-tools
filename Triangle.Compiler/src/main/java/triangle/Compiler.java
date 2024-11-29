@@ -49,14 +49,16 @@ public class Compiler {
     @Argument(description = "The name of the source file to compile", required = true) private static String sourceName;
 
     // needs to be package private to allow CompilerTest to work
-    @Argument(description = "Turn on constant folding") static boolean constantFolding;
+    @Argument(description = "Turn on constant folding") static boolean folding;
 
     // needs to be package private to allow CompilerTest to work
     @Argument(description = "Turn on loop hoisting") static boolean hoisting;
 
     @Argument(description = "Show summary stats") private static boolean showStats;
 
-    @Argument(description = "Show tree after folding") private static boolean showTree;
+    @Argument(description = "Show AST") private static boolean showTree;
+
+    @Argument(description = "Show tree after folding") private static boolean showTreeAfter;
 
     public static void main(String[] args) {
         Args.parseOrExit(Compiler.class, args);
@@ -90,6 +92,10 @@ public class Compiler {
 
         Statement program = parser.parseProgram();
 
+        if (showTree) {
+            System.out.println(ASTPrinter.prettyPrint(program));
+        }
+
         // need to show stats *before* any desugaring, else counts will not be correct
         if (showStats) {
             SummaryVisitor summaryVisitor = new SummaryVisitor();
@@ -122,10 +128,10 @@ public class Compiler {
             return;
         }
 
-        if (constantFolding) {
+        if (folding) {
             program = Optimizer.foldConstants(program);
 
-            if (showTree) {
+            if (showTreeAfter) {
                 System.out.println(ASTPrinter.prettyPrint(program));
             }
         }
