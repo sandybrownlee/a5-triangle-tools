@@ -73,14 +73,14 @@ public abstract class SemanticException extends Exception {
         private final TypeSig.RecordTypeSig.FieldType fieldType;
 
         DuplicateRecordTypeField(final SourcePosition sourcePos, final TypeSig.RecordTypeSig.FieldType fieldType) {
-            this.fieldType = fieldType;
             super(sourcePos, "Duplicate field in record type: " + fieldType.fieldName());
+            this.fieldType = fieldType;
         }
 
         // we may not always have source positions; e.g, when checking a record field typeSig
         DuplicateRecordTypeField(final TypeSig.RecordTypeSig.FieldType fieldType) {
-            this.fieldType = fieldType;
             super("Duplicate field in record type: " + fieldType.fieldName());
+            this.fieldType = fieldType;
         }
 
         TypeSig.RecordTypeSig.FieldType getFieldType() {
