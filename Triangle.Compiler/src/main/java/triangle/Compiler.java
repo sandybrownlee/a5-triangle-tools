@@ -48,9 +48,11 @@ public class Compiler {
 
     @Argument(description = "The name of the source file to compile", required = true) private static String sourceName;
 
-    @Argument(description = "Turn on constant folding") private static boolean constantFolding;
+    // needs to be package private to allow CompilerTest to work
+    @Argument(description = "Turn on constant folding") static boolean constantFolding;
 
-    @Argument(description = "Turn on loop hoisting") private static boolean hoisting;
+    // needs to be package private to allow CompilerTest to work
+    @Argument(description = "Turn on loop hoisting") static boolean hoisting;
 
     @Argument(description = "Show summary stats") private static boolean showStats;
 
@@ -60,7 +62,7 @@ public class Compiler {
         Args.parseOrExit(Compiler.class, args);
 
         try {
-            compileProgram(new FileInputStream(sourceName), new FileOutputStream(objectName), constantFolding, hoisting);
+            compileProgram(new FileInputStream(sourceName), new FileOutputStream(objectName));
         } catch (FileNotFoundException e) {
             System.err.println("Could not open file: " + sourceName);
             e.printStackTrace();
@@ -77,7 +79,7 @@ public class Compiler {
     }
 
     static void compileProgram(
-            InputStream inputStream, final FileOutputStream outputStream, boolean constantFolding, boolean hoisting)
+            InputStream inputStream, final FileOutputStream outputStream)
     throws IOException, SyntaxError {
         Parser parser = new Parser(inputStream);
         SemanticAnalyzer semanticAnalyzer = new SemanticAnalyzer();
