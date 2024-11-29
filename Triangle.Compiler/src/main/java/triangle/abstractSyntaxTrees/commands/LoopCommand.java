@@ -1,5 +1,5 @@
 /*
- * @(#)SequentialCommand.java                       
+ * @(#)WhileCommand.java                       
  * 
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  * 
@@ -18,21 +18,24 @@
 
 package triangle.abstractSyntaxTrees.commands;
 
+import triangle.abstractSyntaxTrees.expressions.Expression;
 import triangle.abstractSyntaxTrees.visitors.CommandVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class SequentialCommand extends Command {
+public class LoopCommand extends Command {
 
-	public SequentialCommand(Command c1AST, Command c2AST, SourcePosition position) {
+	public LoopCommand(Command cAST1, Expression eAST, Command cAST2, SourcePosition position) {
 		super(position);
-		C1 = c1AST;
-		C2 = c2AST;
+		C1 = cAST1;
+		E = eAST;
+		C2 = cAST2;
 	}
 
 	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitSequentialCommand(this, arg);
+		return v.visitLoopCommand(this, arg);
 	}
 
-	public Command C1;
-    public final Command C2;
+	public Expression E;
+	public final Command C1;
+	public final Command C2;
 }

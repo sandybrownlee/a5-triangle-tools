@@ -23,10 +23,14 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.HoistVisitor;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -36,11 +40,21 @@ import triangle.treeDrawer.Drawer;
  */
 public class Compiler {
 
+	@Argument(alias = "sf", description = "source of file", required = true)
+	 private static String sourceFile = "programs/hi.tri";
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+	@Argument(alias = "o", description = "name of the object to be output", required = false)
+	private static String objectName = "obj.tam";
+	@Argument(alias = "st", description = "show AST representation after compilation?", required = false)
+	private static boolean showTree = false;
+	@Argument(alias = "fo", description = "enable folding optimisations?", required = false)
+	public static boolean folding = false;
+	@Argument(alias = "ta", description = "show tree after tree optimisations / hoisting?", required = false)
+	private static boolean showTreeAfter = false;
+	@Argument(alias = "stats", description = "show statistics? (after folding)", required = false)
+	private static boolean showStatistics = false;
+	@Argument(alias = "hoist", description = "enable while do loop hoisting?", required = false)
+	private static boolean hoistingEnabled = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -49,6 +63,7 @@ public class Compiler {
 	private static Emitter emitter;
 	private static ErrorReporter reporter;
 	private static Drawer drawer;
+	private static SummaryVisitor summaryVisitor;
 
 	/** The AST representing the source program. */
 	private static Program theAST;
@@ -56,25 +71,21 @@ public class Compiler {
 	/**
 	 * Compile the source program to TAM machine code.
 	 *
-	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
-	 * @param showingAST   true iff the AST is to be displayed after contextual
-	 *                     analysis
-	 * @param showingTable true iff the object description details are to be
+	 * @var showingTable true iff the object description details are to be
 	 *                     displayed during code generation (not currently
 	 *                     implemented).
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram() {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
-
+		System.out.println("Compiling program: " + sourceFile + "...");
 		System.out.println("Syntactic Analysis ...");
-		SourceFile source = SourceFile.ofPath(sourceName);
+		SourceFile source = SourceFile.ofPath(sourceFile);
 
 		if (source == null) {
-			System.out.println("Can't access source file " + sourceName);
+			System.out.println("Can't access source file " + sourceFile);
 			System.exit(1);
 		}
 
@@ -85,6 +96,7 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		summaryVisitor = new SummaryVisitor();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -94,16 +106,34 @@ public class Compiler {
 			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
-			if (showingAST) {
+			if (showTree) {
 				drawer.draw(theAST);
 			}
 			if (folding) {
-				theAST.visit(new ConstantFolder());
+					theAST.visit(new ConstantFolder());
+				if (showTreeAfter) {
+					showTree = true; // I forgot that checking !showTree after for system.exit is comparing true || false, therefore exiting when trying to draw folded tree
+					drawer.draw(theAST);
+				}
 			}
-			
+
+			if (showStatistics) {
+				summaryVisitor.countStats(theAST);
+			}
+
+			checker.check(theAST); // 3rd pass
+
+			if (hoistingEnabled) {
+				theAST.visit(new HoistVisitor());
+				if (showTreeAfter) {
+					showTree = true;
+					drawer.draw(theAST);
+				}
+			}
+			checker.check(theAST);
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
+				encoder.encodeRun(theAST, false); // 3rd pass
 			}
 		}
 
@@ -124,33 +154,12 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		Args.parseOrExit(Compiler.class, args);
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
-
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		var compiledOK = compileProgram();
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
 		}
 	}
 }

@@ -37,13 +37,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -130,6 +124,22 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 	public Void visitAssignCommand(AssignCommand ast, Frame frame) {
 		var valSize = ast.E.visit(this, frame);
 		encodeStore(ast.V, frame.expand(valSize), valSize);
+		return null;
+	}
+
+	@Override
+	public Void visitLoopCommand(LoopCommand ast, Frame frame) {
+		// forgot to implement this in the previous commits
+		// we can simply copy the emitter code from visit while command as it operates under the same logic,
+		// e.g. if something holds true, we can set the jump address to
+		var loopAddr = emitter.getNextInstrAddr();
+		ast.C1.visit(this, frame);
+		ast.E.visit(this, frame);
+		var jumpifAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0); // instruction with no address
+		ast.C2.visit(this, frame);
+		emitter.emit(OpCode.JUMP, Machine.falseRep, Register.CB, loopAddr);
+		emitter.patch(jumpifAddr);
+		 // figure out what's going to happen next, therefore CB register call. if the condition holds true, therefore trueRep passed in.
 		return null;
 	}
 

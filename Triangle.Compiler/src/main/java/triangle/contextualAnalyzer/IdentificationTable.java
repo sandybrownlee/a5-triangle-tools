@@ -57,6 +57,7 @@ public final class IdentificationTable {
 	// same identifier at the current level.
 
 	public void enter(String id, Declaration attr) {
+		// we don't care about duplication if the declaration is null as we're only looking inside of loops for assignments
 		attr.duplicated = retrieve(id, true) != null;
 		this.latest = new IdEntry(id, attr, this.level, this.latest);
 	}
