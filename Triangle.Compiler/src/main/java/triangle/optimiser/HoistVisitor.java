@@ -224,12 +224,14 @@ public class HoistVisitor extends ConstantFolder {
 				Declaration sequentialDeclaration = createSequentialDeclaration(pos);
 				SequentialCommand sequentialSubTreeToInject;
 				Command assignCommands = createSequentialCommand(pos);
+
+				// we wrap the assignments/empty commands - which are inside a sequential command - inside a sequential command which is on the same level as the while command,
+				// but the assignments are called first as triangle compiler is a DFS algorithm.
 				sequentialSubTreeToInject = new SequentialCommand(assignCommands, ast.C2, pos);
+
+				// wrapping the while loop and assignments on the right side, and the declarations of the variables to the left.
+
 				LetCommand letCommand = new LetCommand(sequentialDeclaration, sequentialSubTreeToInject, pos);
-				// we now have a let command and access to the while command, to place these together we wrap them in a sequential command
-				// we now set the parent tree equal to the combined let trees in sequential command form
-
-
 
 				// and then to add this back to the tree, we pass a new sequential command which contains the updated subtree
 				// and the rest of the tree on the left as we're doing DFS algorithms to figure out the program layout.
@@ -305,29 +307,4 @@ public class HoistVisitor extends ConstantFolder {
 		currentlyInLoop = false;
 		return ast;
 	}
-
-	/**
-	 // assistance function for foldBooleanExpression.
-	 public AbstractSyntaxTree unwrapIdentifier(AbstractSyntaxTree ast) {
-	 VnameExpression vNameAST = (VnameExpression) ast;
-	 SimpleVname simpleVnameAST = (SimpleVname) vNameAST.V;
-	 return simpleVnameAST.I.decl;
-	 }
-
-	 // started work on how to fold booleans further such that => b := true; if b \/ ((1+2)=3) would resolve to "if true" - but then realised this is a little out of scope, but folding is cool :)
-	 // didn't fully implement this as I caught myself doing more work than is required for the assignment.
-	 public AbstractSyntaxTree foldBooleanExpression(AbstractSyntaxTree ast1, AbstractSyntaxTree ast2, Operator o) {
-	 boolean b1 = Boolean.parseBoolean(unwrapIdentifier(ast1).toString());
-	 boolean b2 = Boolean.parseBoolean(unwrapIdentifier(ast2).toString());
-
-	 Identifier foldedValue;
-	 Identifier foldedValue1 = new Identifier("true", ast1.getPosition());
-	 Identifier foldedValue2 = new Identifier("false", ast2.getPosition());
-
-	 foldedValue = b1 || b2 ? foldedValue1  : foldedValue2;
-
-
-	 return foldedValue;
-	 }
-	 **/
 }
