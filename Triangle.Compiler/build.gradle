@@ -32,7 +32,7 @@ jacocoTestReport {
 }
 
 
-// include dependencies in the jar files
+// include dependencies in the jar file
 jar {
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }

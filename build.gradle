@@ -13,7 +13,7 @@ subprojects {
     }
 
     dependencies {
-        //making cli-parser library available to all subprojects
+        // cli-parser library available to all subprojects
         implementation 'com.sampullara.cli:cli-parser:1.0'
     }
 }
