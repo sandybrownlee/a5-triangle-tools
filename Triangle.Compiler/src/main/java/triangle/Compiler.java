@@ -1,8 +1,8 @@
 /*
- * @(#)Compiler.java                       
- * 
+ * @(#)Compiler.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -39,17 +40,20 @@ import com.sampullara.cli.Argument;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	@Argument(alias = "o", description = "file ", required = false)
+	@Argument(alias = "o", description = "The filename of the object program", required = false)
 	static String objectName = "obj.tam";
 
-	@Argument(alias = "s", description = "Statistic to compute for the values", required = false)
+	@Argument(alias = "s", description = "Shows the AST of a program", required = false)
 	static boolean showTree = false;
 
-	@Argument(alias = "f", description = "Statistic to compute for the values", required = false)
+	@Argument(alias = "f", description = "Shows folding", required = false)
 	static boolean folding = false;
 
-	@Argument(alias = "t", description = "Statistic to compute for the values", required = false)
+	@Argument(alias = "af", description = "Shows the tree after folding", required = false)
 	static boolean showAfterTree = false;
+
+	@Argument(alias = "ss", description = "Shows the amount of times binary, if and while expressions are visited", required = false)
+	static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -94,6 +98,7 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		SummaryVisitor summaryVisitor = new SummaryVisitor();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -109,7 +114,19 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+			// if shows stats is added as an argument, it will tell the ast to visit the summaryvisitor class, and then the expressions can be successfully counted and printed
+			if (showStats) {
+				theAST.visit(summaryVisitor);
+				System.out.println("Binary expressions counted: " + summaryVisitor.getBinaryCounter());
+				System.out.println("If statements counted: " + summaryVisitor.getIfCounter());
+				System.out.println("While statements counted: " + summaryVisitor.getWhileCounter());
+			}
+			if (showAfterTree) {
+				// if show after tree is added as an argument, it will complete folding and then build the tree
+				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
+			}
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -141,10 +158,11 @@ public class Compiler {
 			System.exit(1);
 		}
 
+		// parses the args
 		Args.parseOrExit(compiler, args);
 
 		String sourceName = args[0];
-		
+
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
 		if (!showTree) {
