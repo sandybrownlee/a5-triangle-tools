@@ -77,7 +77,10 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
-	
+	@Test
+	public void testDoubleStarToken() {
+		compileExpectFailure("/doublestartest.tri");
+	}
 	
 	
 	private void compileExpectSuccess(String filename) {

@@ -168,6 +168,12 @@ public final class Scanner {
 		case '+':
 		case '-':
 		case '*':
+			takeIt();
+			if (currentChar == '*') { // Check for the second '*' after taking first '*'
+				takeIt();            // take the second '*'
+				return Token.Kind.DOUBLESTAR;
+			}
+			return Token.Kind.OPERATOR; // If it's a single '*', treat it as a regular operator
 		case '/':
 		case '=':
 		case '<':

@@ -289,12 +289,28 @@ public class Parser {
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
 			} else {
-
 				Vname vAST = parseRestOfVname(iAST);
+				if (currentToken.kind == Token.Kind.DOUBLESTAR) { // Handle `**` case
+					acceptIt(); // Consume `**`
+					finish(commandPos);
+					commandAST = new AssignCommand(
+							new SimpleVname(iAST, commandPos),
+							new BinaryExpression(
+									// wraps variable name
+									new VnameExpression(new SimpleVname(iAST, commandPos), commandPos),
+									// operation it performs
+									new Operator("*", commandPos),
+									// translating a*a to a**
+									new VnameExpression(new SimpleVname(iAST, commandPos), commandPos),
+									commandPos),
+							commandPos);
+				}
+				else {
+
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				commandAST = new AssignCommand(vAST, eAST, commandPos);}
 			}
 		}
 			break;

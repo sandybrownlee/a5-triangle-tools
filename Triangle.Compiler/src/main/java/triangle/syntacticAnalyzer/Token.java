@@ -64,7 +64,9 @@ final class Token {
 		LPAREN("("), RPAREN(")"), LBRACKET("["), RBRACKET("]"), LCURLY("{"), RCURLY("}"),
 
 		// special tokens...
-		EOT(""), ERROR("<error>");
+		EOT(""), ERROR("<error>")
+		//Doublestar
+		,DOUBLESTAR("**");
 		
 	    public final String spelling;
 		

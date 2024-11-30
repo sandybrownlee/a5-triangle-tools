@@ -1,5 +1,7 @@
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -9,8 +11,7 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
-import com.sampullara.cli.Args;
-import com.sampullara.cli.Argument;
+
 
 /**
  * The main driver class for the Triangle compiler.
@@ -108,6 +109,9 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 		try {
+			// this will parse the list of arguments passed into the program, and
+			// populate the appropriate instance variables
+			// if the required arguments were not found, it will gracefully exit
 			Args.parseOrExit(Compiler.class, args);
 
 			System.out.println("Arguments parsed:");
