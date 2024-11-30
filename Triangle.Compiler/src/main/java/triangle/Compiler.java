@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.Hoister;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -58,6 +59,10 @@ public class Compiler {
 	/** Flag to display AST after folding optimisations */
 	@Argument(description = "Print stats about the programs AST")
 	static boolean showStats = false;
+
+	/** Flag to apply invariant hoisting optimisations. */
+	@Argument(description = "Apply invariant hoisting optimisation")
+	static boolean hoisting = false;
 
 
 	private static Scanner scanner;
@@ -126,6 +131,10 @@ public class Compiler {
 					drawer = new Drawer();
 					drawer.draw(theAST);
 				}
+			}
+
+			if (hoisting) {
+				theAST.visit(new Hoister());
 			}
 			
 			if (reporter.getNumErrors() == 0) {
