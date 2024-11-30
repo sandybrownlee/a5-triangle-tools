@@ -10,8 +10,11 @@ repositories {
 
 
 dependencies {
-	implementation project(':Triangle.AbstractMachine')
-	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation project(':Triangle.AbstractMachine')
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+
+    // Adding cli-parser library
+    implementation 'com.sampullara.cli:cli-parser:1.0'
 }
 
 application {
@@ -26,4 +29,12 @@ test {
 }
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
+}
+
+
+// include dependencies in the jar file
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
 }
