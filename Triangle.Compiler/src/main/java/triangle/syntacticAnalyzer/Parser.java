@@ -281,9 +281,25 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+				// Break early so later code isn't run
+				break;
+			}
 
-				Vname vAST = parseRestOfVname(iAST);
+			Vname vAST = parseRestOfVname(iAST);
+
+			if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+				acceptIt();
+
+				var binaryExpression = new BinaryExpression(
+						new VnameExpression(vAST, commandPos),
+						new Operator("*", commandPos),
+						new VnameExpression(vAST, commandPos),
+						commandPos
+				);
+
+				commandAST = new AssignCommand(vAST, binaryExpression, commandPos);
+			}
+			else {
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
