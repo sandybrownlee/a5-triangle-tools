@@ -75,6 +75,10 @@ public class TestScanner {
 		compileExpectSuccess("/loopwhile.tri");
 	}
 
+	public void testSquare() {
+		compileExpectSuccess("/square.tri");
+	}
+
 
 	@Test
 	public void testHiNewComment() {
