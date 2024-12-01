@@ -166,7 +166,22 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		var sourceName = parseArgs(args);
 
+		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+
+		if (!(showTree || showTreeAfter)) {
+			System.exit(compiledOK ? 0 : 1);
+		}
+	}
+
+	/**
+	 * Function to parse arguments and populate static flags and variables.
+	 *
+	 * @param args Program arguments to be parsed.
+	 * @return Path to the source file to be compiled.
+	 */
+	private static String parseArgs(String[] args) {
 		var remainingArgs = Args.parseOrExit(Compiler.class, args);
 
 		if (remainingArgs.isEmpty()) {
@@ -174,12 +189,6 @@ public class Compiler {
 			System.exit(1);
 		}
 
-		String sourceName = remainingArgs.get(0);
-
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!(showTree || showTreeAfter)) {
-			System.exit(compiledOK ? 0 : 1);
-		}
+		return remainingArgs.get(0);
 	}
 }
