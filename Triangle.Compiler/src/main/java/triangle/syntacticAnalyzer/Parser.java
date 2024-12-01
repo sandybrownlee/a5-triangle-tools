@@ -287,7 +287,7 @@ public class Parser {
 				// if the current token is an operator and is "**" then we know it's the squaring operator
 				if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
 					acceptIt();
-					// creates 2 variables that will be used in the expression
+					// creates 2 placeholder variables that will be used in the expression
 					VnameExpression squareVariable1 = new VnameExpression(vAST, commandPos);
 					VnameExpression squareVariable2 = new VnameExpression(vAST, commandPos);
 

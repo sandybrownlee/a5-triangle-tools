@@ -117,9 +117,7 @@ public class Compiler {
 			// if shows stats is added as an argument, it will tell the ast to visit the summaryvisitor class, and then the expressions can be successfully counted and printed
 			if (showStats) {
 				theAST.visit(summaryVisitor);
-				System.out.println("Binary expressions counted: " + summaryVisitor.getBinaryCounter());
-				System.out.println("If statements counted: " + summaryVisitor.getIfCounter());
-				System.out.println("While statements counted: " + summaryVisitor.getWhileCounter());
+				summaryVisitor.printSummaryStats();
 			}
 			if (showTreeAfter) {
 				// if show after tree is added as an argument, it will complete folding and then build the tree

@@ -93,7 +93,13 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 
 	public int whileCounter = 0;
 
-	// get methods to retrieve the values in the compiler
+	public void printSummaryStats(){
+		System.out.println("Binary expressions counted: " + binaryCounter);
+		System.out.println("If statements counted: " + ifCounter);
+		System.out.println("While statements counted: " + whileCounter);
+	}
+
+	// get methods to retrieve the values if needed
 	public int getBinaryCounter() {
 		return binaryCounter;
 	}
@@ -348,8 +354,6 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement3 != null) {
 			ast.E3 = (Expression) replacement3;
 		}
-		// at the end of this method which visits an if expression node, it will increment the counter
-		ifCounter++;
 		return null;
 	}
 
@@ -487,6 +491,8 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
+		// at the end of this method which visits an if expression node, it will increment the counter
+		ifCounter++;
 		return null;
 	}
 
