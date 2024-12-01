@@ -15,16 +15,32 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 
 public class TestScanner {
+	 private final char[] operators = {'+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%', '^', '?'};
+	 private final char[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
 	/* some individual unit tests for helper methods in Scanner */
+	@Test
+	public void testIsLetter(){
+		//test all lower case letters
+		for (char c = 'a'; c <= 'z'; c++) {
+			assertTrue("Expected " + c + " to be a letter", Scanner.isLetter(c));
+		}
+		// test all uppercase letter
+		for (char c = 'A'; c <= 'Z'; c++) {
+			assertTrue("Expected " + c + " to be a letter", Scanner.isLetter(c));
+		}
+		//test for non letters
+		char[] nonLetters = {'1', '9', '*', '_', '$', ' '};
+		for (char nonLetter : nonLetters) {
+			assertFalse("Expected " + nonLetter + " to not be a letter", Scanner.isLetter(nonLetter));
+		}
+	}
 
 	@Test
 	public void testIsDigit() {
-		assertTrue(Scanner.isDigit('0'));
-		assertTrue(Scanner.isDigit('1'));
-		assertTrue(Scanner.isDigit('5'));
-		assertTrue(Scanner.isDigit('8'));
-		assertTrue(Scanner.isDigit('9'));
+		for (char op : digits) {
+			assertTrue("Expected " + op + " to be an digit", Scanner.isDigit(op));
+		}
 		assertFalse(Scanner.isDigit('a'));
 		assertFalse(Scanner.isDigit('Z'));
 		assertFalse(Scanner.isDigit('&'));
@@ -34,11 +50,10 @@ public class TestScanner {
 
 	@Test
 	public void testIsOperator() {
-		assertTrue(Scanner.isOperator('*'));
-		assertTrue(Scanner.isOperator('/'));
-		assertTrue(Scanner.isOperator('?'));
-		assertTrue(Scanner.isOperator('+'));
-		assertTrue(Scanner.isOperator('-'));
+		//char[] operators = {'+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%', '^', '?'};
+		for (char op : operators) {
+			assertTrue("Expected " + op + " to be an operator", Scanner.isOperator(op));
+		}
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
