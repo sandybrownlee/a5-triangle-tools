@@ -287,11 +287,17 @@ public class Parser {
 				// if the current token is an operator and is "**" then we know it's the squaring operator
 				if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
 					acceptIt();
-					// creates 2 variables
+					// creates 2 variables that will be used in the expression
 					VnameExpression squareVariable1 = new VnameExpression(vAST, commandPos);
 					VnameExpression squareVariable2 = new VnameExpression(vAST, commandPos);
-					Operator op = new Operator("*", commandPos);
-					Expression square = new BinaryExpression(squareVariable1, op, squareVariable2, commandPos);
+
+					//creates the multiplication operator that will be used in the expression
+					Operator multiply = new Operator("*", commandPos);
+
+					// creates the square expression, where it multiplies the first variable by the second (they will both be the same)
+					Expression square = new BinaryExpression(squareVariable1, multiply, squareVariable2, commandPos);
+
+					//finishes the command and creates a new command, assigning the new square expression
 					finish(commandPos);
 					commandAST = new AssignCommand(vAST, square, commandPos);
 

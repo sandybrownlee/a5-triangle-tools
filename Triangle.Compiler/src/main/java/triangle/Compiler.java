@@ -43,16 +43,16 @@ public class Compiler {
 	@Argument(alias = "o", description = "The filename of the object program", required = false)
 	static String objectName = "obj.tam";
 
-	@Argument(alias = "s", description = "Shows the AST of a program", required = false)
+	@Argument(alias = "showTree", description = "Shows the AST of a program", required = false)
 	static boolean showTree = false;
 
-	@Argument(alias = "f", description = "Shows folding", required = false)
+	@Argument(alias = "folding", description = "Shows folding", required = false)
 	static boolean folding = false;
 
-	@Argument(alias = "af", description = "Shows the tree after folding", required = false)
-	static boolean showAfterTree = false;
+	@Argument(alias = "treeAfterFolding", description = "Shows the tree after folding", required = false)
+	static boolean showTreeAfter = false;
 
-	@Argument(alias = "ss", description = "Shows the amount of times binary, if and while expressions are visited", required = false)
+	@Argument(alias = "showStats", description = "Shows the amount of times binary, if and while expressions are visited", required = false)
 	static boolean showStats = false;
 
 	private static Scanner scanner;
@@ -121,7 +121,7 @@ public class Compiler {
 				System.out.println("If statements counted: " + summaryVisitor.getIfCounter());
 				System.out.println("While statements counted: " + summaryVisitor.getWhileCounter());
 			}
-			if (showAfterTree) {
+			if (showTreeAfter) {
 				// if show after tree is added as an argument, it will complete folding and then build the tree
 				theAST.visit(new ConstantFolder());
 				drawer.draw(theAST);
@@ -165,7 +165,8 @@ public class Compiler {
 
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
-		if (!showTree) {
+		// if no trees are being shown
+		if (!showTree && !showTreeAfter) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
