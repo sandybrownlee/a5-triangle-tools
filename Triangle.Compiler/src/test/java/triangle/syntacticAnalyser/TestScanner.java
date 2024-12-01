@@ -16,7 +16,7 @@ import triangle.syntacticAnalyzer.SourceFile;
 
 public class TestScanner {
 	 private final char[] operators = {'+', '-', '*', '/', '=', '<', '>', '\\', '&', '@', '%', '^', '?'};
-	 private final char[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
+	 private final 	char[] digits = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
 	/* some individual unit tests for helper methods in Scanner */
 	@Test

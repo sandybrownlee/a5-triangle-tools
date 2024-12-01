@@ -28,8 +28,13 @@ public final class Scanner {
 	private boolean currentlyScanningToken;
 
 	public static boolean isLetter(char c) {
-		return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+		boolean isLowercase = (c >= 'a' && c <= 'z');
+		boolean isUppercase = (c >= 'A' && c <= 'Z');
+		if(isLowercase){return true;} else if (isUppercase) {return true;}else return false;
+
+
 	}
+
 
 	public static boolean isDigit(char c) {
 		return (c >= '0' && c <= '9');
@@ -167,13 +172,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
-			takeIt();
-			if (currentChar == '*') { // Check for the second '*' after taking first '*'
-				takeIt();            // take the second '*'
-				return Token.Kind.DOUBLESTAR;
-			}
-			return Token.Kind.OPERATOR; // If it's a single '*', treat it as a regular operator
 		case '/':
 		case '=':
 		case '<':
@@ -188,6 +186,13 @@ public final class Scanner {
 			while (isOperator(currentChar))
 				takeIt();
 			return Token.Kind.OPERATOR;
+		case '*':
+			takeIt();
+			if (currentChar == '*') { // Check for the second '*' after taking first '*'
+				takeIt();            // take the second '*'
+				return Token.Kind.DOUBLESTAR;
+			}
+			return Token.Kind.OPERATOR; // If it's a single '*', treat it as a regular operator
 
 		case '\'':
 			takeIt();

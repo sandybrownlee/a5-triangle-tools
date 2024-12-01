@@ -11,6 +11,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import triangle.optimiser.SummaryVisitor;
+
 
 
 /**
@@ -31,6 +33,8 @@ public class Compiler {
 
 	@Argument(alias = "a", description = "Display AST after folding", required = false)
 	private static boolean showTreeAfter = false;
+	@Argument(alias = "s", description = "Display AST after folding", required = false)
+	private static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -89,6 +93,16 @@ public class Compiler {
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, false); // 3rd pass
+			}
+			if (showStats) {
+				System.out.println("Generating summary statistics...");
+				SummaryVisitor summaryVisitor = new SummaryVisitor();
+				theAST.visit(summaryVisitor, null);
+
+				System.out.println("Summary Statistics:");
+				System.out.println("BinaryExpressions: " + summaryVisitor.getBinaryExpressionCount());
+				System.out.println("IfCommands: " + summaryVisitor.getIfCommandCount());
+				System.out.println("WhileCommands: " + summaryVisitor.getWhileCommandCount());
 			}
 		}
 

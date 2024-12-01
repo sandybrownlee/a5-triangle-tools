@@ -1,0 +1,29 @@
+let
+  var a : Integer;
+  var b : Integer;
+  var n : Integer;
+  var c : Integer
+in
+begin
+
+
+  puteol();
+  a := 0;
+  while a < 5000 do
+  begin
+    b := 0;
+    while b < 3000 do
+    begin
+      c := c + a;
+      c := c / (1 + b);
+      b := b + 1;
+    end;
+    a := a + 1;
+  end;
+  putint(c);
+  begin
+          if a < 0
+          then  n := 0
+          else  n := 1
+  end;
+end
