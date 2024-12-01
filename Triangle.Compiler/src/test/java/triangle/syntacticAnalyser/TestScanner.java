@@ -31,7 +31,10 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
 	}
-	
+
+	// tests the isOperator method for all operators in the language,
+	// then has negative test cases for upper and lowercase letters, as well as numbers and
+	// white space characters
 	@Test
 	public void testIsOperator() {
 		assertTrue(Scanner.isOperator('*'));
@@ -57,6 +60,10 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
 	}
+
+	// tests the boundaries for lower and upper case letters
+	// also tests the ascii values for one higher and lower of the capital letters
+	// and finally asserts false for different cases including numbers, operators and whitespace characters
 	@Test
 	public void testIsLetter() {
 		assertTrue(Scanner.isLetter('a'));
@@ -84,11 +91,18 @@ public class TestScanner {
 		compileExpectSuccess("/hi.tri");
 	}
 
+	//test that the square program compiles successfully
 	@Test
 	public void testSquare() {
 		compileExpectSuccess("/square.tri");
 	}
-	
+
+
+	//test that the loopwhile program compiles successfully
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
 
 	@Test
 	public void testHiNewComment() {

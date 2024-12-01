@@ -37,13 +37,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -182,6 +176,20 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.patch(jumpAddr);
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
+
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		var startOfLoopAddress = emitter.getNextInstrAddr(); // stores the address for start of the loop.
+		ast.C1.visit(this, frame); // visits c1
+		ast.E.visit(this, frame); // visists the boolean expression
+		var jumpIfAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0); // if this condition is false, jump forward to an unknown address which will be patched later
+																								// to avoid c2 being visited
+		ast.C2.visit(this, frame); // if the condition wasn't false, then c2 will be visited
+		emitter.emit(OpCode.JUMP, 0, Register.CB, startOfLoopAddress); // this is a jump with no condition that will jump back to the address at the start of the loop
+
+		emitter.patch(jumpIfAddr); // if the condition was false, this patches the address and jumps to here, exiting the loop
 		return null;
 	}
 
