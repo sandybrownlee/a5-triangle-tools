@@ -34,16 +34,31 @@ public class TestScanner {
 	
 	@Test
 	public void testIsOperator() {
-		assertTrue(Scanner.isOperator('*'));
-		assertTrue(Scanner.isOperator('/'));
-		assertTrue(Scanner.isOperator('?'));
-		assertTrue(Scanner.isOperator('+'));
-		assertTrue(Scanner.isOperator('-'));
+		char[] operators = "+-*/=<>\\&@%^?".toCharArray();
+
+		for (char c : operators) {
+			assertTrue(Scanner.isOperator(c));
+		}
+		
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+	}
+
+	@Test
+	public void testIsLetter() {
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('z'));
+		assertTrue(Scanner.isLetter('A'));
+		assertTrue(Scanner.isLetter('Z'));
+		assertTrue(Scanner.isLetter('w'));
+		assertFalse(Scanner.isLetter(' '));
+		assertFalse(Scanner.isLetter('|'));
+		assertFalse(Scanner.isLetter('^'));
+		assertFalse(Scanner.isLetter(';'));
+		assertFalse(Scanner.isLetter('\t'));
 	}
 	
 	
@@ -53,7 +68,18 @@ public class TestScanner {
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+
+
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
+
+	@Test
+	public void testSquare() {
+		compileExpectSuccess("/square.tri");
+	}
+
 
 	@Test
 	public void testHiNewComment() {

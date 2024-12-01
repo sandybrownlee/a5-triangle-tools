@@ -23,10 +23,14 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.Hoister;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -36,11 +40,30 @@ import triangle.treeDrawer.Drawer;
  */
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
+	/** The filename for the object program, default obj.tam. */
+	@Argument(alias = "o", description = "Output object name")
 	static String objectName = "obj.tam";
-	
+
+	/** Flag to displays the AST after parsing program text. */
+	@Argument(description = "Display the AST")
 	static boolean showTree = false;
+
+	/** Flag to apply constant folding optimisations. */
+	@Argument(description = "Apply constant folding optimisation")
 	static boolean folding = false;
+
+	/** Flag to display AST after folding optimisations */
+	@Argument(description = "Display AST after folding optimisations. This option is ignored if folding optimisation is disabled")
+	static boolean showTreeAfter = false;
+
+	/** Flag to display AST after folding optimisations */
+	@Argument(description = "Print stats about the programs AST")
+	static boolean showStats = false;
+
+	/** Flag to apply invariant hoisting optimisations. */
+	@Argument(description = "Apply invariant hoisting optimisation")
+	static boolean hoisting = false;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -84,7 +107,6 @@ public class Compiler {
 		checker = new Checker(reporter);
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
-		drawer = new Drawer();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -94,11 +116,25 @@ public class Compiler {
 			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
+
 			if (showingAST) {
+				drawer = new Drawer();
 				drawer.draw(theAST);
 			}
+
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+
+				if (showTreeAfter) {
+					// Re instantiate drawer so if both pre and post folding trees are shown, they are different
+					// Otherwise, two windows will open which display the same folded tree
+					drawer = new Drawer();
+					drawer.draw(theAST);
+				}
+			}
+
+			if (hoisting) {
+				theAST.visit(new Hoister());
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -114,6 +150,12 @@ public class Compiler {
 		} else {
 			System.out.println("Compilation was unsuccessful.");
 		}
+
+		if (showStats) {
+			SummaryVisitor summaryVisitor = new SummaryVisitor();
+			System.out.println("\n" + summaryVisitor.createSummary(theAST));
+		}
+
 		return successful;
 	}
 
@@ -124,33 +166,29 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		var sourceName = parseArgs(args);
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
-
-		String sourceName = args[0];
-		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
-		if (!showTree) {
+		if (!(showTree || showTreeAfter)) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
+
+	/**
+	 * Function to parse arguments and populate static flags and variables.
+	 *
+	 * @param args Program arguments to be parsed.
+	 * @return Path to the source file to be compiled.
+	 */
+	private static String parseArgs(String[] args) {
+		var remainingArgs = Args.parseOrExit(Compiler.class, args);
+
+		if (remainingArgs.isEmpty()) {
+			System.out.println("Usage: tc filename [-objectName (-o) outputfilename] [-showTree] [-folding] [-showTreeAfter] [-hoisting] [-showStats]");
+			System.exit(1);
 		}
+
+		return remainingArgs.get(0);
 	}
 }

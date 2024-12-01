@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -288,9 +281,26 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+				// Break early so later code isn't run
+				break;
+			}
 
-				Vname vAST = parseRestOfVname(iAST);
+			Vname vAST = parseRestOfVname(iAST);
+
+			if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+				acceptIt();
+
+				var binaryExpression = new BinaryExpression(
+						new VnameExpression(vAST, commandPos),
+						new Operator("*", commandPos),
+						new VnameExpression(vAST, commandPos),
+						commandPos
+				);
+
+				finish(commandPos);
+				commandAST = new AssignCommand(vAST, binaryExpression, commandPos);
+			}
+			else {
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
@@ -334,6 +344,18 @@ public class Parser {
 			Command cAST = parseSingleCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
+		}
+			break;
+
+		case LOOP: {
+			acceptIt();
+			Command preCommandAST = parseSingleCommand();
+			accept(Token.Kind.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.Kind.DO);
+			Command postCommandAST = parseSingleCommand();
+			finish(commandPos);
+			commandAST = new LoopWhileCommand(eAST, preCommandAST, postCommandAST, commandPos);
 		}
 			break;
 
