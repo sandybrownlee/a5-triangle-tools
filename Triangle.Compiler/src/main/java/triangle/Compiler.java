@@ -185,7 +185,7 @@ public class Compiler {
 		var remainingArgs = Args.parseOrExit(Compiler.class, args);
 
 		if (remainingArgs.isEmpty()) {
-			System.out.println("Usage: tc filename [-objectName (-o) outputfilename] [-showTree] [-folding] [-showTreeAfter] [-showStats]");
+			System.out.println("Usage: tc filename [-objectName (-o) outputfilename] [-showTree] [-folding] [-showTreeAfter] [-hoisting] [-showStats]");
 			System.exit(1);
 		}
 
