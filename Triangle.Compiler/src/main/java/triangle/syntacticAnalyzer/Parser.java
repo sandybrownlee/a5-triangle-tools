@@ -297,6 +297,7 @@ public class Parser {
 						commandPos
 				);
 
+				finish(commandPos);
 				commandAST = new AssignCommand(vAST, binaryExpression, commandPos);
 			}
 			else {
