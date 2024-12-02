@@ -5,25 +5,42 @@ apply plugin: 'jacoco'
 sourceCompatibility = 17
 
 repositories {
-    mavenCentral()
+    mavenCentral() // Default repository for standard dependencies
+    maven { url 'https://jitpack.io' } // JitPack repository for third-party libraries
 }
 
-
 dependencies {
-	implementation project(':Triangle.AbstractMachine')
-	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation project(':Triangle.AbstractMachine')
+    implementation 'com.github.rvesse:airline:2.9.3' // CLI-parser library
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
 application {
-	mainClass = 'Triangle.Compiler'
+    mainClass = 'Triangle.Compiler'
 }
 
-// allow access to programs for unit tests
+// Allow access to programs for unit tests
 sourceSets.test.resources.srcDir file("$rootDir/programs")
 
+// Test configuration
 test {
-    finalizedBy jacocoTestReport // report is always generated after tests run
+    useJUnitPlatform()  // This is important if you are using JUnit 5 (omit if using JUnit 4)
+    finalizedBy jacocoTestReport // Ensures the report is always generated after tests
+    testLogging {
+        events "PASSED", "FAILED", "SKIPPED"  // Provides better visibility on test results in the console
+    }
 }
+
+// Jacoco report configuration
+jacoco {
+    toolVersion = "0.8.7"  // You can specify the Jacoco version here (latest is recommended)
+}
+
 jacocoTestReport {
-    dependsOn test // tests are required to run before generating the report
+    dependsOn test // Ensure tests run before generating the report
+    reports {
+        html.enabled = true  // Generates the HTML report
+        xml.enabled = false  // Disable XML if not needed
+        csv.enabled = false  // Disable CSV if not needed
+    }
 }

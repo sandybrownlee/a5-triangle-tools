@@ -35,5 +35,5 @@ public interface ExpressionVisitor<TArg, TResult> {
 	TResult visitUnaryExpression(UnaryExpression ast, TArg arg);
 
 	TResult visitVnameExpression(VnameExpression ast, TArg arg);
-
+	
 }

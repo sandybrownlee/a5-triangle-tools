@@ -256,105 +256,128 @@ public class Parser {
 	// to represent its phrase structure.
 
 	Command parseCommand() throws SyntaxError {
-		Command commandAST = null; // in case there's a syntactic error
+	    Command commandAST = null; // in case there's a syntactic error
 
-		SourcePosition commandPos = new SourcePosition();
+	    SourcePosition commandPos = new SourcePosition();
 
-		start(commandPos);
-		commandAST = parseSingleCommand();
-		while (currentToken.kind == Token.Kind.SEMICOLON) {
-			acceptIt();
-			Command c2AST = parseSingleCommand();
-			finish(commandPos);
-			commandAST = new SequentialCommand(commandAST, c2AST, commandPos);
-		}
-		return commandAST;
+	    start(commandPos);
+	    commandAST = parseSingleCommand(); // This now includes LetCommand parsing
+	    while (currentToken.kind == Token.Kind.SEMICOLON) {
+	        acceptIt();
+	        Command c2AST = parseSingleCommand();
+	        finish(commandPos);
+	        commandAST = new SequentialCommand(commandAST, c2AST, commandPos); // Combine commands with a semicolon
+	    }
+	    return commandAST;
 	}
 
-	Command parseSingleCommand() throws SyntaxError {
-		Command commandAST = null; // in case there's a syntactic error
-
-		SourcePosition commandPos = new SourcePosition();
-		start(commandPos);
-
-		switch (currentToken.kind) {
-
-		case IDENTIFIER: {
-			Identifier iAST = parseIdentifier();
-			if (currentToken.kind == Token.Kind.LPAREN) {
-				acceptIt();
-				ActualParameterSequence apsAST = parseActualParameterSequence();
-				accept(Token.Kind.RPAREN);
-				finish(commandPos);
-				commandAST = new CallCommand(iAST, apsAST, commandPos);
-
-			} else {
-
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
-		}
-			break;
-
-		case BEGIN:
-			acceptIt();
-			commandAST = parseCommand();
-			accept(Token.Kind.END);
-			break;
-
-		case LET: {
-			acceptIt();
-			Declaration dAST = parseDeclaration();
-			accept(Token.Kind.IN);
-			Command cAST = parseSingleCommand();
-			finish(commandPos);
-			commandAST = new LetCommand(dAST, cAST, commandPos);
-		}
-			break;
-
-		case IF: {
-			acceptIt();
-			Expression eAST = parseExpression();
-			accept(Token.Kind.THEN);
-			Command c1AST = parseSingleCommand();
-			accept(Token.Kind.ELSE);
-			Command c2AST = parseSingleCommand();
-			finish(commandPos);
-			commandAST = new IfCommand(eAST, c1AST, c2AST, commandPos);
-		}
-			break;
-
-		case WHILE: {
-			acceptIt();
-			Expression eAST = parseExpression();
-			accept(Token.Kind.DO);
-			Command cAST = parseSingleCommand();
-			finish(commandPos);
-			commandAST = new WhileCommand(eAST, cAST, commandPos);
-		}
-			break;
-
-		case SEMICOLON:
-		case END:
-		case ELSE:
-		case IN:
-		case EOT:
-
-			finish(commandPos);
-			commandAST = new EmptyCommand(commandPos);
-			break;
-
-		default:
-			syntacticError("\"%\" cannot start a command", currentToken.spelling);
-			break;
-
-		}
-
-		return commandAST;
 	}
+	Command parseSingleCommand() throws SyntaxError { 
+	    Command commandAST = null; // in case there's a syntactic error
+
+	    SourcePosition commandPos = new SourcePosition();
+	    start(commandPos);
+
+	    switch (currentToken.kind) {
+
+	    case IDENTIFIER: {
+	        // Parse the identifier (e.g., 'a')
+	        Identifier iAST = parseIdentifier();
+
+	        // Check if the next token is '**' (the new operator for squaring)
+	        if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+	            acceptIt();  // Consume the '**' operator
+	            
+	            // Create an expression for "a * a"
+	            Vname vAST = new SimpleVname(iAST, commandPos);  // Variable 'a'
+	            Expression expr = new BinaryExpression(vAST, new Operator("*"), vAST, commandPos);  // a * a
+	            
+	            finish(commandPos);
+	            
+	            // Create the assignment: "a = a * a"
+	            commandAST = new AssignCommand(vAST, expr, commandPos);
+	        } else {
+	            // Handle normal assignments or other commands
+	            Vname vAST = parseRestOfVname(iAST);
+	            accept(Token.Kind.BECOMES);
+	            Expression eAST = parseExpression();
+	            finish(commandPos);
+	            commandAST = new AssignCommand(vAST, eAST, commandPos);
+	        }
+	    }
+	    break;
+
+	    case BEGIN:
+	        acceptIt();
+	        commandAST = parseCommand();
+	        accept(Token.Kind.END);
+	        break;
+
+	    case LET: {
+	        acceptIt();
+	        Declaration dAST = parseDeclaration();
+	        accept(Token.Kind.IN);
+	        Command cAST = parseSingleCommand();
+	        finish(commandPos);
+	        commandAST = new LetCommand(dAST, cAST, commandPos);
+	    }
+	    break;
+
+	    case IF: {
+	        acceptIt();
+	        Expression eAST = parseExpression();
+	        accept(Token.Kind.THEN);
+	        Command c1AST = parseSingleCommand();
+	        accept(Token.Kind.ELSE);
+	        Command c2AST = parseSingleCommand();
+	        finish(commandPos);
+	        commandAST = new IfCommand(eAST, c1AST, c2AST, commandPos);
+	    }
+	    break;
+
+	    case WHILE: {
+	        acceptIt();
+	        Expression eAST = parseExpression();
+	        accept(Token.Kind.DO);
+	        Command cAST = parseSingleCommand();
+	        finish(commandPos);
+	        commandAST = new WhileCommand(eAST, cAST, commandPos);
+	    }
+	    break;
+
+	    // New loop command with the structure: loop C1 while E do C2
+	    case LOOP: {
+	        acceptIt();
+	        Command c1AST = parseCommand();  // Parse the first command C1
+	        accept(Token.Kind.WHILE);
+	        Expression eAST = parseExpression();  // Parse the condition E
+	        accept(Token.Kind.DO);
+	        Command c2AST = parseCommand();  // Parse the second command C2
+	        finish(commandPos);
+	        
+	        // Create the loop command with C1, E, and C2
+	        commandAST = new LoopCommand(c1AST, eAST, c2AST, commandPos);
+	    }
+	    break;
+
+	    case SEMICOLON:
+	    case END:
+	    case ELSE:
+	    case IN:
+	    case EOT:
+	        finish(commandPos);
+	        commandAST = new EmptyCommand(commandPos);
+	        break;
+
+	    default:
+	        syntacticError("\"%\" cannot start a command", currentToken.spelling);
+	        break;
+	    }
+
+	    return commandAST;
+	}
+
+
 
 	///////////////////////////////////////////////////////////////////////////////
 	//
