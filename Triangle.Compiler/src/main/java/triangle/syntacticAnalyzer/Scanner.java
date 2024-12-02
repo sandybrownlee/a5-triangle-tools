@@ -280,6 +280,8 @@ public final class Scanner {
 
 		pos.finish = sourceFile.getCurrentLine();
 		tok = new Token(kind, currentSpelling.toString(), pos);
+		System.out.println("Recognized token: " + tok);
+
 		if (debug)
 			System.out.println(tok);
 		return tok;

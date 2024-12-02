@@ -69,6 +69,11 @@ public class TestScanner {
 		compileExpectSuccess("/hi.tri");
 	}
 
+	@Test
+
+	public void testLoopWHile() {
+		compileExpectSuccess("/LoopWhileTest.tri");
+	}
 
 	@Test
 	public void testHiNewComment() {

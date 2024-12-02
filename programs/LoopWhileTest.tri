@@ -1,0 +1,14 @@
+
+let
+  var indra : Integer
+in
+begin
+  indra := 0;
+  loop
+  begin
+    put('indra')
+    indra := indra + 1;
+  end
+  while indra < 2 do
+    put('got ya!');
+end
