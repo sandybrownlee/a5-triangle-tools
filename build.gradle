@@ -2,17 +2,25 @@ apply plugin: 'java'
 
 sourceCompatibility = 17
 
+repositories {
+    mavenCentral() //Maven Central is where most libraries, including cli-parser, are hosted
+}
+
+//Adding cli-parser library for better argument parsing
+dependencies {
+    implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.6'
+}
+
 subprojects.each { subproject ->
-  evaluationDependsOn(subproject.path)
+    evaluationDependsOn(subproject.path)
 }
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-
-  from subprojects.sourceSets.main.output
+    from subprojects.sourceSets.main.output
 }

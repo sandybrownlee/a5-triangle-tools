@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -279,6 +272,19 @@ public class Parser {
 
 		switch (currentToken.kind) {
 
+			case LOOP:
+				System.out.println("this is a loop");
+				accept(Token.Kind.LOOP);            // Match 'loop'
+				Command C1 = parseCommand();        // Parse the first command (can include 'begin ... end')
+				accept(Token.Kind.WHILE);           // Match 'while'
+				Expression E = parseExpression();   // Parse the condition
+				accept(Token.Kind.DO);              // Match 'do'
+				Command C2 = parseCommand();        // Parse the second command (can include 'begin ... end')
+				finish(commandPos);
+				System.out.println("Parsing command: " + currentToken.kind + " (" + currentToken.spelling + ")");
+				commandAST = new WeirdWhileCommand(C1, E, C2, commandPos);  // Create the AST
+				break;
+
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
 			if (currentToken.kind == Token.Kind.LPAREN) {
@@ -300,6 +306,7 @@ public class Parser {
 			break;
 
 		case BEGIN:
+			System.out.println("this is the begin");
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.Kind.END);

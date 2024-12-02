@@ -34,18 +34,57 @@ public class TestScanner {
 	
 	@Test
 	public void testIsOperator() {
-		assertTrue(Scanner.isOperator('*'));
-		assertTrue(Scanner.isOperator('/'));
-		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('*'));
+		assertTrue(Scanner.isOperator('/'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('?'));
+
+
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
 	}
-	
+
+	@Test
+	public void testIsLetter(){
+		//run through all the letters
+		for(char letter='a'; letter <= 'z'; letter++){
+			assertTrue(Scanner.isLetter(letter));
+		}
+		for(char letter='A'; letter <= 'Z'; letter++){
+			assertTrue(Scanner.isLetter(letter));
+		}
+		//run through the numbers
+		for(char i = '0'; i<='9'; i++){
+			assertFalse(Scanner.isLetter(i));
+		}
+
+		//others
+		assertFalse(Scanner.isLetter('+'));
+		assertFalse(Scanner.isLetter('-'));
+		assertFalse(Scanner.isLetter('*'));
+		assertFalse(Scanner.isLetter('/'));
+		assertFalse(Scanner.isLetter('='));
+		assertFalse(Scanner.isLetter('<'));
+		assertFalse(Scanner.isLetter('>'));
+		assertFalse(Scanner.isLetter('\\'));
+		assertFalse(Scanner.isLetter('&'));
+		assertFalse(Scanner.isLetter('@'));
+		assertFalse(Scanner.isLetter('%'));
+		assertFalse(Scanner.isLetter('^'));
+		assertFalse(Scanner.isLetter('?'));
+	}
 	
 	/* these tests all try to compile example programs... */
 	
@@ -77,9 +116,16 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
-	
-	
-	
+
+	@Test
+	public void testWeirdWhile() {
+		// Test for the "loop C1 while E do C2" syntax
+		compileExpectSuccess("/loopwhile.tri");
+	}
+
+
+
+
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
 		// which adds the programs directory to the list of places Java can easily find files

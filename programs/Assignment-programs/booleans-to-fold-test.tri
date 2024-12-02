@@ -1,0 +1,35 @@
+let
+    var b: Boolean
+in
+begin
+    b := false;
+    
+    if b
+    then put('t')
+    else put('f');
+   
+   	puteol();
+
+    b := true;
+    
+    if b 
+    then put('t')
+    else put('f');
+   
+   	puteol();
+    
+    b := false;
+    
+	if b
+    then put('t')
+    else put('f');
+    
+   	puteol();
+        
+    b := false;
+    
+	if b
+    then put('t')
+    else put('f');
+    
+end
