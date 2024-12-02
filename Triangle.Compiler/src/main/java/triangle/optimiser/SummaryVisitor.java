@@ -86,6 +86,9 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 
 	}
 
+	// this class follows the visitor pattern and will count the number of Binary expressions,
+	// ifCommands and WhileCommands in a program
+
 	// the variables to store how many times the nodes are visited
 	public int binaryCounter = 0;
 
@@ -491,7 +494,7 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
-		// at the end of this method which visits an if expression node, it will increment the counter
+		// at the end of this method which visits an if command node, it will increment the counter
 		ifCounter++;
 		return null;
 	}
@@ -517,7 +520,7 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
-		// at the end of this method which visits a while expression node, it will increment the counter
+		// at the end of this method which visits a while command node, it will increment the counter
 		whileCounter++;
 		return null;
 	}
