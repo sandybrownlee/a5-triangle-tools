@@ -22,6 +22,7 @@ package triangle;
 import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
+import triangle.abstractSyntaxTrees.visitors.SummaryVisitor;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
@@ -48,6 +49,8 @@ public class Compiler {
 	static boolean folding = false;
 	@Argument(alias = "sTA", description = "showTreeAfter", required = false)
 	static boolean showTreeAfter = false;
+	@Argument(alias = "sps", description = "showProgramStats", required = false)
+	static boolean showProgramStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -73,7 +76,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showProgramStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -106,6 +109,15 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+			}
+
+			if (showProgramStats) {
+				SummaryVisitor sumVisit = new SummaryVisitor();
+				sumVisit.visitProgram(theAST, null);
+				System.out.println("Summary ...");
+				System.out.println("While command count: " + sumVisit.getWhileCommandsCount());
+				System.out.println("Binary Expression count: " + sumVisit.getBinaryExpressionCount());
+				System.out.println("If command count: " + sumVisit.getIfCommandsCount());
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -146,7 +158,7 @@ public class Compiler {
 
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		var compiledOK = compileProgram(sourceName, objectName, showTree, false, showProgramStats);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
