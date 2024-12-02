@@ -8,5 +8,5 @@ public interface FieldTypeDenoterVisitor<TArg, TResult> {
 	TResult visitMultipleFieldTypeDenoter(MultipleFieldTypeDenoter ast, TArg arg);
 
 	TResult visitSingleFieldTypeDenoter(SingleFieldTypeDenoter ast, TArg arg);
-
+	TResult visitLoopCommand(LoopCommand ast, TArg arg);
 }

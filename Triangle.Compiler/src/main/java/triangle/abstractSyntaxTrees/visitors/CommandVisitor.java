@@ -7,21 +7,23 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand; // Add this import
 
 public interface CommandVisitor<TArg, TResult> {
 
-	TResult visitAssignCommand(AssignCommand ast, TArg arg);
+    TResult visitAssignCommand(AssignCommand ast, TArg arg);
 
-	TResult visitCallCommand(CallCommand ast, TArg arg);
+    TResult visitCallCommand(CallCommand ast, TArg arg);
 
-	TResult visitEmptyCommand(EmptyCommand ast, TArg arg);
+    TResult visitEmptyCommand(EmptyCommand ast, TArg arg);
 
-	TResult visitIfCommand(IfCommand ast, TArg arg);
+    TResult visitIfCommand(IfCommand ast, TArg arg);
 
-	TResult visitLetCommand(LetCommand ast, TArg arg);
+    TResult visitLetCommand(LetCommand ast, TArg arg);
 
-	TResult visitSequentialCommand(SequentialCommand ast, TArg arg);
+    TResult visitSequentialCommand(SequentialCommand ast, TArg arg);
 
-	TResult visitWhileCommand(WhileCommand ast, TArg arg);
+    TResult visitWhileCommand(WhileCommand ast, TArg arg);
 
+    TResult visitLoopCommand(LoopCommand ast, TArg arg); // this method for LoopCommand
 }

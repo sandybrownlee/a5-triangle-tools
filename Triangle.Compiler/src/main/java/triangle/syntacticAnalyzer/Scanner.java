@@ -36,7 +36,6 @@ public final class Scanner {
 	}
 
 	// isOperator returns true iff the given character is an operator character.
-
 	public static boolean isOperator(char c) {
 		return (c == '+' || c == '-' || c == '*' || c == '/' || c == '=' || c == '<' || c == '>' || c == '\\'
 				|| c == '&' || c == '@' || c == '%' || c == '^' || c == '?');
@@ -56,7 +55,6 @@ public final class Scanner {
 
 	// takeIt appends the current character to the current token, and gets
 	// the next character from the source program.
-
 	private void takeIt() {
 		if (currentlyScanningToken)
 			currentSpelling.append(currentChar);
@@ -64,7 +62,6 @@ public final class Scanner {
 	}
 
 	// scanSeparator skips a single separator.
-
 	private void scanSeparator() {
 		switch (currentChar) {
 		
@@ -89,6 +86,7 @@ public final class Scanner {
 		}
 	}
 
+	// This method is updated to recognize '**' operator.
 	private Token.Kind scanToken() {
 
 		switch (currentChar) {
@@ -183,7 +181,7 @@ public final class Scanner {
 				takeIt();
 			return Token.Kind.OPERATOR;
 
-		case '\'':
+		case '\'': // Character literal
 			takeIt();
 			takeIt(); // the quoted character
 			if (currentChar == '\'') {
@@ -249,6 +247,7 @@ public final class Scanner {
 		}
 	}
 
+	// This is the main scan method, which processes tokens.
 	public Token scan() {
 		Token tok;
 		SourcePosition pos;

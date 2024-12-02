@@ -8,5 +8,5 @@ public interface ArrayAggregateVisitor<TArg, TResult> {
 	TResult visitMultipleArrayAggregate(MultipleArrayAggregate ast, TArg arg);
 
 	TResult visitSingleArrayAggregate(SingleArrayAggregate ast, TArg arg);
-
+	TResult visitLoopCommand(LoopCommand ast, TArg arg);
 }

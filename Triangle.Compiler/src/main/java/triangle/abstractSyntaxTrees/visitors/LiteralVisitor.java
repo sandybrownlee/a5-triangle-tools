@@ -8,5 +8,5 @@ public interface LiteralVisitor<TArg, TResult> {
 	TResult visitCharacterLiteral(CharacterLiteral ast, TArg arg);
 
 	TResult visitIntegerLiteral(IntegerLiteral ast, TArg arg);
-
+	
 }
