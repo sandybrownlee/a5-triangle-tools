@@ -1,8 +1,8 @@
 /*
- * @(#)Compiler.java                       
- * 
+ * @(#)Compiler.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,10 +23,13 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -37,10 +40,20 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(alias = "o", description = "The filename of the object program", required = false)
 	static String objectName = "obj.tam";
-	
+
+	@Argument(alias = "showTree", description = "Shows the AST of a program", required = false)
 	static boolean showTree = false;
+
+	@Argument(alias = "folding", description = "Shows folding", required = false)
 	static boolean folding = false;
+
+	@Argument(alias = "treeAfterFolding", description = "Shows the tree after folding", required = false)
+	static boolean showTreeAfter = false;
+
+	@Argument(alias = "showStats", description = "Shows the amount of times binary, if and while expressions are visited", required = false)
+	static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -85,6 +98,7 @@ public class Compiler {
 		emitter = new Emitter(reporter);
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
+		SummaryVisitor summaryVisitor = new SummaryVisitor();
 
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
@@ -100,7 +114,17 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+			// if shows stats is added as an argument, it will tell the ast to visit the summaryvisitor class, and then the expressions can be successfully counted and printed
+			if (showStats) {
+				theAST.visit(summaryVisitor);
+				summaryVisitor.printSummaryStats();
+			}
+			if (showTreeAfter) {
+				// if show after tree is added as an argument, it will complete folding and then build the tree
+				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
+			}
+
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -125,32 +149,23 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
+		Compiler compiler = new Compiler();
+
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
+
+		// parses the args
+		Args.parseOrExit(compiler, args);
 
 		String sourceName = args[0];
-		
+
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
-		if (!showTree) {
+		// if no trees are being shown
+		if (!showTree && !showTreeAfter) {
 			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
 		}
 	}
 }

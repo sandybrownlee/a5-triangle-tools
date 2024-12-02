@@ -31,7 +31,10 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
 	}
-	
+
+	// tests the isOperator method for all operators in the language,
+	// then has negative test cases for upper and lowercase letters, as well as numbers and
+	// white space characters
 	@Test
 	public void testIsOperator() {
 		assertTrue(Scanner.isOperator('*'));
@@ -39,11 +42,45 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('&'));
+		
 		assertFalse(Scanner.isOperator('a'));
+		assertFalse(Scanner.isOperator('A'));
+		assertFalse(Scanner.isOperator('z'));
 		assertFalse(Scanner.isOperator('Z'));
-		assertFalse(Scanner.isOperator('1'));
+		assertFalse(Scanner.isOperator('0'));
+		assertFalse(Scanner.isOperator('9'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+	}
+
+	// tests the boundaries for lower and upper case letters
+	// also tests the ascii values for one higher and lower of the capital letters
+	// and finally asserts false for different cases including numbers, operators and whitespace characters
+	@Test
+	public void testIsLetter() {
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('z'));
+		assertTrue(Scanner.isLetter('A'));
+		assertTrue(Scanner.isLetter('Z'));
+
+		assertFalse(Scanner.isLetter('@'));
+		assertFalse(Scanner.isLetter('['));
+
+		assertFalse(Scanner.isLetter('0'));
+		assertFalse(Scanner.isLetter('9'));
+		assertFalse(Scanner.isLetter('&'));
+		assertFalse(Scanner.isLetter(';'));
+		assertFalse(Scanner.isLetter(','));
+		assertFalse(Scanner.isLetter('\n'));
+		assertFalse(Scanner.isLetter(' '));
 	}
 	
 	
@@ -53,7 +90,19 @@ public class TestScanner {
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
+
+	//test that the square program compiles successfully
+	@Test
+	public void testSquare() {
+		compileExpectSuccess("/square.tri");
+	}
+
+
+	//test that the loopwhile program compiles successfully
+	@Test
+	public void testLoopWhile() {
+		compileExpectSuccess("/loopwhile.tri");
+	}
 
 	@Test
 	public void testHiNewComment() {

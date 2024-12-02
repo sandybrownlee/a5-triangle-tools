@@ -73,9 +73,8 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
-import triangle.abstractSyntaxTrees.vnames.Vname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -86,6 +85,36 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	{
 
 	}
+
+	// this class follows the visitor pattern and will count the number of Binary expressions,
+	// ifCommands and WhileCommands in a program
+
+	// the variables to store how many times the nodes are visited
+	public int binaryCounter = 0;
+
+	public int ifCounter = 0;
+
+	public int whileCounter = 0;
+
+	public void printSummaryStats(){
+		System.out.println("Binary expressions counted: " + binaryCounter);
+		System.out.println("If statements counted: " + ifCounter);
+		System.out.println("While statements counted: " + whileCounter);
+	}
+
+	// get methods to retrieve the values if needed
+	public int getBinaryCounter() {
+		return binaryCounter;
+	}
+
+	public int getIfCounter() {
+		return ifCounter;
+	}
+
+	public int getWhileCounter() {
+		return whileCounter;
+	}
+
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -291,6 +320,8 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 
 		// if we get here, we can't fold any higher than this level
+		// at the end of this method which visits a binary expression node, it will increment the counter
+		binaryCounter++;
 		return null;
 	}
 
@@ -326,7 +357,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement3 != null) {
 			ast.E3 = (Expression) replacement3;
 		}
-
 		return null;
 	}
 
@@ -464,6 +494,8 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
+		// at the end of this method which visits an if command node, it will increment the counter
+		ifCounter++;
 		return null;
 	}
 
@@ -488,6 +520,8 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
+		// at the end of this method which visits a while command node, it will increment the counter
+		whileCounter++;
 		return null;
 	}
 
@@ -501,6 +535,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		ast.C2.visit(this);
 		return null;
 	}
+
 
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
@@ -583,29 +618,9 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-
+			
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
-			}
-
-			// cases for all boolean operators
-			if (o.decl == StdEnvironment.equalDecl) {
-				foldedValue = (int1 == int2);
-
-			} else if (o.decl == StdEnvironment.lessDecl) {
-				foldedValue = (int1 < int2);
-
-			} else if (o.decl == StdEnvironment.notgreaterDecl) {
-				foldedValue = (int1 <= int2);
-
-			} else if (o.decl == StdEnvironment.greaterDecl) {
-				foldedValue = (int1 > int2);
-
-			} else if (o.decl == StdEnvironment.notlessDecl) {
-				foldedValue = (int1 >= int2);
-
-			} else if (o.decl == StdEnvironment.unequalDecl) {
-				foldedValue = (int1 != int2);
 			}
 
 			if (foldedValue instanceof Integer) {
@@ -613,25 +628,8 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
-
 			} else if (foldedValue instanceof Boolean) {
-				// creates identifier object with the value of foldedValue as a string
-				Identifier booleanIdentifier = new Identifier(foldedValue.toString(), node1.getPosition());
-
-				// if the foldedValue is equal to "true", it will set the identifiers decl attribute to true
-				// otherwise, it will be set to false
-				if (foldedValue.toString().equals("true")){
-					booleanIdentifier.decl= StdEnvironment.trueDecl;
-				}
-				else{
-					booleanIdentifier.decl= StdEnvironment.falseDecl;
-				}
-
-				// wraps it into a SimpleVname, then into a VnameExpression before setting its type to boolean and returning
-				SimpleVname booleanVname = new SimpleVname(booleanIdentifier, node1.getPosition());
-				VnameExpression booleanVnameExpression = new VnameExpression(booleanVname, node1.getPosition());
-				booleanVnameExpression.type = StdEnvironment.booleanType;
-				return booleanVnameExpression;
+				/* currently not handled! */
 			}
 		}
 

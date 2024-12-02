@@ -1,0 +1,14 @@
+! for a given input integer a, should print a*a and a*a*a*a 
+
+let
+    var a: Integer
+in
+begin
+    getint(var a);
+    a**;
+    putint(a);
+    puteol();
+    a**;
+    putint(a);
+    puteol();
+end

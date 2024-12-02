@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -291,10 +284,29 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
+				// if the current token is an operator and is "**" then we know it's the squaring operator
+				if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+					// creates 2 placeholder variables that will be used in the expression
+					VnameExpression squareVariable1 = new VnameExpression(vAST, commandPos);
+					VnameExpression squareVariable2 = new VnameExpression(vAST, commandPos);
+
+					//creates the multiplication operator that will be used in the expression
+					Operator multiply = new Operator("*", commandPos);
+
+					// creates the square expression, where it multiplies the first variable by the second (they will both be the same)
+					Expression square = new BinaryExpression(squareVariable1, multiply, squareVariable2, commandPos);
+
+					//finishes the command and creates a new command, assigning the new square expression
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, square, commandPos);
+
+				} else {
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -335,6 +347,17 @@ public class Parser {
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
+			break;
+
+		case LOOP: {
+			acceptIt();
+			Command command1 = parseSingleCommand();
+			accept(Token.Kind.WHILE);
+			Expression expression = parseExpression();
+			accept(Token.Kind.DO);
+			Command command2 = parseSingleCommand();
+			commandAST = new LoopWhileCommand(command1, expression, command2, commandPos);
+			}
 			break;
 
 		case SEMICOLON:
