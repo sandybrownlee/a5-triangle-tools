@@ -14,13 +14,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -79,6 +73,7 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.abstractSyntaxTrees.vnames.Vname;
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -496,6 +491,11 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+	@Override
+	public AbstractSyntaxTree visitWeirdWhileCommand(WeirdWhileCommand command, Void unused) {
+		return null;
+	}
+
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
@@ -572,28 +572,53 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
-		// the only case we know how to deal with for now is two IntegerExpressions
+		// The only case we know how to deal with for now is two IntegerExpressions
 		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
-			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
-			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
+			int int1 = Integer.parseInt(((IntegerExpression) node1).IL.spelling);
+			int int2 = Integer.parseInt(((IntegerExpression) node2).IL.spelling);
 			Object foldedValue = null;
-			
+
+			//Handle arithmetic operations
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
+			} else if (o.decl == StdEnvironment.subtractDecl) {
+				foldedValue = int1 - int2;
+			} else if (o.decl == StdEnvironment.multiplyDecl) {
+				foldedValue = int1 * int2;
+			} else if (o.decl == StdEnvironment.divideDecl && int2 != 0) {
+				foldedValue = int1 / int2;
 			}
 
+			//Handle the result if it's an Integer
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
 				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
 				ie.type = StdEnvironment.integerType;
 				return ie;
-			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+			}
+			//Handle the result if it's a Boolean
+			else if (foldedValue instanceof Boolean) {
+				Identifier id = null;
+				if (foldedValue.toString().equalsIgnoreCase("TRUE")) {
+					id = new Identifier("true", node1.getPosition());
+					id.decl = StdEnvironment.trueDecl;
+				} else if (foldedValue.toString().equalsIgnoreCase("FALSE")) {
+					id = new Identifier("false", node1.getPosition());
+					id.decl = StdEnvironment.falseDecl;
+				}
+
+				//Wrap the Identifier in a SimpleVname, and then in a VnameExpression
+				SimpleVname simpleVname = new SimpleVname(id, node1.getPosition());
+				VnameExpression boolExpr = new VnameExpression(simpleVname, node1.getPosition());
+				boolExpr.type = StdEnvironment.booleanType;
+
+				return boolExpr;
 			}
 		}
 
-		// any unhandled situation (i.e., not foldable) is ignored
+// Return null if no folding was done
 		return null;
+
 	}
 
 }

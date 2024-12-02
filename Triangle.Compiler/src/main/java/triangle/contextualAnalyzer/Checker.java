@@ -33,13 +33,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstantDeclaration;
@@ -184,6 +178,23 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
 		ast.C.visit(this);
+
+		return null;
+	}
+
+	@Override
+	public Void visitWeirdWhileCommand(WeirdWhileCommand command, Void unused) {
+		// Check C1
+		command.C1.visit(this, null);
+
+		// Check E is a boolean expression
+		TypeDenoter expressionType = command.E.visit(this, null);
+		if (!expressionType.equals(StdEnvironment.booleanType)) {
+			reporter.reportError("Loop condition must be of type boolean", "", command.E.getPosition());
+		}
+
+		// Check C2
+		command.C2.visit(this, null);
 
 		return null;
 	}
@@ -932,6 +943,11 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 				StdEnvironment.booleanType);
 		StdEnvironment.notlessDecl = declareStdBinaryOp(">=", StdEnvironment.integerType, StdEnvironment.integerType,
 				StdEnvironment.booleanType);
+		StdEnvironment.notEqualDecl = declareStdBinaryOp("!=", StdEnvironment.integerType, StdEnvironment.integerType,
+				StdEnvironment.booleanType);
+		StdEnvironment.equalDecl = declareStdBinaryOp("==", StdEnvironment.integerType, StdEnvironment.integerType,
+				StdEnvironment.booleanType);
+
 
 		StdEnvironment.charDecl = declareStdType("Char", StdEnvironment.charType);
 		StdEnvironment.chrDecl = declareStdFunc("chr",

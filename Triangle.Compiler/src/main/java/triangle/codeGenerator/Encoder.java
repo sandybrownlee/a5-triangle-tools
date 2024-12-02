@@ -37,13 +37,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -52,17 +46,7 @@ import triangle.abstractSyntaxTrees.declarations.ProcDeclaration;
 import triangle.abstractSyntaxTrees.declarations.SequentialDeclaration;
 import triangle.abstractSyntaxTrees.declarations.UnaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
-import triangle.abstractSyntaxTrees.expressions.ArrayExpression;
-import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
-import triangle.abstractSyntaxTrees.expressions.CallExpression;
-import triangle.abstractSyntaxTrees.expressions.CharacterExpression;
-import triangle.abstractSyntaxTrees.expressions.EmptyExpression;
-import triangle.abstractSyntaxTrees.expressions.IfExpression;
-import triangle.abstractSyntaxTrees.expressions.IntegerExpression;
-import triangle.abstractSyntaxTrees.expressions.LetExpression;
-import triangle.abstractSyntaxTrees.expressions.RecordExpression;
-import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
-import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.*;
 import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
 import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.FuncFormalParameter;
@@ -183,6 +167,48 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		return null;
+	}
+
+	@Override
+	public Void visitWeirdWhileCommand(WeirdWhileCommand ast, Frame frame) {
+		//Execute C1 unconditionally
+		var c1StartAddr = emitter.getNextInstrAddr();
+		ast.C1.visit(this, frame);
+
+		//Evaluate condition E
+		ast.E.visit(this, frame);
+
+		//Jump to end if E is false
+		var endJumpAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
+
+		//Execute C2
+		ast.C2.visit(this, frame);
+
+		//Loop back to C1
+		emitter.emit(OpCode.JUMP, Register.CB, c1StartAddr);
+
+		//Patch end address
+		emitter.patch(endJumpAddr);
+
+		return null;
+
+//		//Create a SequentialCommand for the full loop body (C1 followed by C2)
+//		SequentialCommand loopBody = new SequentialCommand(
+//				command.C1,  // Always execute C1
+//				command.C2,  // Follow with C2 if E is true
+//				command.getPosition() // Track source position for debugging
+//		);
+//
+//		//Wrap the loopBody in a WhileCommand with the condition E
+//		WhileCommand fullLoop = new WhileCommand(
+//				command.E,  // Condition to evaluate after every iteration
+//				loopBody,   // Execute C1 and C2 on every iteration
+//				command.getPosition() // Track source position
+//		);
+//
+//		//Visit the constructed WhileCommand
+//		fullLoop.visit(this, frame);
+//		return null;
 	}
 
 	// Expressions
