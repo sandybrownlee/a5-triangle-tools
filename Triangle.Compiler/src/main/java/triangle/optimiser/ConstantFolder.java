@@ -14,13 +14,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -496,6 +490,15 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+	@Override
+	public AbstractSyntaxTree visitNewLoopCommand(NewLoopCommand ast, Void unused) {
+
+
+
+
+		return null;
+	}
+
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
@@ -577,7 +580,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}

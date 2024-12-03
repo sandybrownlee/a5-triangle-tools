@@ -1,8 +1,8 @@
 /*
- * @(#)Compiler.java                       
- * 
+ * @(#)Compiler.java
+ *
  * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
- * 
+ *
  * Original release:
  *
  * Copyright (C) 1999, 2003 D.A. Watt and D.F. Brown
@@ -23,10 +23,16 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.StatsSummary;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+
+import java.util.List;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -37,10 +43,21 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+
+
+	//New Arguments which are assigned using the cli-parser library.
+	@Argument
 	static String objectName = "obj.tam";
-	
+	@Argument
 	static boolean showTree = false;
+	@Argument
 	static boolean folding = false;
+	@Argument
+	static boolean showTreeAfter = false;
+	@Argument
+	static boolean stats = false;
+
+	private static StatsSummary statsObject;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -66,10 +83,9 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean folding, boolean showTreeAfter, boolean stats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
-
 		System.out.println("Syntactic Analysis ...");
 		SourceFile source = SourceFile.ofPath(sourceName);
 
@@ -99,14 +115,21 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if(showTreeAfter){ //If Folded check if the user also wants to see the updated tree after folding.
+					drawer.draw(theAST);
+				}
 			}
-			
+			if(stats){ //Code that executes when "-stats" is parsed into args.
+				theAST.visit(statsObject = new StatsSummary());
+				System.out.println("Binary Expression Count:" + statsObject.getBinaryExpressionCount()); //Call getters.
+				System.out.println("If Command Count:" + statsObject.getIfCommandCount());
+				System.out.println("While Command Count:" + statsObject.getWhileCommandCount());
+			}
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
 		}
-
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
@@ -125,32 +148,30 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+		List<String> arglist = Args.parseOrExit(Compiler.class, args);
+		//System.out.println("showTree: " + showTree);
+		//System.out.println("folding: " + folding);
+		//System.out.println("showTreeAfter: " + showTreeAfter);
+		//System.out.println("objectName: " + objectName);
+		//System.out.println("stats: " + stats);
+		if (arglist.size() != 1) {
+			System.out.println("Usage: tc filename [-o=outputfilename] [-showTree] [-folding] [-showTreeAfter] [-stats]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
 
-		if (!showTree) {
+
+		String sourceName = arglist.get(0);
+
+		var compiledOK = compileProgram(sourceName, objectName, showTree, false, folding, showTreeAfter, stats);
+
+
+		//Check to see if the user is done viewing the tree before stopping the program.
+		if (!showTree && !showTreeAfter) {
 			System.exit(compiledOK ? 0 : 1);
 		}
+
 	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+
+
 }

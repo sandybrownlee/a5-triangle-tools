@@ -31,6 +31,26 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
 	}
+
+	@Test
+	public void testIsLetter(){
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('z'));
+		assertTrue(Scanner.isLetter('b'));
+
+		assertTrue(Scanner.isLetter('A'));
+		assertTrue(Scanner.isLetter('Z'));
+		assertTrue(Scanner.isLetter('Q'));
+
+
+		//Testing the upper and lower bounds:
+		assertFalse(Scanner.isLetter('`'));
+		assertFalse(Scanner.isLetter('{'));
+
+		assertFalse(Scanner.isLetter('@'));
+		assertFalse(Scanner.isLetter('['));
+
+	}
 	
 	@Test
 	public void testIsOperator() {
@@ -39,6 +59,19 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+
+
+
+
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
@@ -53,32 +86,32 @@ public class TestScanner {
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
 
 	@Test
 	public void testHiNewComment() {
 		compileExpectFailure("/hi-newcomment.tri");
 	}
-	
 
 	@Test
 	public void testHiNewComment2() {
 		compileExpectFailure("/hi-newcomment2.tri");
 	}
-	
 
 	@Test
 	public void testBarDemo() {
 		compileExpectFailure("/bardemo.tri");
 	}
-	
 
 	@Test
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
+
+	@Test
+	public void testSquare(){compileExpectSuccess("/square.tri");}
 	
-	
+	@Test
+	public void testNewLoopCommand(){compileExpectSuccess("/loopwhile.tri");}
 	
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")

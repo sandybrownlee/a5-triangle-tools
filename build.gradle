@@ -6,6 +6,10 @@ subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+repositories {
+    mavenCentral()
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     
@@ -15,4 +19,8 @@ jar {
 
 
   from subprojects.sourceSets.main.output
+}
+
+dependencies {
+    implementation 'com.github.spullara.cli-parser:cli-parser:1.1.6'
 }
