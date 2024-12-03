@@ -84,6 +84,11 @@ public class SummaryVisitor
     }
 
     @Override
+    public Void visitLoopWhileCommand(LoopWhileCommand ast, Void unused) {
+        return null;
+    }
+
+    @Override
     public Void visitBinaryOperatorDeclaration(BinaryOperatorDeclaration ast, Void unused) {
         return null;
     }

@@ -105,6 +105,16 @@ public final class Scanner {
 		case 'j':
 		case 'k':
 		case 'l':
+			takeIt();
+			while (isLetter(currentChar)) {
+				takeIt();
+			}
+			if(currentSpelling.toString().equals("loop")){
+				return Token.Kind.LOOP;
+			}
+			else{
+				return Token.Kind.IDENTIFIER;
+			}
 		case 'm':
 		case 'n':
 		case 'o':
