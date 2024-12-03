@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -87,6 +80,7 @@ import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
 
 public class Parser {
+
 
 	private Scanner lexicalAnalyser;
 	private ErrorReporter errorReporter;
@@ -272,13 +266,30 @@ public class Parser {
 	}
 
 	Command parseSingleCommand() throws SyntaxError {
-		Command commandAST = null; // in case there's a syntactic error
+		Command commandAST = null;
 
 		SourcePosition commandPos = new SourcePosition();
 		start(commandPos);
 
-		switch (currentToken.kind) {
 
+		//Task 6.
+		switch (currentToken.kind) {
+			case LOOP: {
+				acceptIt(); //Accept Loop statement.
+				accept(Token.Kind.BEGIN); //Look for "begin" token or error.
+				Command c1AST = parseCommand(); //Save initial command.
+				accept(Token.Kind.END); //End of first part of loop.
+
+				accept(Token.Kind.WHILE); //Look for "while" token then consume the expression after and store it.
+				Expression eASt = parseExpression();
+
+				accept(Token.Kind.DO); // Look for "do"
+				Command c2AST = parseSingleCommand(); // Save 2nd command.
+
+				finish(commandPos); //Mark end of the loops position.
+				commandAST = new NewLoopCommand(eASt, c1AST, c2AST, commandPos);
+			}
+			break;
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
 			if (currentToken.kind == Token.Kind.LPAREN) {
@@ -291,10 +302,25 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				if(currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")){
+					acceptIt();
+
+
+					VnameExpression vnExpLeft = new VnameExpression(vAST, commandPos);
+					VnameExpression vnExpRight = new VnameExpression(vAST, commandPos);
+					System.out.println(vnExpRight);
+					Operator op = new Operator("*", commandPos);
+
+					Expression eAST = new BinaryExpression(vnExpLeft, op, vnExpRight, commandPos);
+
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				} else {
+					accept(Token.Kind.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -327,6 +353,8 @@ public class Parser {
 		}
 			break;
 
+
+
 		case WHILE: {
 			acceptIt();
 			Expression eAST = parseExpression();
@@ -336,6 +364,7 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+
 
 		case SEMICOLON:
 		case END:
