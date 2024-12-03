@@ -24,7 +24,7 @@ import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ConstDeclaration extends Declaration implements ConstantDeclaration {
+public class ConstDeclaration extends Declaration {
 
 	public ConstDeclaration(Identifier iAST, Expression eAST, SourcePosition position) {
 		super(position);
@@ -32,7 +32,6 @@ public class ConstDeclaration extends Declaration implements ConstantDeclaration
 		E = eAST;
 	}
 
-	@Override
 	public TypeDenoter getType() {
 		return E.type;
 	}

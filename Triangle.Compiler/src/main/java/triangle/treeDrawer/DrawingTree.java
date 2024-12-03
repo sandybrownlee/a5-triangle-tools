@@ -23,7 +23,7 @@ import java.awt.Graphics;
 import java.awt.Point;
 
 public class DrawingTree {
-
+	String description;
 	String caption;
 	int width, height;
 	Point pos, offset;
@@ -32,6 +32,7 @@ public class DrawingTree {
 	DrawingTree[] children;
 
 	public DrawingTree(String caption, int width, int height) {
+		this.description = description;
 		this.caption = caption;
 		this.width = width;
 		this.height = height;

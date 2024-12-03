@@ -18,38 +18,39 @@
 
 package triangle.abstractSyntaxTrees.formals;
 
-import triangle.abstractSyntaxTrees.declarations.VariableDeclaration;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
+import triangle.abstractSyntaxTrees.visitors.FormalParameterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class VarFormalParameter extends FormalParameter implements VariableDeclaration {
+public class VarFormalParameter extends FormalParameter {
 
-	public VarFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		T = tAST;
-	}
+    public VarFormalParameter(Identifier id, TypeDenoter td, SourcePosition position) {
+        super(position);
+        I = id;
+        T = td;
+    }
 
-	@Override
-	public TypeDenoter getType() {
-		return T;
-	}
+    public  Identifier I;
+    public  TypeDenoter T;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitVarFormalParameter(this, arg);
-	}
+    @Override
+    public <TArg, TResult> TResult visit(FormalParameterVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitVarFormalParameter(this, arg);
+    }
 
-	@Override
-	public boolean equals(Object fpAST) {
-		if (fpAST instanceof VarFormalParameter vfpAST) {
-			return T.equals(vfpAST.T);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitVarFormalParameter(this, arg);
+    }
 
-	public final Identifier I;
-	public TypeDenoter T;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        VarFormalParameter that = (VarFormalParameter) obj;
+        return I.equals(that.I) && T.equals(that.T);
+    }
 }
+

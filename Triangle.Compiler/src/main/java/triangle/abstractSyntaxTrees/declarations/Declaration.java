@@ -17,10 +17,12 @@
  */
 
 package triangle.abstractSyntaxTrees.declarations;
-
+import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.abstractSyntaxTrees.types.TypeDenoter;
+
 
 public abstract class Declaration extends AbstractSyntaxTree {
 

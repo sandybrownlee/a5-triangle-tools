@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -60,6 +61,7 @@ import triangle.abstractSyntaxTrees.expressions.LetExpression;
 import triangle.abstractSyntaxTrees.expressions.RecordExpression;
 import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
 import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.SquareExpression;
 import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
 import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.FormalParameter;
@@ -85,6 +87,8 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.abstractSyntaxTrees.vnames.Vname;
+import triangle.syntacticAnalyzer.Token;
+import triangle.syntacticAnalyzer.SourcePosition;
 
 public class Parser {
 
@@ -254,6 +258,10 @@ public class Parser {
 
 	// parseCommand parses the command, and constructs an AST
 	// to represent its phrase structure.
+	
+	
+
+
 
 	Command parseCommand() throws SyntaxError {
 		Command commandAST = null; // in case there's a syntactic error
@@ -473,12 +481,20 @@ public class Parser {
 			break;
 
 		case OPERATOR: {
-			Operator opAST = parseOperator();
-			Expression eAST = parsePrimaryExpression();
-			finish(expressionPos);
-			expressionAST = new UnaryExpression(opAST, eAST, expressionPos);
+		    Operator opAST = parseOperator();
+		    Expression eAST = parsePrimaryExpression();
+		    finish(expressionPos);
+		    
+		    // Check if the operator is the square operator '**'
+		    if (currentToken.kind == Token.Kind.SQ) {
+		        acceptIt();
+		        expressionAST = new SquareExpression(eAST, expressionPos); // Create SquareExpression node
+		    } else {
+		        expressionAST = new UnaryExpression(opAST, eAST, expressionPos);
+		    }
 		}
-			break;
+		break;
+
 
 		case LPAREN:
 			acceptIt();
@@ -739,8 +755,9 @@ public class Parser {
 			accept(Token.Kind.LPAREN);
 			FormalParameterSequence fpsAST = parseFormalParameterSequence();
 			accept(Token.Kind.RPAREN);
+			TypeDenoter tAST = parseTypeDenoter();
 			finish(formalPos);
-			formalAST = new ProcFormalParameter(iAST, fpsAST, formalPos);
+			formalAST = new ProcFormalParameter(iAST, fpsAST, tAST, formalPos);
 		}
 			break;
 

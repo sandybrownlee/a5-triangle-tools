@@ -1,0 +1,25 @@
+let
+ func isSame (a: Integer, b: Integer): Boolean ~
+  if a = b
+  then true
+  else false;
+
+ var num1: Integer;
+ var num2: Integer;
+ var Total: Integer
+ 
+ in
+  begin  
+   getint(var num1);
+   getint(var num2);
+   Total := num1 + num2;
+   putint(Total);
+   if isSame(num1, num2) then
+    begin
+    puteol(); put('S'); put('A'); put('M'); put('E'); put('!');
+    end
+   else
+   end
+
+    
+    

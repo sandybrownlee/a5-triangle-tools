@@ -8,6 +8,7 @@ import triangle.abstractSyntaxTrees.types.ErrorTypeDenoter;
 import triangle.abstractSyntaxTrees.types.IntTypeDenoter;
 import triangle.abstractSyntaxTrees.types.RecordTypeDenoter;
 import triangle.abstractSyntaxTrees.types.SimpleTypeDenoter;
+import triangle.abstractSyntaxTrees.types.SingleFieldTypeDenoter;
 
 public interface TypeDenoterVisitor<TArg, TResult> extends FieldTypeDenoterVisitor<TArg, TResult> {
 
@@ -26,5 +27,9 @@ public interface TypeDenoterVisitor<TArg, TResult> extends FieldTypeDenoterVisit
 	TResult visitIntTypeDenoter(IntTypeDenoter ast, TArg arg);
 
 	TResult visitRecordTypeDenoter(RecordTypeDenoter ast, TArg arg);
+	
+	TResult visitSingleFieldTypeDenoter(SingleFieldTypeDenoter ast, TArg arg);
+	
+	
 
 }
