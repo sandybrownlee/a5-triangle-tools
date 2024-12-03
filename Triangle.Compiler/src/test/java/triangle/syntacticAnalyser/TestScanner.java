@@ -78,6 +78,11 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+	@Test
+	public void testSquare() {
+		compileExpectFailure("/square.tri");
+	}
+	
 	
 	
 	private void compileExpectSuccess(String filename) {
