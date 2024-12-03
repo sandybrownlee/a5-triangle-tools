@@ -179,6 +179,16 @@ public final class Scanner {
 		case '^':
 		case '?':
 			takeIt();
+		    if (currentChar == '*') {
+		        takeIt();
+		        if (currentChar == '*') {
+		        	takeIt();
+		        	return Token.Kind.SQ;
+		        }
+		    } else {
+		        return Token.Kind.OPERATOR;
+		    }
+			takeIt();
 			while (isOperator(currentChar))
 				takeIt();
 			return Token.Kind.OPERATOR;

@@ -23,7 +23,7 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class AbstractSyntaxTree {
 
-	private final SourcePosition position;
+	public SourcePosition position;
 
 	public AbstractSyntaxTree(SourcePosition position) {
 		this.position = position;

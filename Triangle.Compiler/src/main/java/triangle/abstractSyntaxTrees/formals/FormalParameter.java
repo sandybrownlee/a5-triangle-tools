@@ -19,21 +19,19 @@
 package triangle.abstractSyntaxTrees.formals;
 
 import triangle.abstractSyntaxTrees.declarations.Declaration;
-import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.abstractSyntaxTrees.visitors.FormalParameterVisitor;
 
 public abstract class FormalParameter extends Declaration {
 
-	public FormalParameter(SourcePosition position) {
-		super(position);
-	}
+    public FormalParameter(SourcePosition position) {
+        super(position);
+    }
 
-	@Override
-	public abstract boolean equals(Object fpAST);
+    public abstract <TArg, TResult> TResult visit(FormalParameterVisitor<TArg, TResult> visitor, TArg arg);
 
-	public abstract <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg);
-
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    @Override
+    public abstract boolean equals(Object obj);
 }
+
+

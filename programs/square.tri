@@ -1,0 +1,9 @@
+let
+   var Num: Integer;
+   var Total: Integer
+in
+   begin
+    getint(Num);
+      Total:= Num + Num;
+      putint(Total)
+   end

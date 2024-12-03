@@ -40,9 +40,9 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
-import triangle.abstractSyntaxTrees.declarations.ConstantDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FunctionDeclaration;
@@ -63,6 +63,7 @@ import triangle.abstractSyntaxTrees.expressions.LetExpression;
 import triangle.abstractSyntaxTrees.expressions.RecordExpression;
 import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
 import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.SquareExpression;
 import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
 import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.FormalParameter;
@@ -120,7 +121,56 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 	// Commands
 
 	// Always returns null. Does not use the given object.
+	
+	// Method in Checker class
+	public Void checkDeclaration(Object ast) {
+	    if (ast instanceof FuncFormalParameter || ast instanceof ProcFormalParameter) {
+	    	if (ast instanceof ConstFormalParameter) {
+	    	    ConstFormalParameter constFormalParam = (ConstFormalParameter) ast;
+	    	    idTable.enter(constFormalParam.I.spelling, (Declaration) constFormalParam);
+	    	} else if (ast instanceof VarFormalParameter) {
+	    	    VarFormalParameter varFormalParam = (VarFormalParameter) ast;
+	    	    idTable.enter(varFormalParam.I.spelling, (Declaration) varFormalParam);
+	    	} else if (ast instanceof FuncFormalParameter) {
+	    	    FuncFormalParameter funcFormalParam = (FuncFormalParameter) ast;
+	    	    idTable.enter(funcFormalParam.I.spelling, (Declaration) funcFormalParam);
+	    	} else if (ast instanceof ProcFormalParameter) {
+	    	    ProcFormalParameter procFormalParam = (ProcFormalParameter) ast;
+	    	    idTable.enter(procFormalParam.I.spelling, (Declaration) procFormalParam);
+	    	}
 
+
+	    } else if (ast instanceof VarFormalParameter) {
+	        VarFormalParameter vfp = (VarFormalParameter) ast;
+	        // Handle VarFormalParameter separately
+	        if (vfp.duplicated) {
+	            // Handle the error case for duplicated VarFormalParameter
+	        }
+	        // Continue processing VarFormalParameter as needed
+	    }
+	    return null;
+	}
+
+
+	
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+	    ast.C1.visit(this, null);
+	    TypeDenoter eType = ast.E.visit(this, null);
+	    if (!eType.equals(StdEnvironment.booleanType)) {
+	        reporter.reportError("Boolean expression expected here", "", ast.E.position);
+	    }
+	    ast.C2.visit(this, null);
+	    return null;
+	}
+
+
+	@Override
+	public TypeDenoter visitSquareExpression(SquareExpression ast, Void arg) {
+		return ast.type = ast.visit(this);
+	}
+
+	
 	@Override
 	public Void visitAssignCommand(AssignCommand ast, Void arg) {
 		var vType = ast.V.visit(this);
@@ -699,7 +749,7 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		ast.type = StdEnvironment.errorType;
 
 		var binding = ast.I.visit(this);
-		if (binding instanceof ConstantDeclaration constant) {
+		if (binding instanceof ConstDeclaration constant) {
 			ast.variable = false;
 			return ast.type = constant.getType();
 		} else if (binding instanceof VariableDeclaration variable) {

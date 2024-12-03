@@ -22,20 +22,21 @@ import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.visitors.ProgramVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
+
 public class Program extends AbstractSyntaxTree {
 
-	public Program(Command cAST, SourcePosition position) {
-		super(position);
-		C = cAST;
-	}
+    public Program(Command cAST, SourcePosition position) {
+        super(position);
+        C = cAST;
+    }
 
-	public Command C;
+    public Command C;
 
-	public <TArg, TResult> TResult visit(ProgramVisitor<TArg, TResult> visitor, TArg arg) {
-		return visitor.visitProgram(this, arg);
-	}
+    public <TArg, TResult> TResult visit(ProgramVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitProgram(this, arg);
+    }
 
-	public <TResult> TResult visit(ProgramVisitor<Void, TResult> visitor) {
-		return visit(visitor, null);
-	}
+    public <TResult> TResult visit(ProgramVisitor<Void, TResult> visitor) {
+        return visit(visitor, null);
+    }
 }

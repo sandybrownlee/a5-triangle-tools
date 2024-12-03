@@ -11,6 +11,8 @@ import triangle.abstractSyntaxTrees.expressions.LetExpression;
 import triangle.abstractSyntaxTrees.expressions.RecordExpression;
 import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
 import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.SquareExpression;
+
 
 public interface ExpressionVisitor<TArg, TResult> {
 
@@ -35,5 +37,7 @@ public interface ExpressionVisitor<TArg, TResult> {
 	TResult visitUnaryExpression(UnaryExpression ast, TArg arg);
 
 	TResult visitVnameExpression(VnameExpression ast, TArg arg);
+	
+	TResult visitSquareExpression(SquareExpression ast, TArg arg);
 
 }

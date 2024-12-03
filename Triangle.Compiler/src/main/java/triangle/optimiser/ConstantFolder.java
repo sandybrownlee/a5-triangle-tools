@@ -21,6 +21,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -40,6 +41,7 @@ import triangle.abstractSyntaxTrees.expressions.LetExpression;
 import triangle.abstractSyntaxTrees.expressions.RecordExpression;
 import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
 import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.SquareExpression;
 import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
 import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.FuncFormalParameter;
@@ -79,6 +81,8 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.syntacticAnalyzer.SourcePosition;
+
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -92,6 +96,21 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	}
 
+	@Override 
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) { 
+		ast.C1.visit(this, arg); 
+		ast.E.visit(this, arg); 
+		ast.C2.visit(this, arg); 
+		return null; 
+		}
+	
+	@Override
+	public AbstractSyntaxTree visitSquareExpression(SquareExpression ast, Void arg) {
+		ast.expression = (Expression) ast.expression.visit(this, arg);
+		return ast;
+	}
+
+	
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
 		ast.I.visit(this);
@@ -275,9 +294,59 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
-		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
-		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
-		ast.O.visit(this);
+	    AbstractSyntaxTree left = ast.E1.visit(this, arg);
+	    AbstractSyntaxTree right = ast.E2.visit(this, arg);
+
+	    if (left instanceof IntegerExpression && right instanceof IntegerExpression) {
+	        int leftValue = ((IntegerExpression) left).IL.getValue();
+	        int rightValue = ((IntegerExpression) right).IL.getValue();
+
+	        switch (ast.O.spelling) {
+	            case "+":
+	            	return new IntegerExpression(new IntegerLiteral(String.valueOf(leftValue + rightValue), ast.position), ast.position);
+	            case "-":
+	            	return new IntegerExpression(new IntegerLiteral(String.valueOf(leftValue - rightValue), ast.position), ast.position);
+	            case "*":
+	            	return new IntegerExpression(new IntegerLiteral(String.valueOf(leftValue * rightValue), ast.position), ast.position);
+	            case "/":
+	                if (rightValue != 0) {
+	                	return new IntegerExpression(new IntegerLiteral(String.valueOf(leftValue / rightValue), ast.position), ast.position);
+	                } else {
+	                    // Handle division by zero if necessary
+	                }
+	                break;
+	            case "=":
+	                return createBooleanExpression(leftValue == rightValue, ast.position);
+	            case "<":
+	                return createBooleanExpression(leftValue < rightValue, ast.position);
+	            case "<=":
+	                return createBooleanExpression(leftValue <= rightValue, ast.position);
+	            case ">":
+	                return createBooleanExpression(leftValue > rightValue, ast.position);
+	            case ">=":
+	                return createBooleanExpression(leftValue >= rightValue, ast.position);
+	            case "\\=":
+	                return createBooleanExpression(leftValue != rightValue, ast.position);
+	            default:
+	                break;
+	        }
+	    } 
+
+	    return ast;
+	}
+
+	private VnameExpression createBooleanExpression(boolean value, SourcePosition position) {
+	    Identifier identifier = new Identifier(value ? "true" : "false", position);
+	    identifier.decl = value ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+	    SimpleVname vname = new SimpleVname(identifier, position);
+	    return new VnameExpression(vname, position);
+	}
+
+
+
+
+		
+		
 
 		// if visiting a child node returns something, it's either the original constant
 		// (IntegerLiteral) or a folded version replacing the expression at that child
@@ -287,17 +356,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		// Otherwise, at least one child node isn't constant (foldable) so just replace
 		// the
 		// foldable child nodes with their folded equivalent and return null
-		if (replacement1 != null && replacement2 != null) {
-			return foldBinaryExpression(replacement1, replacement2, ast.O);
-		} else if (replacement1 != null) {
-			ast.E1 = (Expression) replacement1;
-		} else if (replacement2 != null) {
-			ast.E2 = (Expression) replacement2;
-		}
-
-		// if we get here, we can't fold any higher than this level
-		return null;
-	}
 
 	@Override
 	public AbstractSyntaxTree visitCallExpression(CallExpression ast, Void arg) {

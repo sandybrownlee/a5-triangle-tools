@@ -39,6 +39,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -57,6 +58,7 @@ import triangle.abstractSyntaxTrees.expressions.LetExpression;
 import triangle.abstractSyntaxTrees.expressions.RecordExpression;
 import triangle.abstractSyntaxTrees.expressions.UnaryExpression;
 import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.expressions.SquareExpression;
 import triangle.abstractSyntaxTrees.formals.ConstFormalParameter;
 import triangle.abstractSyntaxTrees.formals.EmptyFormalParameterSequence;
 import triangle.abstractSyntaxTrees.formals.FuncFormalParameter;
@@ -115,6 +117,15 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	}
 
 	// Commands
+	@Override
+	public DrawingTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+	    DrawingTree d1 = ast.C1.visit(this, arg);
+	    DrawingTree d2 = ast.E.visit(this, arg);
+	    DrawingTree d3 = ast.C2.visit(this, arg);
+	    return layoutTernary("LoopWhileCommand", d1, d2, d3);
+	}
+
+	
 	@Override
 	public DrawingTree visitAssignCommand(AssignCommand ast, Void obj) {
 		var d1 = ast.V.visit(this);
@@ -234,6 +245,12 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	public DrawingTree visitVnameExpression(VnameExpression ast, Void obj) {
 		var d1 = ast.V.visit(this);
 		return layoutUnary("VnameExpr.", d1);
+	}
+	
+	@Override
+	public DrawingTree visitSquareExpression(SquareExpression ast, Void obj) {
+		var d1 = ast.visit(this);
+		return layoutUnary("SquareExpr.", d1);
 	}
 
 	// Declarations

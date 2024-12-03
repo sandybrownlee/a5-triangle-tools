@@ -18,38 +18,47 @@
 
 package triangle.abstractSyntaxTrees.formals;
 
-import triangle.abstractSyntaxTrees.declarations.ProcedureDeclaration;
+import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
+import triangle.abstractSyntaxTrees.visitors.FormalParameterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ProcFormalParameter extends FormalParameter implements ProcedureDeclaration {
+public class ProcFormalParameter extends FormalParameter {
 
-	public ProcFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		FPS = fpsAST;
-	}
+    public ProcFormalParameter(Identifier id, FormalParameterSequence fps, TypeDenoter td, SourcePosition position) {
+        super(position);
+        I = id;
+        FPS = fps;
+        T = td;
+    }
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitProcFormalParameter(this, arg);
-	}
+    public  Identifier I;
+    public  FormalParameterSequence FPS;
+    public  TypeDenoter T;
+    
+    public FormalParameterSequence getFormals() {
+        return FPS;
+    }
 
-	@Override
-	public FormalParameterSequence getFormals() {
-		return FPS;
-	}
+    
+    @Override
+    public <TArg, TResult> TResult visit(FormalParameterVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitProcFormalParameter(this, arg);
+    }
 
-	@Override
-	public boolean equals(Object fpAST) {
-		if (fpAST instanceof ProcFormalParameter) {
-			ProcFormalParameter pfpAST = (ProcFormalParameter) fpAST;
-			return FPS.equals(pfpAST.FPS);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitProcFormalParameter(this, arg);
+    }
 
-	public final Identifier I;
-	public final FormalParameterSequence FPS;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ProcFormalParameter that = (ProcFormalParameter) obj;
+        return I.equals(that.I) && FPS.equals(that.FPS) && T.equals(that.T); 
+    }
 }
+
+

@@ -16,40 +16,49 @@
  * of the authors.
  */
 
+
+
 package triangle.abstractSyntaxTrees.formals;
 
-import triangle.abstractSyntaxTrees.declarations.ConstantDeclaration;
-import triangle.abstractSyntaxTrees.terminals.Identifier;
+import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
+import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
+import triangle.abstractSyntaxTrees.visitors.FormalParameterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class ConstFormalParameter extends FormalParameter implements ConstantDeclaration {
+public class ConstFormalParameter extends FormalParameter {
 
-	public ConstFormalParameter(Identifier iAST, TypeDenoter tAST, SourcePosition position) {
-		super(position);
-		I = iAST;
-		T = tAST;
-	}
+    public ConstFormalParameter(Identifier id, TypeDenoter td, SourcePosition position) {
+        super(position);
+        I = id;
+        T = td;
+    }
 
-	@Override
-	public TypeDenoter getType() {
-		return T;
-	}
+    public  Identifier I;
+    public  TypeDenoter T;
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitConstFormalParameter(this, arg);
-	}
+    @Override
+    public <TArg, TResult> TResult visit(FormalParameterVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitConstFormalParameter(this, arg);
+    }
 
-	@Override
-	public boolean equals(Object fpAST) {
-		if (fpAST instanceof ConstFormalParameter cfpAST) {
-			return T.equals(cfpAST.T);
-		} else {
-			return false;
-		}
-	}
+    @Override
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitConstFormalParameter(this, arg);
+    }
 
-	public final Identifier I;
-	public TypeDenoter T;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        ConstFormalParameter that = (ConstFormalParameter) obj;
+        return I.equals(that.I) && T.equals(that.T);
+    }
 }
+
+
+
+
+	
+

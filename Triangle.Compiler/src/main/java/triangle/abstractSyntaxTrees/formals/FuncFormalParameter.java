@@ -18,46 +18,47 @@
 
 package triangle.abstractSyntaxTrees.formals;
 
-import triangle.abstractSyntaxTrees.declarations.FunctionDeclaration;
 import triangle.abstractSyntaxTrees.terminals.Identifier;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.DeclarationVisitor;
+import triangle.abstractSyntaxTrees.visitors.FormalParameterVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
 
-public class FuncFormalParameter extends FormalParameter implements FunctionDeclaration {
+public class FuncFormalParameter extends FormalParameter {
 
-	public FuncFormalParameter(Identifier iAST, FormalParameterSequence fpsAST, TypeDenoter tAST,
-			SourcePosition position) {
-		super(position);
-		I = iAST;
-		FPS = fpsAST;
-		T = tAST;
-	}
+    public FuncFormalParameter(Identifier id, FormalParameterSequence fps, TypeDenoter td, SourcePosition position) {
+        super(position);
+        I = id;
+        FPS = fps;
+        T = td;
+    }
 
-	public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> v, TArg arg) {
-		return v.visitFuncFormalParameter(this, arg);
-	}
+    public  Identifier I;
+    public FormalParameterSequence FPS;
+    public  TypeDenoter T;
+    
+    public FormalParameterSequence getFormals() {
+        return FPS;
+    }
 
-	@Override
-	public FormalParameterSequence getFormals() {
-		return FPS;
-	}
-	
-	@Override
-	public TypeDenoter getType() {
-		return T;
-	}
-	
-	@Override
-	public boolean equals(Object fpAST) {
-		if (fpAST instanceof FuncFormalParameter) {
-			FuncFormalParameter ffpAST = (FuncFormalParameter) fpAST;
-			return FPS.equals(ffpAST.FPS) && T.equals(ffpAST.T);
-		} else
-			return false;
-	}
 
-	public final Identifier I;
-	public final FormalParameterSequence FPS;
-	public TypeDenoter T;
+    @Override
+    public <TArg, TResult> TResult visit(FormalParameterVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitFuncFormalParameter(this, arg);
+    }
+
+    @Override
+    public <TArg, TResult> TResult visit(DeclarationVisitor<TArg, TResult> visitor, TArg arg) {
+        return visitor.visitFuncFormalParameter(this, arg);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        FuncFormalParameter that = (FuncFormalParameter) obj;
+        return I.equals(that.I) && T.equals(that.T);
+    }
 }
+
+
