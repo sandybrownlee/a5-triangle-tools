@@ -582,10 +582,34 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+			// Handle arithmetic operators
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
+			} else if (o.decl == StdEnvironment.subtractDecl) {
+				foldedValue = int1 - int2;
+			} else if (o.decl == StdEnvironment.multiplyDecl) {
+				foldedValue = int1 * int2;
+			} else if (o.decl == StdEnvironment.divideDecl && int2 != 0) {
+				foldedValue = int1 / int2;
 			}
+
+			// Handle relational operators
+			else if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 == int2;
+			} else if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			} else if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			} else if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			} else if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			} else if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			}
+			
+
+
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
@@ -593,12 +617,21 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				VnameExpression ve = createBooleanConstant((Boolean) foldedValue, node1);
+				ve.type = StdEnvironment.booleanType; // Ensure type is set
+				return ve;
+
 			}
 		}
 
 		// any unhandled situation (i.e., not foldable) is ignored
 		return null;
+	}
+	private VnameExpression createBooleanConstant(boolean value, AbstractSyntaxTree position) {
+		Identifier id = new Identifier(value ? "true" : "false", position.getPosition());
+		id.decl = value ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+		SimpleVname vname = new SimpleVname(id, position.getPosition());
+		return new VnameExpression(vname, position.getPosition());
 	}
 
 }

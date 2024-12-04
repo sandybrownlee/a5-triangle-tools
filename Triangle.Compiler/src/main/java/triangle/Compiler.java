@@ -33,7 +33,7 @@ public class Compiler {
 
 	@Argument(alias = "a", description = "Display AST after folding", required = false)
 	private static boolean showTreeAfter = false;
-	@Argument(alias = "s", description = "Display AST after folding", required = false)
+	@Argument(alias = "s", description = "Display Stats", required = false)
 	private static boolean showStats = false;
 
 	private static Scanner scanner;

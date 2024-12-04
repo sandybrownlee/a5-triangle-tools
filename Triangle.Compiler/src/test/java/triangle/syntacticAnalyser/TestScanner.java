@@ -79,6 +79,9 @@ public class TestScanner {
 	public void testHiNewComment() {
 		compileExpectFailure("/hi-newcomment.tri");
 	}
+	@Test
+	public void testBooleanFolding() {
+		compileExpectSuccess("/booleans-to-fold.tri");}
 
 
 	@Test

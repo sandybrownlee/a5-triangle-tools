@@ -1,14 +1,13 @@
 
 let
-  var indra : Integer
+  var bye : Integer
 in
 begin
-  indra := 0;
+  bye := 0;
   loop
   begin
-    put('indra')
-    indra := indra + 1;
+    bye := bye + 2;
   end
-  while indra < 2 do
-    put('got ya!');
+  while bye < 4 do
+    put('h');
 end

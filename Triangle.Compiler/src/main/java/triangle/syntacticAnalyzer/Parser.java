@@ -347,7 +347,7 @@ public class Parser {
 			break;
 		case LOOP: {
 		acceptIt(); // Consume "loop"
-		Command c1AST = parseSingleCommand(); // Parse Command C1 (can be a block of commands)
+		Command c1AST = parseSingleCommand(); // Parse Command C1
 		accept(Token.Kind.WHILE); // Consume "while"
 		Expression eAST = parseExpression(); // Parse the condition E
 		accept(Token.Kind.DO); // Consume "do"
