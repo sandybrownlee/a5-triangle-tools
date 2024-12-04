@@ -21,6 +21,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -493,6 +494,11 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
+		return null;
+	}
+	
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
 		return null;
 	}
 
