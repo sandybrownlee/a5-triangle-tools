@@ -39,6 +39,17 @@ public class TestScanner {
 		assertTrue(Scanner.isOperator('?'));
 		assertTrue(Scanner.isOperator('+'));
 		assertTrue(Scanner.isOperator('-'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('\\'));
+		assertTrue(Scanner.isOperator('&'));
+		assertTrue(Scanner.isOperator('@'));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^'));
+		assertTrue(Scanner.isOperator('?'));
+		
+		
 		assertFalse(Scanner.isOperator('a'));
 		assertFalse(Scanner.isOperator('Z'));
 		assertFalse(Scanner.isOperator('1'));
@@ -46,6 +57,24 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('\n'));
 	}
 	
+	@Test
+	public void testIsLetter() {
+		assertTrue(Scanner.isLetter('a')); //edge case
+		assertTrue(Scanner.isLetter('m')); 
+		assertTrue(Scanner.isLetter('z')); //edge case
+		assertTrue(Scanner.isLetter('A')); //edge case
+		assertTrue(Scanner.isLetter('M'));
+		assertTrue(Scanner.isLetter('Z')); //edge case
+		
+		assertFalse(Scanner.isLetter('0')); //digit
+		assertFalse(Scanner.isLetter('+')); //operator
+		assertFalse(Scanner.isLetter('\n')); //special character
+		
+	    assertFalse(Scanner.isLetter('`')); //ascii one before 'a'
+	    assertFalse(Scanner.isLetter('{')); //ascii one after 'z'
+	    assertFalse(Scanner.isLetter('@')); //ascii one before 'A'
+	    assertFalse(Scanner.isLetter('[')); //ascii one after 'Z'
+	}
 	
 	/* these tests all try to compile example programs... */
 	
