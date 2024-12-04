@@ -1,0 +1,13 @@
+
+let
+  var bye : Integer
+in
+begin
+  bye := 0;
+  loop
+  begin
+    bye := bye + 2;
+  end
+  while bye < 4 do
+    put('h');
+end

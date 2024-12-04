@@ -14,13 +14,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -496,6 +490,17 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(LoopWhileCommand ast, Void unused) {
+		ast.C1.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		ast.C2.visit(this);
+		return null;
+	}
+
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
@@ -577,10 +582,34 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
 			Object foldedValue = null;
-			
+			// Handle arithmetic operators
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
+			} else if (o.decl == StdEnvironment.subtractDecl) {
+				foldedValue = int1 - int2;
+			} else if (o.decl == StdEnvironment.multiplyDecl) {
+				foldedValue = int1 * int2;
+			} else if (o.decl == StdEnvironment.divideDecl && int2 != 0) {
+				foldedValue = int1 / int2;
 			}
+
+			// Handle relational operators
+			else if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = int1 == int2;
+			} else if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = int1 != int2;
+			} else if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = int1 < int2;
+			} else if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = int1 >= int2;
+			} else if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = int1 > int2;
+			} else if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = int1 <= int2;
+			}
+			
+
+
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
@@ -588,12 +617,21 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				VnameExpression ve = createBooleanConstant((Boolean) foldedValue, node1);
+				ve.type = StdEnvironment.booleanType; // Ensure type is set
+				return ve;
+
 			}
 		}
 
 		// any unhandled situation (i.e., not foldable) is ignored
 		return null;
+	}
+	private VnameExpression createBooleanConstant(boolean value, AbstractSyntaxTree position) {
+		Identifier id = new Identifier(value ? "true" : "false", position.getPosition());
+		id.decl = value ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+		SimpleVname vname = new SimpleVname(id, position.getPosition());
+		return new VnameExpression(vname, position.getPosition());
 	}
 
 }
