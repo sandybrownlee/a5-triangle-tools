@@ -292,6 +292,7 @@ public class Parser {
 				Vname vAST = parseRestOfVname(iAST);
 				
 				if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
 					
 					VnameExpression vne = new VnameExpression(vAST, commandPos);
 					

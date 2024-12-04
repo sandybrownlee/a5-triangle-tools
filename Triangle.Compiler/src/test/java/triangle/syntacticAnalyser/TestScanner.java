@@ -109,7 +109,7 @@ public class TestScanner {
 	
 	@Test
 	public void testSquare() {
-		compileExpectFailure("/square.tri");
+		compileExpectSuccess("/square.tri");
 	}
 	
 	
