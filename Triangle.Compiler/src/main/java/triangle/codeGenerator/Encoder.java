@@ -44,6 +44,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -182,6 +183,22 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.patch(jumpAddr);
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
+	
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		
+		var loopAddr = emitter.getNextInstrAddr();
+		ast.C1.visit(this, frame); // visit c1
+		
+		ast.E.visit(this, frame); // visit e
+		var jumpAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0); // store this location
+		
+		ast.C2.visit(this, frame); // visit c2
+		emitter.emit(OpCode.JUMP, Machine.trueRep, Register.CB, loopAddr); // go back to C1
+		
+		emitter.patch(jumpAddr); // go back to while
 		return null;
 	}
 

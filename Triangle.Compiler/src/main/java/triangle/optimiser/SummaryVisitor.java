@@ -81,7 +81,7 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 
-public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
+public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
 		CommandVisitor<Void, AbstractSyntaxTree>, DeclarationVisitor<Void, AbstractSyntaxTree>,
 		ExpressionVisitor<Void, AbstractSyntaxTree>, FormalParameterSequenceVisitor<Void, AbstractSyntaxTree>,
@@ -92,6 +92,25 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	{
 
 	}
+	
+	// counters for binary/if/whiles
+	public int numBinary = 0;
+	public int numIf = 0;
+	public int numWhile = 0;
+	
+	// getters for binary/if/while counters
+	public int getNumBinary() {
+		return numBinary;
+	}
+	
+	public int getNumIf() {
+		return numIf;
+	}
+	
+	public int getNumWhile() {
+		return numWhile;
+	}
+	
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -276,6 +295,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
+		numBinary++; // count visiting vinary expression
 		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
 		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
 		ast.O.visit(this);
@@ -464,6 +484,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIfCommand(IfCommand ast, Void arg) {
+		numIf++; // count visitng if expression
 		ast.C1.visit(this);
 		ast.C2.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
@@ -489,6 +510,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
+		numWhile++; // count visiting while expression
 		ast.C.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
