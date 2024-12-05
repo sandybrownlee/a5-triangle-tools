@@ -23,6 +23,7 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -46,10 +47,13 @@ public class Compiler {
 	private static boolean showTree;
 	
 	@Argument(alias = "treeAfter", description = "Show the abstract syntax tree after folding", required = false)
-	static boolean showTreeAfter = false;
+	private static boolean showTreeAfter = false;
 
 	@Argument(alias = "folding", description = "Enable folding", required = false)
 	private static boolean folding;
+	
+	@Argument(alias = "stats", description = "Show the summary statistics", required = false)
+	private static boolean showStats;
 	
 
 	private static Scanner scanner;
@@ -62,6 +66,11 @@ public class Compiler {
 
 	/** The AST representing the source program. */
 	private static Program theAST;
+	
+	
+	// summaryVisitor for Task 5
+	private static SummaryVisitor summaryStats;
+	
 
 	/**
 	 * Compile the source program to TAM machine code.
@@ -76,7 +85,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showTreeAfter) {
+	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable, boolean showTreeAfter, boolean showingStats) {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -121,6 +130,15 @@ public class Compiler {
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
+			if (showingStats) {
+				summaryStats = new SummaryVisitor();
+				theAST.visit(summaryStats);
+				
+				System.out.println("Summary statistics ...");
+				System.out.println("There are "+ summaryStats.getNumBinary() + " binary expressions." );
+				System.out.println("There are "+ summaryStats.getNumIf() + " if commands." );
+				System.out.println("There are "+ summaryStats.getNumWhile() + " while expressions." );
+			}
 			System.out.println("Compilation was successful.");
 		} else {
 			System.out.println("Compilation was unsuccessful.");
@@ -146,7 +164,7 @@ public class Compiler {
 		
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false, showTreeAfter);
+		var compiledOK = compileProgram(sourceName, objectName, showTree, false, showTreeAfter, showStats);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
