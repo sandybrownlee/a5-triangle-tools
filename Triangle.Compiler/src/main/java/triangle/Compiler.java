@@ -99,9 +99,6 @@ public class Compiler {
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
 			if (showingAST && !showTreeAfter) {
