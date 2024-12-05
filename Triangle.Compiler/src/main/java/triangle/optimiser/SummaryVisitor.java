@@ -340,7 +340,6 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIfExpression(IfExpression ast, Void arg) {
-		numIf++; // count visitng if expression
 		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
 		if (replacement1 != null) {
 			ast.E1 = (Expression) replacement1;
@@ -485,6 +484,7 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIfCommand(IfCommand ast, Void arg) {
+		numIf++; // count visitng if expression
 		ast.C1.visit(this);
 		ast.C2.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
