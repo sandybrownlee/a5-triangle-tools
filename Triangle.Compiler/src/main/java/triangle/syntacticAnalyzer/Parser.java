@@ -291,10 +291,21 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				if (currentToken.kind == Token.Kind.STARSTAR) {
+					acceptIt();
+					accept(Token.Kind.SEMICOLON);
+					
+					Operator multiplyOp = new Operator("*", commandPos);
+		            Expression leftExp = new VnameExpression(vAST, commandPos);
+		            Expression rightExp = new VnameExpression(vAST, commandPos);
+		            Expression multiplyExp = new BinaryExpression(multiplyOp, leftExp, rightExp, commandPos);
+		            commandAST = new AssignCommand(vAST, multiplyExp, commandPos);
+				} else {
+					accept(Token.Kind.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -541,34 +552,44 @@ public class Parser {
 	//
 	///////////////////////////////////////////////////////////////////////////////
 
+	
+	
 	Vname parseVname() throws SyntaxError {
 		Vname vnameAST = null; // in case there's a syntactic error
 		Identifier iAST = parseIdentifier();
 		vnameAST = parseRestOfVname(iAST);
 		return vnameAST;
 	}
+	
+	
+	
+	Vname parseRestOfVname(Identifier iAST) throws SyntaxError {
+	    SourcePosition vnamePos = new SourcePosition();
+	    start(vnamePos);
+	    
+	    Vname vAST = new SimpleVname(iAST, vnamePos);
 
-	Vname parseRestOfVname(Identifier identifierAST) throws SyntaxError {
-		SourcePosition vnamePos = new SourcePosition();
-		vnamePos = identifierAST.getPosition();
-		Vname vAST = new SimpleVname(identifierAST, vnamePos);
+	    while (true) {
+	        if (currentToken.kind == Token.Kind.DOT) { 
+	            
+	            acceptIt();
+	            Identifier fieldAST = parseIdentifier();
+	            vAST = new DotVname(vAST, fieldAST, vnamePos);
+	        } else if (currentToken.kind == Token.Kind.LBRACKET) { 
+	            acceptIt();
+	            Expression subscriptAST = parseExpression();
+	            accept(Token.Kind.RBRACKET);
+	            vAST = new SubscriptVname(vAST, subscriptAST, vnamePos);
+	        } else {
+	            break;
+	        }
+	    }
 
-		while (currentToken.kind == Token.Kind.DOT || currentToken.kind == Token.Kind.LBRACKET) {
-
-			if (currentToken.kind == Token.Kind.DOT) {
-				acceptIt();
-				Identifier iAST = parseIdentifier();
-				vAST = new DotVname(vAST, iAST, vnamePos);
-			} else {
-				acceptIt();
-				Expression eAST = parseExpression();
-				accept(Token.Kind.RBRACKET);
-				finish(vnamePos);
-				vAST = new SubscriptVname(vAST, eAST, vnamePos);
-			}
-		}
-		return vAST;
+	    finish(vnamePos);
+	    return vAST;
 	}
+
+	 
 
 	///////////////////////////////////////////////////////////////////////////////
 	//
@@ -856,27 +877,28 @@ public class Parser {
 		return actualAST;
 	}
 
+
 	///////////////////////////////////////////////////////////////////////////////
 	//
 	// TYPE-DENOTERS
 	//
 	///////////////////////////////////////////////////////////////////////////////
-
+	
 	TypeDenoter parseTypeDenoter() throws SyntaxError {
 		TypeDenoter typeAST = null; // in case there's a syntactic error
 		SourcePosition typePos = new SourcePosition();
-
+	
 		start(typePos);
-
+	
 		switch (currentToken.kind) {
-
+	
 		case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
 			finish(typePos);
 			typeAST = new SimpleTypeDenoter(iAST, typePos);
 		}
 			break;
-
+	
 		case ARRAY: {
 			acceptIt();
 			IntegerLiteral ilAST = parseIntegerLiteral();
@@ -886,7 +908,7 @@ public class Parser {
 			typeAST = new ArrayTypeDenoter(ilAST, tAST, typePos);
 		}
 			break;
-
+	
 		case RECORD: {
 			acceptIt();
 			FieldTypeDenoter fAST = parseFieldTypeDenoter();
@@ -895,11 +917,11 @@ public class Parser {
 			typeAST = new RecordTypeDenoter(fAST, typePos);
 		}
 			break;
-
+	
 		default:
 			syntacticError("\"%\" cannot start a type denoter", currentToken.spelling);
 			break;
-
+	
 		}
 		return typeAST;
 	}

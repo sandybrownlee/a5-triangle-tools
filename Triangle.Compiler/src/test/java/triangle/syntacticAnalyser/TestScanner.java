@@ -34,16 +34,44 @@ public class TestScanner {
 	
 	@Test
 	public void testIsOperator() {
-		assertTrue(Scanner.isOperator('*'));
-		assertTrue(Scanner.isOperator('/'));
-		assertTrue(Scanner.isOperator('?'));
-		assertTrue(Scanner.isOperator('+'));
-		assertTrue(Scanner.isOperator('-'));
-		assertFalse(Scanner.isOperator('a'));
-		assertFalse(Scanner.isOperator('Z'));
-		assertFalse(Scanner.isOperator('1'));
-		assertFalse(Scanner.isOperator(';'));
-		assertFalse(Scanner.isOperator('\n'));
+	    
+		// test for valid operators
+	    assertTrue(Scanner.isOperator('+'));
+	    assertTrue(Scanner.isOperator('-'));
+	    assertTrue(Scanner.isOperator('*'));
+	    assertTrue(Scanner.isOperator('/'));
+	    assertTrue(Scanner.isOperator('?'));
+	    assertTrue(Scanner.isOperator('='));
+	    assertTrue(Scanner.isOperator('%'));
+	    assertTrue(Scanner.isOperator('^'));
+	    assertTrue(Scanner.isOperator('&'));
+	    assertTrue(Scanner.isOperator('<'));
+	    assertTrue(Scanner.isOperator('>'));
+
+	    // test for invalid operators
+	    assertFalse(Scanner.isOperator('!'));
+	    assertFalse(Scanner.isOperator('#'));
+	    assertFalse(Scanner.isOperator(' '));
+	    assertFalse(Scanner.isOperator('1'));
+	    assertFalse(Scanner.isOperator('\n'));
+	    assertFalse(Scanner.isOperator('z'));
+	}
+
+	@Test
+	public void testIsLetter() {
+	    
+		// test edge cases for letters
+	    assertTrue(Scanner.isLetter('a'));
+	    assertTrue(Scanner.isLetter('z'));
+	    assertTrue(Scanner.isLetter('A'));
+	    assertTrue(Scanner.isLetter('Z'));
+
+	    // test for non-letters
+	    assertFalse(Scanner.isLetter('1'));
+	    assertFalse(Scanner.isLetter('&'));
+	    assertFalse(Scanner.isLetter('#'));
+	    assertFalse(Scanner.isLetter(' '));
+	    assertFalse(Scanner.isLetter('\n'));
 	}
 	
 	
