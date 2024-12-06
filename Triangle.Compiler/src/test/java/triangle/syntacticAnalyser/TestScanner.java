@@ -34,6 +34,10 @@ public class TestScanner {
 	
 	@Test
 	public void testIsOperator() {
+		char[] operators = "=<>/&@%".toCharArray();
+		for (char ch : operators) {
+			assertTrue(Scanner.isOperator(ch));
+		}
 		assertTrue(Scanner.isOperator('*'));
 		assertTrue(Scanner.isOperator('/'));
 		assertTrue(Scanner.isOperator('?'));
@@ -45,7 +49,18 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
 	}
-	
+
+	@Test
+	public void testIsLetter() {
+		// Testing boundaries by using values outside acceptable range:
+		assertFalse(Scanner.isLetter('`'));
+		assertFalse(Scanner.isLetter('{'));
+		assertFalse(Scanner.isLetter('@'));
+		assertFalse(Scanner.isLetter('['));
+		// Testing random letters close to the boundary range:
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('A'));
+	}
 	
 	/* these tests all try to compile example programs... */
 	
