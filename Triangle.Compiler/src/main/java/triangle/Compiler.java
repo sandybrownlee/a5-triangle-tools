@@ -27,7 +27,12 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import triangle.optimiser.SummaryVisitor;
 
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 /**
  * The main driver class for the Triangle compiler.
  *
@@ -37,10 +42,16 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
 	
+	@Argument(alias = "oN", description = "filename for the object program", required = false)
+	static String objectName = "obj.tam";
+	@Argument(alias = "sT", description = "argument which holds the users choice forAST displaying", required = false)
 	static boolean showTree = false;
+	@Argument(alias = "f", description = "argument which holdes the users choice for AST folding", required = false)
 	static boolean folding = false;
+	@Argument(alias = "sTA", description = "argument which holds the users choice for AST displaying after folding", required = false)
+	static boolean showTreeAfter = false;
+	static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -100,6 +111,22 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
+			if (showTreeAfter) {
+				System.out.println("Displaying the AST after constant folding...");
+				theAST.visit(new ConstantFolder());
+			    drawer.draw(theAST); // draw the AST after folding
+			}
+			if (showStats) {
+				System.out.println("Generating program statistics...");
+				SummaryVisitor summaryVisitor = new SummaryVisitor();
+				theAST.visit(summaryVisitor, null);
+
+				// Print collected statistics
+				System.out.println("Program Statistics:");
+				System.out.println("BinaryExpressions: " + summaryVisitor.getBinaryExpressionCount());
+				System.out.println("IfCommands: " + summaryVisitor.getIfCommandCount());
+				System.out.println("WhileCommands: " + summaryVisitor.getWhileCommandCount());
+			}
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -123,15 +150,19 @@ public class Compiler {
 	 * @param args the only command-line argument to the program specifies the
 	 *             source filename.
 	 */
+	
+	
 	public static void main(String[] args) {
 
+		Compiler compiler = new Compiler();
+		
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
 		
 		parseArgs(args);
-
+		
 		String sourceName = args[0];
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
@@ -150,6 +181,12 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			}
+			else if (sl.equals("showtreeafter")) {
+				showTreeAfter= true;
+			}
+			else if (sl.equals("showstats")) {
+				showStats = true;
 			}
 		}
 	}

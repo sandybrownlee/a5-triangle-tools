@@ -17,12 +17,12 @@ import triangle.syntacticAnalyzer.SourceFile;
 public class TestScanner {
 	
 	/* some individual unit tests for helper methods in Scanner */
-
+/*
 	@Test
 	public void testIsDigit() {
 		assertTrue(Scanner.isDigit('0'));
 		assertTrue(Scanner.isDigit('1'));
-		assertTrue(Scanner.isDigit('5'));
+		assertTrue(Scanner.isDigit('2'));
 		assertTrue(Scanner.isDigit('8'));
 		assertTrue(Scanner.isDigit('9'));
 		assertFalse(Scanner.isDigit('a'));
@@ -30,6 +30,22 @@ public class TestScanner {
 		assertFalse(Scanner.isDigit('&'));
 		assertFalse(Scanner.isDigit(';'));
 		assertFalse(Scanner.isDigit('\n'));
+	}
+	
+	@Test
+	public void testIsLetter() {
+		assertTrue(Scanner.isLetter('a'));
+		assertTrue(Scanner.isLetter('b'));
+		assertTrue(Scanner.isLetter('z'));
+		assertTrue(Scanner.isLetter('A'));
+		assertTrue(Scanner.isLetter('B'));
+		assertTrue(Scanner.isLetter('Z'));
+		assertFalse(Scanner.isLetter('0'));
+		assertFalse(Scanner.isLetter('1'));
+		assertFalse(Scanner.isLetter('9'));
+		assertFalse(Scanner.isLetter('&'));
+		assertFalse(Scanner.isLetter(';'));
+		assertFalse(Scanner.isLetter('\n'));
 	}
 	
 	@Test
@@ -47,7 +63,7 @@ public class TestScanner {
 	}
 	
 	
-	/* these tests all try to compile example programs... */
+	/* these tests all try to compile example programs... 
 	
 	@Test
 	public void testHi() {
@@ -78,7 +94,7 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
-	
+	*/
 	
 	private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")

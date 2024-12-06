@@ -1,5 +1,3 @@
-! this won't work until after some lab work
-
 let
   var a : Integer
 in
