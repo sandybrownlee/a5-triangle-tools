@@ -286,8 +286,15 @@ public class Parser {
 				ActualParameterSequence apsAST = parseActualParameterSequence();
 				accept(Token.Kind.RPAREN);
 				finish(commandPos);
-				commandAST = new CallCommand(iAST, apsAST, commandPos);
-
+				commandAST = new CallCommand(iAST, apsAST, commandPos);	
+			} else if (currentToken.kind == Token.Kind.SQUARING) {
+				acceptIt();
+				Vname vAST = new SimpleVname(iAST, commandPos);
+				Operator operator = new Operator("**", commandPos);
+				VnameExpression exprAST = new VnameExpression(vAST, commandPos);
+				UnaryExpression squareExpr = new UnaryExpression(operator, exprAST, commandPos);
+				finish(commandPos);
+				commandAST = new AssignCommand(vAST, squareExpr, commandPos);	
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);

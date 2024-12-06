@@ -63,6 +63,9 @@ final class Token {
 		// brackets...
 		LPAREN("("), RPAREN(")"), LBRACKET("["), RBRACKET("]"), LCURLY("{"), RCURLY("}"),
 
+		// special operators
+		SQUARING("**"),
+
 		// special tokens...
 		EOT(""), ERROR("<error>");
 		

@@ -113,6 +113,7 @@ import triangle.codeGenerator.entities.KnownValue;
 import triangle.codeGenerator.entities.PrimitiveRoutine;
 import triangle.codeGenerator.entities.RoutineEntity;
 import triangle.codeGenerator.entities.RuntimeEntity;
+import triangle.codeGenerator.entities.SquarePrimitiveRoutine;
 import triangle.codeGenerator.entities.TypeRepresentation;
 import triangle.codeGenerator.entities.UnknownAddress;
 import triangle.codeGenerator.entities.UnknownRoutine;
@@ -745,6 +746,8 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		elaborateStdPrimRoutine(StdEnvironment.puteolDecl, Primitive.PUTEOL);
 		elaborateStdEqRoutine(StdEnvironment.equalDecl, Primitive.EQ);
 		elaborateStdEqRoutine(StdEnvironment.unequalDecl, Primitive.NE);
+//		StdEnvironment.squareDecl.entity = new SquarePrimitiveRoutine();
+		elaborateStdPrimRoutine(StdEnvironment.squareDecl, Primitive.SQUARE);
 	}
 
 	boolean tableDetailsReqd;
