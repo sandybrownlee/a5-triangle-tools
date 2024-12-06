@@ -39,6 +39,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.loopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -679,6 +680,14 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		line1.link = new Polyline(x2 + line2.dx - dx - x1, 0, r);
 
 		return r;
+	}
+
+	@Override
+	public DrawingTree visitLoopWhileCommand(loopWhileCommand ast, Void arg) {
+		var d1 = ast.c1AST.visit(this);
+		var d2 = ast.eAST.visit(this);
+		var d3 = ast.c2AST.visit(this);
+		return layoutTernary("LoopWhileCom.", d1, d2, d3);
 	}
 
 }

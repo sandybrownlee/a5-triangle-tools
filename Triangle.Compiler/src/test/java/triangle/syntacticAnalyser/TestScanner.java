@@ -44,6 +44,26 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('1'));
 		assertFalse(Scanner.isOperator(';'));
 		assertFalse(Scanner.isOperator('\n'));
+		
+		// task 4 new test cases
+		assertTrue(Scanner.isOperator('<'));
+		assertTrue(Scanner.isOperator('>'));
+		assertTrue(Scanner.isOperator('='));
+		assertTrue(Scanner.isOperator('%'));
+		assertTrue(Scanner.isOperator('^')); 
+		assertTrue(Scanner.isOperator('@'));
+	}
+	
+	@Test
+	public void testIsLetter() {
+	    // task 4 new test cases
+	    assertTrue(Scanner.isLetter('a'));	
+	    assertTrue(Scanner.isLetter('A')); 
+	    
+	    assertFalse(Scanner.isLetter('1'));  
+	    assertFalse(Scanner.isLetter('*')); 
+	    assertFalse(Scanner.isLetter(' '));  
+	    assertFalse(Scanner.isLetter('\n')); 
 	}
 	
 	
@@ -78,6 +98,20 @@ public class TestScanner {
 		compileExpectFailure("/repeatuntil.tri");
 	}
 	
+	@Test
+	public void testCorrectSquare() {
+	    compileExpectSuccess("/correctSquare.tri");
+	}
+	
+	@Test
+	public void testIncorrectSquare() {
+	    compileExpectFailure("/incorrectSquare.tri");
+	}
+	
+	@Test
+	public void testloopWhile() {
+	    compileExpectSuccess("/loopWhile.tri");
+	}
 	
 	
 	private void compileExpectSuccess(String filename) {

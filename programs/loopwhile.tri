@@ -1,0 +1,12 @@
+let
+    var int: Integer
+in
+begin
+    int := 0;
+    loop
+        putint(int); puteol();
+        int := int + 1;
+    while int < 3
+    do
+        putint(int);
+end
