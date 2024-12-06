@@ -279,24 +279,39 @@ public class Parser {
 
 		switch (currentToken.kind) {
 
-		case IDENTIFIER: {
-			Identifier iAST = parseIdentifier();
-			if (currentToken.kind == Token.Kind.LPAREN) {
-				acceptIt();
-				ActualParameterSequence apsAST = parseActualParameterSequence();
-				accept(Token.Kind.RPAREN);
-				finish(commandPos);
-				commandAST = new CallCommand(iAST, apsAST, commandPos);
+			case IDENTIFIER: {
+				Identifier iAST = parseIdentifier();
+				if (currentToken.kind == Token.Kind.LPAREN) {
+					acceptIt();
+					ActualParameterSequence apsAST = parseActualParameterSequence();
+					accept(Token.Kind.RPAREN);
+					finish(commandPos);
+					commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+				} else {
+					Vname vAST = parseRestOfVname(iAST);
 
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+					// check for ** operator
+					if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+						acceptIt();
+
+						VnameExpression vne = new VnameExpression(vAST, commandPos);
+
+						Operator op = new Operator("*", commandPos);
+
+						// build a BinaryExpression for `a * a`
+						Expression eAST = new BinaryExpression(vne, op, vne, commandPos);
+
+						// build the AssignCommand for `a = a * a`
+						commandAST = new AssignCommand(vAST, eAST, commandPos);
+					} else {
+						accept(Token.Kind.BECOMES);
+						Expression eAST = parseExpression();
+						finish(commandPos);
+						commandAST = new AssignCommand(vAST, eAST, commandPos);
+					}
+				}
 			}
-		}
 			break;
 
 		case BEGIN:
