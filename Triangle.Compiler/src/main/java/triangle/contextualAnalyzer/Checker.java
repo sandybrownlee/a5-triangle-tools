@@ -962,4 +962,16 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 				StdEnvironment.booleanType);
 
 	}
+
+	@Override
+	public Void visitSquareCommand(SquareCommand ast, Void arg) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visitSquareCommand'");
+	}
+
+	@Override
+	public Void visitSquareCommand(triangle.abstractSyntaxTrees.commands.SquareCommand ast, Void arg) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visitSquareCommand'");
+	}
 }
