@@ -54,7 +54,7 @@ final class Token {
 		INTLITERAL("<int>"), CHARLITERAL("<char>"), IDENTIFIER("<identifier>"), OPERATOR("<operator>"),
 
 		// reserved words - keep in alphabetical order for ease of maintenance...
-		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), OF("of"),
+		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), LOOPWHILE("loop"), OF("of"),
 		PROC("proc"), RECORD("record"), THEN("then"), TYPE("type"), VAR("var"), WHILE("while"),
 
 		// punctuation...
@@ -85,7 +85,7 @@ final class Token {
 	    public static Kind fromSpelling(String spelling) {
 	    	boolean isRW = false;
 	    	for (Kind kind: Kind.values()) {
-	    		if (kind == firstReservedWord) {
+	    		if (kind == firstReservedWord || kind == secondReservedWord) {
 	    			isRW = true;
 	    		}
 	    		
@@ -101,7 +101,7 @@ final class Token {
 	    	return Kind.IDENTIFIER;
 	    }
 	    
-	    private final static Kind firstReservedWord = ARRAY, lastReservedWord = WHILE;
+	    private final static Kind firstReservedWord = ARRAY, secondReservedWord = LOOPWHILE, lastReservedWord = WHILE;
 	}
 
 }

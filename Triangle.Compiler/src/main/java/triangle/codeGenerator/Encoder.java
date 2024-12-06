@@ -42,6 +42,7 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
@@ -113,7 +114,7 @@ import triangle.codeGenerator.entities.KnownValue;
 import triangle.codeGenerator.entities.PrimitiveRoutine;
 import triangle.codeGenerator.entities.RoutineEntity;
 import triangle.codeGenerator.entities.RuntimeEntity;
-import triangle.codeGenerator.entities.SquarePrimitiveRoutine;
+//import triangle.codeGenerator.entities.SquarePrimitiveRoutine;
 import triangle.codeGenerator.entities.TypeRepresentation;
 import triangle.codeGenerator.entities.UnknownAddress;
 import triangle.codeGenerator.entities.UnknownRoutine;
@@ -183,6 +184,18 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.patch(jumpAddr);
 		ast.E.visit(this, frame);
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		return null;
+	}
+
+	@Override
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		var loopAddr = emitter.getNextInstrAddr();
+		ast.C1.visit(this, frame);
+		ast.E.visit(this, frame);
+		var jumpAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
+		ast.C2.visit(this, frame);
+		emitter.emit(OpCode.JUMP, Machine.trueRep, Register.CB, loopAddr);	// back to C1
+		emitter.patch(jumpAddr);	// back to while
 		return null;
 	}
 
