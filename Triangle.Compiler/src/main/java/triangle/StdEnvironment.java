@@ -47,4 +47,6 @@ public final class StdEnvironment {
 
 	public static FuncDeclaration chrDecl, ordDecl, eolDecl, eofDecl;
 
+	
+	
 }

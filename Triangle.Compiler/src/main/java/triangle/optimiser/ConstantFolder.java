@@ -21,6 +21,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.loopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -593,6 +594,18 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 
 		// any unhandled situation (i.e., not foldable) is ignored
+		return null;
+	}
+
+	@Override
+	public AbstractSyntaxTree visitLoopWhileCommand(loopWhileCommand ast, Void arg) {
+		ast.c1AST.visit(this);
+		ast.c2AST.visit(this);
+		
+		AbstractSyntaxTree replacement = ast.eAST.visit(this);
+		if (replacement != null) {
+			ast.eAST = (Expression) replacement;
+		}
 		return null;
 	}
 

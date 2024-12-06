@@ -18,6 +18,7 @@
 
 package triangle.abstractSyntaxTrees.expressions;
 
+
 import triangle.abstractSyntaxTrees.terminals.Operator;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
 import triangle.syntacticAnalyzer.SourcePosition;
