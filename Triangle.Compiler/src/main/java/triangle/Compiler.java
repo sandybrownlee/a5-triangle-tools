@@ -104,7 +104,7 @@ public class Compiler {
 			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
-			if (showingAST) {
+			if (showTree) {
 				drawer.draw(theAST);
 			}
 			if (folding) {
@@ -160,7 +160,7 @@ public class Compiler {
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false, showProgramStats);
 
-		if (!showTree) {
+		if (!showTree && !showTreeAfter) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
