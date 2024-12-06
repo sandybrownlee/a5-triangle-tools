@@ -11,6 +11,7 @@ import triangle.abstractMachine.Machine;
 import triangle.abstractMachine.OpCode;
 import triangle.abstractMachine.Primitive;
 import triangle.abstractMachine.Register;
+import triangle.abstractSyntaxTrees.commands.SquareCommand; // Import the SquareCommand
 
 public class Emitter {
 
@@ -116,5 +117,18 @@ public class Emitter {
 		} catch (IOException ioe) {
 			System.err.println("Error writing object file: " + ioe);
 		}
+	}
+
+	/**
+	 * Emits the code for the SquareCommand (a**).
+	 * 
+	 * @param command the SquareCommand to emit
+	 */
+	public void emit(SquareCommand command) {
+		// Generate code for the base expression of the square command
+		command.base.visit(this); // Visit the base expression to generate its code
+
+		// Emit the multiplication operation to square the value
+		emit(OpCode.MULT, 2); // Emit the MULT opcode to multiply the value by itself
 	}
 }
