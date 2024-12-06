@@ -596,4 +596,49 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
+		// Check if both operands are IntegerExpressions
+		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
+			// Parse the integer values from the IntegerExpressions
+			int int1 = Integer.parseInt(((IntegerExpression) node1).IL.spelling);
+			int int2 = Integer.parseInt(((IntegerExpression) node2).IL.spelling);
+			Object foldedValue = null; // Variable to hold the result of the operation
+	
+			// Determine the operation based on the operator's spelling
+			switch (o.spelling) {
+				case "=":
+					foldedValue = (int1 == int2); // Check for equality
+					break;
+				case "<":
+					foldedValue = (int1 < int2); // Check if less than
+					break;
+				case "<=":
+					foldedValue = (int1 <= int2); // Check if less than or equal to
+					break;
+				case ">":
+					foldedValue = (int1 > int2); // Check if greater than
+					break;
+				case ">=":
+					foldedValue = (int1 >= int2); // Check if greater than or equal to
+					break;
+				case "\\=":
+					foldedValue = (int1 != int2); // Check for inequality
+					break;
+			}
+	
+			// If the result of the operation is a Boolean
+			if (foldedValue instanceof Boolean) {
+				// Create an Identifier for the Boolean result ("true" or "false")
+				Identifier id = new Identifier(foldedValue.toString(), node1.getPosition());
+				// Set the declaration attribute to the corresponding standard environment declaration
+				id.decl = (Boolean) foldedValue ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+				// Wrap the Identifier in a SimpleVname, then in a VnameExpression
+				VnameExpression vnameExpr = new VnameExpression(new SimpleVname(id, node1.getPosition()), node1.getPosition());
+				return vnameExpr; // Return the VnameExpression representing the Boolean result
+			}
+		}
+		// If the expression cannot be folded, return null
+		return null; 
+	}
+
 }
