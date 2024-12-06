@@ -19,6 +19,7 @@
  package triangle;
 
  import triangle.abstractSyntaxTrees.Program;
+ import triangle.abstractSyntaxTrees.visitors.SummaryVisitor; // Import the SummaryVisitor
  import triangle.codeGenerator.Emitter;
  import triangle.codeGenerator.Encoder;
  import triangle.contextualAnalyzer.Checker;
@@ -42,6 +43,7 @@
 	 static boolean showTree = false;
 	 static boolean folding = false;
 	 static boolean showTreeAfter = false; // New option for showing tree after folding
+	 static boolean showStats = false; // New variable to control stats display
  
 	 private static Scanner scanner;
 	 private static Parser parser;
@@ -98,6 +100,13 @@
 				 theAST.visit(new ConstantFolder());
 			 }
 			 
+			 // Integrate SummaryVisitor here if showStats is true
+			 if (showStats) {
+				 SummaryVisitor summaryVisitor = new SummaryVisitor();
+				 theAST.visit(summaryVisitor, null); // Visit the AST to count nodes
+				 summaryVisitor.getSummary(); // Print the summary
+			 }
+ 
 			 if (reporter.getNumErrors() == 0) {
 				 System.out.println("Code Generation ...");
 				 encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -112,33 +121,15 @@
 				 drawer.draw(theAST); // Show the tree after folding if the option is set
 			 }
 		 } else {
-			 System.out.println("Compilation was unsuccessful.");
+  System.out.println("Compilation failed with " + reporter.getNumErrors() + " errors.");
 		 }
 		 return successful;
 	 }
  
 	 /**
-	  * Triangle compiler main program.
+	  * Parse command line arguments.
 	  *
-	  * @param args the only command-line argument to the program specifies the
-	  *             source filename.
-	  */
-	  public static void main(String[] args) {
-
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding] [showTreeAfter]");
-			System.exit(1);
-		}
-		
-		parseCommandLineArguments(args); // main class
-	
-		// Compile the program
-		compileProgram(args[0], objectName, showTree, folding);
-	}
-	 /**
-	  * Parses command line arguments to set options for the compiler.
-	  *
-	  * @param args the command line arguments
+	  * @param args the command line arguments.
 	  */
 	 private static void parseCommandLineArguments(String[] args) {
 		 for (String arg : args) {
@@ -150,7 +141,19 @@
 				 folding = true;
 			 } else if (arg.equals("showTreeAfter")) {
 				 showTreeAfter = true;
+			 } else if (arg.equals("showStats")) { // New option for showing stats
+				 showStats = true; // You need to declare this variable
 			 }
 		 }
+	 }
+ 
+	 /**
+	  * The main method for the Triangle compiler.
+	  *
+	  * @param args command line arguments.
+	  */
+	 public static void main(String[] args) {
+		 parseCommandLineArguments(args);
+		 compileProgram("source.tri", objectName, showTree, false);
 	 }
  }
