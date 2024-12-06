@@ -18,6 +18,11 @@
 
 package triangle;
 
+import com.github.rvesse.airline.annotations.Command;
+import com.github.rvesse.airline.annotations.Option;
+import com.github.rvesse.airline.SingleCommand;
+import com.github.rvesse.airline.parser.errors.ParseException;
+
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -37,10 +42,11 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
+	private String objectName = "obj.tam";
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	private boolean showTree = false;
+	private boolean folding = false;
+	private boolean showTreeAfter = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -57,25 +63,19 @@ public class Compiler {
 	 * Compile the source program to TAM machine code.
 	 *
 	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
-	 * @param showingAST   true iff the AST is to be displayed after contextual
-	 *                     analysis
-	 * @param showingTable true iff the object description details are to be
-	 *                     displayed during code generation (not currently
-	 *                     implemented).
-	 * @return true iff the source program is free of compile-time errors, otherwise
+	 * @return true if the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+	private boolean compileProgram(String sourceName) {
 
-		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
+		System.out.println("********** " + "Triangle Compiler" + " **********");
 
 		System.out.println("Syntactic Analysis ...");
 		SourceFile source = SourceFile.ofPath(sourceName);
 
 		if (source == null) {
 			System.out.println("Can't access source file " + sourceName);
-			System.exit(1);
+			return false;
 		}
 
 		scanner = new Scanner(source);
@@ -86,34 +86,35 @@ public class Compiler {
 		encoder = new Encoder(emitter, reporter);
 		drawer = new Drawer();
 
-		// scanner.enableDebugging();
-		theAST = parser.parseProgram(); // 1st pass
-		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
-			System.out.println("Contextual Analysis ...");
-			checker.check(theAST); // 2nd pass
-			if (showingAST) {
-				drawer.draw(theAST);
-			}
-			if (folding) {
-				theAST.visit(new ConstantFolder());
-			}
-			
-			if (reporter.getNumErrors() == 0) {
-				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
-			}
-		}
+        theAST = parser.parseProgram();
+        if (reporter.getNumErrors() > 0) {
+            return false;
+        }
+
+        System.out.println("Contextual Analysis ...");
+        checker.check(theAST);
+        if (showTree) {
+            drawer.draw(theAST);
+        }
+
+        if (folding) {
+            theAST.visit(new ConstantFolder());
+            if (showTreeAfter) {
+                drawer.draw(theAST);
+            }
+        }
+
+        if (reporter.getNumErrors() == 0) {
+            System.out.println("Code Generation ...");
+            encoder.encodeRun(theAST, false);
+        }
 
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
 			System.out.println("Compilation was successful.");
-		} else {
+		} else
 			System.out.println("Compilation was unsuccessful.");
-		}
 		return successful;
 	}
 
@@ -125,32 +126,21 @@ public class Compiler {
 	 */
 	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
+		try {
+            Compiler compiler = SingleCommand.singleCommand(Compiler.class).parse(args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+            if (args.length == 0) {
+                System.out.println("Usage: java -jar TriangleCompiler.jar [options] <sourcefile>");
+                System.exit(1);
+            }
 
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
+            String sourceName = args[args.length - 1];
+            boolean success = compiler.compileProgram(sourceName);
+            System.exit(success ? 0 : 1);
+
+        } catch (ParseException e) {
+            System.err.println("Error parsing command-line arguments: " + e.getMessage());
+            System.exit(1);
+        }
 	}
 }

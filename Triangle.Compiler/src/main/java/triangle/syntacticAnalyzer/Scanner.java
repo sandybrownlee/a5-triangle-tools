@@ -167,7 +167,6 @@ public final class Scanner {
 
 		case '+':
 		case '-':
-		case '*':
 		case '/':
 		case '=':
 		case '<':
@@ -239,6 +238,16 @@ public final class Scanner {
 		case '}':
 			takeIt();
 			return Token.Kind.RCURLY;
+			
+		case '*':
+		    if (nextChar == '*') {
+		        currentSpelling.append(nextChar);
+		        acceptIt();
+		        currentToken = new Token(Token.Kind.STARSTAR, currentSpelling.toString(), position);
+		    } else {
+		        currentToken = new Token(Token.Kind.OPERATOR, "*", position);
+		    }
+		    break;
 
 		case SourceFile.EOT:
 			return Token.Kind.EOT;
