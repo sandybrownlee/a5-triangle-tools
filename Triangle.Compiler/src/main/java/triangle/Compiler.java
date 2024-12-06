@@ -18,7 +18,11 @@
 
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+
 import triangle.abstractSyntaxTrees.Program;
+import triangle.abstractSyntaxTrees.visitors.summaryVisitor;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
@@ -37,11 +41,21 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+    @Argument(alias = "o", description = "name of the object file")	
+    static String objectName = "obj.tam";
 
+    @Argument(alias = "tree", description = "shows abstract syntax tree")
+    static boolean showTree = false;
+
+    @Argument(alias = "folding", description = "enables constant folding")
+    static boolean folding = false;
+    
+    @Argument(alias = "showTreeAfter", description = "shows abstract syntax tree after folding")
+    static boolean showTreeAfter = false;
+    
+    @Argument(alias = "showStats", description = "shows the summary statistics")
+    static boolean showStats = false;
+    
 	private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
@@ -99,8 +113,21 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				drawer.draw(theAST);
 			}
 			
+            if (showTreeAfter) {
+                drawer.draw(theAST);
+            }
+			
+         // task 5b
+            if (showStats) { 
+                System.out.println("Summary Statistics : ");
+                summaryVisitor visitor = new summaryVisitor();
+                theAST.visit(visitor, null);
+                visitor.printSummaryStats();
+            }
+            
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -124,13 +151,12 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-
+		try {
+            Args.parse(Compiler.class, args); 
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding] [showTreeAfter]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
 
 		String sourceName = args[0];
 		
@@ -139,18 +165,9 @@ public class Compiler {
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
 		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
+        } catch (IllegalArgumentException e) {
+            System.out.println("Error with parsing the arguments: " + e.getMessage());
+            System.exit(1);
+        }
 	}
 }
