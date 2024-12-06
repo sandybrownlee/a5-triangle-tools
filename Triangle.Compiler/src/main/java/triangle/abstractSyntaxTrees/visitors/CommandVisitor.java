@@ -6,6 +6,7 @@ import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
+import triangle.abstractSyntaxTrees.commands.SquareCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 
 public interface CommandVisitor<TArg, TResult> {
@@ -23,5 +24,7 @@ public interface CommandVisitor<TArg, TResult> {
 	TResult visitSequentialCommand(SequentialCommand ast, TArg arg);
 
 	TResult visitWhileCommand(WhileCommand ast, TArg arg);
+
+	TResult visitSquareCommand(SquareCommand ast, TArg arg); //visit the newly created SquareCommand
 
 }

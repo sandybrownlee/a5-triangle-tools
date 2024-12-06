@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
+import triangle.abstractSyntaxTrees.commands.SquareCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -802,5 +803,11 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 
 		var baseObject = (AddressableEntity) V.visit(this, frame);
 		baseObject.encodeFetchAddress(emitter, frame, V);
+	}
+
+	@Override
+	public Void visitSquareCommand(SquareCommand ast, Frame arg) {
+		// TODO Auto-generated method stub
+		throw new UnsupportedOperationException("Unimplemented method 'visitSquareCommand'");
 	}
 }

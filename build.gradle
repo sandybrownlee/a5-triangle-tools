@@ -6,13 +6,16 @@ subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+dependencies {
+    implementation 'com.github.ghik:cli-parser_2.13:0.9.0' // Added dependency
+}
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
-
 
   from subprojects.sourceSets.main.output
 }
