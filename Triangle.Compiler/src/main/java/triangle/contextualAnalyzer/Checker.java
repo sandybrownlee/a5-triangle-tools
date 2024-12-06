@@ -38,7 +38,9 @@ import triangle.abstractSyntaxTrees.commands.CallCommand;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
+import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
+import triangle.abstractSyntaxTrees.commands.SquareCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
@@ -974,4 +976,19 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 		// TODO Auto-generated method stub
 		throw new UnsupportedOperationException("Unimplemented method 'visitSquareCommand'");
 	}
+
+	@Override
+    public Void visitLoopWhileCommand(LoopWhileCommand ast, Void arg) {
+    // Check the command C1
+    ast.C1.visit(this, arg);
+    
+    // Check the expression E
+    TypeDenoter eType = ast.E.visit(this, arg);
+    checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+    
+    // Check the command C2
+    ast.C2.visit(this, arg);
+    
+    return null;
+}
 }

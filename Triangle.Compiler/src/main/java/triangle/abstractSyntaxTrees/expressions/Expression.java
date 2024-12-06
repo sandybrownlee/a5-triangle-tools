@@ -21,7 +21,6 @@ package triangle.abstractSyntaxTrees.expressions;
 import triangle.abstractSyntaxTrees.AbstractSyntaxTree;
 import triangle.abstractSyntaxTrees.types.TypeDenoter;
 import triangle.abstractSyntaxTrees.visitors.ExpressionVisitor;
-import triangle.codeGenerator.Emitter;
 import triangle.syntacticAnalyzer.SourcePosition;
 
 public abstract class Expression extends AbstractSyntaxTree {
@@ -41,9 +40,9 @@ public abstract class Expression extends AbstractSyntaxTree {
 		throw new UnsupportedOperationException();
 	}
 
-	public abstract <TArg, TResult> TResult visit(Emitter visitor, TArg arg);
+	public abstract <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor, TArg arg);
 
-	public <TArg, TResult> TResult visit(Emitter visitor) {
+	public <TArg, TResult> TResult visit(ExpressionVisitor<TArg, TResult> visitor) {
 		return visit(visitor, null);
 	}
 }

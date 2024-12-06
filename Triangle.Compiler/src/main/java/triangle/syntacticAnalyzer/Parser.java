@@ -287,71 +287,83 @@
 				 commandAST = parseCommand();
 				 accept(Token.Kind.END);
 				 break;
- 
-			 case LET: {
-				 acceptIt();
-				 Declaration dAST = parseDeclaration();
-				 accept(Token.Kind.IN);
-				 Command cAST = parseSingleCommand();
-				 finish(commandPos);
-				 commandAST = new LetCommand(dAST, cAST, commandPos);
-			 }
-			 break;
- 
-			 case IF: {
-				 acceptIt();
-				 Expression eAST = parseExpression();
-				 accept(Token.Kind.THEN);
-				 Command c1AST = parseSingleCommand();
-				 accept(Token.Kind.ELSE);
-				 Command c2AST = parseSingleCommand();
-				 finish(commandPos);
-				 commandAST = new IfCommand(eAST, c1AST, c2AST, commandPos);
-			 }
-			 break;
- 
-			 case WHILE: {
-				 acceptIt();
-				 Expression eAST = parseExpression();
-				 accept(Token.Kind.DO);
-				 Command cAST = parseSingleCommand();
-				 finish(commandPos);
-				 commandAST = new WhileCommand(eAST, cAST, commandPos);
-			 }
-			 break;
- 
-			 case SQUARE: { // New case for SquareCommand
-				 acceptIt(); // Accept the SQUARE token
-				 Expression baseAST = parseExpression(); // Parse the base expression
-				 finish(commandPos);
-				 commandAST = new SquareCommand(baseAST, commandPos); // Create a new SquareCommand
-			 }
-			 break;
- 
-			 case SEMICOLON:
-			 case END:
-			 case ELSE:
-			 case IN:
-			 case EOT:
-				 finish(commandPos);
-				 commandAST = new EmptyCommand(commandPos);
-				 break;
- 
-			 default:
-				 syntacticError("\"%\" cannot start a command", currentToken.spelling);
-				 break;
-		 }
- 
-		 return commandAST;
-	 }
- 
-	 ///////////////////////////////////////////////////////////////////////////////
-	 //
-	 // EXPRESSIONS
-	 //
-	 ///////////////////////////////////////////////////////////////////////////////
- 
-	 Expression parseExpression() throws SyntaxError {
+
+				 case LOOP: { // New case for LoopWhileCommand
+					acceptIt(); // Accept the LOOP token
+					commandAST = parseLoopWhileCommand(); // Parse the loop while command
+										finish(commandPos);
+									}
+									break;
+					 
+								 case LET: {
+									 acceptIt();
+									 Declaration dAST = parseDeclaration();
+									 accept(Token.Kind.IN);
+									 Command cAST = parseSingleCommand();
+									 finish(commandPos);
+									 commandAST = new LetCommand(dAST, cAST, commandPos);
+								 }
+								 break;
+					 
+								 case IF: {
+									 acceptIt();
+									 Expression eAST = parseExpression();
+									 accept(Token.Kind.THEN);
+									 Command c1AST = parseSingleCommand();
+									 accept(Token.Kind.ELSE);
+									 Command c2AST = parseSingleCommand();
+									 finish(commandPos);
+									 commandAST = new IfCommand(eAST, c1AST, c2AST, commandPos);
+								 }
+								 break;
+					 
+								 case WHILE: {
+									 acceptIt();
+									 Expression eAST = parseExpression();
+									 accept(Token.Kind.DO);
+									 Command cAST = parseSingleCommand();
+									 finish(commandPos);
+									 commandAST = new WhileCommand(eAST, cAST, commandPos);
+								 }
+								 break;
+					 
+								 case SQUARE: { // New case for SquareCommand
+									 acceptIt(); // Accept the SQUARE token
+									 Expression baseAST = parseExpression(); // Parse the base expression
+									 finish(commandPos);
+									 commandAST = new SquareCommand(baseAST, commandPos); // Create a new SquareCommand
+								 }
+								 break;
+					 
+								 case SEMICOLON:
+								 case END:
+								 case ELSE:
+								 case IN:
+								 case EOT:
+									 finish(commandPos);
+									 commandAST = new EmptyCommand(commandPos);
+									 break;
+					 
+								 default:
+									 syntacticError("\"%\" cannot start a command", currentToken.spelling);
+									 break;
+							 }
+					 
+							 return commandAST;
+						 }
+					 
+						 ///////////////////////////////////////////////////////////////////////////////
+						 //
+						 // EXPRESSIONS
+						 //
+						 ///////////////////////////////////////////////////////////////////////////////
+					 
+						 private Command parseLoopWhileCommand() {
+							// TODO Auto-generated method stub
+							throw new UnsupportedOperationException("Unimplemented method 'parseLoopWhileCommand'");
+						}
+					
+						Expression parseExpression() throws SyntaxError {
 		 Expression expressionAST = null; // in case there's a syntactic error
  
 		 SourcePosition expressionPos = new SourcePosition();
@@ -731,7 +743,7 @@
 				 Identifier iAST = parseIdentifier();
 				 accept(Token.Kind.LPAREN);
 				 FormalParameterSequence fpsAST = parseFormalParameterSequence();
-				 accept(Token.Kind.R PAREN);
+				 accept(Token.Kind.RPAREN);
 				 accept(Token.Kind.COLON);
 				 TypeDenoter tAST = parseTypeDenoter();
 				 finish(formalPos);
