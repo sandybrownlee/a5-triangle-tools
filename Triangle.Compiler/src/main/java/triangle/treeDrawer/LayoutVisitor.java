@@ -39,6 +39,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -115,6 +116,7 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 	}
 
 	// Commands
+	
 	@Override
 	public DrawingTree visitAssignCommand(AssignCommand ast, Void obj) {
 		var d1 = ast.V.visit(this);
@@ -162,7 +164,11 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		var d2 = ast.C.visit(this);
 		return layoutBinary("WhileCom.", d1, d2);
 	}
-
+	@Override
+	public DrawingTree visitRepeatCommand(RepeatCommand ast, Void obj) {
+	return null;
+	}
+	
 	// Expressions
 	@Override
 	public DrawingTree visitArrayExpression(ArrayExpression ast, Void obj) {
@@ -528,6 +534,8 @@ public class LayoutVisitor implements ActualParameterVisitor<Void, DrawingTree>,
 		var d1 = ast.C.visit(this);
 		return layoutUnary("Program", d1);
 	}
+	
+
 
 	private DrawingTree layoutCaption(String name) {
 		var w = fontMetrics.stringWidth(name) + 4;

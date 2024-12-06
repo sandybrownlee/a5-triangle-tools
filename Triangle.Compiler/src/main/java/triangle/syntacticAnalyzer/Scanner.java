@@ -78,7 +78,15 @@ public final class Scanner {
 			if (currentChar == SourceFile.EOL)
 				takeIt();
 			break;
-
+		case '#': 
+			takeIt();
+			
+			// the comment ends when we reach an end-of-line (EOL) or end of file (EOT - for end-of-transmission)
+			while ((currentChar != SourceFile.EOL) && (currentChar != SourceFile.EOT))
+				takeIt();
+			if (currentChar == SourceFile.EOL)
+				takeIt();
+			break;
 		// whitespace
 		case ' ':
 		case '\n':
@@ -239,6 +247,9 @@ public final class Scanner {
 		case '}':
 			takeIt();
 			return Token.Kind.RCURLY;
+		case '|':
+			takeIt();
+			return Token.Kind.OPERATOR;
 
 		case SourceFile.EOT:
 			return Token.Kind.EOT;
@@ -257,7 +268,7 @@ public final class Scanner {
 		currentlyScanningToken = false;
 		// skip any whitespace or comments
 		while (currentChar == '!' || currentChar == ' ' || currentChar == '\n' || currentChar == '\r'
-				|| currentChar == '\t')
+				|| currentChar == '\t' || currentChar == '#')
 			scanSeparator();
 
 		currentlyScanningToken = true;

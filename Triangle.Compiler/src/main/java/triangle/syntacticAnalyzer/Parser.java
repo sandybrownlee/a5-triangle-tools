@@ -288,13 +288,22 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			}
+			
+			else if(currentToken.kind == currentToken.kind.BECOMES){
 
 				Vname vAST = parseRestOfVname(iAST);
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
+			}
+			else if(currentToken.kind == currentToken.kind.SQUARE){
+				acceptIt();
+				Vname vAST = new SimpleVname(iAST, commandPos);
+				Expression variableAST = new VnameExpression(vAST, commandPos);
+				finish(commandPos);
+				commandAST = new AssignCommand(vAST, variableAST, commandPos);
 			}
 		}
 			break;
@@ -336,6 +345,17 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+		/*	
+		case LOOP: {
+			acceptIt();
+			Command c1AST = parseCommand();
+			accept(Token.Kind.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.Kind.DO);
+			Command c2AST = parseCommand();
+			commandAST = new LoopWhileCommand(c1AST, eAST, c2AST, commandPos);
+		}
+			break;*/
 
 		case SEMICOLON:
 		case END:

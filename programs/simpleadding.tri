@@ -5,6 +5,8 @@ let
 
 in
     begin
-        a := 1; b := 2; c := a / b;
+        a := 3; b := 2; c := a * b;
+        putint(a+b);
+        putint(c)
     end
 

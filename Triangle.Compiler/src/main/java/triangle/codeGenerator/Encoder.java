@@ -18,6 +18,8 @@
 
 package triangle.codeGenerator;
 
+
+//import main.java.triangle.codeGenerator.LoopWhileCommand;
 import triangle.ErrorReporter;
 import triangle.StdEnvironment;
 import triangle.abstractMachine.Machine;
@@ -44,6 +46,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.RepeatCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
@@ -184,6 +187,18 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		return null;
 	}
+	/*
+	public Void visitLoopWhileCommand(LoopWhileCommand ast, Frame frame) {
+		int jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+		int loopAddr = emitter.getNextInstrAddr(); //start of the loop
+	    ast.C1.visit(this, frame); // execute C1
+	    emitter.patch(jumpAddr)); // exit loop if E is false
+	    ast.E.visit(this, frame);// check condition E
+	    emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0); //skip c2 if E is false
+	    ast.C2.visit(this, frame); // execute C2 if E is true
+	    emitter.emit(OpCode.JUMP, 0, Register.CB, loopAddr);
+	    return null;
+	}*/
 
 	// Expressions
 	@Override
@@ -661,6 +676,11 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 			}
 		}
 		return baseObject;
+	}
+	
+	@Override
+	public Void visitRepeatCommand(RepeatCommand ast, Frame frame) {
+	return null;
 	}
 
 	// Programs
