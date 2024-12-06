@@ -39,17 +39,21 @@ import triangle.treeDrawer.Drawer;
  */
 public class Compiler {
 
-	@Argument(alias = "o", description = "The filename for the object program, normally obj.tam", required = true, prefix = "--")
+	@Argument(alias = "o", description = "The name of the file containing the object program", required = true, prefix = "--")
 	private static String objectName = "obj.tam";
 
-	@Argument(alias = "tree", description = "Show ABS (Abstract Syntax Tree)", required = false, prefix = "--")
+	@Argument(alias = "tree", description = "If true, then ABS (Abstract Syntax Tree) is to be displayed after\r\n"
+			+ " contextual analysis", required = false, prefix = "--")
 	private static boolean showTree;
-	
+
 	@Argument(alias = "fold", description = "Use folding", required = false, prefix = "--")
 	private static boolean folding;
 
 	@Argument(alias = "treeAfter", description = "Show ABS (Abstract Syntax Tree) after folding", required = false, prefix="--")
 	private static boolean showTreeAfter = false;
+
+	@Argument(alias = "stats", description = "Prints out the count lists", required = false, prefix = "--")
+	private static boolean showStats;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -62,13 +66,12 @@ public class Compiler {
 	/** The AST representing the source program. */
 	private static Program theAST;
 
+	private static SummaryVisitor summaryStats;
+
 	/**
 	 * Compile the source program to TAM machine code.
 	 *
 	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
-	 * @param showingAST   true iff the AST is to be displayed after contextual
-	 *                     analysis
 	 * @param showingTable true iff the object description details are to be
 	 *                     displayed during code generation (not currently
 	 *                     implemented).
@@ -121,6 +124,14 @@ public class Compiler {
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
+			if (showStats) {
+				summaryStats = new SummaryVisitor();
+				theAST.visit(summaryStats);
+				System.out.println("Summary statistics:");
+				System.out.printf("There are %d binary expressions.\n", summaryStats.getBinaryExpressionsCount());
+				System.out.printf("There are %d if commands.\n", summaryStats.getConditionalCommandsCount());
+				System.out.printf("There are %d while expressions.\n", summaryStats.getWhileCommandsCount());
+			}
 			System.out.println("Compilation was successful.");
 		} else {
 			System.out.println("Compilation was unsuccessful.");

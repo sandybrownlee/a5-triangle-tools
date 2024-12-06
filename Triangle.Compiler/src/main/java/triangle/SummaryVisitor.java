@@ -21,6 +21,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+//import triangle.abstractSyntaxTrees.commands.LoopWhileCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -91,6 +92,23 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 	{
 
 	}
+	
+	private int binaryExpressionsCount = 0;
+	private int conditionalCommandsCount = 0;
+	private int whileCommandsCount = 0;
+
+	public int getBinaryExpressionsCount() {
+		return binaryExpressionsCount;
+	}
+	
+	public int getConditionalCommandsCount() {
+		return conditionalCommandsCount;
+	}
+	
+	public int getWhileCommandsCount() {
+		return whileCommandsCount;
+	}
+	
 
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
@@ -275,6 +293,7 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
+		binaryExpressionsCount++;
 		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
 		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
 		ast.O.visit(this);
@@ -463,6 +482,7 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitIfCommand(IfCommand ast, Void arg) {
+		conditionalCommandsCount++;
 		ast.C1.visit(this);
 		ast.C2.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
@@ -488,6 +508,7 @@ public class SummaryVisitor implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
+		whileCommandsCount++;
 		ast.C.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
