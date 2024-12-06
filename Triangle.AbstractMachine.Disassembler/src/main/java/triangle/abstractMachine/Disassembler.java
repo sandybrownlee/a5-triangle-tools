@@ -138,6 +138,9 @@ public class Disassembler {
 		case DIV:
 			System.out.print("div     ");
 			break;
+		case SQUARE:
+			System.out.print("square  ");
+			break;
 		case MOD:
 			System.out.print("mod     ");
 			break;

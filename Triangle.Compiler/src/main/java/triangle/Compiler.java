@@ -18,6 +18,9 @@
 
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -36,11 +39,21 @@ import triangle.treeDrawer.Drawer;
  */
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+	@Argument(alias = "o", description = "The name of the file containing the object program", required = true, prefix = "--")
+	private static String objectName = "obj.tam";
+
+	@Argument(alias = "tree", description = "If true, then ABS (Abstract Syntax Tree) is to be displayed after\r\n"
+			+ " contextual analysis", required = false, prefix = "--")
+	private static boolean showTree;
+
+	@Argument(alias = "fold", description = "Use folding", required = false, prefix = "--")
+	private static boolean folding;
+
+	@Argument(alias = "treeAfter", description = "Show ABS (Abstract Syntax Tree) after folding", required = false, prefix="--")
+	private static boolean showTreeAfter = false;
+
+	@Argument(alias = "stats", description = "Prints out the count lists", required = false, prefix = "--")
+	private static boolean showStats;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -53,21 +66,19 @@ public class Compiler {
 	/** The AST representing the source program. */
 	private static Program theAST;
 
+	private static SummaryVisitor summaryStats;
+
 	/**
 	 * Compile the source program to TAM machine code.
 	 *
 	 * @param sourceName   the name of the file containing the source program.
-	 * @param objectName   the name of the file containing the object program.
-	 * @param showingAST   true iff the AST is to be displayed after contextual
-	 *                     analysis
 	 * @param showingTable true iff the object description details are to be
 	 *                     displayed during code generation (not currently
 	 *                     implemented).
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
-
+	static boolean compileProgram(String sourceName, boolean showingTable) {
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
 		System.out.println("Syntactic Analysis ...");
@@ -94,11 +105,14 @@ public class Compiler {
 			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
-			if (showingAST) {
+			if (showTree) {
 				drawer.draw(theAST);
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if (showTreeAfter) {
+					drawer.draw(theAST);
+				}
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -110,6 +124,14 @@ public class Compiler {
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
+			if (showStats) {
+				summaryStats = new SummaryVisitor();
+				theAST.visit(summaryStats);
+				System.out.println("Summary statistics:");
+				System.out.printf("There are %d binary expressions.\n", summaryStats.getBinaryExpressionsCount());
+				System.out.printf("There are %d if commands.\n", summaryStats.getConditionalCommandsCount());
+				System.out.printf("There are %d while expressions.\n", summaryStats.getWhileCommandsCount());
+			}
 			System.out.println("Compilation was successful.");
 		} else {
 			System.out.println("Compilation was unsuccessful.");
@@ -124,33 +146,22 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
 
 		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+
+	    // this will parse the list of arguments passed into the program, and
+	    // populate the appropriate instance variables
+	    // if the required arguments were not found, it will gracefully exit 
+	    Args.parseOrExit(Compiler.class, args);
+
+		var compiledOK = compileProgram(sourceName, false);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
 		}
 	}
 }

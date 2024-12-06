@@ -348,6 +348,9 @@ public class Interpreter {
 				status = failedZeroDivide;
 			}
 			break;
+		case SQUARE:
+			data[ST - 1] = overflowChecked(data[ST - 1] * data[ST - 1]);
+			break;
 		case MOD:
 			ST = ST - 1;
 			accumulator = data[ST - 1];
