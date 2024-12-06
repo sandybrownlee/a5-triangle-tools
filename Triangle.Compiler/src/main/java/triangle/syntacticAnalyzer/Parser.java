@@ -288,8 +288,17 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
+			} else if (currentToken.kind == Token.Kind.SQUARE) {
+				acceptIt();
+                Vname vAST = new SimpleVname(iAST, commandPos);
+                Operator multiplyOp = new Operator("*", commandPos);
+                Expression lhsExpr = new VnameExpression(vAST, commandPos);
+                Expression rhsExpr = new VnameExpression(vAST, commandPos);
+                Expression multiplicationExpr = new BinaryExpression(lhsExpr, multiplyOp, rhsExpr, commandPos);
+                finish(commandPos);
+                commandAST = new AssignCommand(vAST, multiplicationExpr, commandPos);
+	            
 			} else {
-
 				Vname vAST = parseRestOfVname(iAST);
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();

@@ -27,6 +27,9 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+
 
 /**
  * The main driver class for the Triangle compiler.
@@ -35,12 +38,20 @@ import triangle.treeDrawer.Drawer;
  * @author Deryck F. Brown
  */
 public class Compiler {
-
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	//updated variables using the cli.
+	@Argument(alias = "objectName", description = "Name")
+    static String objectName = "obj.tam";
+    
+    @Argument(alias = "showTree", description = "Display AST", required = false) 
+    static boolean showTree = false;
+    
+    @Argument(alias = "folding", description = "Organisation of AST", required = false)
+    static boolean folding = false;
+    
+    @Argument(alias = "after", description = "Shows AST after folding is finished", required = false)
+    static boolean showTreeAfter = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -99,6 +110,9 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if (showTreeAfter) {
+			        drawer.draw(theAST);
+			    }
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -142,6 +156,7 @@ public class Compiler {
 	}
 	
 	private static void parseArgs(String[] args) {
+	    
 		for (String s : args) {
 			var sl = s.toLowerCase();
 			if (sl.equals("tree")) {
@@ -150,6 +165,8 @@ public class Compiler {
 				objectName = s.substring(3);
 			} else if (sl.equals("folding")) {
 				folding = true;
+			} else if (sl.equals("after")) {
+				showTreeAfter = true;
 			}
 		}
 	}
