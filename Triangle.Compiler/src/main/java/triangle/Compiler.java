@@ -27,7 +27,6 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
-import com.sampullara.cli.Args;
 import com.sampullara.cli.Argument;
 
 
@@ -41,7 +40,7 @@ public class Compiler {
 	/** The filename for the object program, normally obj.tam. */
 	
 	//updated variables using the cli.
-	@Argument(alias = "objectName", description = "Name")
+	@Argument(alias = "objectName", description = "Name of object")
     static String objectName = "obj.tam";
     
     @Argument(alias = "showTree", description = "Display AST", required = false) 
@@ -50,7 +49,7 @@ public class Compiler {
     @Argument(alias = "folding", description = "Organisation of AST", required = false)
     static boolean folding = false;
     
-    @Argument(alias = "after", description = "Shows AST after folding is finished", required = false)
+    @Argument(alias = "showTreeAfter", description = "Shows AST after folding is finished", required = false)
     static boolean showTreeAfter = false;
 
 	private static Scanner scanner;
@@ -157,17 +156,17 @@ public class Compiler {
 	
 	private static void parseArgs(String[] args) {
 	    
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			} else if (sl.equals("after")) {
-				showTreeAfter = true;
-			}
-		}
+        for (String s : args) {
+            var sl = s.toLowerCase();
+            if (sl.equals("tree")) {
+                showTree = true;
+            } else if (sl.startsWith("-o=")) {
+                objectName = s.substring(3);
+            } else if (sl.equals("-folding")) {
+                folding = true;
+            } else if (sl.equals("-after")) {
+                showTreeAfter = true;
+            }
+        }
 	}
 }

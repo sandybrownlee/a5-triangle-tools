@@ -8,15 +8,20 @@ repositories {
     mavenCentral()
 }
 
+task buildJar(type: Jar) {
+    from sourceSets.main.output
+    archiveBaseName.set('triangle-compiler')
+    archiveVersion.set('1.0')
+}
+
+application {
+	mainClass = 'Triangle.Compiler'
+}
 
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 	implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
-}
-
-application {
-	mainClass = 'Triangle.Compiler'
 }
 
 // allow access to programs for unit tests
@@ -25,6 +30,7 @@ sourceSets.test.resources.srcDir file("$rootDir/programs")
 test {
     finalizedBy jacocoTestReport // report is always generated after tests run
 }
+
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
 }
