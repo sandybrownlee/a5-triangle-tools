@@ -51,7 +51,7 @@ final class Token {
 
 	public enum Kind {
 		// literals, identifiers, operators...
-		INTLITERAL("<int>"), CHARLITERAL("<char>"), IDENTIFIER("<identifier>"), OPERATOR("<operator>"),
+		INTLITERAL("<int>"), CHARLITERAL("<char>"), IDENTIFIER("<identifier>"), OPERATOR("<operator>"), SQUARE("**"), 
 
 		// reserved words - keep in alphabetical order for ease of maintenance...
 		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), OF("of"),
@@ -64,7 +64,7 @@ final class Token {
 		LPAREN("("), RPAREN(")"), LBRACKET("["), RBRACKET("]"), LCURLY("{"), RCURLY("}"),
 
 		// special tokens...
-		EOT(""), ERROR("<error>"), SQUARE("**");
+		EOT(""), ERROR("<error>");
 		
 	    public final String spelling;
 		

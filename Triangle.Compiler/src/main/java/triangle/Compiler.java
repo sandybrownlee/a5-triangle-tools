@@ -119,7 +119,7 @@ public class Compiler {
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
 		}
-
+		
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
