@@ -28,6 +28,7 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
 import com.sampullara.cli.Argument;
+import triangle.optimiser.SummaryVisitor;
 
 
 /**
@@ -51,6 +52,9 @@ public class Compiler {
     
     @Argument(alias = "showTreeAfter", description = "Shows AST after folding is finished", required = false)
     static boolean showTreeAfter = false;
+    
+    @Argument(alias = "showStats", description = "Prints the quantity of certain AST nodes", required = false)
+    static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -78,7 +82,7 @@ public class Compiler {
 	 */
 	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
 
-		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
+		System.out.println("\n********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
 		System.out.println("Syntactic Analysis ...");
 		SourceFile source = SourceFile.ofPath(sourceName);
@@ -148,6 +152,12 @@ public class Compiler {
 		String sourceName = args[0];
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		
+        if (showStats) {
+            SummaryVisitor summaryVisitor = new SummaryVisitor();
+            theAST.visit(summaryVisitor);
+            summaryVisitor.printStats();
+        }
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
@@ -166,6 +176,8 @@ public class Compiler {
                 folding = true;
             } else if (sl.equals("-after")) {
                 showTreeAfter = true;
+            } else if (sl.equals("-stats")) {
+                showStats = true;
             }
         }
 	}
