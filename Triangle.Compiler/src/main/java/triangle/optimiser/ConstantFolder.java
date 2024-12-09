@@ -592,15 +592,35 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
+			} else if (o.decl == StdEnvironment.equalDecl) {
+			    foldedValue = (int1 == int2);
+			} else if (o.decl == StdEnvironment.lessDecl) {
+			    foldedValue = (int1 < int2);
+			} else if (o.decl == StdEnvironment.greaterDecl) {
+			    foldedValue = (int1 > int2);
+			} else if (o.decl == StdEnvironment.greaterEqualDecl) {
+			    foldedValue = (int1 >= int2);
+			} else if (o.decl == StdEnvironment.unequalDecl) {
+			    foldedValue = (int1 != int2);
 			}
-
+			
 			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-				ie.type = StdEnvironment.integerType;
+			    IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
+			    IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+			    ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+	            Identifier identifier;
+	            if ((Boolean) foldedValue) {
+	                identifier = new Identifier("true", node1.getPosition());
+	                identifier.decl = StdEnvironment.trueDecl;
+	            } else {
+	                identifier = new Identifier("false", node1.getPosition());
+	                identifier.decl = StdEnvironment.falseDecl;
+	            }
+	            SimpleVname simpleVname = new SimpleVname(identifier, node1.getPosition());
+	            simpleVname.type = StdEnvironment.booleanType;
+	            return new VnameExpression(simpleVname, node1.getPosition());
 			}
 		}
 
