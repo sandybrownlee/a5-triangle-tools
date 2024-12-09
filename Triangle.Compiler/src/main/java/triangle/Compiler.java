@@ -168,7 +168,7 @@ public class Compiler {
 	    
         for (String s : args) {
             var sl = s.toLowerCase();
-            if (sl.equals("tree")) {
+            if (sl.equals("-tree")) {
                 showTree = true;
             } else if (sl.startsWith("-o=")) {
                 objectName = s.substring(3);
