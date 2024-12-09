@@ -27,6 +27,9 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Argument;
+import triangle.optimiser.SummaryVisitor;
+
 
 /**
  * The main driver class for the Triangle compiler.
@@ -35,12 +38,23 @@ import triangle.treeDrawer.Drawer;
  * @author Deryck F. Brown
  */
 public class Compiler {
-
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	//updated variables using the cli.
+	@Argument(alias = "objectName", description = "Name of object")
+    static String objectName = "obj.tam";
+    
+    @Argument(alias = "showTree", description = "Display AST", required = false) 
+    static boolean showTree = false;
+    
+    @Argument(alias = "folding", description = "Organisation of AST", required = false)
+    static boolean folding = false;
+    
+    @Argument(alias = "showTreeAfter", description = "Shows AST after folding is finished", required = false)
+    static boolean showTreeAfter = false;
+    
+    @Argument(alias = "showStats", description = "Prints the quantity of certain AST nodes", required = false)
+    static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -68,7 +82,7 @@ public class Compiler {
 	 */
 	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
 
-		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
+		System.out.println("\n********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
 		System.out.println("Syntactic Analysis ...");
 		SourceFile source = SourceFile.ofPath(sourceName);
@@ -89,9 +103,9 @@ public class Compiler {
 		// scanner.enableDebugging();
 		theAST = parser.parseProgram(); // 1st pass
 		if (reporter.getNumErrors() == 0) {
-			// if (showingAST) {
-			// drawer.draw(theAST);
-			// }
+			if (showingAST) {
+				drawer.draw(theAST);
+			 }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
 			if (showingAST) {
@@ -99,6 +113,9 @@ public class Compiler {
 			}
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if (showTreeAfter) {
+			        drawer.draw(theAST);
+			    }
 			}
 			
 			if (reporter.getNumErrors() == 0) {
@@ -106,7 +123,7 @@ public class Compiler {
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
 		}
-
+		
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
@@ -135,6 +152,12 @@ public class Compiler {
 		String sourceName = args[0];
 		
 		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		
+        if (showStats) {
+            SummaryVisitor summaryVisitor = new SummaryVisitor();
+            theAST.visit(summaryVisitor);
+            summaryVisitor.printStats();
+        }
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
@@ -142,15 +165,20 @@ public class Compiler {
 	}
 	
 	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
+	    
+        for (String s : args) {
+            var sl = s.toLowerCase();
+            if (sl.equals("-tree")) {
+                showTree = true;
+            } else if (sl.startsWith("-o=")) {
+                objectName = s.substring(3);
+            } else if (sl.equals("-folding")) {
+                folding = true;
+            } else if (sl.equals("-after")) {
+                showTreeAfter = true;
+            } else if (sl.equals("-stats")) {
+                showStats = true;
+            }
+        }
 	}
 }

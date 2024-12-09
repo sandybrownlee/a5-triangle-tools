@@ -21,6 +21,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.WhileDoCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -495,8 +496,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 		return null;
 	}
-
-	// TODO uncomment if you've implemented the repeat command
+	
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
 //		ast.C.visit(this);
@@ -506,6 +506,18 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 //		}
 //		return null;
 //	}
+	
+	@Override
+	public AbstractSyntaxTree visitWhileDoCommand(WhileDoCommand ast, Void arg) {
+	    ast.Cmd1.visit(this);
+	    ast.Cmd2.visit(this);
+	    AbstractSyntaxTree replacement = ast.Exp.visit(this);
+	    if (replacement != null) {
+	        ast.Exp = (Expression) replacement;
+	    }
+	    
+	    return null;
+	}
 
 	@Override
 	public AbstractSyntaxTree visitMultipleArrayAggregate(MultipleArrayAggregate ast, Void arg) {
@@ -580,15 +592,35 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
+			} else if (o.decl == StdEnvironment.equalDecl) {
+			    foldedValue = (int1 == int2);
+			} else if (o.decl == StdEnvironment.lessDecl) {
+			    foldedValue = (int1 < int2);
+			} else if (o.decl == StdEnvironment.greaterDecl) {
+			    foldedValue = (int1 > int2);
+			} else if (o.decl == StdEnvironment.greaterEqualDecl) {
+			    foldedValue = (int1 >= int2);
+			} else if (o.decl == StdEnvironment.unequalDecl) {
+			    foldedValue = (int1 != int2);
 			}
-
+			
 			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-				ie.type = StdEnvironment.integerType;
+			    IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
+			    IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+			    ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+	            Identifier identifier;
+	            if ((Boolean) foldedValue) {
+	                identifier = new Identifier("true", node1.getPosition());
+	                identifier.decl = StdEnvironment.trueDecl;
+	            } else {
+	                identifier = new Identifier("false", node1.getPosition());
+	                identifier.decl = StdEnvironment.falseDecl;
+	            }
+	            SimpleVname simpleVname = new SimpleVname(identifier, node1.getPosition());
+	            simpleVname.type = StdEnvironment.booleanType;
+	            return new VnameExpression(simpleVname, node1.getPosition());
 			}
 		}
 

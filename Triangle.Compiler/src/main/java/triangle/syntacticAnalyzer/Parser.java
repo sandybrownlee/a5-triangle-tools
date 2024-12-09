@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.WhileDoCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -288,8 +289,17 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
+			} else if (currentToken.kind == Token.Kind.SQUARE) {
+				acceptIt();
+                Vname vAST = new SimpleVname(iAST, commandPos);
+                Operator multiply = new Operator("*", commandPos);
+                Expression lhsExpr = new VnameExpression(vAST, commandPos);
+                Expression rhsExpr = new VnameExpression(vAST, commandPos);
+                Expression multiplicationExpr = new BinaryExpression(lhsExpr, multiply, rhsExpr, commandPos);
+                finish(commandPos);
+                commandAST = new AssignCommand(vAST, multiplicationExpr, commandPos);
+	            
 			} else {
-
 				Vname vAST = parseRestOfVname(iAST);
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
@@ -336,6 +346,18 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+			
+        case WHILEDO: {
+            acceptIt();
+            Command Cmd1 = parseCommand();
+            accept(Token.Kind.WHILE);
+            Expression Exp = parseExpression();
+            accept(Token.Kind.DO);
+            Command Cmd2 = parseCommand();
+            finish(commandPos);
+            commandAST = new WhileDoCommand(Cmd1, Exp, Cmd2, commandPos);
+        }
+        break;
 
 		case SEMICOLON:
 		case END:
