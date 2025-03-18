@@ -2,17 +2,26 @@ apply plugin: 'java'
 
 sourceCompatibility = 17
 
+repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }  // Added JitPack repository for cli-parser
+}
+
 subprojects.each { subproject ->
-  evaluationDependsOn(subproject.path)
+    evaluationDependsOn(subproject.path)
+}
+
+dependencies {
+    implementation project(':Triangle.Compiler')  // Include the Compiler module
+    implementation 'com.github.rvesse:airline:2.7.0'  // Added cli-parser library
 }
 
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
+
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
-
-  from subprojects.sourceSets.main.output
+    from subprojects.collect { it.sourceSets.main.output }
 }

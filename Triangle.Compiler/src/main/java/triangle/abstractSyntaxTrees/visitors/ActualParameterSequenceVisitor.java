@@ -11,5 +11,4 @@ public interface ActualParameterSequenceVisitor<TArg, TResult> {
 	TResult visitMultipleActualParameterSequence(MultipleActualParameterSequence ast, TArg arg);
 
 	TResult visitSingleActualParameterSequence(SingleActualParameterSequence ast, TArg arg);
-
-}
+	

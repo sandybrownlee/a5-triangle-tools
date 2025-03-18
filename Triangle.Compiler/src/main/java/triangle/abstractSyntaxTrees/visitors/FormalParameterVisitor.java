@@ -14,5 +14,5 @@ public interface FormalParameterVisitor<TArg, TResult> {
 	TResult visitProcFormalParameter(ProcFormalParameter ast, TArg arg);
 
 	TResult visitVarFormalParameter(VarFormalParameter ast, TArg arg);
-
+	TResult visitLoopCommand(LoopCommand ast, TArg arg);
 }
