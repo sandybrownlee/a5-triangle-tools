@@ -1,16 +1,19 @@
 apply plugin: 'java'
 
 sourceCompatibility = 17
+
 repositories {
     mavenCentral()
-      maven { url 'https://jitpack.io'}
+    maven { url 'https://jitpack.io' }  // Added JitPack repository for cli-parser
 }
 
 subprojects.each { subproject ->
-  evaluationDependsOn(subproject.path)
+    evaluationDependsOn(subproject.path)
 }
+
 dependencies {
-    implementation project(':Triangle.Compiler') // Include the Compiler module
+    implementation project(':Triangle.Compiler')  // Include the Compiler module
+    implementation 'com.github.rvesse:airline:2.7.0'  // Added cli-parser library
 }
 
 jar {
@@ -22,7 +25,3 @@ jar {
 
     from subprojects.collect { it.sourceSets.main.output }
 }
-
-
-
-

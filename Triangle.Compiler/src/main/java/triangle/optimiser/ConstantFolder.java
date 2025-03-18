@@ -274,30 +274,26 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 	}
 
 	@Override
-	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
-		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
-		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
-		ast.O.visit(this);
+	public Object visitBinaryExpression(BinaryExpression expr, Object arg) {
+		Object left = expr.E1.visit(this, null);
+		Object right = expr.E2.visit(this, null);
 
-		// if visiting a child node returns something, it's either the original constant
-		// (IntegerLiteral) or a folded version replacing the expression at that child
-		// node
-		// If both child nodes are not null; return a folded version of this
-		// BinaryExpression
-		// Otherwise, at least one child node isn't constant (foldable) so just replace
-		// the
-		// foldable child nodes with their folded equivalent and return null
-		if (replacement1 != null && replacement2 != null) {
-			return foldBinaryExpression(replacement1, replacement2, ast.O);
-		} else if (replacement1 != null) {
-			ast.E1 = (Expression) replacement1;
-		} else if (replacement2 != null) {
-			ast.E2 = (Expression) replacement2;
+		if (left instanceof IntegerLiteral && right instanceof IntegerLiteral) {
+			int leftValue = Integer.parseInt(((IntegerLiteral) left).spelling);
+			int rightValue = Integer.parseInt(((IntegerLiteral) right).spelling);
+
+			switch (expr.O.spelling) {
+				case "=" -> return new BooleanLiteral(leftValue == rightValue);
+				case "<" -> return new BooleanLiteral(leftValue < rightValue);
+				case ">" -> return new BooleanLiteral(leftValue > rightValue);
+				case "<=" -> return new BooleanLiteral(leftValue <= rightValue);
+				case ">=" -> return new BooleanLiteral(leftValue >= rightValue);
+				case "\\=" -> return new BooleanLiteral(leftValue != rightValue);
+			}
 		}
-
-		// if we get here, we can't fold any higher than this level
-		return null;
+		return expr; // Return the original expression if folding is not possible
 	}
+
 
 	@Override
 	public AbstractSyntaxTree visitCallExpression(CallExpression ast, Void arg) {

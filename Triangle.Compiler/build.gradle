@@ -5,8 +5,8 @@ apply plugin: 'jacoco'
 sourceCompatibility = 17
 
 repositories {
-    mavenCentral() // Default repository for standard dependencies
-    maven { url 'https://jitpack.io' } // JitPack repository for third-party libraries
+    mavenCentral()  // Default repository for standard dependencies
+    maven { url 'https://jitpack.io' }  // JitPack must be included here
 }
 
 dependencies {
@@ -24,23 +24,23 @@ sourceSets.test.resources.srcDir file("$rootDir/programs")
 
 // Test configuration
 test {
-    useJUnitPlatform()  // This is important if you are using JUnit 5 (omit if using JUnit 4)
-    finalizedBy jacocoTestReport // Ensures the report is always generated after tests
+    useJUnitPlatform()
+    finalizedBy jacocoTestReport
     testLogging {
-        events "PASSED", "FAILED", "SKIPPED"  // Provides better visibility on test results in the console
+        events "PASSED", "FAILED", "SKIPPED"
     }
 }
 
 // Jacoco report configuration
 jacoco {
-    toolVersion = "0.8.7"  // You can specify the Jacoco version here (latest is recommended)
+    toolVersion = "0.8.7"
 }
 
 jacocoTestReport {
-    dependsOn test // Ensure tests run before generating the report
+    dependsOn test
     reports {
-        html.enabled = true  // Generates the HTML report
-        xml.enabled = false  // Disable XML if not needed
-        csv.enabled = false  // Disable CSV if not needed
+        html.required.set(true)
+        xml.required.set(false)
+        csv.required.set(false)
     }
 }

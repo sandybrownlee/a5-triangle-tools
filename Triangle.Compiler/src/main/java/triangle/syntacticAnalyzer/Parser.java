@@ -280,34 +280,33 @@ public class Parser {
 
 	    switch (currentToken.kind) {
 
-	    case IDENTIFIER: {
-	        // Parse the identifier (e.g., 'a')
-	        Identifier iAST = parseIdentifier();
+			case IDENTIFIER: {
+				Identifier iAST = parseIdentifier();
 
-	        // Check if the next token is '**' (the new operator for squaring)
-	        if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
-	            acceptIt();  // Consume the '**' operator
-	            
-	            // Create an expression for "a * a"
-	            Vname vAST = new SimpleVname(iAST, commandPos);  // Variable 'a'
-	            Expression expr = new BinaryExpression(vAST, new Operator("*"), vAST, commandPos);  // a * a
-	            
-	            finish(commandPos);
-	            
-	            // Create the assignment: "a = a * a"
-	            commandAST = new AssignCommand(vAST, expr, commandPos);
-	        } else {
-	            // Handle normal assignments or other commands
-	            Vname vAST = parseRestOfVname(iAST);
-	            accept(Token.Kind.BECOMES);
-	            Expression eAST = parseExpression();
-	            finish(commandPos);
-	            commandAST = new AssignCommand(vAST, eAST, commandPos);
-	        }
-	    }
-	    break;
+				if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("--")) {
+					acceptIt();  // Consume the '--' operator
 
-	    case BEGIN:
+					// Create an expression for "a = a - 1"
+					Vname vAST = new SimpleVname(iAST, commandPos);  // Variable 'a'
+					Expression decrementExpr = new BinaryExpression(vAST, new Operator("-"),
+							new IntegerExpression(new IntegerLiteral("1", commandPos), commandPos), commandPos);
+
+					finish(commandPos);
+
+					// Create the assignment: "a = a - 1"
+					commandAST = new AssignCommand(vAST, decrementExpr, commandPos);
+				} else {
+					Vname vAST = parseRestOfVname(iAST);
+					accept(Token.Kind.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
+			}
+			break;
+
+
+			case BEGIN:
 	        acceptIt();
 	        commandAST = parseCommand();
 	        accept(Token.Kind.END);
@@ -469,16 +468,16 @@ public class Parser {
 		}
 			break;
 
-		case LCURLY: {
-			acceptIt();
-			RecordAggregate raAST = parseRecordAggregate();
-			accept(Token.Kind.RCURLY);
-			finish(expressionPos);
-			expressionAST = new RecordExpression(raAST, expressionPos);
-		}
+			case LCURLY: { // New case for curly braces
+				acceptIt();  // Accept the opening `{`
+				commandAST = parseCommand();  // Parse the enclosed commands
+				accept(Token.Kind.RCURLY);  // Accept the closing `}`
+				finish(commandPos);
+			}
 			break;
 
-		case IDENTIFIER: {
+
+			case IDENTIFIER: {
 			Identifier iAST = parseIdentifier();
 			if (currentToken.kind == Token.Kind.LPAREN) {
 				acceptIt();
