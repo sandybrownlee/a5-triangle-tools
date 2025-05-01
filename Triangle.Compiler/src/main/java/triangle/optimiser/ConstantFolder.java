@@ -88,10 +88,6 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		OperatorVisitor<Void, AbstractSyntaxTree>, ProgramVisitor<Void, AbstractSyntaxTree>,
 		RecordAggregateVisitor<Void, AbstractSyntaxTree>, TypeDenoterVisitor<Void, AbstractSyntaxTree>,
 		VnameVisitor<Void, AbstractSyntaxTree> {
-	{
-
-	}
-
 	@Override
 	public AbstractSyntaxTree visitConstFormalParameter(ConstFormalParameter ast, Void arg) {
 		ast.I.visit(this);
@@ -273,7 +269,7 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-	@Override
+	
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
 		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
 		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
@@ -571,29 +567,78 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
-	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
-		// the only case we know how to deal with for now is two IntegerExpressions
-		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
-			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
-			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
-			Object foldedValue = null;
-			
-			if (o.decl == StdEnvironment.addDecl) {
-				foldedValue = int1 + int2;
-			}
+	/**
+	 * Try to constant-fold a binary expression.  Handles both integer arithmetic
+	 * and relational operators returning booleans.
+	 *
+	 * @param node1  the folded sub-AST for the left operand (always IntegerExpression)
+	 * @param node2  the folded sub-AST for the right operand (always IntegerExpression)
+	 * @param o      the Operator node carrying the operator spelling and decl
+	 * @return       a new folded AST node (IntegerExpression or VnameExpression) if foldable,
+	 *               or null if not foldable at this level
+	 */
+	/**
+	 * Try to constant-fold a binary expression. Handles both integer arithmetic
+	 * and relational operators returning booleans.
+	 */
+	
+	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1,
+	                                               AbstractSyntaxTree node2,
+	                                               Operator o) {
+	  // Both children must be integer expressions to fold
+	  if (node1 instanceof IntegerExpression && node2 instanceof IntegerExpression) {
+	    int v1 = Integer.parseInt(((IntegerExpression) node1).IL.spelling);
+	    int v2 = Integer.parseInt(((IntegerExpression) node2).IL.spelling);
+	    Object result = null;
+	    String op = o.spelling;
 
-			if (foldedValue instanceof Integer) {
-				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
-				IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
-				ie.type = StdEnvironment.integerType;
-				return ie;
-			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
-			}
-		}
+	    // Arithmetic → Integer result
+	    switch (op) {
+	      case "+":  result = v1 + v2; break;
+	      case "-":  result = v1 - v2; break;
+	      case "*":  result = v1 * v2; break;
+	      case "/":  result = v1 / v2; break;
+	    }
 
-		// any unhandled situation (i.e., not foldable) is ignored
-		return null;
+	    // Relational → Boolean result
+	    if (result == null) {
+	      switch (op) {
+	        case "=":  result = (v1 == v2); break;
+	        case "<":  result = (v1 <  v2); break;
+	        case "<=": result = (v1 <= v2); break;
+	        case ">":  result = (v1 >  v2); break;
+	        case ">=": result = (v1 >= v2); break;
+	        case "\\=":result = (v1 != v2); break;
+	      }
+	    }
+
+	    // If we got an Integer, build an IntegerExpression
+	    if (result instanceof Integer) {
+	      IntegerLiteral il = new IntegerLiteral(result.toString(), node1.getPosition());
+	      IntegerExpression ie = new IntegerExpression(il, node1.getPosition());
+	      ie.type = StdEnvironment.integerType;
+	      return ie;
+	    }
+
+	    // If we got a Boolean, build a VnameExpression for true/false
+	    if (result instanceof Boolean) {
+	      // 1) Make an Identifier "true" or "false"
+	      String boolSpelling = result.toString();
+	      Identifier id = new Identifier(boolSpelling, node1.getPosition());
+	      id.decl = ((Boolean)result)
+	                ? StdEnvironment.trueDecl
+	                : StdEnvironment.falseDecl;
+	      // 2) Wrap it in a SimpleVname and then VnameExpression
+	      SimpleVname v = new SimpleVname(id, node1.getPosition());
+	      VnameExpression ve = new VnameExpression(v, node1.getPosition());
+	      // 3) **Crucial**: set its type so codegen won’t NPE
+	      ve.type = StdEnvironment.booleanType;
+	      return ve;
+	    }
+	  }
+
+	  // not foldable here
+	  return null;
 	}
 
 }

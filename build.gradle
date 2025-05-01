@@ -1,18 +1,35 @@
-apply plugin: 'java'
+ apply plugin: 'java'
 
-sourceCompatibility = 17
+ sourceCompatibility = 17
 
-subprojects.each { subproject ->
-  evaluationDependsOn(subproject.path)
+repositories {
+    mavenCentral()
 }
 
-jar {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    
-    from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
-    }
+dependencies {
 
-
-  from subprojects.sourceSets.main.output
+    implementation 'com.github.spullara.cli-parser:cli-parser:1.1.6'
 }
+
+ subprojects.each { subproject ->
+   evaluationDependsOn(subproject.path)
+ }
+
+ jar {
+   duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+   from {
+
+    // include both root and subprojects’ runtime jars
+    (configurations.runtimeClasspath +
+     subprojects*.configurations.runtimeClasspath.flatten())
+  .collect { it.isDirectory() ? it : zipTree(it) }
+   }
+
+   manifest {
+     attributes(
+       'Main-Class': 'triangle.Compiler'
+     )
+   }
+   from subprojects.sourceSets.main.output
+ }

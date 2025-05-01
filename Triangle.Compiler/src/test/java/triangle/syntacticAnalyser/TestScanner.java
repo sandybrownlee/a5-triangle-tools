@@ -46,7 +46,27 @@ public class TestScanner {
 		assertFalse(Scanner.isOperator('\n'));
 	}
 	
-	
+	@Test
+	public void testIsLetter() {
+	    // lowercase letters
+	    assertTrue(Scanner.isLetter('a'));
+	    assertTrue(Scanner.isLetter('m'));
+	    assertTrue(Scanner.isLetter('z'));
+	    // uppercase letters
+	    assertTrue(Scanner.isLetter('A'));
+	    assertTrue(Scanner.isLetter('M'));
+	    assertTrue(Scanner.isLetter('Z'));
+	    // just outside the ranges
+	    assertFalse(Scanner.isLetter('@'));   // before 'A'
+	    assertFalse(Scanner.isLetter('['));   // after 'Z'
+	    assertFalse(Scanner.isLetter('`'));   // before 'a'
+	    assertFalse(Scanner.isLetter('{'));   // after 'z'
+	    // non‐letters
+	    assertFalse(Scanner.isLetter('0'));
+	    assertFalse(Scanner.isLetter('+'));
+	    assertFalse(Scanner.isLetter('\n'));
+	}
+
 	/* these tests all try to compile example programs... */
 	
 	@Test

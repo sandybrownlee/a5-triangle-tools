@@ -1,5 +1,4 @@
 rootProject.name = 'Triangle-Tools'
-
 include	'Triangle.Compiler'
 include 'Triangle.AbstractMachine'
 include 'Triangle.AbstractMachine.Disassembler'

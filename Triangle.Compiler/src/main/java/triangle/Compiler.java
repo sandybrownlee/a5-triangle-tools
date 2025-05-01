@@ -17,12 +17,15 @@
  */
 
 package triangle;
-
+import com.sampullara.cli.Argument;  //cli imports
+import com.sampullara.cli.Args;  //cliparser imports 
+import java.util.List;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.SummaryVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -35,12 +38,33 @@ import triangle.treeDrawer.Drawer;
  * @author Deryck F. Brown
  */
 public class Compiler {
+	/** 
+     * Name of the output object file 
+     * Can be set with -o; defaults to "obj.tam" 
+     */
+	@Argument(alias = "o", description = "Name of object file (default obj.tam)")
+    static String objectName = "obj.tam";
+	 /** 
+     * If true, draw the AST after parsing and contextual analysis 
+     */
+    @Argument(description = "Show AST before constant folding")
+    static boolean showTree = false;
+    /** 
+     * If true, perform the constant-folding optimization pass 
+     */
+    @Argument(description = "Perform constant folding optimisations")
+    static boolean folding = false;
+    /** 
+     * If true, draw the AST again after constant folding is complete 
+     */
+    @Argument(description = "Show AST after constant folding is complete")
+    static boolean showTreeAfter = false;
+    /** 
+     * If true, print summary stats (#BinaryExpressions, #IfCommands, #WhileCommands) 
+     */
+    @Argument(description = "Show summary statistics (number of BinaryExpressions, IfCommands, WhileCommands)")
+    static boolean showStats = false;
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -100,13 +124,22 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
+			if (showTreeAfter) {
+                drawer.draw(theAST);
+                if (showStats) {
+                    System.out.println("Summary Statistics (before code generation):");
+                    SummaryVisitor visitor = new SummaryVisitor();
+                    theAST.visit(visitor, null);
+                    System.out.println("BinaryExpressions: " + visitor.getBinaryCount());
+                    System.out.println("IfCommands: "          + visitor.getIfCount());
+                    System.out.println("WhileCommands: "       + visitor.getWhileCount());
+                }
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
 			}
 		}
-
+		}
 		boolean successful = (reporter.getNumErrors() == 0);
 		if (successful) {
 			emitter.saveObjectProgram(objectName);
@@ -130,27 +163,16 @@ public class Compiler {
 			System.exit(1);
 		}
 		
-		parseArgs(args);
+		// Parse annotations on static fields and populate options
+        List<String> unparsed = Args.parseOrExit(Compiler.class, args);  
+        if (unparsed.isEmpty()) {
+            System.out.println("Error: No source filename provided.");
+            System.exit(1);
+        }
+        String sourceName = unparsed.get(0);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+        boolean compiledOK = compileProgram(sourceName, objectName, showTree, false);
+        System.exit((!showTree && !showTreeAfter) ? (compiledOK ? 0 : 1) : 0);
+    }
 }
+	

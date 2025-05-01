@@ -273,48 +273,73 @@ public class Parser {
 
 	Command parseSingleCommand() throws SyntaxError {
 		Command commandAST = null; // in case there's a syntactic error
+		    SourcePosition commandPos = new SourcePosition();
+		    start(commandPos);
 
-		SourcePosition commandPos = new SourcePosition();
-		start(commandPos);
+		    switch (currentToken.kind) {
 
-		switch (currentToken.kind) {
+		    case IDENTIFIER: {
+		        Identifier iAST = parseIdentifier();
+		        if (currentToken.kind == Token.Kind.LPAREN) {
+		            acceptIt();
+		            ActualParameterSequence apsAST = parseActualParameterSequence();
+		            accept(Token.Kind.RPAREN);
+		            finish(commandPos);
+		            commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-		case IDENTIFIER: {
-			Identifier iAST = parseIdentifier();
-			if (currentToken.kind == Token.Kind.LPAREN) {
-				acceptIt();
-				ActualParameterSequence apsAST = parseActualParameterSequence();
-				accept(Token.Kind.RPAREN);
-				finish(commandPos);
-				commandAST = new CallCommand(iAST, apsAST, commandPos);
+		        } else {
 
-			} else {
+		            Vname vAST = parseRestOfVname(iAST);
 
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
-		}
-			break;
+		            // ——— Decrement operator support: a-- desugars to a = a - 1 ———
+		            if (currentToken.kind == Token.Kind.OPERATOR
+		                && currentToken.spelling.equals("--")) {
+		                acceptIt();  // consume “--”
+		                IntegerLiteral one = new IntegerLiteral("1", commandPos);
+		                VnameExpression ve = new VnameExpression(vAST, commandPos);
+		                Operator op = new Operator("-", commandPos);
+		                Expression rhs = new BinaryExpression(
+		                    ve, op, new IntegerExpression(one, commandPos), commandPos
+		                );
+		                finish(commandPos);
+		                commandAST = new AssignCommand(vAST, rhs, commandPos);
 
-		case BEGIN:
-			acceptIt();
-			commandAST = parseCommand();
-			accept(Token.Kind.END);
-			break;
+		            } else {
+		                accept(Token.Kind.BECOMES);
+		                Expression eAST = parseExpression();
+		                finish(commandPos);
+		                commandAST = new AssignCommand(vAST, eAST, commandPos);
+		            }
+		        }
+		    }
+		        break;
 
-		case LET: {
-			acceptIt();
-			Declaration dAST = parseDeclaration();
-			accept(Token.Kind.IN);
-			Command cAST = parseSingleCommand();
-			finish(commandPos);
-			commandAST = new LetCommand(dAST, cAST, commandPos);
-		}
-			break;
+		    case BEGIN:
+		        acceptIt();
+		        commandAST = parseCommand();
+		        accept(Token.Kind.END);
+		        break;
 
+		    // ——— Support for { … } blocks as an alternative to BEGIN … END ———
+		    case LCURLY:                              // when we see ‘{’
+		        accept(Token.Kind.LCURLY);           // consume the ‘{’
+		        Command block = parseCommand();      // parse everything inside the braces
+		        accept(Token.Kind.RCURLY);           // consume the matching ‘}’
+		        finish(commandPos);                  // mark the end of this block
+		        commandAST = block;                  //  line hooks it into  AST!
+		        break;
+
+
+		    case LET: {
+		        acceptIt();
+		        Declaration dAST = parseDeclaration();
+		        accept(Token.Kind.IN);
+		        Command cAST = parseSingleCommand();
+		        finish(commandPos);
+		        commandAST = new LetCommand(dAST, cAST, commandPos);
+		    }
+		        break;
+			
 		case IF: {
 			acceptIt();
 			Expression eAST = parseExpression();
@@ -342,10 +367,11 @@ public class Parser {
 		case ELSE:
 		case IN:
 		case EOT:
-
-			finish(commandPos);
-			commandAST = new EmptyCommand(commandPos);
-			break;
+		case RCURLY:      // also treat “}” as the end of this command sequence
+	         finish(commandPos);
+	         commandAST = new EmptyCommand(commandPos);
+	         break;
+			
 
 		default:
 			syntacticError("\"%\" cannot start a command", currentToken.spelling);
