@@ -1,7 +1,7 @@
 /*
  * @(#)Compiler.java                       
  * 
- * Revisions and updates (c) 2022-2024 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * Revisions and updates (c) 2022-2025 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  * 
  * Original release:
  *
@@ -30,9 +30,6 @@ import triangle.treeDrawer.Drawer;
 
 /**
  * The main driver class for the Triangle compiler.
- *
- * @version 2.1 7 Oct 2003
- * @author Deryck F. Brown
  */
 public class Compiler {
 

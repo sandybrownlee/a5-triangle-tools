@@ -1,7 +1,9 @@
 apply plugin: 'java'
 apply plugin: 'application'
 
-sourceCompatibility = 17
+java {
+    sourceCompatibility = 21
+}
 
 dependencies {
 	implementation project(':Triangle.AbstractMachine')

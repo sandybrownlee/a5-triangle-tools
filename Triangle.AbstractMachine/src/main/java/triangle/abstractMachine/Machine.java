@@ -1,7 +1,7 @@
 /*
  * @(#)Machine.java                        
  * 
- * Revisions and updates (c) 2022-2023 Sandy Brownlee. alexander.brownlee@stir.ac.uk
+ * Revisions and updates (c) 2022-2025 Sandy Brownlee. alexander.brownlee@stir.ac.uk
  * 
  * Original release:
  *
