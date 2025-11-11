@@ -329,10 +329,18 @@ public class Parser {
 		}
 			break;
 
-		case BEGIN:
+		case BEGIN: {
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.Kind.END);
+		}
+			break;
+
+		case LCURLY: {
+			acceptIt();                      
+			commandAST = parseCommand();
+			accept(Token.Kind.RCURLY);       
+		}
 			break;
 
 		case LET: {

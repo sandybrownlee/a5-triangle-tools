@@ -66,6 +66,7 @@ final class Token {
 		// special tokens...
 		EOT(""), ERROR("<error>");
 		
+		
 	    public final String spelling;
 		
 	    private Kind(String spelling) {
