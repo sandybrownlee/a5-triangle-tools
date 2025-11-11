@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.WhileDoCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -374,6 +375,19 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+
+		case LOOP: {
+			acceptIt(); 
+			Command command1 = parseCommand();
+			accept(Token.Kind.WHILE);
+			Expression expression = parseExpression();
+			accept(Token.Kind.DO);
+			Command command2 = parseCommand();
+			finish(commandPos);
+			commandAST = new WhileDoCommand(command1, expression, command2, commandPos);
+			break;
+		}
+
 
 		case SEMICOLON:
 		case END:

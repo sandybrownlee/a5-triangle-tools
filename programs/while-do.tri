@@ -1,0 +1,15 @@
+let
+    var a: Integer
+in
+begin
+    a := 0;
+    loop
+        putint(a);
+        puteol();
+        a := a + 1;
+    while a < 3
+    do
+        putint(a);
+        puteol();
+end
+
