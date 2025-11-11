@@ -4,12 +4,15 @@ in
 begin
     a := 0;
     loop
-        putint(a);
-        puteol();
-        a := a + 1;
+        begin
+            putint(a);
+            puteol();
+            a := a + 1;
+        end
     while a < 3
     do
-        putint(a);
-        puteol();
+        begin
+            putint(a);
+            puteol();
+        end
 end
-

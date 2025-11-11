@@ -29,6 +29,8 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import triangle.optimiser.StatisticsCollector;
+
 
 
 /**
@@ -50,6 +52,10 @@ public class Compiler {
 
     @Argument(description = "tree after folding complete", required = false)
     static boolean showTreeAfter = false;
+
+	@Argument(description="shows generated stats")
+    static boolean showStats = false;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -110,6 +116,15 @@ public class Compiler {
 				theAST.visit(new ConstantFolder());
 			}
 			
+			// call new visitor
+			if (showStats) {
+				StatisticsCollector stats = new StatisticsCollector();
+				theAST.visit(stats, null);
+				System.out.println("Program statistics: " 
+				+ stats.getIntegerCount() + " IntegerExpressions, " 
+				+ stats.getCharacterCount() + " CharacterExpressions");
+			}
+					
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
