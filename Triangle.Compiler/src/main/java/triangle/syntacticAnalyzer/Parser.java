@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -290,11 +283,35 @@ public class Parser {
 
 			} else {
 
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+                Vname vAST = parseRestOfVname(iAST);
+
+                if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("++") ){
+                    acceptIt();
+                    IntegerLiteral oneIntLiteral =  new IntegerLiteral("1", commandPos);
+                    Expression one = new IntegerExpression(oneIntLiteral, commandPos);
+                    Operator plus = new Operator("+", commandPos);
+                    Expression variableExpression = new VnameExpression(vAST, commandPos);
+                    Expression increment = new BinaryExpression(variableExpression, plus, one, commandPos);
+
+                    commandAST = new AssignCommand(vAST, increment, commandPos);
+                //Task 3a - add support for ** command
+                }else if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**") ){
+                    acceptIt();
+                    IntegerLiteral twoIntLiteral =  new IntegerLiteral("2", commandPos);
+                    Expression two = new IntegerExpression(twoIntLiteral, commandPos);
+                    Operator multiply = new Operator("*", commandPos);
+                    Expression variableExpression = new VnameExpression(vAST, commandPos);
+                    Expression timesTwo = new BinaryExpression(variableExpression, multiply, two, commandPos);
+
+                    commandAST = new AssignCommand(vAST, timesTwo, commandPos);
+
+                }else {
+                    accept(Token.Kind.BECOMES);
+                    Expression eAST = parseExpression();
+                    finish(commandPos);
+                    commandAST = new AssignCommand(vAST, eAST, commandPos);
+                }
+
 			}
 		}
 			break;
@@ -304,6 +321,12 @@ public class Parser {
 			commandAST = parseCommand();
 			accept(Token.Kind.END);
 			break;
+
+        case LCURLY:
+            acceptIt();
+            commandAST = parseCommand();
+            accept(Token.Kind.RCURLY);
+            break;
 
 		case LET: {
 			acceptIt();
@@ -337,11 +360,34 @@ public class Parser {
 		}
 			break;
 
+        case REPEAT: {
+            acceptIt();
+            Command cAST = parseSingleCommand();
+            accept(Token.Kind.UNTIL);
+            Expression eAST = parseExpression();
+            finish(commandPos);
+            commandAST = new RepeatCommand(eAST, cAST, commandPos);
+        }
+            break;
+
+            case LOOP: {
+                acceptIt();
+                Command c1AST = parseSingleCommand();
+                accept(Token.Kind.WHILE);
+                Expression eAST = parseExpression();
+                accept(Token.Kind.DO);
+                Command c2AST = parseSingleCommand();
+                finish(commandPos);
+                commandAST = new DoWhileDoCommand(c1AST, eAST, c2AST, commandPos);
+            }
+            break;
+
 		case SEMICOLON:
 		case END:
 		case ELSE:
 		case IN:
 		case EOT:
+        case RCURLY:
 
 			finish(commandPos);
 			commandAST = new EmptyCommand(commandPos);

@@ -2,6 +2,8 @@ apply plugin: 'java'
 apply plugin: 'application'
 apply plugin: 'jacoco'
 
+
+
 java {
     sourceCompatibility = 21
 }
@@ -13,11 +15,15 @@ repositories {
 
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
-	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    implementation group: 'com.github.spullara.cli-parser', name: 'cli-parser', version: '1.1.5'
+	implementation group: 'org.apache.commons', name: 'commons-math3', version: '3.0'
+	implementation group: 'com.opencsv', name: 'opencsv', version: '3.7'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+	
 }
 
 application {
-	mainClass = 'Triangle.Compiler'
+	mainClass = 'triangle.Compiler'
 }
 
 // allow access to programs for unit tests
@@ -29,3 +35,8 @@ test {
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
 }
+
+tasks.named('run') {
+    workingDir = rootProject.projectDir
+}
+

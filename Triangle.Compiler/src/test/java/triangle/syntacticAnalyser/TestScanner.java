@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.function.ThrowingRunnable;
 
 import triangle.ErrorReporter;
+import triangle.optimiser.SummaryStatistics;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
@@ -53,34 +54,46 @@ public class TestScanner {
 	public void testHi() {
 		compileExpectSuccess("/hi.tri");
 	}
-	
 
 	@Test
 	public void testHiNewComment() {
-		compileExpectFailure("/hi-newcomment.tri");
+		compileExpectSuccess("/hi-newcomment.tri");
 	}
-	
 
 	@Test
 	public void testHiNewComment2() {
-		compileExpectFailure("/hi-newcomment2.tri");
+		compileExpectSuccess("/hi-newcomment2.tri");
 	}
-	
 
 	@Test
 	public void testBarDemo() {
-		compileExpectFailure("/bardemo.tri");
+		compileExpectSuccess("/bardemo.tri");
 	}
-	
 
 	@Test
 	public void testRepeatUntil() {
-		compileExpectFailure("/repeatuntil.tri");
+		compileExpectSuccess("/repeatuntil.tri");
 	}
-	
-	
-	
-	private void compileExpectSuccess(String filename) {
+
+	@Test
+	public void testAdd() {
+		compileExpectSuccess("/add.tri");
+	}
+
+    @Test
+    public void testIncrement() {compileExpectSuccess("/increment.tri"); }
+
+    @Test
+    public void testDouble() {compileExpectSuccess("/double.tri"); }
+
+    @Test
+    public void testDoWhileDoLoop() {compileExpectSuccess("/loopwhile.tri"); }
+
+    @Test
+    public void testWhileCurly() {compileExpectSuccess("/while-curly.tri"); }
+
+
+    private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
 		// which adds the programs directory to the list of places Java can easily find files
 		// getResource() below searches for a file, which is in /programs 
@@ -115,5 +128,7 @@ public class TestScanner {
 		// currently this program will fail
 		assertNotEquals("Problem compiling " + filename, 0, reporter.getNumErrors());
 	}
+
+
 
 }
