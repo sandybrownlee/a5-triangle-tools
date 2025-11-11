@@ -1,18 +1,38 @@
 apply plugin: 'java'
 
 java {
-    sourceCompatibility = 21
+    sourceCompatibility = 17
 }
 
 subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }
 
+allprojects {
+  repositories {
+    mavenCentral()
+    maven { url 'https://jitpack.io' }
+  }
+}
+
+
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn subprojects.collect { it.tasks.named('jar') }
     
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        def jars = []
+        if (configurations.findByName('runtimeClasspath') != null) {
+            jars += configurations.runtimeClasspath
+        }
+        subprojects.each { sp ->
+            def rc = sp.configurations.findByName('runtimeClasspath')
+            if (rc != null) {
+                jars += rc
+            }
+        }
+        def existing = jars.findAll { it.exists() }
+        existing.collect { it.isDirectory() ? it : zipTree(it) }
     }
 
 

@@ -23,10 +23,17 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.Hoister;
+import triangle.optimiser.StatsVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+
+import java.util.List;
+import java.util.ArrayList;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
@@ -34,11 +41,22 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+	@Argument(description = "Name of output object file", alias = "o")
 	static String objectName = "obj.tam";
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	@Argument(description = "Show AST after contextual analysis", alias = "t")
+	static Boolean showTree = false;
+	@Argument(description = "Enable constant folding", alias = "f")
+	static Boolean folding = false;
+	@Argument(description = "Show AST after constant folding", alias = "a")
+	static Boolean showTreeAfter = false;
+	@Argument(description = "Show AST statistics (IntegerExpressions, CharacterExpressions)", alias = "s")
+	static Boolean showStats = false;
+	@Argument(description = "Enable hoisting (loop-invariant code motion) after folding", alias = "h")
+	static Boolean hoisting = false;
 
+	// CLI managed via cli-parser; annotated fields are parsed via Args.parseOrExit.
+	
 	private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
@@ -94,9 +112,31 @@ public class Compiler {
 			if (showingAST) {
 				drawer.draw(theAST);
 			}
+
+			// Optional: statistics (Task 6)
+			if (showStats) {
+				StatsVisitor stats = new StatsVisitor();
+				theAST.visit(stats); // walk full AST
+				System.out.println("Stats: IntegerExpressions=" + stats.getIntegerCount() + ", CharacterExpressions=" + stats.getCharacterCount());
+			}
+
+			// Optional: constant folding (Task 7)
 			if (folding) {
 				theAST.visit(new ConstantFolder());
+				if (showTreeAfter) {
+					drawer.draw(theAST);
+				}
 			}
+
+			// Optional: hoisting (Task 8) - after constant folding
+			if (hoisting) {
+				if (theAST != null && theAST.C != null) {
+					theAST.C = Hoister.transform(theAST.C);
+				}
+			}
+				
+			// Re-run contextual analysis to ensure types/decls are set after AST transforms
+			checker.check(theAST);
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -121,33 +161,55 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		
+		// Normalize GNU-style --options to cli-parser -options and split --key=value into tokens
+		String[] norm = normalizeArgs(args);
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+		// Populate annotated static fields; returns remaining non-option args (source filename)
+		List<String> rest = Args.parseOrExit(Compiler.class, norm);
+
+		if (rest.size() < 1) {
+			System.out.println("Usage: tc <filename> [-objectName obj.tam] [-showTree] [-folding] [-showTreeAfter] [-showStats] [-hoisting]");
 			System.exit(1);
 		}
-		
-		parseArgs(args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		String sourceName = rest.get(0);
 
-		if (!showTree) {
+		boolean compiledOK = compileProgram(sourceName, objectName, showTree, false);
+
+		// Keep process alive if any tree window is requested
+		if (!showTree && !showTreeAfter) {
 			System.exit(compiledOK ? 0 : 1);
 		}
 	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
+
+	/**
+	 * Convert --long and --key=value to -long and separate tokens for cli-parser.
+	 */
+	private static String[] normalizeArgs(String[] args) {
+		List<String> out = new ArrayList<>(args.length);
+		for (String a : args) {
+			if (a.startsWith("--")) {
+				String s = a.substring(2);
+				int eq = s.indexOf('=');
+				if (eq >= 0) {
+					String key = s.substring(0, eq);
+					String val = s.substring(eq + 1);
+					out.add("-" + key);
+					if (!val.isEmpty()) out.add(val);
+				} else {
+					out.add("-" + s);
+				}
+			} else if (a.startsWith("-") && a.contains("=")) {
+				int eq = a.indexOf('=');
+				String key = a.substring(1, eq);
+				String val = a.substring(eq + 1);
+				out.add("-" + key);
+				if (!val.isEmpty()) out.add(val);
+			} else {
+				out.add(a);
 			}
 		}
+		return out.toArray(new String[0]);
 	}
 }

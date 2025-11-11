@@ -3,7 +3,7 @@ apply plugin: 'application'
 apply plugin: 'jacoco'
 
 java {
-    sourceCompatibility = 21
+    sourceCompatibility = 17
 }
 
 repositories {
@@ -13,11 +13,12 @@ repositories {
 
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
+	implementation 'com.github.spullara.cli-parser:cli-parser:1.1.5'
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
 application {
-	mainClass = 'Triangle.Compiler'
+	mainClass = 'triangle.Compiler'
 }
 
 // allow access to programs for unit tests

@@ -291,10 +291,29 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+				// Support shorthand doubling: a**;  =>  a := a * 2;
+				if (currentToken.kind == Token.Kind.OPERATOR && "**".equals(currentToken.spelling)) {
+					// consume '**'
+					acceptIt();
+					SourcePosition rhsPos = new SourcePosition();
+					start(rhsPos);
+					// Build RHS: (vAST) * 2
+					Operator timesOp = new Operator("*", rhsPos);
+					IntegerLiteral twoLit = new IntegerLiteral("2", rhsPos);
+					Expression rhs = new BinaryExpression(
+						new VnameExpression(vAST, rhsPos),
+						timesOp,
+						new IntegerExpression(twoLit, rhsPos),
+						rhsPos
+					);
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, rhs, commandPos);
+				} else {
+					accept(Token.Kind.BECOMES);
+					Expression eAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, eAST, commandPos);
+				}
 			}
 		}
 			break;
@@ -303,6 +322,12 @@ public class Parser {
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.Kind.END);
+			break;
+
+		case LCURLY:
+			acceptIt();
+			commandAST = parseCommand();
+			accept(Token.Kind.RCURLY);
 			break;
 
 		case LET: {
@@ -315,6 +340,25 @@ public class Parser {
 		}
 			break;
 
+		case LOOP: {
+			acceptIt(); // consume 'loop'
+			// parse C1
+			Command c1AST = parseSingleCommand();
+			// 'while' E 'do' C2
+			accept(Token.Kind.WHILE);
+			Expression eAST = parseExpression();
+			accept(Token.Kind.DO);
+			Command c2AST = parseSingleCommand();
+			// desugar:
+			// C1;
+			// while E do (C2; C1)
+			finish(commandPos);
+			Command bodyAST = new SequentialCommand(c2AST, c1AST, commandPos);
+			WhileCommand whileAST = new WhileCommand(eAST, bodyAST, commandPos);
+			commandAST = new SequentialCommand(c1AST, whileAST, commandPos);
+		}
+			break;
+		
 		case IF: {
 			acceptIt();
 			Expression eAST = parseExpression();
@@ -341,6 +385,7 @@ public class Parser {
 		case END:
 		case ELSE:
 		case IN:
+		case RCURLY:
 		case EOT:
 
 			finish(commandPos);
