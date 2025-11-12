@@ -176,12 +176,16 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 
 	@Override
 	public Void visitWhileCommand(WhileCommand ast, Frame frame) {
-		var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);
+		/**var jumpAddr = emitter.emit(OpCode.JUMP, 0, Register.CB, 0);*/
 		var loopAddr = emitter.getNextInstrAddr();
-		ast.C.visit(this, frame);
-		emitter.patch(jumpAddr);
-		ast.E.visit(this, frame);
-		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
+		ast.C1.visit(this, frame); /**Run C1 first */
+		/**emitter.patch(jumpAddr); */
+		ast.E.visit(this, frame); /** Test E */
+		var exitJump = emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, 0);
+        ast.C2.visit(this, frame); /**Run C2 if E is true */
+        emitter.emit(OpCode.JUMP, 0, Register.CB, loopAddr); /**Loop back through */
+        int afterLoopAddr = emitter.getNextInstrAddr();
+        emitter.patch(exitJump, afterLoopAddr); /**Patch exit */
 		return null;
 	}
 

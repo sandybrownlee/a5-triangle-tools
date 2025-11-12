@@ -77,10 +77,39 @@ public class TestScanner {
 	public void testRepeatUntil() {
 		compileExpectFailure("/repeatuntil.tri");
 	}
-	
-	
-	
-	private void compileExpectSuccess(String filename) {
+
+    /** Tests the custom '**' */
+    /** The test compiles the 'double.tri' program */
+    @Test
+    public void testDouble(){
+        compileExpectSuccess("/double.tri");
+    }
+
+    /** Tests the new 'loop C1 while E do C2' construct introduced in Task 4
+    The loop-while command structure where C1 executes one more time than C2 */
+    @Test
+    public void testWhileCom(){
+        compileExpectSuccess("/loopwhile.tri");
+    }
+
+    /** Tests support for '{ ... }' blocks as implemented in Task 5
+    The test compiles 'whilecurly.tri' which contains curly-brace command blocks */
+    @Test
+    public void testWhileCurly(){
+        compileExpectSuccess("/whilecurly.tri");
+    }
+
+    /**Tests Boolean for task 7*/
+    @Test
+    public void testBooleanConstantFolding() {
+        compileExpectSuccess("/booleans-to-fold.tri");
+    }
+
+
+
+
+
+    private void compileExpectSuccess(String filename) {
 		// build.gradle has a line sourceSets.test.resources.srcDir file("$rootDir/programs")
 		// which adds the programs directory to the list of places Java can easily find files
 		// getResource() below searches for a file, which is in /programs 

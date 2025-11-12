@@ -28,18 +28,47 @@ import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
+
 /**
  * The main driver class for the Triangle compiler.
  */
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
+    /**  These are the original
 	static String objectName = "obj.tam";
-	
 	static boolean showTree = false;
 	static boolean folding = false;
+    */
+    @Argument(alias = "s", description = "Source file to be compiled", required = true)
+    static String sourceName;
 
-	private static Scanner scanner;
+    /** Task 2b using cli-parser */
+    @Argument(alias = "o", description = "Object file name", required = false)
+    static String objectName = "obj.tam";
+
+    @Argument(alias = "st", description = "Show tree AST")
+    static boolean showTree = false;
+
+    @Argument(alias = "f", description = "Enable folding")
+    static boolean folding = false;
+
+    /** Task 2c using cli-parser */
+    @Argument(alias = "sta", description = "Show AST after folding")
+    static boolean showTreeAfter = false;
+
+    @Argument(alias = "ss", description = "Show compilers stats")
+    static boolean showStats = false;
+
+    /**
+     @Argument(alias = "hoisting", description = "Hoisting expressions")
+     static boolean hoisting = false;
+     */
+
+
+    private static Scanner scanner;
 	private static Parser parser;
 	private static Checker checker;
 	private static Encoder encoder;
@@ -63,7 +92,7 @@ public class Compiler {
 	 * @return true iff the source program is free of compile-time errors, otherwise
 	 *         false.
 	 */
-	static boolean compileProgram(String sourceName, String objectName, boolean showingAST, boolean showingTable) {
+    boolean compileProgram() {
 
 		System.out.println("********** " + "Triangle Compiler (Java Version 2.1)" + " **********");
 
@@ -91,16 +120,35 @@ public class Compiler {
 			// }
 			System.out.println("Contextual Analysis ...");
 			checker.check(theAST); // 2nd pass
-			if (showingAST) {
-				drawer.draw(theAST);
-			}
+			if (showTree){
+                drawer.draw(theAST);
+            }
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
-			
-			if (reporter.getNumErrors() == 0) {
+            if(showTreeAfter){
+                System.out.println("AST after folding");
+                drawer.draw(theAST);
+            }
+
+
+             if(showStats){
+                    CompilerStatistics stats = new CompilerStatistics();
+                    theAST.visit(stats);
+                    stats.displayCompilerStatistics();
+             }
+
+             /**
+             if(hoisting){
+                     Hoisting hoisting new Hoisting();
+             }
+             */
+
+
+
+            if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
-				encoder.encodeRun(theAST, showingTable); // 3rd pass
+				encoder.encodeRun(theAST, false); // 3rd pass
 			}
 		}
 
@@ -121,24 +169,20 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
-
+        /**
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-objectName=obj.tam] [-showTree] [-folding] [-showTreeAfter]");
 			System.exit(1);
-		}
-		
-		parseArgs(args);
+		}*/
+        /**parseArgs(args);*/
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
-
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
+        Compiler compiler = new Compiler();
+        Args.parseOrExit(compiler, args);
+		var compiledOK = compiler.compileProgram();
+        System.exit(compiledOK ? 0 : 1);
 	}
 	
-	private static void parseArgs(String[] args) {
+	/** private static void parseArgs(String[] args) {
 		for (String s : args) {
 			var sl = s.toLowerCase();
 			if (sl.equals("tree")) {
@@ -149,5 +193,5 @@ public class Compiler {
 				folding = true;
 			}
 		}
-	}
+	} */
 }

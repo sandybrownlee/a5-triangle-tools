@@ -13,6 +13,8 @@ repositories {
 
 dependencies {
 	implementation project(':Triangle.AbstractMachine')
+    //Added cli-parser for 2a.
+    implementation 'com.github.spullara.cli-parser:cli-parser:1.1.6'
 	testImplementation group: 'junit', name: 'junit', version: '4.13.2'
 }
 
@@ -28,4 +30,8 @@ test {
 }
 jacocoTestReport {
     dependsOn test // tests are required to run before generating the report
+}
+
+tasks.withType(Copy) {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

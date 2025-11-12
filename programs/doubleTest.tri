@@ -1,0 +1,7 @@
+#Test unit for part 3b
+
+let
+    var a := 5
+in
+    a**;
+end

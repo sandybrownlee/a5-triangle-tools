@@ -288,14 +288,40 @@ public class Parser {
 				finish(commandPos);
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
-			} else {
+			} else if (currentToken.kind == Token.Kind.BECOMES){
 
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
+                Vname vAST = parseRestOfVname(iAST);
+                accept(Token.Kind.BECOMES);
+                Expression eAST = parseExpression();
+                finish(commandPos);
+                commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+            } else if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")){
+                /** Parse rest of variable name */
+                /** Vname vAST = parseRestOfVname(iAST);
+                acceptIt(); */
+                SourcePosition assignPos = new SourcePosition();
+                start(commandPos);
+
+                /** Left side of multiplication */
+                Vname vAST = parseRestOfVname(iAST);
+                VnameExpression leftExpr = new VnameExpression(vAST, vAST.getPosition());
+
+                /** Right hand side literal 2 */
+                IntegerLiteral twoLiteral = new IntegerLiteral("2", commandPos);
+                IntegerExpression rightExpr = new IntegerExpression(twoLiteral, commandPos);
+
+                /** Multiplication operator */
+                Operator multiplyOp = new Operator("*", commandPos);
+
+                /** Build binary expression */
+                BinaryExpression multiplyExpr = new BinaryExpression(leftExpr, multiplyOp, rightExpr, commandPos);
+
+                finish(commandPos);
+                commandAST = new AssignCommand(vAST, multiplyExpr, commandPos);
+
+                acceptIt();
+            }
 		}
 			break;
 
@@ -305,7 +331,27 @@ public class Parser {
 			accept(Token.Kind.END);
 			break;
 
-		case LET: {
+        case LCURLY:
+            acceptIt();
+
+            List<Command> commands = new ArrayList<>();
+
+            /**Keep parsing commands until '}'*/
+            while (currentToken.kind != Token.Kind.RCURLY) {
+                commands.add(parseSingleCommand());
+            }
+
+            accept(Token.Kind.RCURLY);
+
+            /**If there is only one command, use it, otherwise wrap in SequentialCommand*/
+            if (commands.size() == 1) {
+                commandAST = commands.get(0);
+            } else {
+                commandAST = new SequentialCommand(commands, commandPos);
+            }
+            break;
+
+            case LET: {
 			acceptIt();
 			Declaration dAST = parseDeclaration();
 			accept(Token.Kind.IN);
@@ -337,8 +383,21 @@ public class Parser {
 		}
 			break;
 
+        case LOOP: {
+            acceptIt();
+            Command c1AST = parseSingleCommand();
+            accept(Token.Kind.WHILE);
+            Expression eAST = parseExpression();
+            accept(Token.Kind.DO);
+            Command c2AST = parseSingleCommand();
+            finish(commandPos);
+            commandAST = new LoopWhileCommand(c1AST, eAST, c2AST, commandPos);
+        }
+            break;
+
 		case SEMICOLON:
 		case END:
+        case RCURLY:
 		case ELSE:
 		case IN:
 		case EOT:

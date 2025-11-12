@@ -180,10 +180,11 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 	@Override
 	public Void visitWhileCommand(WhileCommand ast, Void arg) {
-		var eType = ast.E.visit(this);
-
-		checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
-		ast.C.visit(this);
+        ast.C1.visit(this); /** Visit and validate the first command block*/
+		var eType = ast.E.visit(this); /** Visit the condition expression (E) and retrieve its evaluated type*/
+        /**Ensure the condition expression is of Boolean type. If not, an error message is reported to the user*/
+        checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+		ast.C2.visit(this); /**Visit and validate the second command block */
 
 		return null;
 	}

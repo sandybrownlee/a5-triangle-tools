@@ -275,9 +275,30 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitBinaryExpression(BinaryExpression ast, Void arg) {
-		AbstractSyntaxTree replacement1 = ast.E1.visit(this);
-		AbstractSyntaxTree replacement2 = ast.E2.visit(this);
+        /** Visit the left-hand and right-hand sides of the binary expression
+        These visits recursively simplify or fold sub-expressions if possible*/
+        Expression e1 = ast.E1.visit(this, null);
+        Expression e2 = ast.E2.visit(this, null);
 		ast.O.visit(this);
+
+        /** Check if both sides of the expression are integer literals
+        Only constant integer values can be folded at compile time */
+        if (e1 instanceof IntegerExpression && e2 instanceof IntegerExpression) {
+            int n1 = ((IntegerExpression)e1).value;
+            int n2 = ((IntegerExpression)e2).value;
+
+            /** Perform constant folding based on the operator
+            Replace the binary operation with a single IntegerExpression result */
+            switch (ast.O.spelling) {
+                case "+":
+                    return new IntegerExpression(n1 + n2, ast.position);
+                case "-":
+                    return new IntegerExpression(n1 - n2, ast.position);
+                case "*":
+                    return new IntegerExpression(n1 * n2, ast.position);
+                case "/":
+                    return new IntegerExpression(n1 / n2, ast.position);
+            }
 
 		// if visiting a child node returns something, it's either the original constant
 		// (IntegerLiteral) or a folded version replacing the expression at that child
@@ -488,11 +509,12 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	@Override
 	public AbstractSyntaxTree visitWhileCommand(WhileCommand ast, Void arg) {
-		ast.C.visit(this);
+		ast.C1.visit(this);
 		AbstractSyntaxTree replacement = ast.E.visit(this);
 		if (replacement != null) {
 			ast.E = (Expression) replacement;
 		}
+        ast.C2.visit(this);
 		return null;
 	}
 

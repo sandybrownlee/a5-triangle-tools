@@ -91,6 +91,20 @@ public final class Scanner {
 
 	private Token.Kind scanToken() {
 
+        //Create shortcut a**;
+        if(currentChar == '*'){
+            takeIt();
+            if(currentChar == '*'){
+                takeIt();
+                if(currentChar == ';'){
+                    takeIt();
+                    return Token.Kind.DOUBLE;
+                } else{
+                    return Token.Kind.OPERATOR;
+                }
+            }
+        }
+
 		switch (currentChar) {
 
 		case 'a':

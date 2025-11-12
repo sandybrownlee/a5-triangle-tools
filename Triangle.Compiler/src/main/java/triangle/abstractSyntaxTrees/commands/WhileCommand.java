@@ -24,10 +24,11 @@ import triangle.syntacticAnalyzer.SourcePosition;
 
 public class WhileCommand extends Command {
 
-	public WhileCommand(Expression eAST, Command cAST, SourcePosition position) {
+	public WhileCommand(Expression eAST, Command c1AST, Command c2AST, SourcePosition position) {
 		super(position);
 		E = eAST;
-		C = cAST;
+		C1 = c1AST;
+        C2 = c2AST;
 	}
 
 	public <TArg, TResult> TResult visit(CommandVisitor<TArg, TResult> v, TArg arg) {
@@ -35,5 +36,6 @@ public class WhileCommand extends Command {
 	}
 
 	public Expression E;
-	public final Command C;
+	public final Command C1;
+    public final Command C2;
 }
