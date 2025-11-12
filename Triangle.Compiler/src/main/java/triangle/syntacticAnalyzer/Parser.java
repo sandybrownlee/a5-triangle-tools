@@ -291,6 +291,24 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
+
+                if (currentToken.kind == Token.Kind.STARSTAR)
+                {
+                    acceptIt();
+
+                    SourcePosition pos = new SourcePosition();
+                    finish(pos);
+
+                    Operator op = new Operator("*", pos);
+                    Expression rhs = new BinaryExpression(
+                            new VnameExpression(vAST, pos),
+                            op,
+                            new IntegerExpression(new IntegerLiteral("2", pos), pos),
+                            pos
+                    );
+                    commandAST = new AssignCommand(vAST, rhs, pos);
+                    return commandAST;
+                }
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
@@ -304,6 +322,12 @@ public class Parser {
 			commandAST = parseCommand();
 			accept(Token.Kind.END);
 			break;
+
+        case LCURLY:
+            acceptIt();
+            commandAST = parseCommand();
+            accept(Token.Kind.RCURLY);
+            break;
 
 		case LET: {
 			acceptIt();
@@ -331,16 +355,32 @@ public class Parser {
 			acceptIt();
 			Expression eAST = parseExpression();
 			accept(Token.Kind.DO);
-			Command cAST = parseSingleCommand();
+			Command cAST = parseCommand();
 			finish(commandPos);
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
 
+            case LOOP:
+            {
+                acceptIt(); // consume 'loop'
+                Command c1AST = parseSingleCommand();
+                accept(Token.Kind.WHILE);
+                Expression eAST = parseExpression();
+                accept(Token.Kind.DO);
+                Command c2AST = parseSingleCommand();
+                finish(commandPos);
+
+                WhileCommand whileAST = new WhileCommand(eAST, c2AST, commandPos);
+                commandAST = new SequentialCommand(c1AST, whileAST, commandPos);
+                break;
+            }
+
 		case SEMICOLON:
 		case END:
 		case ELSE:
 		case IN:
+        case RCURLY:
 		case EOT:
 
 			finish(commandPos);

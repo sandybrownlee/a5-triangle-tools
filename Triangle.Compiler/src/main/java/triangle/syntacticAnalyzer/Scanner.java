@@ -168,6 +168,15 @@ public final class Scanner {
 		case '+':
 		case '-':
 		case '*':
+            takeIt();
+            if (currentChar == '*')
+            {
+                takeIt();
+                return Token.Kind.STARSTAR;
+            } else
+            {
+                return Token.Kind.OPERATOR;
+            }
 		case '/':
 		case '=':
 		case '<':
