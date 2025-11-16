@@ -1,0 +1,8 @@
+let
+  var a : Integer
+in
+  begin
+    a := 21;
+    a**;
+    putint(a); puteol()
+  end

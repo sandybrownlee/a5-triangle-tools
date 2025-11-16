@@ -21,6 +21,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.WhileWithTestCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -495,6 +496,17 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 		return null;
 	}
+	
+	@Override
+	public AbstractSyntaxTree visitWhileWithTestCommand(WhileWithTestCommand ast, Void arg) {
+		ast.C1.visit(this);
+		AbstractSyntaxTree replacement = ast.E.visit(this);
+		if (replacement != null) {
+			ast.E = (Expression) replacement;
+		}
+		ast.C2.visit(this);
+		return null;
+	}
 
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
@@ -573,6 +585,9 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 
 	public AbstractSyntaxTree foldBinaryExpression(AbstractSyntaxTree node1, AbstractSyntaxTree node2, Operator o) {
 		// the only case we know how to deal with for now is two IntegerExpressions
+		//NEW
+		//I have added the case needed for task 7
+		//It now also works with expressions that return a boolean ( = < <= > >= \=)
 		if ((node1 instanceof IntegerExpression) && (node2 instanceof IntegerExpression)) {
 			int int1 = (Integer.parseInt(((IntegerExpression) node1).IL.spelling));
 			int int2 = (Integer.parseInt(((IntegerExpression) node2).IL.spelling));
@@ -581,6 +596,30 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
 			}
+			
+			else if (o.decl == StdEnvironment.equalDecl) {
+				foldedValue = (int1 == int2);
+			}
+			
+			else if (o.decl == StdEnvironment.unequalDecl) {
+				foldedValue = (int1 != int2);
+			}
+			
+			else if (o.decl == StdEnvironment.lessDecl) {
+				foldedValue = (int1 < int2);
+			}
+			
+			else if (o.decl == StdEnvironment.notlessDecl) {
+				foldedValue = (int1 >= int2);
+			}
+			
+			else if (o.decl == StdEnvironment.greaterDecl) {
+				foldedValue = (int1 > int2);
+			}
+			
+			else if (o.decl == StdEnvironment.notgreaterDecl) {
+				foldedValue = (int1 <= int2);
+			}
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
@@ -588,7 +627,19 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				/*HANDLED IN TASK 7*/
+				boolean b = (Boolean) foldedValue;
+				String spelling = b ? "true" : "false";
+				
+				Identifier id = new Identifier(spelling, node1.getPosition());
+				id.decl = b ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+				id.type = StdEnvironment.booleanType;
+				
+				SimpleVname sv = new SimpleVname(id, node1.getPosition());
+				VnameExpression ve = new VnameExpression(sv, node1.getPosition());
+				ve.type = StdEnvironment.booleanType;
+				
+				return ve;
 			}
 		}
 

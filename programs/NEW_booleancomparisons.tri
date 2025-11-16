@@ -1,0 +1,31 @@
+let
+  var a : Integer
+in
+  begin
+    a := 10 + 20 * 2 / 3;
+    putint(a); puteol();
+
+    if 3 = 4
+    then putint(1)
+    else putint(0);
+    
+    if 4 \= 3
+    then putint(1)
+    else putint(0);
+
+    if 1 < 2 
+    then putint(1)
+    else putint(0);
+
+    if 5 >= 5
+    then putint(1)
+    else putint(0);
+ 
+    if 2 > 3
+    then putint(1)
+    else putint(0);
+
+    if 6 <= a
+    then putint(1)
+    else putint(0);
+  end

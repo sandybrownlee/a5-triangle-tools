@@ -23,21 +23,33 @@ import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
 import triangle.contextualAnalyzer.Checker;
 import triangle.optimiser.ConstantFolder;
+import triangle.optimiser.StatisticsVisitor;
 import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 
 /**
  * The main driver class for the Triangle compiler.
  */
 public class Compiler {
 
-	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
-	
-	static boolean showTree = false;
-	static boolean folding = false;
+	@Argument(description = "Name of output .tam file", alias = "o")
+    private static String objectName = "obj.tam";
+
+    @Argument(description = "Show AST after contextual analysis")
+    private static boolean showTree = false;
+
+    @Argument(description = "Perform constant folding optimisation")
+    private static boolean folding = false;
+
+    @Argument(description = "Show AST again after folding")
+    private static boolean showTreeAfter = false;
+    
+    @Argument(description = "Show statistics/count of Integer/Character expressions")
+    private static boolean showStats = false;
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -97,6 +109,11 @@ public class Compiler {
 			if (folding) {
 				theAST.visit(new ConstantFolder());
 			}
+			if (showStats) {
+				StatisticsVisitor statsVisitor = new StatisticsVisitor();
+				theAST.visit(statsVisitor);
+				statsVisitor.printStatistics();
+			}
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -116,38 +133,24 @@ public class Compiler {
 
 	/**
 	 * Triangle compiler main program.
-	 *
-	 * @param args the only command-line argument to the program specifies the
-	 *             source filename.
 	 */
 	public static void main(String[] args) {
 
-		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
-			System.exit(1);
-		}
-		
-		parseArgs(args);
+        Args.parseOrExit(Compiler.class, args);
 
-		String sourceName = args[0];
-		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+        if (args.length == 0) {
+            System.out.println("Usage: tc <sourcefile> [--objectName obj.tam] [--showTree] [--folding] [--showTreeAfter] [--showStats]");
+            System.exit(1);
+        }
 
-		if (!showTree) {
-			System.exit(compiledOK ? 0 : 1);
-		}
-	}
-	
-	private static void parseArgs(String[] args) {
-		for (String s : args) {
-			var sl = s.toLowerCase();
-			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
-		}
-	}
+        String sourceName = args[0];
+
+        boolean compiledOK = compileProgram(sourceName, objectName, showTree, false);
+
+        if (folding && showTreeAfter && reporter.getNumErrors() == 0) {
+            drawer.draw(theAST);
+        }
+
+        System.exit(compiledOK ? 0 : 1);
+    }
 }
