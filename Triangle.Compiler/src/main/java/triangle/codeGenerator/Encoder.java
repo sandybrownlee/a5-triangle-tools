@@ -117,6 +117,8 @@ import triangle.codeGenerator.entities.TypeRepresentation;
 import triangle.codeGenerator.entities.UnknownAddress;
 import triangle.codeGenerator.entities.UnknownRoutine;
 import triangle.codeGenerator.entities.UnknownValue;
+import triangle.abstractSyntaxTrees.commands.DoubleClickCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 
 public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		ActualParameterSequenceVisitor<Frame, Integer>, ArrayAggregateVisitor<Frame, Integer>,
@@ -184,6 +186,40 @@ public final class Encoder implements ActualParameterVisitor<Frame, Integer>,
 		emitter.emit(OpCode.JUMPIF, Machine.trueRep, Register.CB, loopAddr);
 		return null;
 	}
+
+    @Override
+    public Void visitDoubleClickCommand(DoubleClickCommand ast, Frame frame) {
+        int valSize = Machine.integerSize;
+
+        encodeFetch(ast.V, frame, valSize);
+
+        emitter.emit(OpCode.LOADL, 2);
+
+        emitter.emit(OpCode.CALL, Register.PB, Primitive.MULT);
+
+        encodeStore(ast.V, frame.expand(valSize), valSize);
+
+        return null;
+    }
+
+    @Override
+    public Void visitLoopCommand(LoopCommand ast, Frame frame) {
+        var startAddr = emitter.getNextInstrAddr();
+
+        ast.C1.visit(this, frame);
+
+        ast.E.visit(this, frame);
+
+        var jumpifAddr = emitter.emit(OpCode.JUMPIF, Machine.falseRep, Register.CB, 0);
+
+        ast.C2.visit(this, frame);
+
+        emitter.emit(OpCode.JUMP, 0, Register.CB, startAddr);
+
+        emitter.patch(jumpifAddr);
+
+        return null;
+    }
 
 	// Expressions
 	@Override

@@ -21,13 +21,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
-import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
-import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
-import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
-import triangle.abstractSyntaxTrees.declarations.ProcDeclaration;
-import triangle.abstractSyntaxTrees.declarations.SequentialDeclaration;
-import triangle.abstractSyntaxTrees.declarations.UnaryOperatorDeclaration;
-import triangle.abstractSyntaxTrees.declarations.VarDeclaration;
+import triangle.abstractSyntaxTrees.declarations.*;
 import triangle.abstractSyntaxTrees.expressions.ArrayExpression;
 import triangle.abstractSyntaxTrees.expressions.BinaryExpression;
 import triangle.abstractSyntaxTrees.expressions.CallExpression;
@@ -79,6 +73,13 @@ import triangle.abstractSyntaxTrees.visitors.VnameVisitor;
 import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
+import triangle.abstractSyntaxTrees.commands.DoubleClickCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
+import triangle.abstractSyntaxTrees.vnames.SimpleVname;
+import triangle.abstractSyntaxTrees.vnames.Vname;
+import triangle.abstractSyntaxTrees.terminals.Identifier;
+import triangle.abstractSyntaxTrees.expressions.VnameExpression;
+import triangle.abstractSyntaxTrees.declarations.Declaration;
 
 public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSyntaxTree>,
 		ActualParameterSequenceVisitor<Void, AbstractSyntaxTree>, ArrayAggregateVisitor<Void, AbstractSyntaxTree>,
@@ -496,6 +497,29 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		return null;
 	}
 
+    public AbstractSyntaxTree visitDoubleClickCommand(DoubleClickCommand ast, Void arg) {
+        ast.V.visit(this);
+        return null;
+    }
+
+    @Override
+    public AbstractSyntaxTree visitLoopCommand(LoopCommand ast, Void arg) {
+        // Visit children commands (C1 and C2) for side effects/sub-folding
+        ast.C1.visit(this);
+
+        AbstractSyntaxTree replacement = ast.E.visit(this);
+        ast.C2.visit(this);
+
+        if (replacement != null) {
+            Expression newE = (Expression) replacement;
+
+            return new LoopCommand(ast.C1, newE, ast.C2, ast.getPosition());
+        }
+
+        // No changes to the expression, so return the original node
+        return ast; // Return the original 'ast' node
+    }
+
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
 //	public AbstractSyntaxTree visitRepeatCommand(RepeatCommand ast, Void arg) {
@@ -580,7 +604,25 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 			
 			if (o.decl == StdEnvironment.addDecl) {
 				foldedValue = int1 + int2;
-			}
+			} else if (o.decl == StdEnvironment.subtractDecl) {
+                foldedValue = int1 - int2;
+            } else if (o.decl == StdEnvironment.multiplyDecl) {
+                foldedValue = int1 * int2;
+            } else if (o.decl == StdEnvironment.divideDecl) {
+                foldedValue = int1 / int2;
+            } else if (o.decl == StdEnvironment.lessDecl) {
+                foldedValue = int1 < int2;
+            } else if (o.decl == StdEnvironment.notgreaterDecl) {
+                foldedValue = int1 <= int2;
+            } else if (o.decl == StdEnvironment.greaterDecl) {
+                foldedValue = int1 > int2;
+            } else if (o.decl == StdEnvironment.notlessDecl) {
+                foldedValue = int1 >= int2;
+            } else if (o.decl == StdEnvironment.equalDecl) {
+                foldedValue = int1 == int2;
+            } else if (o.decl == StdEnvironment.unequalDecl) {
+                foldedValue = int1 != int2;
+            }
 
 			if (foldedValue instanceof Integer) {
 				IntegerLiteral il = new IntegerLiteral(foldedValue.toString(), node1.getPosition());
@@ -588,7 +630,21 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 				ie.type = StdEnvironment.integerType;
 				return ie;
 			} else if (foldedValue instanceof Boolean) {
-				/* currently not handled! */
+				Boolean result = (Boolean) foldedValue;
+
+                String spelling = result ? "true" : "false";
+                Declaration decl = result ? StdEnvironment.trueDecl : StdEnvironment.falseDecl;
+
+                Identifier i = new Identifier(spelling, node1.getPosition());
+                i.decl = decl;
+
+                Vname vname = new SimpleVname(i, node1.getPosition());
+                vname.type = StdEnvironment.booleanType;
+
+                VnameExpression ve = new VnameExpression(vname, node1.getPosition());
+                ve.type = StdEnvironment.booleanType;
+
+                return ve;
 			}
 		}
 

@@ -4,6 +4,14 @@ java {
     sourceCompatibility = 21
 }
 
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'info.picocli:picocli:4.7.5'
+}
 subprojects.each { subproject ->
   evaluationDependsOn(subproject.path)
 }

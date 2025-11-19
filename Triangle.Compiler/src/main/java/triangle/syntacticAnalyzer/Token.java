@@ -54,11 +54,11 @@ final class Token {
 		INTLITERAL("<int>"), CHARLITERAL("<char>"), IDENTIFIER("<identifier>"), OPERATOR("<operator>"),
 
 		// reserved words - keep in alphabetical order for ease of maintenance...
-		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), OF("of"),
+		ARRAY("array"), BEGIN("begin"), CONST("const"), DO("do"), ELSE("else"), END("end"), FUNC("func"), IF("if"), IN("in"), LET("let"), LOOP("loop"), OF("of"),
 		PROC("proc"), RECORD("record"), THEN("then"), TYPE("type"), VAR("var"), WHILE("while"),
 
 		// punctuation...
-		DOT("."), COLON(":"), SEMICOLON(";"), COMMA(","), BECOMES(":="), IS("~"),
+		DOT("."), COLON(":"), SEMICOLON(";"), COMMA(","), BECOMES(":="), IS("~"), DOUBLESTAR("**"),
 
 		// brackets...
 		LPAREN("("), RPAREN(")"), LBRACKET("["), RBRACKET("]"), LCURLY("{"), RCURLY("}"),

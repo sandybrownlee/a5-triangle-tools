@@ -35,14 +35,7 @@ import triangle.abstractSyntaxTrees.aggregates.MultipleRecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.RecordAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
-import triangle.abstractSyntaxTrees.commands.AssignCommand;
-import triangle.abstractSyntaxTrees.commands.CallCommand;
-import triangle.abstractSyntaxTrees.commands.Command;
-import triangle.abstractSyntaxTrees.commands.EmptyCommand;
-import triangle.abstractSyntaxTrees.commands.IfCommand;
-import triangle.abstractSyntaxTrees.commands.LetCommand;
-import triangle.abstractSyntaxTrees.commands.SequentialCommand;
-import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.*;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -291,19 +284,35 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
+                if (currentToken.kind == Token.Kind.BECOMES) {
+                    acceptIt();
+                    Expression eAST = parseExpression();
+                    finish(commandPos);
+                    commandAST = new AssignCommand(vAST, eAST, commandPos);
+
+                } else if (currentToken.kind == Token.Kind.DOUBLESTAR) {
+                    acceptIt(); // Consume the "**"
+                    finish(commandPos);
+                    commandAST = new DoubleClickCommand(vAST, commandPos);
+
+                } else {
+                    syntacticError("\":=\" or \"**\" expected here", "");
+                }
 			}
 		}
 			break;
 
-		case BEGIN:
-			acceptIt();
-			commandAST = parseCommand();
-			accept(Token.Kind.END);
-			break;
+            case BEGIN: // HANDLE BEGIN
+            case LCURLY: // HANDLE {
+                Token.Kind tokenToAccept = Token.Kind.END; // Default is END
+                if (currentToken.kind == Token.Kind.LCURLY) {
+                    tokenToAccept = Token.Kind.RCURLY;
+                }
+
+                acceptIt(); // Consume BEGIN or {
+                commandAST = parseCommand(); // Parse the sequence inside
+                accept(tokenToAccept); // Consume END or }
+                break; // Break out of the switch
 
 		case LET: {
 			acceptIt();
@@ -336,6 +345,18 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+
+            case LOOP: {
+                acceptIt();
+                Command c1AST = parseSingleCommand();
+                accept(Token.Kind.WHILE);
+                Expression eAST = parseExpression();
+                accept(Token.Kind.DO);
+                Command c2AST = parseSingleCommand();
+                finish(commandPos);
+                commandAST = new LoopCommand(c1AST, eAST, c2AST, commandPos);
+            }
+            break;
 
 		case SEMICOLON:
 		case END:

@@ -108,6 +108,8 @@ import triangle.abstractSyntaxTrees.vnames.DotVname;
 import triangle.abstractSyntaxTrees.vnames.SimpleVname;
 import triangle.abstractSyntaxTrees.vnames.SubscriptVname;
 import triangle.syntacticAnalyzer.SourcePosition;
+import triangle.abstractSyntaxTrees.commands.DoubleClickCommand;
+import triangle.abstractSyntaxTrees.commands.LoopCommand;
 
 public final class Checker implements ActualParameterVisitor<FormalParameter, Void>,
 		ActualParameterSequenceVisitor<FormalParameterSequence, Void>, ArrayAggregateVisitor<Void, TypeDenoter>,
@@ -187,6 +189,28 @@ public final class Checker implements ActualParameterVisitor<FormalParameter, Vo
 
 		return null;
 	}
+
+    @Override
+    public Void visitDoubleClickCommand(DoubleClickCommand ast, Void arg) {
+        TypeDenoter vType = ast.V.visit(this);
+
+        checkAndReportError(ast.V.variable, "LHS of '**' is not a variable", ast.V);
+        checkAndReportError(vType.equals(StdEnvironment.integerType), "argument of '**' must be an Integer", ast.V);
+
+        return null;
+    }
+
+    @Override
+    public Void visitLoopCommand(LoopCommand ast, Void arg) {
+        ast.C1.visit(this);
+
+        var eType = ast.E.visit(this);
+        checkAndReportError(eType.equals(StdEnvironment.booleanType), "Boolean expression expected here", ast.E);
+
+        ast.C2.visit(this);
+
+        return null;
+    }
 
 	// Expressions
 
