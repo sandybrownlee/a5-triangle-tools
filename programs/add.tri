@@ -1,0 +1,23 @@
+let
+  func add (n : Integer, n2 : Integer) : Integer ~
+		n + n;
+
+  func product (n : Integer, n2 : Integer) : Integer ~
+		n * n;
+
+  proc compare (b : Integer, n : Integer) ~
+		if add(b, n) == product(b,n)
+		then put('S'); put('a'); put('m'); put('e'); put('!');
+                else
+
+  var x : Integer;
+  var m : Integer
+
+in
+ begin
+ getint (var x);
+ getint (var m);
+ putint (add (x, m));
+ putint (product (x, m));
+ putname (compare (x, m));
+ end;

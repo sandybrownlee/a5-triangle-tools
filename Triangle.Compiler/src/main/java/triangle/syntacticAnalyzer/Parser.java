@@ -43,6 +43,7 @@ import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.WhileDoCommand;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.Declaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -291,18 +292,56 @@ public class Parser {
 			} else {
 
 				Vname vAST = parseRestOfVname(iAST);
+				
+				if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("**")) {
+					acceptIt();
+
+					// create an integer literal for the value 2
+					IntegerLiteral integerLiteral = new IntegerLiteral("2", commandPos);
+					IntegerExpression integerExpression = new IntegerExpression(integerLiteral, commandPos);
+									
+					// create a VnameExpression wrapping the variable
+					VnameExpression vnameExpression = new VnameExpression(vAST, commandPos);
+									
+					// define the multiplication operator
+					Operator multiplyOperator = new Operator("*", commandPos);
+									
+					// binary expression representing (variable * 2)
+					Expression expressionAST = new BinaryExpression(vnameExpression, multiplyOperator, integerExpression, commandPos);
+									
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, expressionAST, commandPos);
+									
+				} else {
+					accept(Token.Kind.BECOMES);
+					Expression expressionAST = parseExpression();
+					finish(commandPos);
+					commandAST = new AssignCommand(vAST, expressionAST, commandPos);
+				}
+
+
+				/*
 				accept(Token.Kind.BECOMES);
 				Expression eAST = parseExpression();
 				finish(commandPos);
 				commandAST = new AssignCommand(vAST, eAST, commandPos);
+			    */
 			}
 		}
 			break;
 
-		case BEGIN:
+		case BEGIN: {
 			acceptIt();
 			commandAST = parseCommand();
 			accept(Token.Kind.END);
+		}
+			break;
+
+		case LCURLY: {
+			acceptIt();                      
+			commandAST = parseCommand();
+			accept(Token.Kind.RCURLY);       
+		}
 			break;
 
 		case LET: {
@@ -336,6 +375,19 @@ public class Parser {
 			commandAST = new WhileCommand(eAST, cAST, commandPos);
 		}
 			break;
+
+		case LOOP: {
+			acceptIt(); 
+			Command command1 = parseCommand();
+			accept(Token.Kind.WHILE);
+			Expression expression = parseExpression();
+			accept(Token.Kind.DO);
+			Command command2 = parseCommand();
+			finish(commandPos);
+			commandAST = new WhileDoCommand(command1, expression, command2, commandPos);
+			break;
+		}
+
 
 		case SEMICOLON:
 		case END:

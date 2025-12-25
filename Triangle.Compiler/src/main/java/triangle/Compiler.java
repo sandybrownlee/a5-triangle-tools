@@ -18,6 +18,8 @@
 
 package triangle;
 
+import com.sampullara.cli.Args;
+import com.sampullara.cli.Argument;
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
 import triangle.codeGenerator.Encoder;
@@ -27,6 +29,9 @@ import triangle.syntacticAnalyzer.Parser;
 import triangle.syntacticAnalyzer.Scanner;
 import triangle.syntacticAnalyzer.SourceFile;
 import triangle.treeDrawer.Drawer;
+import triangle.optimiser.StatisticsCollector;
+
+
 
 /**
  * The main driver class for the Triangle compiler.
@@ -34,10 +39,23 @@ import triangle.treeDrawer.Drawer;
 public class Compiler {
 
 	/** The filename for the object program, normally obj.tam. */
-	static String objectName = "obj.tam";
 	
-	static boolean showTree = false;
-	static boolean folding = false;
+	// using the cli-parser varables
+	@Argument(description = "name of tree")
+    static String objectName = "obj.tam";
+
+    @Argument(description = "shows the tree", required = false) 
+    static boolean showTree = false;
+
+    @Argument(description = "how the AST is organized", required = false)
+    static boolean folding = false;
+
+    @Argument(description = "tree after folding complete", required = false)
+    static boolean showTreeAfter = false;
+
+	@Argument(description="shows generated stats")
+    static boolean showStats = false;
+
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -98,6 +116,15 @@ public class Compiler {
 				theAST.visit(new ConstantFolder());
 			}
 			
+			// call new visitor
+			if (showStats) {
+				StatisticsCollector stats = new StatisticsCollector();
+				theAST.visit(stats, null);
+				System.out.println("Program statistics: " 
+				+ stats.getIntegerCount() + " IntegerExpressions, " 
+				+ stats.getCharacterCount() + " CharacterExpressions");
+			}
+					
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
 				encoder.encodeRun(theAST, showingTable); // 3rd pass
@@ -121,13 +148,19 @@ public class Compiler {
 	 *             source filename.
 	 */
 	public static void main(String[] args) {
+		Compiler compiler = new Compiler();
 
 		if (args.length < 1) {
 			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
 			System.exit(1);
 		}
 		
-		parseArgs(args);
+		//parseArgs(args);
+		try {
+    		Args.parseOrExit(compiler, args);
+		} catch (Exception e) {
+    		System.out.println("Issue when trying to parse args-> " + e.getMessage());
+		}
 
 		String sourceName = args[0];
 		
@@ -138,6 +171,7 @@ public class Compiler {
 		}
 	}
 	
+	/* NO LONGER USED
 	private static void parseArgs(String[] args) {
 		for (String s : args) {
 			var sl = s.toLowerCase();
@@ -150,4 +184,5 @@ public class Compiler {
 			}
 		}
 	}
+	*/
 }

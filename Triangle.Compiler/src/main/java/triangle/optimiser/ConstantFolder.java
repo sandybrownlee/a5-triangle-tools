@@ -16,11 +16,13 @@ import triangle.abstractSyntaxTrees.aggregates.SingleArrayAggregate;
 import triangle.abstractSyntaxTrees.aggregates.SingleRecordAggregate;
 import triangle.abstractSyntaxTrees.commands.AssignCommand;
 import triangle.abstractSyntaxTrees.commands.CallCommand;
+import triangle.abstractSyntaxTrees.commands.Command;
 import triangle.abstractSyntaxTrees.commands.EmptyCommand;
 import triangle.abstractSyntaxTrees.commands.IfCommand;
 import triangle.abstractSyntaxTrees.commands.LetCommand;
 import triangle.abstractSyntaxTrees.commands.SequentialCommand;
 import triangle.abstractSyntaxTrees.commands.WhileCommand;
+import triangle.abstractSyntaxTrees.commands.WhileDoCommand;
 import triangle.abstractSyntaxTrees.declarations.BinaryOperatorDeclaration;
 import triangle.abstractSyntaxTrees.declarations.ConstDeclaration;
 import triangle.abstractSyntaxTrees.declarations.FuncDeclaration;
@@ -497,6 +499,18 @@ public class ConstantFolder implements ActualParameterVisitor<Void, AbstractSynt
 		}
 		return null;
 	}
+
+	@Override
+	public AbstractSyntaxTree visitWhileDoCommand(WhileDoCommand ast, Void arg) {
+		ast.command1.visit(this, arg);
+		AbstractSyntaxTree replacement = ast.expression.visit(this, arg);
+		if (replacement != null) {
+			ast.expression.visit(this, arg);
+		}
+		ast.command2.visit(this, arg);
+		return null;
+	}
+
 
 	// TODO uncomment if you've implemented the repeat command
 //	@Override
