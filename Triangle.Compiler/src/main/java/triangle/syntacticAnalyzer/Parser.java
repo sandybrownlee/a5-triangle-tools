@@ -289,13 +289,27 @@ public class Parser {
 				commandAST = new CallCommand(iAST, apsAST, commandPos);
 
 			} else {
+    Vname vAST = parseRestOfVname(iAST);
 
-				Vname vAST = parseRestOfVname(iAST);
-				accept(Token.Kind.BECOMES);
-				Expression eAST = parseExpression();
-				finish(commandPos);
-				commandAST = new AssignCommand(vAST, eAST, commandPos);
-			}
+    if (currentToken.kind == Token.Kind.OPERATOR && currentToken.spelling.equals("--")) {
+        acceptIt();
+
+        Operator opAST = new Operator("-", currentToken.position);
+        IntegerLiteral oneAST = new IntegerLiteral("1", currentToken.position);
+        IntegerExpression oneExprAST = new IntegerExpression(oneAST, currentToken.position);
+
+        VnameExpression leftExprAST = new VnameExpression(vAST, currentToken.position);
+        BinaryExpression eAST = new BinaryExpression(leftExprAST, opAST, oneExprAST, currentToken.position);
+
+        finish(commandPos);
+        commandAST = new AssignCommand(vAST, eAST, commandPos);
+    } else {
+        accept(Token.Kind.BECOMES);
+        Expression eAST = parseExpression();
+        finish(commandPos);
+        commandAST = new AssignCommand(vAST, eAST, commandPos);
+    }
+}
 		}
 			break;
 
@@ -304,6 +318,12 @@ public class Parser {
 			commandAST = parseCommand();
 			accept(Token.Kind.END);
 			break;
+
+			case LCURLY:
+            acceptIt();
+            commandAST = parseCommand();
+            accept(Token.Kind.RCURLY);
+            break;
 
 		case LET: {
 			acceptIt();

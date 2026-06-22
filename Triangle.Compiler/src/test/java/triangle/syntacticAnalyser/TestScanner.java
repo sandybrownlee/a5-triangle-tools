@@ -16,7 +16,19 @@ import triangle.syntacticAnalyzer.SourceFile;
 
 public class TestScanner {
 	
-	/* some individual unit tests for helper methods in Scanner */
+	@Test
+    public void testIsLetter() {
+    assertTrue(Scanner.isLetter('a'));
+    assertTrue(Scanner.isLetter('z'));
+    assertTrue(Scanner.isLetter('A'));
+    assertTrue(Scanner.isLetter('Z'));
+
+    assertFalse(Scanner.isLetter('0'));
+    assertFalse(Scanner.isLetter('9'));
+    assertFalse(Scanner.isLetter('&'));
+    assertFalse(Scanner.isLetter(';'));
+    assertFalse(Scanner.isLetter('\n'));
+    }
 
 	@Test
 	public void testIsDigit() {

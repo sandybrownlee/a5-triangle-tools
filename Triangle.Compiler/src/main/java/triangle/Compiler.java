@@ -17,6 +17,7 @@
  */
 
 package triangle;
+ 
 
 import triangle.abstractSyntaxTrees.Program;
 import triangle.codeGenerator.Emitter;
@@ -36,8 +37,10 @@ public class Compiler {
 	/** The filename for the object program, normally obj.tam. */
 	static String objectName = "obj.tam";
 	
+	static boolean showTreeAfter = false;
 	static boolean showTree = false;
 	static boolean folding = false;
+	
 
 	private static Scanner scanner;
 	private static Parser parser;
@@ -95,8 +98,9 @@ public class Compiler {
 				drawer.draw(theAST);
 			}
 			if (folding) {
-				theAST.visit(new ConstantFolder());
-			}
+                theAST.visit(new ConstantFolder());
+              }
+             
 			
 			if (reporter.getNumErrors() == 0) {
 				System.out.println("Code Generation ...");
@@ -123,7 +127,7 @@ public class Compiler {
 	public static void main(String[] args) {
 
 		if (args.length < 1) {
-			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding]");
+			System.out.println("Usage: tc filename [-o=outputfilename] [tree] [folding] [showTreeAfter] [showStats]");
 			System.exit(1);
 		}
 		
@@ -131,7 +135,7 @@ public class Compiler {
 
 		String sourceName = args[0];
 		
-		var compiledOK = compileProgram(sourceName, objectName, showTree, false);
+		var compiledOK = compileProgram(sourceName, objectName, showTree, showTreeAfter);
 
 		if (!showTree) {
 			System.exit(compiledOK ? 0 : 1);
@@ -142,12 +146,15 @@ public class Compiler {
 		for (String s : args) {
 			var sl = s.toLowerCase();
 			if (sl.equals("tree")) {
-				showTree = true;
-			} else if (sl.startsWith("-o=")) {
-				objectName = s.substring(3);
-			} else if (sl.equals("folding")) {
-				folding = true;
-			}
+            showTree = true;
+            } else if (sl.equals("showtreeafter")) {
+             showTreeAfter = true;
+            } else if (sl.startsWith("-o=")) {
+             objectName = s.substring(3);
+            } else if (sl.equals("folding")) {
+             folding = true;
+          }
 		}
-	}
+	} 
+	
 }
